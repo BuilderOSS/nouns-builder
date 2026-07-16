@@ -1,8 +1,9 @@
 'use client'
 
+import { useChainStore } from '@buildeross/stores'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Box, Button, Flex, Input, Text } from '@buildeross/zord'
 import React, { useState } from 'react'
-import { useAccount } from 'wagmi'
 
 import { useCreateSplit } from '../../../hooks/useCreateSplit'
 import {
@@ -10,7 +11,10 @@ import {
   type SplitRecipient,
   validateSplitRecipients,
 } from '../../../utils/splits'
+import { SplitFlowChart } from './SplitFlowChart'
 import {
+  allocBarFill,
+  allocBarTrack,
   errorText,
   removeBtn,
   row,
@@ -30,7 +34,7 @@ const EMPTY: SplitRecipient[] = [
 ]
 
 export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated }) => {
-  const { isConnected } = useAccount()
+  const chainId = useChainStore((x) => x.chain.id)
   const { createSplit, isPending, error, splitAddress, reset } = useCreateSplit()
   const [recipients, setRecipients] = useState<SplitRecipient[]>(EMPTY)
 
@@ -70,6 +74,10 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated
         Deploy a 0xSplits contract that forwards mint proceeds and royalties to these
         recipients by percentage. The split address becomes the payout address above.
       </Text>
+
+      <Box mb={'x4'}>
+        <SplitFlowChart recipients={recipients} />
+      </Box>
 
       {recipients.map((r, i) => (
         <Box key={i} className={row}>
@@ -115,6 +123,15 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated
           {total.toFixed(2)}%
         </Text>
       </Box>
+      <div className={allocBarTrack}>
+        <div
+          className={allocBarFill}
+          style={{
+            width: `${Math.min(total, 100)}%`,
+            background: Math.abs(total - 100) < 0.0001 ? '#10b981' : '#f5a623',
+          }}
+        />
+      </div>
 
       {errors.length > 0 && <div className={errorText}>{errors[0].message}</div>}
 
@@ -124,16 +141,16 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated
           address above.
         </div>
       ) : (
-        <Button
-          type={'button'}
+        <ContractButton
+          chainId={chainId}
           mt={'x4'}
           width={'100%'}
           loading={isPending}
-          disabled={!isConnected || errors.length > 0 || isPending}
-          onClick={handleCreate}
+          disabled={errors.length > 0 || isPending}
+          handleClick={handleCreate}
         >
-          {isConnected ? 'Create split' : 'Connect wallet to create split'}
-        </Button>
+          Create split
+        </ContractButton>
       )}
 
       {error && !splitAddress && <div className={errorText}>{error.message}</div>}

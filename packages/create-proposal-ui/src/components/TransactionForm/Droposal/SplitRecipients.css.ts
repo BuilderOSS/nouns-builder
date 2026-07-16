@@ -33,8 +33,23 @@ export const totalRow = style({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  marginTop: '0.5rem',
+  marginTop: '0.75rem',
   fontSize: '13px',
+})
+
+export const allocBarTrack = style({
+  height: '6px',
+  width: '100%',
+  borderRadius: vars.radii.round,
+  overflow: 'hidden',
+  background: 'rgba(128,128,128,0.2)',
+  marginTop: '0.4rem',
+})
+
+export const allocBarFill = style({
+  height: '100%',
+  borderRadius: vars.radii.round,
+  transition: 'width 0.2s ease, background 0.2s ease',
 })
 
 export const errorText = style({

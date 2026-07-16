@@ -11,7 +11,32 @@ import { useAccount } from 'wagmi'
 import { defaultInputLabelStyle } from './Droposal.css'
 import droposalFormSchema, { DroposalFormValues } from './DroposalForm.schema'
 import { DroposalPreview } from './DroposalPreview'
+import {
+  advancedChevron,
+  advancedChevronOpen,
+  advancedToggle,
+  eyebrow,
+  grid2,
+  section,
+  sectionHead,
+  sectionHint,
+} from './DroposalSections.css'
 import { SplitRecipients } from './SplitRecipients'
+import { SplitToggle } from './SplitToggle'
+
+const Section: React.FC<{
+  label: string
+  hint?: string
+  children: React.ReactNode
+}> = ({ label, hint, children }) => (
+  <Box className={section}>
+    <Box className={sectionHead}>
+      <span className={eyebrow}>{label}</span>
+      {hint && <span className={sectionHint}>{hint}</span>}
+    </Box>
+    <Flex direction={'column'}>{children}</Flex>
+  </Box>
+)
 
 export interface DroposalFormProps {
   onSubmit?: (
@@ -29,9 +54,10 @@ const editionSizeOptions = [
 ]
 
 export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }) => {
-  const [editionType, setEditionType] = useState<EditionType>('fixed')
+  const [editionType, setEditionType] = useState<EditionType>('open')
   const [isIPFSUploading, setIsIPFSUploading] = useState(false)
   const [showSplit, setShowSplit] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const { address: user } = useAccount()
   const { treasury } = useDaoStore((x) => x.addresses)
 
@@ -47,7 +73,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
     publicSaleEnd: '',
     royaltyPercentage: 5,
     pricePerMint: 0,
-    maxSupply: 10,
+    maxSupply: 0,
   }
 
   const handleSubmit = useCallback(
@@ -103,286 +129,314 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                 disabled={formik.isValidating || disabled}
                 style={{ outline: 0, border: 0, padding: 0, margin: 0 }}
               >
-                <Flex as={Form} direction={'column'}>
-                  <SmartInput
-                    {...formik.getFieldProps('name')}
-                    inputLabel={'Name'}
-                    placeholder={'Zorbs'}
-                    type={FIELD_TYPES.TEXT}
-                    formik={formik}
-                    id={'name'}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errorMessage={
-                      formik.touched['name'] && formik.errors['name']
-                        ? formik.errors['name']
-                        : undefined
-                    }
-                  />
-
-                  <SmartInput
-                    {...formik.getFieldProps('symbol')}
-                    inputLabel={'Symbol'}
-                    placeholder={'$SYMBOL'}
-                    type={FIELD_TYPES.TEXT}
-                    formik={formik}
-                    id={'symbol'}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errorMessage={
-                      formik.touched['symbol'] && formik.errors['symbol']
-                        ? formik.errors['symbol']
-                        : undefined
-                    }
-                  />
-
-                  <TextArea
-                    {...formik.getFieldProps('description')}
-                    inputLabel={'Description'}
-                    placeholder={
-                      'This is a project that means a lot to me. Soon it can be yours too.'
-                    }
-                    formik={formik}
-                    id={'description'}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errorMessage={
-                      formik.touched['description'] && formik.errors['description']
-                        ? formik.errors['description']
-                        : undefined
-                    }
-                  />
-
-                  <SingleMediaUpload
-                    {...formik.getFieldProps('mediaUrl')}
-                    formik={formik}
-                    id="mediaUrl"
-                    inputLabel={'Media'}
-                    onUploadStart={handleMediaUploadStart}
-                    onUploadSettled={() => setIsIPFSUploading(false)}
-                  />
-
-                  {showCover && (
-                    <SingleMediaUpload
-                      {...formik.getFieldProps('coverUrl')}
-                      formik={formik}
-                      id="coverUrl"
-                      inputLabel={'Cover'}
-                      onUploadStart={() => setIsIPFSUploading(true)}
-                      onUploadSettled={() => setIsIPFSUploading(false)}
-                    />
-                  )}
-
-                  <SmartInput
-                    {...formik.getFieldProps('pricePerMint')}
-                    inputLabel={'Price'}
-                    placeholder={'0.01'}
-                    type={FIELD_TYPES.TEXT}
-                    formik={formik}
-                    perma={'ETH'}
-                    id={'pricePerMint'}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errorMessage={
-                      formik.touched['pricePerMint'] && formik.errors['pricePerMint']
-                        ? formik.errors['pricePerMint']
-                        : undefined
-                    }
-                  />
-
-                  <Text
-                    mb="x8"
-                    ml="x2"
-                    style={{ marginTop: -30 }}
-                    className={defaultHelperTextStyle}
-                  >
-                    Zora charges a small flat fee 0.000777 ETH per NFT minted to
-                    collectors.{' '}
-                    <a
-                      target="_blank"
-                      rel="noreferrer noopener"
-                      href="https://support.zora.co/en/articles/4981037-zora-mint-collect-fees"
-                    >
-                      Learn more
-                    </a>
-                  </Text>
-
-                  <label className={defaultInputLabelStyle}>Edition type</label>
-
-                  <DropdownSelect
-                    options={editionSizeOptions}
-                    value={editionType}
-                    onChange={handleEditionTypeChanged}
-                  />
-
-                  {editionType === 'fixed' ? (
+                <Flex as={Form} direction={'column'} gap={'x4'}>
+                  <Section label={'Collection'}>
                     <SmartInput
-                      {...formik.getFieldProps('maxSupply')}
-                      placeholder={'1000'}
-                      inputLabel={'Edition size'}
+                      {...formik.getFieldProps('name')}
+                      inputLabel={'Name'}
+                      placeholder={'Zorbs'}
                       type={FIELD_TYPES.TEXT}
                       formik={formik}
-                      perma={'Editions'}
-                      id={'maxSupply'}
+                      id={'name'}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                       errorMessage={
-                        formik.touched['maxSupply'] && formik.errors['maxSupply']
-                          ? formik.errors['maxSupply']
+                        formik.touched['name'] && formik.errors['name']
+                          ? formik.errors['name']
                           : undefined
                       }
                     />
-                  ) : (
-                    <Box mb={'x8'}>
-                      <label className={defaultInputLabelStyle}>Edition size</label>
-                      <Flex
-                        align={'center'}
-                        backgroundColor={'background2'}
-                        h={'x16'}
-                        px={'x4'}
-                        style={{ borderRadius: '16px' }}
-                      >
-                        <Text color="text4">Unlimited</Text>
-                      </Flex>
-                    </Box>
-                  )}
 
-                  <DatePicker
-                    {...formik.getFieldProps('publicSaleStart')}
-                    placeholder={'yyyy-mm-dd'}
-                    inputLabel={'Start time'}
-                    formik={formik}
-                    id={'publicSaleStart'}
-                    autoSubmit={false}
-                    disabled={false}
-                    enableTime={true}
-                    dateFormat="Z"
-                    altFormat="Y-m-d H:i"
-                    errorMessage={
-                      formik.touched['publicSaleStart'] &&
-                      formik.errors['publicSaleStart']
-                        ? formik.errors['publicSaleStart']
-                        : undefined
-                    }
-                  />
+                    <SmartInput
+                      {...formik.getFieldProps('symbol')}
+                      inputLabel={'Symbol'}
+                      placeholder={'$SYMBOL'}
+                      type={FIELD_TYPES.TEXT}
+                      formik={formik}
+                      id={'symbol'}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      errorMessage={
+                        formik.touched['symbol'] && formik.errors['symbol']
+                          ? formik.errors['symbol']
+                          : undefined
+                      }
+                    />
 
-                  <DatePicker
-                    {...formik.getFieldProps('publicSaleEnd')}
-                    placeholder={'yyyy-mm-dd'}
-                    inputLabel={'End time'}
-                    formik={formik}
-                    id={'publicSaleEnd'}
-                    autoSubmit={false}
-                    disabled={false}
-                    enableTime={true}
-                    dateFormat="Z"
-                    altFormat="Y-m-d H:i"
-                    errorMessage={
-                      formik.touched['publicSaleEnd'] && formik.errors['publicSaleEnd']
-                        ? formik.errors['publicSaleEnd']
-                        : undefined
-                    }
-                  />
+                    <TextArea
+                      {...formik.getFieldProps('description')}
+                      inputLabel={'Description'}
+                      placeholder={
+                        'This is a project that means a lot to me. Soon it can be yours too.'
+                      }
+                      formik={formik}
+                      id={'description'}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      errorMessage={
+                        formik.touched['description'] && formik.errors['description']
+                          ? formik.errors['description']
+                          : undefined
+                      }
+                    />
+                  </Section>
 
-                  <SmartInput
-                    {...formik.getFieldProps('maxPerAddress')}
-                    inputLabel={'Mint limit per address'}
-                    placeholder={'Unlimited'}
-                    type={FIELD_TYPES.NUMBER}
-                    formik={formik}
-                    id={'maxPerAddress'}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errorMessage={
-                      formik.touched['maxPerAddress'] && formik.errors['maxPerAddress']
-                        ? formik.errors['maxPerAddress']
-                        : undefined
-                    }
-                  />
+                  <Section label={'Artwork'} hint={'Media + optional cover'}>
+                    <SingleMediaUpload
+                      {...formik.getFieldProps('mediaUrl')}
+                      formik={formik}
+                      id="mediaUrl"
+                      inputLabel={'Media'}
+                      onUploadStart={handleMediaUploadStart}
+                      onUploadSettled={() => setIsIPFSUploading(false)}
+                    />
 
-                  <SmartInput
-                    {...formik.getFieldProps('royaltyPercentage')}
-                    inputLabel={'Royalty'}
-                    placeholder={'5'}
-                    perma={'%'}
-                    type={FIELD_TYPES.NUMBER}
-                    formik={formik}
-                    id={'royaltyPercentage'}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errorMessage={
-                      formik.touched['royaltyPercentage'] &&
-                      formik.errors['royaltyPercentage']
-                        ? formik.errors['royaltyPercentage']
-                        : undefined
-                    }
-                  />
+                    {showCover && (
+                      <SingleMediaUpload
+                        {...formik.getFieldProps('coverUrl')}
+                        formik={formik}
+                        id="coverUrl"
+                        inputLabel={'Cover'}
+                        onUploadStart={() => setIsIPFSUploading(true)}
+                        onUploadSettled={() => setIsIPFSUploading(false)}
+                      />
+                    )}
+                  </Section>
 
-                  <SmartInput
-                    {...formik.getFieldProps('fundsRecipient')}
-                    inputLabel={'Payout address'}
-                    placeholder={'0x... or .eth'}
-                    type={FIELD_TYPES.TEXT}
-                    formik={formik}
-                    id={'fundsRecipient'}
-                    isAddress={true}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    helperText={
-                      'The DAO treasury address is set as the default payout address. This address will receive any withdrawals and royalties. It can be your personal wallet, a multisignature wallet, or an external splits contract.'
-                    }
-                    errorMessage={
-                      formik.touched['fundsRecipient'] && formik.errors['fundsRecipient']
-                        ? formik.errors['fundsRecipient']
-                        : undefined
-                    }
-                  />
+                  <Section label={'Sale'}>
+                    <SmartInput
+                      {...formik.getFieldProps('pricePerMint')}
+                      inputLabel={'Price'}
+                      placeholder={'0.01'}
+                      type={FIELD_TYPES.TEXT}
+                      formik={formik}
+                      perma={'ETH'}
+                      id={'pricePerMint'}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      errorMessage={
+                        formik.touched['pricePerMint'] && formik.errors['pricePerMint']
+                          ? formik.errors['pricePerMint']
+                          : undefined
+                      }
+                    />
 
-                  <Box>
-                    <Button
-                      type={'button'}
-                      variant={showSplit ? 'secondary' : 'ghost'}
-                      size={'sm'}
-                      onClick={() => setShowSplit((v) => !v)}
+                    <Text
+                      mb="x8"
+                      ml="x2"
+                      style={{ marginTop: -30 }}
+                      className={defaultHelperTextStyle}
                     >
-                      {showSplit
-                        ? 'Cancel split'
-                        : 'Split payout among multiple recipients'}
-                    </Button>
-                    {showSplit && (
-                      <Box mt={'x2'}>
-                        <SplitRecipients
-                          onSplitCreated={(address) => {
-                            formik.setFieldValue('fundsRecipient', address)
-                            setShowSplit(false)
-                          }}
+                      Zora charges a small flat fee 0.000777 ETH per NFT minted to
+                      collectors.{' '}
+                      <a
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        href="https://support.zora.co/en/articles/4981037-zora-mint-collect-fees"
+                      >
+                        Learn more
+                      </a>
+                    </Text>
+
+                    <Box className={grid2}>
+                      <DatePicker
+                        {...formik.getFieldProps('publicSaleStart')}
+                        placeholder={'yyyy-mm-dd'}
+                        inputLabel={'Start time'}
+                        formik={formik}
+                        id={'publicSaleStart'}
+                        autoSubmit={false}
+                        disabled={false}
+                        enableTime={true}
+                        dateFormat="Z"
+                        altFormat="Y-m-d H:i"
+                        errorMessage={
+                          formik.touched['publicSaleStart'] &&
+                          formik.errors['publicSaleStart']
+                            ? formik.errors['publicSaleStart']
+                            : undefined
+                        }
+                      />
+
+                      <DatePicker
+                        {...formik.getFieldProps('publicSaleEnd')}
+                        placeholder={'yyyy-mm-dd'}
+                        inputLabel={'End time'}
+                        formik={formik}
+                        id={'publicSaleEnd'}
+                        autoSubmit={false}
+                        disabled={false}
+                        enableTime={true}
+                        dateFormat="Z"
+                        altFormat="Y-m-d H:i"
+                        errorMessage={
+                          formik.touched['publicSaleEnd'] &&
+                          formik.errors['publicSaleEnd']
+                            ? formik.errors['publicSaleEnd']
+                            : undefined
+                        }
+                      />
+                    </Box>
+                  </Section>
+
+                  <Section label={'Revenue'} hint={'Payout & splits'}>
+                    <SmartInput
+                      {...formik.getFieldProps('fundsRecipient')}
+                      inputLabel={'Payout address'}
+                      placeholder={'0x... or .eth'}
+                      type={FIELD_TYPES.TEXT}
+                      formik={formik}
+                      id={'fundsRecipient'}
+                      isAddress={true}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      helperText={
+                        'The DAO treasury address is set as the default payout address. This address will receive any withdrawals and royalties. It can be your personal wallet, a multisignature wallet, or an external splits contract.'
+                      }
+                      errorMessage={
+                        formik.touched['fundsRecipient'] &&
+                        formik.errors['fundsRecipient']
+                          ? formik.errors['fundsRecipient']
+                          : undefined
+                      }
+                    />
+
+                    <Box mt={'x2'}>
+                      <SplitToggle checked={showSplit} onChange={setShowSplit} />
+                      {showSplit && (
+                        <Box mt={'x4'}>
+                          <SplitRecipients
+                            onSplitCreated={(address) => {
+                              formik.setFieldValue('fundsRecipient', address)
+                              setShowSplit(false)
+                            }}
+                          />
+                        </Box>
+                      )}
+                    </Box>
+                  </Section>
+
+                  <Box className={section}>
+                    <button
+                      type={'button'}
+                      className={advancedToggle}
+                      aria-expanded={showAdvanced}
+                      onClick={() => setShowAdvanced((v) => !v)}
+                    >
+                      <span className={eyebrow}>Advanced</span>
+                      <span
+                        className={[
+                          advancedChevron,
+                          showAdvanced ? advancedChevronOpen : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                      >
+                        ›
+                      </span>
+                    </button>
+                    {showAdvanced && (
+                      <Flex direction={'column'} mt={'x4'}>
+                        <label className={defaultInputLabelStyle}>Edition type</label>
+                        <DropdownSelect
+                          options={editionSizeOptions}
+                          value={editionType}
+                          onChange={handleEditionTypeChanged}
                         />
-                      </Box>
+
+                        {editionType === 'fixed' ? (
+                          <SmartInput
+                            {...formik.getFieldProps('maxSupply')}
+                            placeholder={'1000'}
+                            inputLabel={'Edition size'}
+                            type={FIELD_TYPES.TEXT}
+                            formik={formik}
+                            perma={'Editions'}
+                            id={'maxSupply'}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            errorMessage={
+                              formik.touched['maxSupply'] && formik.errors['maxSupply']
+                                ? formik.errors['maxSupply']
+                                : undefined
+                            }
+                          />
+                        ) : (
+                          <Box mb={'x8'}>
+                            <label className={defaultInputLabelStyle}>Edition size</label>
+                            <Flex
+                              align={'center'}
+                              backgroundColor={'background2'}
+                              h={'x16'}
+                              px={'x4'}
+                              style={{ borderRadius: '16px' }}
+                            >
+                              <Text color="text4">Unlimited</Text>
+                            </Flex>
+                          </Box>
+                        )}
+
+                        <SmartInput
+                          {...formik.getFieldProps('royaltyPercentage')}
+                          inputLabel={'Royalty'}
+                          placeholder={'5'}
+                          perma={'%'}
+                          type={FIELD_TYPES.NUMBER}
+                          formik={formik}
+                          id={'royaltyPercentage'}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          errorMessage={
+                            formik.touched['royaltyPercentage'] &&
+                            formik.errors['royaltyPercentage']
+                              ? formik.errors['royaltyPercentage']
+                              : undefined
+                          }
+                        />
+
+                        <SmartInput
+                          {...formik.getFieldProps('maxPerAddress')}
+                          inputLabel={'Mint limit per address'}
+                          placeholder={'Unlimited'}
+                          type={FIELD_TYPES.NUMBER}
+                          formik={formik}
+                          id={'maxPerAddress'}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          helperText={'Leave empty for unlimited mints per wallet.'}
+                          errorMessage={
+                            formik.touched['maxPerAddress'] &&
+                            formik.errors['maxPerAddress']
+                              ? formik.errors['maxPerAddress']
+                              : undefined
+                          }
+                        />
+
+                        <SmartInput
+                          {...formik.getFieldProps('defaultAdmin')}
+                          inputLabel={'Default admin address'}
+                          placeholder={'0x... or .eth'}
+                          type={FIELD_TYPES.TEXT}
+                          formik={formik}
+                          id={'defaultAdmin'}
+                          isAddress={true}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          helperText={
+                            'The wallet you have connected to nouns.build is set as the default admin address. This address will manage the edition. It can be your personal wallet, a multisignature wallet, or the DAO treasury.'
+                          }
+                          errorMessage={
+                            formik.touched['defaultAdmin'] &&
+                            formik.errors['defaultAdmin']
+                              ? formik.errors['defaultAdmin']
+                              : undefined
+                          }
+                        />
+                      </Flex>
                     )}
                   </Box>
 
-                  <SmartInput
-                    {...formik.getFieldProps('defaultAdmin')}
-                    inputLabel={'Default admin address'}
-                    placeholder={'0x... or .eth'}
-                    type={FIELD_TYPES.TEXT}
-                    formik={formik}
-                    id={'defaultAdmin'}
-                    isAddress={true}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    helperText={
-                      'The wallet you have connected to nouns.build is set as the default admin address. This address will manage the edition. It can be your personal wallet, a multisignature wallet, or the DAO treasury.'
-                    }
-                    errorMessage={
-                      formik.touched['defaultAdmin'] && formik.errors['defaultAdmin']
-                        ? formik.errors['defaultAdmin']
-                        : undefined
-                    }
-                  />
-
                   <Button
-                    mt={'x9'}
                     variant={'outline'}
                     borderRadius={'curved'}
                     type="submit"

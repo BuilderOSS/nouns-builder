@@ -26,7 +26,11 @@ export interface UseCreateSplitResult {
 export const useCreateSplit = (): UseCreateSplitResult => {
   const chainId = useChainStore((x) => x.chain.id)
   const publicClient = usePublicClient({ chainId })
-  const { data: walletClient } = useWalletClient({ chainId })
+  // No forced chainId: the caller (ContractButton) guarantees the wallet is on
+  // the DAO chain before invoking, so the connected wallet client is correct.
+  // Forcing chainId here returns undefined when the wallet is on another chain,
+  // which misreads as "not connected".
+  const { data: walletClient } = useWalletClient()
 
   const [isPending, setIsPending] = useState(false)
   const [error, setError] = useState<Error | null>(null)
