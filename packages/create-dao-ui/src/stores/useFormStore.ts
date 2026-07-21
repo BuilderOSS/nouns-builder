@@ -89,6 +89,12 @@ const initialState = {
       hours: undefined,
       minutes: undefined,
     },
+    proposalUpdatablePeriod: {
+      seconds: undefined,
+      days: 1,
+      hours: undefined,
+      minutes: undefined,
+    },
   },
   enableFastDAO: false,
   reservedUntilTokenId: '0',
@@ -165,9 +171,8 @@ export const useFormStore = create(
       name: `nouns-builder-create-${process.env.NEXT_PUBLIC_NETWORK_TYPE}`,
       storage: createJSONStorage(() => localStorage),
       // Version history note: v3 was used for an intermediate links migration;
-      // current v4 keeps sequential guards (<2, <3, <4) so older persisted states
-      // still migrate correctly through each step.
-      version: 4,
+      // v4 migrated general form fields; v5 adds proposalUpdatablePeriod.
+      version: 5,
       migrate: (persistedState: any, version: number) => {
         if (version < 2 && persistedState?.setUpArtwork !== undefined) {
           persistedState = {
@@ -197,12 +202,27 @@ export const useFormStore = create(
           const migratedLinks =
             persistedState?.general?.links ?? persistedState?.setUpArtwork?.links ?? []
 
-          return {
+          persistedState = {
             ...persistedState,
             general: {
               ...persistedState?.general,
               projectDescription: migratedDescription,
               links: migratedLinks,
+            },
+          }
+        }
+
+        if (version < 5) {
+          persistedState = {
+            ...persistedState,
+            auctionSettings: {
+              ...persistedState?.auctionSettings,
+              proposalUpdatablePeriod: {
+                seconds: undefined,
+                days: 1,
+                hours: undefined,
+                minutes: undefined,
+              },
             },
           }
         }

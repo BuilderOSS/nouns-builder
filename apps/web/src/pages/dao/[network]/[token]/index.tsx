@@ -13,7 +13,7 @@ import {
   SectionHandler,
   SmartContracts,
 } from '@buildeross/dao-ui'
-import { useGovernorVersion } from '@buildeross/hooks/useGovernorVersion'
+import { useGovernorVersion } from '@buildeross/hooks/useContractVersion'
 import { auctionAbi, getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses, useChainStore, useDaoStore } from '@buildeross/stores'
@@ -215,10 +215,6 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
 
     // Owner sections (full access)
     const ownerSections = [
-      {
-        title: 'Admin',
-        component: [<PreAuctionForm key={'admin'} />],
-      },
       aboutSection,
       {
         title: supportsCandidates ? 'Proposals' : 'Activity',

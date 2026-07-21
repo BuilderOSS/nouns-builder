@@ -3,4 +3,5 @@ export const FAST_DAO_TIMINGS = {
   TIMELOCK_DELAY: { minutes: 5 },
   VOTING_DELAY: { minutes: 5 },
   VOTING_PERIOD: { minutes: 10 },
+  PROPOSAL_UPDATABLE_PERIOD: { minutes: 5 },
 } as const

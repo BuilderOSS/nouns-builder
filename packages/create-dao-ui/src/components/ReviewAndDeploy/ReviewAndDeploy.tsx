@@ -1,7 +1,8 @@
 import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import { L2_CHAINS } from '@buildeross/constants/chains'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
-import { managerAbi, managerV1Abi } from '@buildeross/sdk/contract'
+import { useManagerVersion } from '@buildeross/hooks'
+import { managerAbi, managerV1Abi, managerV3Abi } from '@buildeross/sdk/contract'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
@@ -23,7 +24,7 @@ import {
   parseEther,
   zeroAddress,
 } from 'viem'
-import { useAccount, useConfig, useReadContract } from 'wagmi'
+import { useAccount, useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
@@ -84,12 +85,17 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
 
   const { addresses, setAddresses } = useDaoStore()
   const isL2 = L2_CHAINS.includes(chain.id)
-  const { data: version, isLoading: isVersionLoading } = useReadContract({
-    abi: managerAbi,
-    address: PUBLIC_MANAGER_ADDRESS[chain.id],
-    functionName: 'contractVersion',
+
+  // Use Manager version hook to determine which deploy signature to use
+  const {
+    version,
+    isV3OrHigher,
+    isLoading: isVersionLoading,
+  } = useManagerVersion({
     chainId: chain.id,
+    managerAddress: PUBLIC_MANAGER_ADDRESS[chain.id],
   })
+
   const { address } = useAccount()
   const config = useConfig()
 
@@ -186,8 +192,8 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
     ]
   )
 
-  const govParams = useMemo(
-    () => ({
+  const govParams = useMemo(() => {
+    const baseParams = {
       timelockDelay: BigInt(toSeconds(auctionSettings.timelockDelay)),
       votingDelay: BigInt(toSeconds(auctionSettings.votingDelay)),
       votingPeriod: BigInt(toSeconds(auctionSettings.votingPeriod)),
@@ -197,18 +203,41 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
       quorumThresholdBps: auctionSettings?.quorumThreshold
         ? BigInt(Number((Number(auctionSettings?.quorumThreshold) * 100).toFixed(2)))
         : BigInt('0'),
-      vetoer: vetoPower === true ? getAddress(vetoerAddress as AddressType) : zeroAddress,
-    }),
-    [
-      auctionSettings?.timelockDelay,
-      auctionSettings?.votingPeriod,
-      auctionSettings?.votingDelay,
-      auctionSettings?.proposalThreshold,
-      auctionSettings?.quorumThreshold,
-      vetoPower,
-      vetoerAddress,
-    ]
-  )
+      vetoer:
+        vetoPower === true && vetoerAddress && isAddress(vetoerAddress, { strict: false })
+          ? getAddress(vetoerAddress as AddressType)
+          : zeroAddress,
+    }
+
+    // Include proposalUpdatablePeriod for Manager v3.0.0+
+    if (isV3OrHigher) {
+      return {
+        ...baseParams,
+        proposalUpdatablePeriod: BigInt(
+          toSeconds(
+            auctionSettings.proposalUpdatablePeriod || {
+              days: 1,
+              hours: 0,
+              minutes: 0,
+              seconds: 0,
+            }
+          )
+        ),
+      }
+    }
+
+    return baseParams
+  }, [
+    auctionSettings?.timelockDelay,
+    auctionSettings?.votingPeriod,
+    auctionSettings?.votingDelay,
+    auctionSettings?.proposalThreshold,
+    auctionSettings?.quorumThreshold,
+    auctionSettings?.proposalUpdatablePeriod,
+    vetoPower,
+    vetoerAddress,
+    isV3OrHigher,
+  ])
 
   const handleDeploy = useCallback(async () => {
     setDeploymentError(undefined)
@@ -241,7 +270,23 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
     let transaction
     try {
       let txHash: `0x${string}`
-      if (version?.startsWith('2')) {
+      if (version?.startsWith('3')) {
+        // Use v3 ABI with proposalUpdatablePeriod
+        const data = await simulateContract(config, {
+          address: PUBLIC_MANAGER_ADDRESS[chain.id],
+          chainId: chain.id,
+          abi: managerV3Abi,
+          functionName: 'deploy',
+          args: [
+            founderParams,
+            { ...tokenParams, reservedUntilTokenId, metadataRenderer: zeroAddress },
+            auctionParams,
+            govParams,
+          ],
+        })
+        txHash = await writeContract(config, data.request)
+      } else if (version?.startsWith('2')) {
+        // Use v2 ABI without proposalUpdatablePeriod
         const data = await simulateContract(config, {
           address: PUBLIC_MANAGER_ADDRESS[chain.id],
           chainId: chain.id,
@@ -256,6 +301,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
         })
         txHash = await writeContract(config, data.request)
       } else {
+        // Use v1 ABI (no reservedUntilTokenId)
         const data = await simulateContract(config, {
           address: PUBLIC_MANAGER_ADDRESS[chain.id],
           chainId: chain.id,
@@ -419,13 +465,19 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                 label="Quorum Threshold"
                 value={`${auctionSettings.quorumThreshold} %`}
               />
-              <ReviewItem
-                label="Voting Delay"
-                value={formatDuration(auctionSettings.votingDelay)}
-              />
+              {isV3OrHigher && auctionSettings.proposalUpdatablePeriod && (
+                <ReviewItem
+                  label="Updatable Period"
+                  value={formatDuration(auctionSettings.proposalUpdatablePeriod)}
+                />
+              )}
               <ReviewItem
                 label="Voting Period"
                 value={formatDuration(auctionSettings.votingPeriod)}
+              />
+              <ReviewItem
+                label="Voting Delay"
+                value={formatDuration(auctionSettings.votingDelay)}
               />
               <ReviewItem
                 label="Timelock Delay"
@@ -585,9 +637,11 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                     I acknowledge this DAO uses{' '}
                     <strong>Fast DAO timings (testing only)</strong> &mdash;{' '}
                     {formatDuration(FAST_DAO_TIMINGS.AUCTION_DURATION)} auction (0 ETH
-                    reserve), {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock,{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)} voting delay,{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting period.{' '}
+                    reserve),{' '}
+                    {formatDuration(FAST_DAO_TIMINGS.PROPOSAL_UPDATABLE_PERIOD)} updatable
+                    period, {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)} voting delay,{' '}
+                    {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting period,{' '}
+                    {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock.{' '}
                     <strong>Not for production.</strong>
                   </Flex>
                 </Flex>

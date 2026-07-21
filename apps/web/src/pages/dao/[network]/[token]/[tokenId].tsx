@@ -12,8 +12,8 @@ import {
   Treasury,
 } from '@buildeross/dao-ui'
 import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
+import { useGovernorVersion } from '@buildeross/hooks/useContractVersion'
 import { useGalleryItems } from '@buildeross/hooks/useGalleryItems'
-import { useGovernorVersion } from '@buildeross/hooks/useGovernorVersion'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses } from '@buildeross/stores'
