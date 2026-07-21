@@ -547,6 +547,19 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                   helperText="The minimum percent of total NFTs that must vote ‘For’ for a proposal to pass. We recommend a starting value of 10%."
                 />
 
+                {supportsCandidates && (
+                  <DaysHoursMinsSecs
+                    {...formik.getFieldProps('proposalUpdatablePeriod')}
+                    inputLabel={'Updatable Period'}
+                    formik={formik}
+                    id={'proposalUpdatablePeriod'}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    errorMessage={formik.errors['proposalUpdatablePeriod']}
+                    helperText="The period during which proposers can edit their proposals after creation. After this period ends, proposals can no longer be edited and voting begins. Must not exceed voting period."
+                  />
+                )}
+
                 <DaysHoursMinsSecs
                   {...formik.getFieldProps('votingPeriod')}
                   inputLabel={'Voting Period'}
@@ -568,19 +581,6 @@ export const AdminForm: React.FC<AdminFormProps> = ({ onOpenProposalReview }) =>
                   errorMessage={formik.errors['votingDelay']}
                   helperText="The time between when a proposal is created and when voting begins. This gives members a chance to review and discuss the proposal."
                 />
-
-                {supportsCandidates && (
-                  <DaysHoursMinsSecs
-                    {...formik.getFieldProps('proposalUpdatablePeriod')}
-                    inputLabel={'Proposal Updatable Period'}
-                    formik={formik}
-                    id={'proposalUpdatablePeriod'}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    errorMessage={formik.errors['proposalUpdatablePeriod']}
-                    helperText="The period during which proposers can edit their proposals after creation. After this period ends, proposals can no longer be edited and voting begins. Must not exceed voting period."
-                  />
-                )}
 
                 <DaysHoursMinsSecs
                   {...formik.getFieldProps('timelockDelay')}
