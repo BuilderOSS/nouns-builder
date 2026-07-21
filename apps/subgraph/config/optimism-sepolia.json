@@ -1,12 +1,12 @@
 {
   "network": "optimism-sepolia",
   "manager": {
-    "address": "0x9c51aa40551b35ab16d410adef9659ed3bcd8bd6",
-    "startBlock": 44287093
+    "address": "0xe5a7373d53ac4454996a9673b4a7a455b40f1150",
+    "startBlock": 46405577
   },
   "eas": {
     "address": "0x4200000000000000000000000000000000000021",
-    "startBlock": 44287093
+    "startBlock": 46405577
   },
   "callHandlers": false
 }
