@@ -8,3 +8,15 @@ export const twoColumnLayout = style({
     },
   },
 })
+
+export const singleColumnLayout = style({
+  gridTemplateColumns: `minmax(0, 1fr)`,
+})
+
+export const rightColumnHiddenOnMobile = style({
+  '@media': {
+    '(max-width: 768px)': {
+      display: 'none',
+    },
+  },
+})

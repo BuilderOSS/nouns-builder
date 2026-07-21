@@ -7,7 +7,8 @@ export const isProposalOpen = (state: ProposalState): boolean => {
     state === ProposalState.Queued ||
     state === ProposalState.Succeeded ||
     state === ProposalState.Active ||
-    state === ProposalState.Pending
+    state === ProposalState.Pending ||
+    state === ProposalState.Updatable
   ) {
     return true
   }
@@ -34,4 +35,12 @@ export const isProposalExecutable = (proposal: {
     !!proposal.executableFrom &&
     parseBlockchainDate(proposal.executableFrom) < new Date()
   )
+}
+
+export const isProposalUpdatable = (state: ProposalState): boolean => {
+  return state === ProposalState.Updatable
+}
+
+export const isProposalReplaced = (state: ProposalState): boolean => {
+  return state === ProposalState.Replaced
 }

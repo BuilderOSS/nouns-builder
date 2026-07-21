@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import type { CHAIN_ID } from '@buildeross/types'
 import { Flex, Text } from '@buildeross/zord'
 import React from 'react'
@@ -10,7 +10,7 @@ interface FeedItemChainProps {
 }
 
 export const FeedItemChain: React.FC<FeedItemChainProps> = ({ chainId }) => {
-  const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)!
+  const chain = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === chainId)!
 
   return (
     <Flex align="center" gap="x1">

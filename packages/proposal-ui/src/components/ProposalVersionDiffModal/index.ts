@@ -1,0 +1,1 @@
+export { ProposalVersionDiffModal } from './ProposalVersionDiffModal'

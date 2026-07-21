@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import type { CHAIN_ID } from '@buildeross/types'
 import * as Sentry from '@sentry/nextjs'
 import { NextApiRequest, NextApiResponse } from 'next'
@@ -89,7 +89,7 @@ export const validate = {
       throw new InvalidRequestError('chainId must be a valid positive number')
     }
 
-    if (!PUBLIC_ALL_CHAINS.some((chain) => chain.id === parsed)) {
+    if (!PUBLIC_DEFAULT_CHAINS.some((chain) => chain.id === parsed)) {
       throw new InvalidRequestError('chainId must be a valid supported chain ID')
     }
 

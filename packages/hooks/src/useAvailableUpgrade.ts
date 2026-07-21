@@ -20,7 +20,7 @@ import isUndefined from 'lodash/isUndefined'
 import lt from 'lodash/lt'
 import pickBy from 'lodash/pickBy'
 import useSWR from 'swr'
-import { encodeFunctionData } from 'viem'
+import { encodeFunctionData, isAddressEqual } from 'viem'
 import { useReadContracts } from 'wagmi'
 
 interface AvailableUpgrade {
@@ -257,11 +257,20 @@ export const useAvailableUpgrade = ({
 
   const noActiveUpgradeProposal = typeof activeUpgradeProposal === 'undefined'
 
+  // Only pause/unpause if the auction contract is being upgraded
+  const isAuctionBeingUpgraded = upgradeTransactions.some(
+    (tx) =>
+      addresses.auction &&
+      isAddressEqual(tx.target as `0x${string}`, addresses.auction as `0x${string}`)
+  )
+
   const upgrade = {
     type: TransactionType.UPGRADE,
     title: 'Upgrade Proposal',
     summary: `Upgrade contracts to Nouns Builder v${managerVersion}`,
-    transactions: withPauseUnpause(paused, upgradeTransactions),
+    transactions: isAuctionBeingUpgraded
+      ? withPauseUnpause(paused, upgradeTransactions)
+      : upgradeTransactions,
   }
 
   return {

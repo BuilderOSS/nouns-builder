@@ -18,6 +18,7 @@
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/hooks": "workspace:*",
     "@buildeross/ipfs-service": "workspace:*",
+    "@buildeross/candidate-ui": "workspace:*",
     "@buildeross/proposal-ui": "workspace:*",
     "@buildeross/sdk": "workspace:*",
     "@buildeross/stores": "workspace:*",

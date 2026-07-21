@@ -24,6 +24,7 @@ type DAO @entity {
   voters: [DAOVoter!]! @derivedFrom(field: "dao")
   tokens: [Token!]! @derivedFrom(field: "dao")
   proposals: [Proposal!]! @derivedFrom(field: "dao")
+  candidateCount: Int!
   auctions: [Auction!]! @derivedFrom(field: "dao")
   daoMultisigUpdates: [DaoMultisigUpdate!]! @derivedFrom(field: "dao")
   pinnedAssets: [TreasuryAssetPin!]! @derivedFrom(field: "dao")
@@ -32,6 +33,7 @@ type DAO @entity {
   zoraCoins: [ZoraCoin!]! @derivedFrom(field: "dao")
   zoraDrops: [ZoraDrop!]! @derivedFrom(field: "dao")
   links: [DAOLink!]! @derivedFrom(field: "dao")
+  candidates: [ProposalCandidateGroup!]! @derivedFrom(field: "dao")
 }
 
 type DAOLink @entity {
@@ -103,7 +105,16 @@ type Snapshot @entity {
   proposalCount: Int!
 }
 
-type Proposal @entity {
+interface ProposalMetadataEntity {
+  id: ID!
+  title: String
+  description: String
+  metadata: String
+  representedAddress: String
+  discussionUrl: String
+}
+
+type Proposal implements ProposalMetadataEntity @entity {
   id: ID!
   proposalId: Bytes!
   proposalNumber: Int!
@@ -142,9 +153,25 @@ type Proposal @entity {
   vetoTransactionHash: Bytes
   voteCount: Int!
   snapshotBlockNumber: BigInt!
+  updatePeriodEnd: BigInt
+  replacedBy: Proposal
+  replaces: Proposal
+  updateMessage: String
+  updateCount: Int!
+  isSigned: Boolean!
+  candidateVersion: ProposalCandidateVersion
   transactionHash: Bytes!
   votes: [ProposalVote!]! @derivedFrom(field: "proposal")
+  signers: [ProposalSigner!]! @derivedFrom(field: "proposal")
   updates: [ProposalUpdate!]! @derivedFrom(field: "proposal")
+}
+
+type ProposalSigner @entity {
+  id: ID!
+  proposal: Proposal!
+  signer: Bytes!
+  voteWeight: BigInt!
+  timestamp: BigInt!
 }
 
 type ProposalUpdate @entity {
@@ -157,6 +184,86 @@ type ProposalUpdate @entity {
   creator: Bytes!
   originalMessageId: Bytes!
   deleted: Boolean!
+}
+
+type ProposalCandidateGroup @entity {
+  id: ID!
+  dao: DAO!
+  proposer: Bytes!
+  salt: Bytes!
+  createdAt: BigInt!
+  candidateNumber: Int!
+  versions: [ProposalCandidateVersion!]! @derivedFrom(field: "group")
+  comments: [CandidateComment!]! @derivedFrom(field: "group")
+  versionCount: BigInt!
+  commentCount: BigInt!
+  latestVersionNumber: BigInt!
+  leadingVersion: ProposalCandidateVersion
+  currentForCount: BigInt!
+  currentAgainstCount: BigInt!
+  currentAbstainCount: BigInt!
+}
+
+type ProposalCandidateVersion implements ProposalMetadataEntity @entity {
+  id: ID! # Composite ID: candidateId-proposalHash
+  group: ProposalCandidateGroup!
+  candidateId: Bytes!
+  proposalHash: Bytes! # Hash of the proposal content computed by governor's hashProposal()
+  salt: Bytes!
+  attester: Bytes!
+  versionNumber: BigInt!
+  targets: [Bytes!]!
+  values: [BigInt!]!
+  calldatas: [Bytes!]!
+  title: String
+  description: String
+  metadata: String
+  representedAddress: String
+  discussionUrl: String
+  attestationUID: Bytes! # Original EAS attestation UID
+  proposal: Proposal
+  createdAt: BigInt!
+  signatures: [CandidateSponsorSignature!]! @derivedFrom(field: "version")
+  signatureCount: BigInt!
+  totalVoteWeight: BigInt!
+  revoked: Boolean!
+}
+
+enum CandidateVoteSupport {
+  NONE
+  FOR
+  AGAINST
+  ABSTAIN
+}
+
+type CandidateComment @entity {
+  id: ID!
+  group: ProposalCandidateGroup!
+  candidateId: Bytes! # Renamed from candidate for consistency
+  proposalHash: Bytes! # Hash of the proposal version this comment is for
+  commenter: Bytes!
+  voteWeight: BigInt!
+  support: CandidateVoteSupport!
+  comment: String!
+  parentComment: CandidateComment
+  createdAt: BigInt!
+  replies: [CandidateComment!]! @derivedFrom(field: "parentComment")
+  revoked: Boolean!
+}
+
+type CandidateSponsorSignature @entity {
+  id: ID! # Composite ID: proposalHash-signerAddress
+  attestationUID: Bytes! # Original EAS attestation UID
+  version: ProposalCandidateVersion!
+  candidateId: Bytes! # Stored as field for querying
+  proposalHash: Bytes!
+  signer: Bytes!
+  nonce: BigInt!
+  deadline: BigInt!
+  signature: Bytes!
+  revoked: Boolean!
+  createdAt: BigInt!
+  voteWeight: BigInt!
 }
 
 type DaoMultisigUpdate @entity {
@@ -258,6 +365,7 @@ type MetadataItem @entity {
 enum FeedEventType {
   PROPOSAL_CREATED
   PROPOSAL_UPDATED
+  PROPOSAL_EDITED
   PROPOSAL_VOTED
   PROPOSAL_EXECUTED
   AUCTION_CREATED
@@ -268,6 +376,10 @@ enum FeedEventType {
   CLANKER_TOKEN_UNLINKED
   ZORA_COIN_CREATED
   ZORA_DROP_CREATED
+  CANDIDATE_VERSION_CREATED
+  CANDIDATE_COMMENT_CREATED
+  CANDIDATE_SPONSOR_SIGNATURE_CREATED
+  CANDIDATE_SUBMITTED_AS_PROPOSAL
 }
 
 interface FeedEvent {
@@ -313,6 +425,18 @@ type ProposalVotedEvent implements FeedEvent @entity {
   actor: Bytes!
   proposal: Proposal!
   vote: ProposalVote!
+}
+
+type ProposalEditedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  proposal: Proposal!
+  previousProposal: Proposal!
 }
 
 type ProposalExecutedEvent implements FeedEvent @entity {
@@ -406,6 +530,56 @@ type ZoraCoinCreatedEvent implements FeedEvent @entity {
   transactionHash: Bytes!
   actor: Bytes!
   zoraCoin: ZoraCoin!
+}
+
+type CandidateVersionCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  candidateVersion: ProposalCandidateVersion!
+  group: ProposalCandidateGroup!
+}
+
+type CandidateCommentCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  comment: CandidateComment!
+  group: ProposalCandidateGroup!
+}
+
+type CandidateSponsorSignatureCreatedEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  signature: CandidateSponsorSignature!
+  candidateVersion: ProposalCandidateVersion!
+  group: ProposalCandidateGroup!
+}
+
+type CandidateSubmittedAsProposalEvent implements FeedEvent @entity {
+  id: ID!
+  type: FeedEventType!
+  dao: DAO!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  actor: Bytes!
+  proposal: Proposal!
+  candidateVersion: ProposalCandidateVersion!
+  group: ProposalCandidateGroup!
 }
 
 type ClankerToken @entity {

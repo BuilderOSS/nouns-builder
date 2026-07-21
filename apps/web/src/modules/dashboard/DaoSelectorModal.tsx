@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { COIN_SUPPORTED_CHAIN_IDS } from '@buildeross/constants/coining'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
@@ -36,7 +36,7 @@ export const DaoSelectorModal: React.FC<DaoSelectorModalProps> = ({
     if (!selectedDao) return
 
     // Get the chain name from chain ID
-    const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === selectedDao.chainId)
+    const chain = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === selectedDao.chainId)
     if (!chain) {
       console.error('Chain not found for DAO')
       return

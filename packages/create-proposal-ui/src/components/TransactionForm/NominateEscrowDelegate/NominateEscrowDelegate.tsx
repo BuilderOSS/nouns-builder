@@ -6,7 +6,7 @@ import {
   ESCROW_DELEGATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { useEscrowDelegate } from '@buildeross/hooks/useEscrowDelegate'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Transaction, TransactionType } from '@buildeross/types'
 import { SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
@@ -18,6 +18,8 @@ import { Form, Formik } from 'formik'
 import { useCallback } from 'react'
 import { encodeFunctionData, getAddress, Hex, isAddress, zeroHash } from 'viem'
 import * as yup from 'yup'
+
+import { useTransactionComposer } from '../../shared'
 
 interface EscrowDelegateFormValues {
   escrowDelegate: string
@@ -52,8 +54,7 @@ const schemaEncoder = new SchemaEncoder(ESCROW_DELEGATE_SCHEMA)
 
 export const NominateEscrowDelegate: React.FC = () => {
   const { token, treasury } = useDaoStore((state) => state.addresses)
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const chain = useChainStore((x) => x.chain)
   const { escrowDelegate } = useEscrowDelegate({
     chainId: chain.id,

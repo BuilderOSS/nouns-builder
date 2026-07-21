@@ -13,6 +13,7 @@ import {
   SectionHandler,
   SmartContracts,
 } from '@buildeross/dao-ui'
+import { useGovernorVersion } from '@buildeross/hooks/useContractVersion'
 import { auctionAbi, getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses, useChainStore, useDaoStore } from '@buildeross/stores'
@@ -106,6 +107,11 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   // Check if signer address is a minter - show custom minter tab if true
   const isSignerCustomMinter = !!signerAddress && !!isSignerMinter
 
+  const { supportsCandidates } = useGovernorVersion({
+    chainId: chain.id,
+    governorAddress: addresses.governor,
+  })
+
   const [showMinterModal, setShowMinterModal] = React.useState(false)
 
   const openTab = React.useCallback(
@@ -165,6 +171,20 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     [push, chain.slug, addresses.token]
   )
 
+  const openCandidateCreatePage = React.useCallback(
+    async (stage?: ProposalCreateStage) => {
+      await push({
+        pathname: `/dao/[network]/[token]/candidate/create`,
+        query: {
+          network: chain.slug,
+          token: addresses.token,
+          ...(stage ? { stage } : {}),
+        },
+      })
+    },
+    [push, chain.slug, addresses.token]
+  )
+
   const openProposalReviewPage = React.useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]/proposal/review`,
@@ -195,20 +215,21 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
 
     // Owner sections (full access)
     const ownerSections = [
+      aboutSection,
+      {
+        title: supportsCandidates ? 'Proposals' : 'Activity',
+        component: [
+          <Activity
+            key={supportsCandidates ? 'proposals' : 'activity'}
+            onOpenProposalCreate={openProposalCreatePage}
+            onOpenProposalReview={openProposalReviewPage}
+            onOpenCandidateCreate={openCandidateCreatePage}
+          />,
+        ],
+      },
       {
         title: 'Admin',
         component: [<PreAuctionForm key={'admin'} />],
-      },
-      aboutSection,
-      {
-        title: 'Activity',
-        component: [
-          <Activity
-            key={'proposals'}
-            onOpenProposalCreate={openProposalCreatePage}
-            onOpenProposalReview={openProposalReviewPage}
-          />,
-        ],
       },
     ]
 
@@ -241,15 +262,24 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     isMerkleReserveMinter,
     isERC721RedeemMinter,
     isSignerCustomMinter,
+    supportsCandidates,
     openProposalCreatePage,
     openProposalReviewPage,
+    openCandidateCreatePage,
   ])
 
   if (!owner) {
     return null
   }
 
-  const activeTab = query.tab ? (query.tab as string) : isOwner ? 'admin' : 'about'
+  // Normalize tab - both 'activity' and 'proposals' should map to the proposals/activity section
+  const rawTab = query.tab ? (query.tab as string) : isOwner ? 'admin' : 'about'
+  const activeTab =
+    rawTab === 'proposals' || rawTab === 'activity'
+      ? supportsCandidates
+        ? 'proposals'
+        : 'activity'
+      : rawTab
   const path = `/dao/${chain.slug}/${addresses.token}/?tab=${activeTab}`
 
   return (

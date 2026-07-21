@@ -1,0 +1,5 @@
+query CandidateGroup($candidateId: ID!) {
+  proposalCandidateGroup(id: $candidateId) {
+    ...CandidateGroupDetailFragment
+  }
+}

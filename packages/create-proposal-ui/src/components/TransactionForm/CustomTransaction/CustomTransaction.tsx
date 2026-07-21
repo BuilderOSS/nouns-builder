@@ -1,17 +1,16 @@
-import { useProposalStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import { motion } from 'framer-motion'
 import React, { ReactNode } from 'react'
 
 import { useCustomTransactionStore } from '../../../stores/useCustomTransactionStore'
+import { useTransactionComposer } from '../../shared'
 import { customTransactionWrapper, transactionFormWrapper } from './CustomTransaction.css'
 import { FormHeading } from './FormHeading'
 import { ABI, Address, Arguments, Function, Summary, Value } from './forms'
 
 export const CustomTransaction: React.FC = () => {
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
 
   const {
     active: activeCustomTransactionSection,

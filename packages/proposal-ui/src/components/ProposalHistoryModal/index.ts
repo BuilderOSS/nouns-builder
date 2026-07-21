@@ -1,0 +1,1 @@
+export { ProposalHistoryModal } from './ProposalHistoryModal'

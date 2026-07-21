@@ -1,30 +1,13 @@
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
-import { Box } from '@buildeross/zord'
 import React, { useState } from 'react'
 
 import { GovernorContractButton } from '../GovernorContractButton'
-import { cancelButtonBorder, proposalActionButtonVariants } from './ProposalActions.css'
+import { proposalActionButtonVariants } from './ProposalActions.css'
 
 interface CancelButtonProps {
   proposalId: string
   showCancel?: boolean
   showVeto?: boolean
-}
-
-export const Cancel: React.FC<{
-  proposalId: string
-  onSuccess: () => void
-}> = (props) => {
-  return (
-    <GovernorContractButton
-      functionName="cancel"
-      args={[props.proposalId as `0x${string}`]}
-      buttonText="Cancel Proposal"
-      buttonClassName={proposalActionButtonVariants['cancel']}
-      w={'100%'}
-      {...props}
-    />
-  )
 }
 
 export const CancelButton: React.FC<CancelButtonProps> = ({ proposalId }) => {
@@ -43,21 +26,19 @@ export const CancelButton: React.FC<CancelButtonProps> = ({ proposalId }) => {
 
   return (
     <>
-      <Box
-        w={{ '@initial': '100%', '@768': 'auto' }}
-        pt={{ '@initial': 'x3', '@768': 'x0' }}
-        className={cancelButtonBorder}
-      >
-        <Cancel
-          proposalId={proposalId}
-          onSuccess={() =>
-            onActionSuccess({
-              title: 'Proposal Canceled',
-              subtitle: 'You’ve successfully canceled this proposal',
-            })
-          }
-        />
-      </Box>
+      <GovernorContractButton
+        functionName="cancel"
+        args={[proposalId as `0x${string}`]}
+        buttonText="Cancel Proposal"
+        buttonClassName={proposalActionButtonVariants['cancel']}
+        proposalId={proposalId}
+        onSuccess={() =>
+          onActionSuccess({
+            title: 'Proposal Canceled',
+            subtitle: 'You’ve successfully canceled this proposal',
+          })
+        }
+      />
 
       <AnimatedModal size={'small'} open={showSuccessModal} close={onSuccessModalClose}>
         <SuccessModalContent

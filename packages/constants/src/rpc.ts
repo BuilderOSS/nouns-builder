@@ -18,7 +18,6 @@ const createRpcUrls = () => {
 
   addToUrls(CHAIN_ID.FOUNDRY, foundry.rpcUrls.default.http[0])
   addToUrls(CHAIN_ID.ZORA, 'https://rpc.zora.energy')
-  addToUrls(CHAIN_ID.ZORA_SEPOLIA, 'https://sepolia.rpc.zora.energy')
 
   for (const key of Object.keys(CHAIN_ID)) {
     if (isNaN(Number(key))) {

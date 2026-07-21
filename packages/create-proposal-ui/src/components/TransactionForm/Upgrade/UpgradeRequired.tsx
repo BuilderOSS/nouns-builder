@@ -1,9 +1,10 @@
-import { TransactionBundle, useProposalStore } from '@buildeross/stores'
+import { TransactionBundle } from '@buildeross/types'
 import { UpgradeCard } from '@buildeross/ui/UpgradeCard'
 import { Box } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 
 import { Alert } from '../../Alert'
+import { useTransactionComposer } from '../../shared'
 
 export interface UpgradeRequiredProps {
   transaction?: TransactionBundle
@@ -34,7 +35,7 @@ export const UpgradeRequired: React.FC<UpgradeRequiredProps> = ({
   transaction: upgradeTransaction,
   totalContractUpgrades,
 }) => {
-  const addTransaction = useProposalStore((state) => state.addTransaction)
+  const { addTransaction } = useTransactionComposer()
 
   const handleUpgrade = (): void => {
     addTransaction(upgradeTransaction!)

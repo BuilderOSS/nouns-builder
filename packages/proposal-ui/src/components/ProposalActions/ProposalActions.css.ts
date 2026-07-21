@@ -46,12 +46,3 @@ export const proposalActionButtonVariants = styleVariants({
     },
   ],
 })
-
-export const cancelButtonBorder = style({
-  borderTop: `2px solid ${vars.color.background2}`,
-  '@media': {
-    '(min-width: 768px)': {
-      borderTop: 'none',
-    },
-  },
-})

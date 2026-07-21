@@ -7,6 +7,7 @@ import {
   ProposalActions,
   ProposalDescription,
   ProposalDetailsGrid,
+  ProposalEditedBanner,
   ProposalHeader,
   ProposalVotes,
 } from '@buildeross/proposal-ui'
@@ -14,11 +15,13 @@ import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
 import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { type DaoContractAddresses, useChainStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import { ProposalState } from '@buildeross/types'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
 import { isProposalOpen } from '@buildeross/utils/proposalState'
 import { getProposalWarning } from '@buildeross/utils/warnings'
-import { Box, Flex, Icon } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import type { GetServerSideProps } from 'next'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { Fragment } from 'react'
 import { Meta } from 'src/components/Meta'
@@ -48,26 +51,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   addresses,
 }) => {
   const chain = useChainStore((state) => state.chain)
-  const { query, push, pathname, replace } = useRouter()
-
-  React.useEffect(() => {
-    if (!query || !replace) return
-    const { network, token, id } = query
-    if (typeof id !== 'string' || !id.startsWith('0x')) return
-    if (!network || !token) return
-    replace(
-      {
-        pathname: '/dao/[network]/[token]/vote/[id]',
-        query: {
-          network: network,
-          token: token,
-          id: proposalNumber,
-        },
-      },
-      undefined,
-      { shallow: true }
-    )
-  }, [proposalNumber, replace, query])
+  const { query, push, pathname } = useRouter()
 
   const { data: balance } = useBalance({
     address: addresses.treasury,
@@ -84,6 +68,16 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   const openProposalReviewPage = React.useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]/proposal/review`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
+  }, [push, chain.slug, addresses.token])
+
+  const openProposalUpdatePage = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]/proposal/create`,
       query: {
         network: chain.slug,
         token: addresses.token,
@@ -135,6 +129,7 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
 
   const { proposer, state, values } = proposal ?? {}
   const treasuryBalance = balance?.value
+  const candidateVersion = proposal?.candidateVersion
   const displayWarning = React.useMemo(() => {
     if (!proposer || state == null || !values) return ''
     return getProposalWarning({
@@ -194,8 +189,45 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
                 <Box fontWeight={'heading'}>{displayWarning}</Box>
               </Flex>
             )}
+            <ProposalEditedBanner key="edited-banner" proposal={proposal} />
 
-            {displayActions && <ProposalActions daoName={daoName} proposal={proposal} />}
+            {displayActions && (
+              <ProposalActions
+                daoName={daoName}
+                proposal={proposal}
+                onNavigateToUpdateProposal={openProposalUpdatePage}
+              />
+            )}
+            {candidateVersion && (
+              <Flex
+                align="center"
+                justify="space-between"
+                gap="x4"
+                py="x4"
+                px="x6"
+                borderRadius="curved"
+                borderWidth="thin"
+                borderColor="accent"
+                backgroundColor="background2"
+                wrap="wrap"
+              >
+                <Flex align="center" gap="x3">
+                  <Text fontWeight="label" color="text1">
+                    Originating Candidate: Candidate #
+                    {candidateVersion.group.candidateNumber}
+                  </Text>
+                </Flex>
+                <Button
+                  as={Link}
+                  href={`/dao/${chain.slug}/${addresses.token}/candidate/${candidateVersion.group.candidateNumber}`}
+                  variant="outline"
+                  size="sm"
+                  style={{ fontSize: '16px' }}
+                >
+                  View Candidate
+                </Button>
+              </Flex>
+            )}
           </>
 
           <ProposalDetailsGrid proposal={proposal} />
@@ -268,6 +300,27 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
   if (getAddress(proposal.dao.tokenAddress) !== getAddress(collection)) {
     return {
       notFound: true,
+    }
+  }
+
+  if (proposalIdOrNumber.startsWith('0x')) {
+    return {
+      redirect: {
+        destination: `/dao/${network}/${collection}/vote/${proposal.proposalNumber}`,
+        permanent: false,
+      },
+    }
+  }
+
+  // Redirect to latest version if this proposal has been replaced
+  if (proposal.state === ProposalState.Replaced && data.replacedBy) {
+    const latestProposalNumber = data.replacedBy.proposalNumber
+
+    return {
+      redirect: {
+        destination: `/dao/${network}/${collection}/vote/${latestProposalNumber}`,
+        permanent: false, // Use temporary redirect since proposals could be updated again
+      },
     }
   }
 

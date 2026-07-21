@@ -28,6 +28,7 @@ export interface FormValues {
   discussionUrl: string
   representedAddressEnabled: boolean
   transactions: TransactionBundle[]
+  updateMessage?: string
 }
 
 const isValidDiscussionUrl = (value: string): boolean => {
@@ -39,33 +40,40 @@ const isValidDiscussionUrl = (value: string): boolean => {
   }
 }
 
-export const validationSchema = Yup.object().shape({
-  title: Yup.string()
-    .trim()
-    .required(PROPOSAL_TITLE_REQUIRED_ERROR)
-    .matches(PROPOSAL_TITLE_REGEX, PROPOSAL_TITLE_FORMAT_ERROR)
-    .max(PROPOSAL_TITLE_MAX_LENGTH, PROPOSAL_TITLE_MAX_ERROR),
-  summary: Yup.string().trim().optional().required(PROPOSAL_SUMMARY_REQUIRED_ERROR),
-  representedAddressEnabled: Yup.boolean().required(),
-  representedAddress: Yup.string().when('representedAddressEnabled', {
-    is: true,
-    then: (schema) =>
-      schema
-        .trim()
-        .required(PROPOSAL_REPRESENTED_ADDRESS_REQUIRED_ERROR)
-        .test(
-          'represented-address-format',
-          PROPOSAL_REPRESENTED_ADDRESS_FORMAT_ERROR,
-          (value) => !!value && isAddress(value, { strict: false })
-        ),
-    otherwise: (schema) => schema.optional(),
-  }),
-  discussionUrl: Yup.string()
-    .trim()
-    .optional()
-    .test('discussion-url-format', PROPOSAL_DISCUSSION_URL_FORMAT_ERROR, (value) => {
-      if (!value) return true
-      return isValidDiscussionUrl(value)
+export const PROPOSAL_UPDATE_MESSAGE_REQUIRED_ERROR =
+  'Update message is required when updating a proposal'
+
+export const createValidationSchema = (isUpdating: boolean) =>
+  Yup.object().shape({
+    title: Yup.string()
+      .trim()
+      .required(PROPOSAL_TITLE_REQUIRED_ERROR)
+      .matches(PROPOSAL_TITLE_REGEX, PROPOSAL_TITLE_FORMAT_ERROR)
+      .max(PROPOSAL_TITLE_MAX_LENGTH, PROPOSAL_TITLE_MAX_ERROR),
+    summary: Yup.string().trim().optional().required(PROPOSAL_SUMMARY_REQUIRED_ERROR),
+    representedAddressEnabled: Yup.boolean().required(),
+    representedAddress: Yup.string().when('representedAddressEnabled', {
+      is: true,
+      then: (schema) =>
+        schema
+          .trim()
+          .required(PROPOSAL_REPRESENTED_ADDRESS_REQUIRED_ERROR)
+          .test(
+            'represented-address-format',
+            PROPOSAL_REPRESENTED_ADDRESS_FORMAT_ERROR,
+            (value) => !!value && isAddress(value, { strict: false })
+          ),
+      otherwise: (schema) => schema.optional(),
     }),
-  transactions: Yup.array().min(1, 'Minimum one transaction required'),
-})
+    discussionUrl: Yup.string()
+      .trim()
+      .optional()
+      .test('discussion-url-format', PROPOSAL_DISCUSSION_URL_FORMAT_ERROR, (value) => {
+        if (!value) return true
+        return isValidDiscussionUrl(value)
+      }),
+    transactions: Yup.array().min(1, 'Minimum one transaction required'),
+    updateMessage: isUpdating
+      ? Yup.string().trim().required(PROPOSAL_UPDATE_MESSAGE_REQUIRED_ERROR)
+      : Yup.string().trim().optional(),
+  })

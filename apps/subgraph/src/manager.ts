@@ -49,6 +49,7 @@ export function handleDAODeployed(event: DAODeployedEvent): void {
   dao.contractImage = metadataContract.contractImage()
   dao.projectURI = metadataContract.projectURI()
   dao.proposalCount = 0
+  dao.candidateCount = 0
   dao.ownerCount = 0
   dao.voterCount = 0
   dao.tokensCount = 0

@@ -1,9 +1,9 @@
-import { useProposalStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
+import { useTransactionComposer } from '../shared'
 import { TransactionCard } from '../TransactionCard'
 import { ConfirmRemove } from './ConfirmRemove'
 
@@ -13,9 +13,8 @@ interface QueueProps {
 }
 
 export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = false }) => {
-  const transactions = useProposalStore((state) => state.transactions)
-  const removeTransaction = useProposalStore((state) => state.removeTransaction)
-  const removeAllTransactions = useProposalStore((state) => state.removeAllTransactions)
+  const { transactions, removeTransaction, removeAllTransactions } =
+    useTransactionComposer()
 
   const [openConfirm, setOpenConfirm] = React.useState<boolean>(false)
   const [removeIndex, setRemoveIndex] = React.useState<number | null>(null)
@@ -78,19 +77,23 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = fals
       </Flex>
 
       <Stack gap={'x4'}>
-        {transactions
-          ? transactions.map((transaction, i) => (
-              <TransactionCard
-                key={`${transaction.type}-${i}`}
-                handleRemove={() => confirmRemoveTransaction(i)}
-                disabled={
-                  transaction.type === TransactionType.UPGRADE ||
-                  transaction.type === TransactionType.UPDATE_MINTER
-                }
-                transaction={transaction}
-              />
-            ))
-          : null}
+        {transactions?.length > 0 ? (
+          transactions.map((transaction, i) => (
+            <TransactionCard
+              key={`${transaction.type}-${i}`}
+              handleRemove={() => confirmRemoveTransaction(i)}
+              disabled={
+                transaction.type === TransactionType.UPGRADE ||
+                transaction.type === TransactionType.UPDATE_MINTER
+              }
+              transaction={transaction}
+            />
+          ))
+        ) : (
+          <Text size="sm" color="text3">
+            No transactions in queue
+          </Text>
+        )}
       </Stack>
       <Stack
         borderWidth={'thin'}
@@ -99,7 +102,11 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = fals
         mt={'x6'}
         mb={'x8'}
       />
-      <Button variant="outline" onClick={handleClearAll}>
+      <Button
+        variant="outline"
+        onClick={handleClearAll}
+        disabled={transactions.length === 0}
+      >
         Clear queue
       </Button>
       <AnimatedModal close={() => setOpenConfirm(false)} open={openConfirm}>

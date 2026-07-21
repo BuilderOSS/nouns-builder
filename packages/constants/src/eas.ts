@@ -9,7 +9,6 @@ export const EAS_CONTRACT_ADDRESS: Partial<Record<CHAIN_ID, `0x${string}`>> = {
   [CHAIN_ID.BASE]: '0x4200000000000000000000000000000000000021',
   [CHAIN_ID.BASE_SEPOLIA]: '0x4200000000000000000000000000000000000021',
   [CHAIN_ID.ZORA]: undefined,
-  [CHAIN_ID.ZORA_SEPOLIA]: undefined,
 }
 
 export const EAS_SUPPORTED_CHAIN_IDS = Object.entries(EAS_CONTRACT_ADDRESS)
@@ -40,6 +39,18 @@ export const ESCROW_DELEGATE_SCHEMA = `address daoMultiSig`
 export const TREASURY_ASSET_PIN_SCHEMA_UID = `0xc384fd4fdacb670667c07759423132a193053742b58d5a056b61d72ba1a09e26`
 
 export const TREASURY_ASSET_PIN_SCHEMA = `uint8 tokenType, address token, bool isCollection, uint256 tokenId`
+
+export const PROPOSAL_CANDIDATE_SCHEMA_UID = `0xc3315fb5b910e904d24f56c5b37dd5a5d06392bb040ba8ad669a9f7b3bbe2e4f`
+
+export const PROPOSAL_CANDIDATE_SCHEMA = `bytes32 candidateId,bytes32 salt,address[] targets,uint256[] values,bytes[] calldatas,string description`
+
+export const CANDIDATE_COMMENT_SCHEMA_UID = `0x1decf999b02cbecd8697ae7cf0c4017bc0115adbee476da79634332fdff965b2`
+
+export const CANDIDATE_COMMENT_SCHEMA = `bytes32 candidateId,uint8 support,string comment,bytes32 parentCommentUID`
+
+export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID = `0x58cd8b0e3e1bd4c8c0d980826c3a041d315132ecccbfb7063f6458c05809e54a`
+
+export const CANDIDATE_SPONSOR_SIGNATURE_SCHEMA = `bytes32 candidateId,bytes32 proposalId,uint256 nonce,uint256 deadline,bytes signature`
 
 export type AttestationParams = {
   schema: `0x${string}`
@@ -80,6 +91,35 @@ export const easAbi = [
     ],
     name: 'attest',
     outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        components: [
+          { internalType: 'bytes32', name: 'schema', type: 'bytes32' },
+          {
+            components: [
+              { internalType: 'address', name: 'recipient', type: 'address' },
+              { internalType: 'uint64', name: 'expirationTime', type: 'uint64' },
+              { internalType: 'bool', name: 'revocable', type: 'bool' },
+              { internalType: 'bytes32', name: 'refUID', type: 'bytes32' },
+              { internalType: 'bytes', name: 'data', type: 'bytes' },
+              { internalType: 'uint256', name: 'value', type: 'uint256' },
+            ],
+            internalType: 'struct AttestationRequestData[]',
+            name: 'data',
+            type: 'tuple[]',
+          },
+        ],
+        internalType: 'struct MultiAttestationRequest[]',
+        name: 'multiRequests',
+        type: 'tuple[]',
+      },
+    ],
+    name: 'multiAttest',
+    outputs: [{ internalType: 'bytes32[]', name: '', type: 'bytes32[]' }],
     stateMutability: 'payable',
     type: 'function',
   },

@@ -1,6 +1,6 @@
 import { useEscrowDelegate } from '@buildeross/hooks/useEscrowDelegate'
 import { erc20Abi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { Accordion } from '@buildeross/ui/Accordion'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
@@ -34,7 +34,7 @@ import {
   parseUnits,
 } from 'viem'
 
-import { TokenSelectionForm } from '../../shared'
+import { TokenSelectionForm, useTransactionComposer } from '../../shared'
 import { StreamForm } from './StreamForm'
 import streamTokensSchema, {
   StreamFormValues,
@@ -79,8 +79,7 @@ const SyncSenderAddressFromEscrowDelegate = ({
 }
 
 export const StreamTokens: React.FC = () => {
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
 

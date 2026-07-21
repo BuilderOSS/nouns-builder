@@ -47,6 +47,7 @@ function seedDao(initialDescription: string): void {
   dao.voterCount = 0
   dao.tokensCount = 0
   dao.proposalCount = 0
+  dao.candidateCount = 0
   dao.totalAuctionSales = BigInt.fromI32(0)
   dao.auctionConfig = auctionConfigId
   dao.save()

@@ -1,5 +1,5 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import type {
   CHAIN_ID,
   DaoContractAddresses,
@@ -128,7 +128,7 @@ const generatePrompt = (data: RequestBody): string => {
     bundleContext,
   } = data
 
-  const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)!
+  const chain = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === chainId)!
 
   const safeFunctionName = transaction.functionName.replace(/[^a-zA-Z0-9]/g, '')
   const contractType =
@@ -278,7 +278,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ error: 'chainId and addresses are required' })
     }
 
-    if (!PUBLIC_ALL_CHAINS.some((c) => c.id === requestData.chainId))
+    if (!PUBLIC_DEFAULT_CHAINS.some((c) => c.id === requestData.chainId))
       return res.status(400).json({ error: 'chainId not found' })
 
     if (!requestData.addresses || Object.values(requestData.addresses).length < 5)

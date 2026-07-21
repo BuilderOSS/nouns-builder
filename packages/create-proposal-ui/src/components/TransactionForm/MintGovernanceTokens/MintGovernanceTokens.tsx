@@ -1,6 +1,6 @@
 import { useAvailableUpgrade } from '@buildeross/hooks/useAvailableUpgrade'
 import { auctionAbi, tokenAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -10,6 +10,7 @@ import gte from 'lodash/gte'
 import { Address, encodeFunctionData, isAddress } from 'viem'
 import { useReadContract } from 'wagmi'
 
+import { useTransactionComposer } from '../../shared'
 import { UpgradeInProgress, UpgradeRequired } from '../Upgrade'
 import MintGovernanceTokensForm from './MintGovernanceTokensForm'
 import { MintGovernanceTokensFormValues } from './MintGovernanceTokensForm.schema'
@@ -18,9 +19,7 @@ const CONTRACT_VERSION = '1.2.0'
 
 export const MintGovernanceTokens: React.FC = () => {
   const addresses = useDaoStore((state) => state.addresses)
-  const transactions = useProposalStore((state) => state.transactions)
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { transactions, addTransaction, resetTransactionType } = useTransactionComposer()
   const chain = useChainStore((x) => x.chain)
 
   const {

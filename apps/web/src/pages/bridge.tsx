@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Heading, Icon, Stack, Text } from '@buildeross/zord'
 import Head from 'next/head'
@@ -76,7 +76,7 @@ const NetworkCard: React.FC<{
     chainId,
   })
 
-  const chain = PUBLIC_ALL_CHAINS.find((x) => x.id === chainId)
+  const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId)
 
   if (!chain) return null
 

@@ -35,7 +35,7 @@ export const WalletIdentity = ({
 }: WalletIdentityProps) => {
   const { getProfileLink } = useLinks()
   const inner = (
-    <Flex align="center" gap={gap} minWidth={0} className={className}>
+    <Flex align="center" gap={gap} style={{ minWidth: 0 }} className={className}>
       <Avatar address={address} src={avatarSrc} size={avatarSize} />
       <Text
         className={nameClassName}

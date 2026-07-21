@@ -7,7 +7,6 @@ import {
   optimismSepolia,
   sepolia,
   zora,
-  zoraSepolia,
 } from 'wagmi/chains'
 
 /**
@@ -89,12 +88,6 @@ const TESTNET_CHAINS_UNSORTED: Chains = [
     slug: 'base-sepolia',
     icon: '/chains/base.svg',
   },
-  {
-    ...zoraSepolia,
-    id: CHAIN_ID.ZORA_SEPOLIA,
-    slug: 'zora-sepolia',
-    icon: '/chains/zora.png',
-  },
 ] as const satisfies Chains
 
 export const TESTNET_CHAINS: Chains = sortNonEmptyChains(TESTNET_CHAINS_UNSORTED)
@@ -127,7 +120,7 @@ export const PUBLIC_ALL_CHAINS: Chains = sortNonEmptyChains(
 )
 
 const PUBLIC_DEFAULT_CHAINS_UNSORTED = PUBLIC_IS_TESTNET
-  ? PUBLIC_ALL_CHAINS_UNSORTED
+  ? TESTNET_CHAINS_UNSORTED
   : MAINNET_CHAINS_UNSORTED
 
 export const PUBLIC_DEFAULT_CHAINS: Chains = sortNonEmptyChains(
@@ -145,14 +138,5 @@ export const L1_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
   : ([CHAIN_ID.ETHEREUM] as const)
 
 export const L2_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
-  ? ([CHAIN_ID.ZORA_SEPOLIA, CHAIN_ID.BASE_SEPOLIA, CHAIN_ID.OPTIMISM_SEPOLIA] as const)
+  ? ([CHAIN_ID.BASE_SEPOLIA, CHAIN_ID.OPTIMISM_SEPOLIA] as const)
   : ([CHAIN_ID.ZORA, CHAIN_ID.BASE, CHAIN_ID.OPTIMISM] as const)
-
-export const ZORA_CHAINS: CHAIN_ID[] = PUBLIC_IS_TESTNET
-  ? [CHAIN_ID.ZORA_SEPOLIA]
-  : [CHAIN_ID.ZORA]
-
-/**
- * Check if a chain ID is a Zora chain (mainnet or testnet)
- */
-export const isZoraChain = (chainId: CHAIN_ID): boolean => ZORA_CHAINS.includes(chainId)
