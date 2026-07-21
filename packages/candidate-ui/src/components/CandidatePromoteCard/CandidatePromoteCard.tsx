@@ -154,7 +154,7 @@ export const CandidatePromoteCard: React.FC<CandidatePromoteCardProps> = ({
 
   const getDescription = () => {
     const signatureCount = eligibleSignatures.length
-    const formattedCurrent = totalPromoteWeight.toString()
+    const formattedCurrent = totalSignatureWeight.toString()
     const formattedRequired = requiredVoteWeight.toString()
 
     if (cardState.status === 'gathering') {
@@ -169,8 +169,8 @@ export const CandidatePromoteCard: React.FC<CandidatePromoteCardProps> = ({
   }
 
   const getProgressPercentage = () => {
-    if (proposalThreshold === undefined || totalPromoteWeight === 0n) return 0
-    const percentage = (Number(totalPromoteWeight) / Number(requiredVoteWeight)) * 100
+    if (proposalThreshold === undefined || totalSignatureWeight === 0n) return 0
+    const percentage = (Number(totalSignatureWeight) / Number(requiredVoteWeight)) * 100
     return Math.min(percentage, 100)
   }
 
