@@ -637,11 +637,10 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
                     I acknowledge this DAO uses{' '}
                     <strong>Fast DAO timings (testing only)</strong> &mdash;{' '}
                     {formatDuration(FAST_DAO_TIMINGS.AUCTION_DURATION)} auction (0 ETH
-                    reserve),{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.PROPOSAL_UPDATABLE_PERIOD)} updatable
-                    period, {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)} voting delay,{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting period,{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock.{' '}
+                    reserve), {formatDuration(FAST_DAO_TIMINGS.PROPOSAL_UPDATABLE_PERIOD)}{' '}
+                    updatable period, {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)}{' '}
+                    voting delay, {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting
+                    period, {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock.{' '}
                     <strong>Not for production.</strong>
                   </Flex>
                 </Flex>

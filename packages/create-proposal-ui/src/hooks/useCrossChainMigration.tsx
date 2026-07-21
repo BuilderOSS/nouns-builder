@@ -41,6 +41,7 @@ export interface DAOConfigParams {
   quorumThresholdBps: bigint
   vetoer: AddressType
   timelockDelay: bigint
+  proposalUpdatablePeriod?: bigint
 }
 
 export interface DeployedContracts {

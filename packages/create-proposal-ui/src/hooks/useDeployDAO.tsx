@@ -1,6 +1,7 @@
 import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
-import { managerAbi } from '@buildeross/sdk/contract'
+import { useManagerVersion } from '@buildeross/hooks'
+import { managerAbi, managerV3Abi } from '@buildeross/sdk/contract'
 import { CHAIN_ID } from '@buildeross/types'
 import { useState } from 'react'
 import { encodeAbiParameters, parseAbiParameters, zeroAddress } from 'viem'
@@ -16,6 +17,13 @@ export const useDeployDAO = (config?: DAOConfigParams, targetChainId?: CHAIN_ID)
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
+  })
+
+  // Check if target Manager contract supports v3 features
+  const managerAddress = targetChainId ? PUBLIC_MANAGER_ADDRESS[targetChainId] : undefined
+  const { isV3OrHigher } = useManagerVersion({
+    chainId: targetChainId || 1,
+    managerAddress: managerAddress || '0x0000000000000000000000000000000000000000',
   })
 
   const deploy = async () => {
@@ -65,8 +73,8 @@ export const useDeployDAO = (config?: DAOConfigParams, targetChainId?: CHAIN_ID)
       founderRewardBps: 0,
     }
 
-    // Prepare governance params
-    const govParams = {
+    // Prepare governance params with smart defaults for v2→v3 migrations
+    const baseGovParams = {
       timelockDelay: config.timelockDelay,
       votingDelay: config.votingDelay,
       votingPeriod: config.votingPeriod,
@@ -75,9 +83,23 @@ export const useDeployDAO = (config?: DAOConfigParams, targetChainId?: CHAIN_ID)
       vetoer: config.vetoer,
     }
 
-    // Execute deployment
+    // For v3 deployments, add proposalUpdatablePeriod with smart default
+    const govParams = isV3OrHigher
+      ? {
+          ...baseGovParams,
+          proposalUpdatablePeriod:
+            config.proposalUpdatablePeriod !== undefined
+              ? config.proposalUpdatablePeriod
+              : // Smart default: min(1 day, voting period)
+                config.votingPeriod < 86400n
+                ? config.votingPeriod
+                : 86400n,
+        }
+      : baseGovParams
+
+    // Execute deployment with version-appropriate ABI
     const hash = await writeContractAsync({
-      abi: managerAbi,
+      abi: isV3OrHigher ? managerV3Abi : managerAbi,
       address: managerAddress,
       functionName: 'deploy',
       args: [founderParams, tokenParams, auctionParams, govParams],

@@ -242,11 +242,10 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                     <strong>Enable Fast DAO (testing only):</strong> ultra-short timings
                     for testing &mdash;{' '}
                     {formatDuration(FAST_DAO_TIMINGS.AUCTION_DURATION)} auction (0 ETH
-                    reserve),{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.PROPOSAL_UPDATABLE_PERIOD)} updatable
-                    period, {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)} voting delay,{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting period,{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock.{' '}
+                    reserve), {formatDuration(FAST_DAO_TIMINGS.PROPOSAL_UPDATABLE_PERIOD)}{' '}
+                    updatable period, {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)}{' '}
+                    voting delay, {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting
+                    period, {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock.{' '}
                     <strong>Not for production.</strong>
                   </Flex>
                 </Flex>

@@ -17,6 +17,7 @@ export interface MigrationConfig {
   quorumThresholdBps: bigint
   votingDelay: bigint
   votingPeriod: bigint
+  proposalUpdatablePeriod?: bigint
 }
 
 export interface ValidationResult {
@@ -125,6 +126,21 @@ export const validateMigrationConfig = (config: MigrationConfig): ValidationResu
     warnings.push('Quorum threshold is low (<5%), proposals may pass too easily')
   }
 
+  // Proposal updatable period validation (v3+ feature)
+  if (config.proposalUpdatablePeriod !== undefined) {
+    if (config.proposalUpdatablePeriod < 0n) {
+      errors.push('Proposal updatable period must be non-negative')
+    }
+
+    if (config.proposalUpdatablePeriod > config.votingPeriod) {
+      errors.push('Proposal updatable period must be less than or equal to voting period')
+    }
+
+    if (config.proposalUpdatablePeriod > 86400n * 7n) {
+      warnings.push('Proposal updatable period is very long (more than 1 week)')
+    }
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -215,43 +231,53 @@ export const compareConfigs = (
 
   // These should match exactly
   if (source.name !== target.name) {
-    warnings.push(`DAO name changed: "${source.name}" � "${target.name}"`)
+    warnings.push(`DAO name changed from "${source.name}" to "${target.name}"`)
   }
 
   if (source.symbol !== target.symbol) {
-    warnings.push(`Symbol changed: "${source.symbol}" � "${target.symbol}"`)
+    warnings.push(`Symbol changed from "${source.symbol}" to "${target.symbol}"`)
   }
 
   // These can differ but note the changes
   if (source.reservePrice !== target.reservePrice) {
     warnings.push(
-      `Reserve price changed: ${source.reservePrice} � ${target.reservePrice}`
+      `Reserve price changed from ${source.reservePrice} to ${target.reservePrice}`
     )
   }
 
   if (source.duration !== target.duration) {
-    warnings.push(`Auction duration changed: ${source.duration} � ${target.duration}`)
+    warnings.push(
+      `Auction duration changed from ${source.duration} to ${target.duration}`
+    )
   }
 
   if (source.proposalThresholdBps !== target.proposalThresholdBps) {
     warnings.push(
-      `Proposal threshold changed: ${source.proposalThresholdBps} � ${target.proposalThresholdBps}`
+      `Proposal threshold changed from ${source.proposalThresholdBps} to ${target.proposalThresholdBps}`
     )
   }
 
   if (source.quorumThresholdBps !== target.quorumThresholdBps) {
     warnings.push(
-      `Quorum threshold changed: ${source.quorumThresholdBps} � ${target.quorumThresholdBps}`
+      `Quorum threshold changed from ${source.quorumThresholdBps} to ${target.quorumThresholdBps}`
     )
   }
 
   if (source.votingDelay !== target.votingDelay) {
-    warnings.push(`Voting delay changed: ${source.votingDelay} � ${target.votingDelay}`)
+    warnings.push(
+      `Voting delay changed from ${source.votingDelay} to ${target.votingDelay}`
+    )
   }
 
   if (source.votingPeriod !== target.votingPeriod) {
     warnings.push(
-      `Voting period changed: ${source.votingPeriod} � ${target.votingPeriod}`
+      `Voting period changed from ${source.votingPeriod} to ${target.votingPeriod}`
+    )
+  }
+
+  if (source.proposalUpdatablePeriod !== target.proposalUpdatablePeriod) {
+    warnings.push(
+      `Proposal updatable period changed from ${source.proposalUpdatablePeriod || 'none'} to ${target.proposalUpdatablePeriod || 'none'}`
     )
   }
 
@@ -259,7 +285,7 @@ export const compareConfigs = (
   if (source.founders && target.founders) {
     if (source.founders.length !== target.founders.length) {
       warnings.push(
-        `Number of founders changed: ${source.founders.length} � ${target.founders.length}`
+        `Number of founders changed from ${source.founders.length} to ${target.founders.length}`
       )
     }
   }

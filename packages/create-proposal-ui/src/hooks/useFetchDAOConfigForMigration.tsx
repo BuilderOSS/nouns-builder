@@ -11,7 +11,7 @@ import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { encodeAbiParameters, parseAbiParameters, zeroAddress } from 'viem'
-import { useReadContracts } from 'wagmi'
+import { useReadContract, useReadContracts } from 'wagmi'
 
 /**
  * Fetches DAO configuration from source chain for migration purposes
@@ -63,6 +63,17 @@ export const useFetchDAOConfigForMigration = ({
       { ...contracts.governor, functionName: 'vetoer' },
       { ...contracts.treasury, functionName: 'delay' },
     ] as const,
+  })
+
+  // Fetch proposalUpdatablePeriod separately (v3+ only, will fail silently for v2)
+  const { data: proposalUpdatablePeriod } = useReadContract({
+    abi: contracts.governor.abi,
+    address: contracts.governor.address,
+    functionName: 'proposalUpdatablePeriod',
+    chainId: sourceChainId,
+    query: {
+      enabled: enabled && !!sourceAddresses.governor,
+    },
   })
 
   if (!data || error) {
@@ -159,6 +170,7 @@ export const useFetchDAOConfigForMigration = ({
         quorumThresholdBps: quorumThresholdBps!,
         vetoer: vetoer!,
         timelockDelay: timelockDelay!,
+        proposalUpdatablePeriod,
       },
     },
     isLoading,

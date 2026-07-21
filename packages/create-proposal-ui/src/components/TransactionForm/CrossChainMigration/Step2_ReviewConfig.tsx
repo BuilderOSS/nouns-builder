@@ -1,3 +1,5 @@
+import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
+import { useManagerVersion } from '@buildeross/hooks'
 import { AddressType } from '@buildeross/types'
 import { SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
@@ -16,12 +18,25 @@ const stringifyWithBigInt = (obj: any): string => {
 }
 
 export const Step2_ReviewConfig: React.FC = () => {
-  const { sourceConfig, editedConfig, updateConfig, goToNextStep, goToPreviousStep } =
-    useCrossChainMigration()
+  const {
+    sourceConfig,
+    editedConfig,
+    updateConfig,
+    goToNextStep,
+    goToPreviousStep,
+    targetChainId,
+  } = useCrossChainMigration()
   const { address: walletAddress } = useAccount()
 
   const [localConfig, setLocalConfig] = useState(editedConfig || sourceConfig)
   const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Check if target Manager contract supports v3 features
+  const managerAddress = targetChainId ? PUBLIC_MANAGER_ADDRESS[targetChainId] : undefined
+  const { isV3OrHigher } = useManagerVersion({
+    chainId: targetChainId || 1,
+    managerAddress: managerAddress || '0x0000000000000000000000000000000000000000',
+  })
 
   // Detect if config has changed (BigInt-safe comparison)
   const hasChanges = useMemo(() => {
@@ -82,6 +97,22 @@ export const Step2_ReviewConfig: React.FC = () => {
           newErrors[`founder_${idx}_pct`] = 'Ownership must be between 0-100'
         }
       })
+    }
+
+    // Validate proposalUpdatablePeriod if present (v3+ deployments)
+    if (isV3OrHigher && localConfig.proposalUpdatablePeriod !== undefined) {
+      const updatablePeriod = localConfig.proposalUpdatablePeriod
+      const votingPeriod = localConfig.votingPeriod
+
+      if (updatablePeriod < 0n) {
+        newErrors.proposalUpdatablePeriod =
+          'Proposal updatable period must be non-negative'
+      }
+
+      if (votingPeriod && updatablePeriod > votingPeriod) {
+        newErrors.proposalUpdatablePeriod =
+          'Proposal updatable period must be less than or equal to voting period'
+      }
     }
 
     setErrors(newErrors)
@@ -504,6 +535,40 @@ export const Step2_ReviewConfig: React.FC = () => {
                 </Text>
               </Box>
             </Flex>
+
+            {isV3OrHigher && (
+              <Box>
+                <Label htmlFor="proposal-updatable-period" mb="x2">
+                  Updatable Period (days)
+                </Label>
+                <Input
+                  id="proposal-updatable-period"
+                  type="number"
+                  step="0.1"
+                  value={Number(
+                    (localConfig.proposalUpdatablePeriod || 0n) / 86400n
+                  ).toFixed(2)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setLocalConfig({
+                      ...localConfig,
+                      proposalUpdatablePeriod: BigInt(
+                        Math.round(parseFloat(e.target.value || '0') * 86400)
+                      ),
+                    })
+                  }
+                />
+                <Text color="text4" fontSize={12} mt="x1">
+                  {Number(localConfig.proposalUpdatablePeriod || 0n).toLocaleString()}{' '}
+                  seconds - Period during which proposers can edit proposals after
+                  creation. Can be 0 to disable.
+                </Text>
+                {errors.proposalUpdatablePeriod && (
+                  <Text color="negative" fontSize={12} mt="x1">
+                    {errors.proposalUpdatablePeriod}
+                  </Text>
+                )}
+              </Box>
+            )}
 
             <Flex gap="x4">
               <Box flex={1}>
