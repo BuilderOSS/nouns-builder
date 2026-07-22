@@ -1,11 +1,17 @@
-import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
+import { PUBLIC_DEFAULT_CHAINS, supportsUpdatableProposals } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { isAddress } from 'viem'
 
 import { SDK } from '../client'
-import type { DaosForDashboardQuery } from '../sdk.generated'
+import type {
+  DaosForDashboardQuery,
+  DaosForDashboardUpdatableQuery,
+} from '../sdk.generated'
 
-export type DashboardDao = DaosForDashboardQuery['daos'][number] & {
+export type DashboardDao = (
+  | DaosForDashboardQuery['daos'][number]
+  | DaosForDashboardUpdatableQuery['daos'][number]
+) & {
   chainId: CHAIN_ID
 }
 
@@ -21,14 +27,22 @@ export const dashboardRequest = async (
       throw new Error('Zero address not allowed')
 
     const data = await Promise.all(
-      PUBLIC_DEFAULT_CHAINS.map((chain) =>
-        SDK.connect(chain.id)
-          .daosForDashboard({
-            user: memberAddress.toLowerCase(),
-            first: 30,
-          })
-          .then((x) => ({ ...x, chainId: chain.id }))
-      )
+      PUBLIC_DEFAULT_CHAINS.map((chain) => {
+        const sdk = SDK.connect(chain.id)
+        return supportsUpdatableProposals(chain.id)
+          ? sdk
+              .daosForDashboardUpdatable({
+                user: memberAddress.toLowerCase(),
+                first: 30,
+              })
+              .then((x) => ({ ...x, chainId: chain.id }))
+          : sdk
+              .daosForDashboard({
+                user: memberAddress.toLowerCase(),
+                first: 30,
+              })
+              .then((x) => ({ ...x, chainId: chain.id }))
+      })
     )
 
     return data

@@ -1,3 +1,4 @@
+import { supportsUpdatableProposals } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { isProposalReplaced } from '@buildeross/utils/proposalState'
 
@@ -19,19 +20,28 @@ export const getProposals = async (
   page?: number
 ): Promise<ProposalsResponse> => {
   try {
-    const data = await SDK.connect(chainId).proposals({
-      where: {
-        dao: token.toLowerCase(),
-      },
-      first: limit,
-      skip: page ? (page - 1) * limit : 0,
-    })
+    const sdk = SDK.connect(chainId)
+    const data = supportsUpdatableProposals(chainId)
+      ? await sdk.proposalsUpdatable({
+          where: {
+            dao: token.toLowerCase(),
+          },
+          first: limit,
+          skip: page ? (page - 1) * limit : 0,
+        })
+      : await sdk.proposals({
+          where: {
+            dao: token.toLowerCase(),
+          },
+          first: limit,
+          skip: page ? (page - 1) * limit : 0,
+        })
 
     const allProposals = await Promise.all(
       data?.proposals.map(async (p) => {
-        const { executableFrom, expiresAt, calldatas, updatePeriodEnd, ...proposal } = p
+        const { executableFrom, expiresAt, calldatas, ...proposal } = p
 
-        const baseProposal = {
+        const baseProposal: any = {
           ...proposal,
           calldatas: calldatas ? calldatas.split(':') : [],
           state: await getProposalState(
@@ -39,8 +49,18 @@ export const getProposals = async (
             proposal.dao.governorAddress,
             proposal.proposalId
           ),
-          updatePeriodEnd: updatePeriodEnd ? Number(updatePeriodEnd) : undefined,
         }
+
+        // Add updatable proposal fields (v0.1.17+) with explicit defaults (null, not undefined)
+        baseProposal.updatePeriodEnd =
+          'updatePeriodEnd' in p && p.updatePeriodEnd ? Number(p.updatePeriodEnd) : null
+        baseProposal.updateMessage =
+          'updateMessage' in p ? (p.updateMessage ?? null) : null
+        baseProposal.updateCount = 'updateCount' in p ? (p.updateCount ?? null) : null
+        baseProposal.candidateVersion =
+          'candidateVersion' in p ? (p.candidateVersion ?? null) : null
+        baseProposal.replaces = 'replaces' in p ? (p.replaces ?? null) : null
+        baseProposal.replacedBy = 'replacedBy' in p ? (p.replacedBy ?? null) : null
 
         // executableFrom and expiresAt will always either be both defined, or neither defined
         if (executableFrom && expiresAt) {
