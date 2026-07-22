@@ -10,7 +10,7 @@ export interface RelayBridgeCalldata {
   }
 }
 
-const TESTNET_CHAIN_IDS = [11155111, 84532, 11155420, 999999999, 31337]
+const TESTNET_CHAIN_IDS = [11155111, 84532, 11155420, 31337]
 
 export async function getRelayBridgeCalldata({
   originChainId,
