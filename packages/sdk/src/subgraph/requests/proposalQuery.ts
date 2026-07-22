@@ -1,15 +1,18 @@
+import { supportsUpdatableProposals } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 
 import { getProposalState, ProposalState } from '../../contract/requests/getProposalState'
 import { SDK } from '../client'
 import {
   ProposalDetailFragment,
+  ProposalDetailUpdatableFragment,
   ProposalFragment,
+  ProposalUpdatableFragment,
   ProposalVoteFragment as ProposalVote,
 } from '../sdk.generated'
 
 export type Proposal = Omit<
-  ProposalDetailFragment,
+  ProposalDetailFragment | ProposalDetailUpdatableFragment,
   | 'transactionHash'
   | 'executionTransactionHash'
   | 'cancelTransactionHash'
@@ -21,6 +24,11 @@ export type Proposal = Omit<
   | 'executedAt'
   | 'proposer'
   | 'updatePeriodEnd'
+  | 'updateMessage'
+  | 'updateCount'
+  | 'candidateVersion'
+  | 'replaces'
+  | 'replacedBy'
 > & {
   proposer: string
   values: string[]
@@ -33,24 +41,27 @@ export type Proposal = Omit<
   executableFrom?: number
   expiresAt?: number
   executedAt?: number
-  updatePeriodEnd?: number
+  updatePeriodEnd?: number | null
+  updateMessage?: string | null
+  updateCount?: number | null
+  candidateVersion?: ProposalDetailUpdatableFragment['candidateVersion'] | null
+  replaces?: ProposalDetailUpdatableFragment['replaces'] | null
+  replacedBy?: ProposalDetailUpdatableFragment['replacedBy'] | null
   votes?: ProposalVote[]
 }
 
 export const formatAndFetchState = async (
   chainId: CHAIN_ID,
-  data: ProposalFragment | ProposalDetailFragment
+  data:
+    | ProposalFragment
+    | ProposalDetailFragment
+    | ProposalUpdatableFragment
+    | ProposalDetailUpdatableFragment
 ) => {
-  const {
-    executableFrom,
-    expiresAt,
-    calldatas,
-    executionTransactionHash,
-    updatePeriodEnd,
-    ...proposal
-  } = data
+  const { executableFrom, expiresAt, calldatas, executionTransactionHash, ...proposal } =
+    data
 
-  const baseProposal = {
+  const baseProposal: any = {
     ...proposal,
     calldatas: calldatas ? calldatas.split(':') : [],
     state: await getProposalState(
@@ -58,8 +69,20 @@ export const formatAndFetchState = async (
       proposal.dao.governorAddress,
       proposal.proposalId
     ),
-    updatePeriodEnd: updatePeriodEnd ? Number(updatePeriodEnd) : undefined,
   }
+
+  // Add updatable proposal fields (v0.1.17+) with explicit defaults (null, not undefined)
+  baseProposal.updatePeriodEnd =
+    'updatePeriodEnd' in data && data.updatePeriodEnd
+      ? Number(data.updatePeriodEnd)
+      : null
+  baseProposal.updateMessage =
+    'updateMessage' in data ? (data.updateMessage ?? null) : null
+  baseProposal.updateCount = 'updateCount' in data ? (data.updateCount ?? null) : null
+  baseProposal.candidateVersion =
+    'candidateVersion' in data ? (data.candidateVersion ?? null) : null
+  baseProposal.replaces = 'replaces' in data ? (data.replaces ?? null) : null
+  baseProposal.replacedBy = 'replacedBy' in data ? (data.replacedBy ?? null) : null
 
   // executableFrom and expiresAt will always either be both defined, or neither defined
   if (executableFrom && expiresAt) {
@@ -78,9 +101,10 @@ export const getProposal = async (
   proposalId: string
 ): Promise<Proposal | undefined> => {
   try {
-    const data = await SDK.connect(chainId).proposal({
-      proposalId: proposalId.toLowerCase(),
-    })
+    const sdk = SDK.connect(chainId)
+    const data = supportsUpdatableProposals(chainId)
+      ? await sdk.proposalUpdatable({ proposalId: proposalId.toLowerCase() })
+      : await sdk.proposal({ proposalId: proposalId.toLowerCase() })
 
     return await formatAndFetchState(chainId, data.proposal!)
   } catch (e) {

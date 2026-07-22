@@ -1,18 +1,33 @@
+import { supportsUpdatableProposals } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 
 import { getProposalState, ProposalState } from '../../contract/requests/getProposalState'
 import { SDK } from '../client'
-import { ProposalFragment } from '../sdk.generated'
+import { ProposalFragment, ProposalUpdatableFragment } from '../sdk.generated'
 
 export type ProposalVersion = Omit<
-  ProposalFragment,
-  'calldatas' | 'values' | 'proposer' | 'transactionHash' | 'updatePeriodEnd'
+  ProposalFragment | ProposalUpdatableFragment,
+  | 'calldatas'
+  | 'values'
+  | 'proposer'
+  | 'transactionHash'
+  | 'updatePeriodEnd'
+  | 'updateMessage'
+  | 'updateCount'
+  | 'candidateVersion'
+  | 'replaces'
+  | 'replacedBy'
 > & {
   proposer: string
   values: string[]
   calldatas: string[]
   transactionHash: string
-  updatePeriodEnd?: number
+  updatePeriodEnd?: number | null
+  updateMessage?: string | null
+  updateCount?: number | null
+  candidateVersion?: ProposalUpdatableFragment['candidateVersion'] | null
+  replaces?: ProposalUpdatableFragment['replaces'] | null
+  replacedBy?: ProposalUpdatableFragment['replacedBy'] | null
   state: ProposalState
 }
 
@@ -22,16 +37,24 @@ export const getProposalVersions = async (
   proposalNumber: number
 ): Promise<ProposalVersion[]> => {
   try {
-    const data = await SDK.connect(chainId).proposalVersions({
-      where: {
-        dao: daoAddress.toLowerCase(),
-        proposalNumber: proposalNumber,
-      },
-    })
+    const sdk = SDK.connect(chainId)
+    const data = supportsUpdatableProposals(chainId)
+      ? await sdk.proposalVersionsUpdatable({
+          where: {
+            dao: daoAddress.toLowerCase(),
+            proposalNumber: proposalNumber,
+          },
+        })
+      : await sdk.proposalVersions({
+          where: {
+            dao: daoAddress.toLowerCase(),
+            proposalNumber: proposalNumber,
+          },
+        })
 
     const versions = await Promise.all(
       data?.proposals.map(async (p) => {
-        const { calldatas, updatePeriodEnd, ...proposal } = p
+        const { calldatas, ...proposal } = p
 
         // Get state for each version
         const state = await getProposalState(
@@ -40,12 +63,23 @@ export const getProposalVersions = async (
           proposal.proposalId
         )
 
-        return {
+        const version: any = {
           ...proposal,
           calldatas: calldatas ? calldatas.split(':') : [],
-          updatePeriodEnd: updatePeriodEnd ? Number(updatePeriodEnd) : undefined,
           state,
         }
+
+        // Add updatable proposal fields (v0.1.17+) with explicit defaults (null, not undefined)
+        version.updatePeriodEnd =
+          'updatePeriodEnd' in p && p.updatePeriodEnd ? Number(p.updatePeriodEnd) : null
+        version.updateMessage = 'updateMessage' in p ? (p.updateMessage ?? null) : null
+        version.updateCount = 'updateCount' in p ? (p.updateCount ?? null) : null
+        version.candidateVersion =
+          'candidateVersion' in p ? (p.candidateVersion ?? null) : null
+        version.replaces = 'replaces' in p ? (p.replaces ?? null) : null
+        version.replacedBy = 'replacedBy' in p ? (p.replacedBy ?? null) : null
+
+        return version
       }) || []
     )
 

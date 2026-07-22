@@ -1,0 +1,28 @@
+fragment ProposalUpdatable on Proposal {
+  ...Proposal
+  updatePeriodEnd
+  updateMessage
+  updateCount
+  candidateVersion {
+    candidateId
+    proposalHash
+    attestationUID
+    proposal {
+      id
+      proposalId
+      proposalNumber
+    }
+    versionNumber
+    group {
+      candidateNumber
+    }
+  }
+  replaces {
+    proposalId
+    proposalNumber
+  }
+  replacedBy {
+    proposalId
+    proposalNumber
+  }
+}

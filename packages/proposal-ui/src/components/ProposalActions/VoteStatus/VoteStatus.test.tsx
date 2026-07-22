@@ -67,6 +67,7 @@ describe('VoteStatus', () => {
             reason: 'FOR',
             support: Support.For,
             weight: 3,
+            timestamp: 1630000100,
           }}
           votesAvailable={1}
           proposalId={'0x12'}
@@ -91,6 +92,7 @@ describe('VoteStatus', () => {
             reason: '',
             support: Support.Against,
             weight: 5,
+            timestamp: 1630000100,
           }}
           votesAvailable={1}
           proposalId={'0x12'}
@@ -115,6 +117,7 @@ describe('VoteStatus', () => {
             reason: '',
             support: Support.Abstain,
             weight: 5,
+            timestamp: 1630000100,
           }}
           votesAvailable={1}
           proposalId={'0x12'}
