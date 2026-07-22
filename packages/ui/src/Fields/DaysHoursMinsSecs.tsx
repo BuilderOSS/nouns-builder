@@ -23,6 +23,7 @@ interface DaysHoursMinsProps {
   helperText?: string
   tooltip?: string
   disabled?: boolean
+  marginBottom?: string
 }
 
 const helperVariants = {
@@ -84,6 +85,7 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
   helperText,
   onBlur,
   disabled = false,
+  marginBottom = 'x8',
 }) => {
   const { days, hours, minutes, seconds } = value
   const handleChange = (e: any, type: string) => {
@@ -157,7 +159,11 @@ const DaysHoursMinsSecs: React.FC<DaysHoursMinsProps> = ({
   }
 
   return (
-    <Flex direction={'column'} mb={'x8'} style={disabled ? { opacity: 0.5 } : undefined}>
+    <Flex
+      direction={'column'}
+      mb={marginBottom}
+      style={disabled ? { opacity: 0.5 } : undefined}
+    >
       <Flex
         align={'center'}
         justify={'flex-start'}

@@ -1,14 +1,25 @@
 import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import { useManagerVersion } from '@buildeross/hooks'
 import { AddressType } from '@buildeross/types'
-import { SmartInput } from '@buildeross/ui/Fields'
+import { DaysHoursMinsSecs, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Button, Flex, Heading, Input, Label, Stack, Text } from '@buildeross/zord'
-import { useMemo, useState } from 'react'
+import { Form, Formik, FormikHelpers } from 'formik'
+import { useMemo } from 'react'
 import { getAddress, isAddress } from 'viem'
 import { useAccount } from 'wagmi'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
+import {
+  bigIntSecondsToTimeStructure,
+  numberSecondsToTimeStructure,
+  timeStructureToBigIntSeconds,
+  timeStructureToNumberSeconds,
+} from '../../../utils/timeConversions'
+import {
+  Step2ConfigFormValues,
+  step2ConfigValidationSchema,
+} from './Step2_ReviewConfig.schema'
 
 // Helper to safely stringify objects containing BigInt values
 const stringifyWithBigInt = (obj: any): string => {
@@ -28,9 +39,6 @@ export const Step2_ReviewConfig: React.FC = () => {
   } = useCrossChainMigration()
   const { address: walletAddress } = useAccount()
 
-  const [localConfig, setLocalConfig] = useState(editedConfig || sourceConfig)
-  const [errors, setErrors] = useState<Record<string, string>>({})
-
   // Check if target Manager contract supports v3 features
   const managerAddress = targetChainId ? PUBLIC_MANAGER_ADDRESS[targetChainId] : undefined
   const { isV3OrHigher } = useManagerVersion({
@@ -38,167 +46,123 @@ export const Step2_ReviewConfig: React.FC = () => {
     managerAddress: managerAddress || '0x0000000000000000000000000000000000000000',
   })
 
-  // Detect if config has changed (BigInt-safe comparison)
-  const hasChanges = useMemo(() => {
-    if (!localConfig || !sourceConfig) return false
-    return stringifyWithBigInt(localConfig) !== stringifyWithBigInt(sourceConfig)
-  }, [localConfig, sourceConfig])
-
-  const validateConfig = () => {
-    const newErrors: Record<string, string> = {}
-
-    if (!localConfig) return false
-
-    if (!localConfig.name || localConfig.name.trim().length === 0) {
-      newErrors.name = 'DAO name is required'
-    }
-
-    if (!localConfig.symbol || localConfig.symbol.trim().length === 0) {
-      newErrors.symbol = 'Token symbol is required'
-    }
-
-    if (
-      localConfig.reservedUntilTokenId !== undefined &&
-      localConfig.reservedUntilTokenId < 0n
-    ) {
-      newErrors.reservedUntilTokenId = 'Reserved tokens must be non-negative'
-    }
-
-    // Ensure at least one founder exists
-    if (!localConfig.founders || localConfig.founders.length === 0) {
-      newErrors.founders = 'At least one founder is required'
-    }
-
-    if (localConfig.founders && localConfig.founders.length > 0) {
-      // Validate that first founder is the current wallet
-      if (walletAddress && localConfig.founders[0]) {
-        if (
-          localConfig.founders[0].wallet.toLowerCase() !== walletAddress.toLowerCase()
-        ) {
-          newErrors.founders = 'First founder must be your connected wallet address'
-          newErrors.founder_0_wallet = 'This must be your wallet address'
-        }
-      }
-
-      // Check for duplicates
-      const walletAddresses = localConfig.founders.map((f) => f.wallet.toLowerCase())
-      const duplicates = walletAddresses.filter(
-        (addr, idx) => walletAddresses.indexOf(addr) !== idx
-      )
-      if (duplicates.length > 0) {
-        newErrors.founders = 'Duplicate founder addresses are not allowed'
-      }
-
-      localConfig.founders.forEach((founder, idx) => {
-        if (!isAddress(founder.wallet)) {
-          newErrors[`founder_${idx}_wallet`] = 'Invalid wallet address'
-        }
-        if (founder.ownershipPct < 0 || founder.ownershipPct > 100) {
-          newErrors[`founder_${idx}_pct`] = 'Ownership must be between 0-100'
-        }
-      })
-    }
-
-    // Validate proposalUpdatablePeriod if present (v3+ deployments)
-    if (isV3OrHigher && localConfig.proposalUpdatablePeriod !== undefined) {
-      const updatablePeriod = localConfig.proposalUpdatablePeriod
-      const votingPeriod = localConfig.votingPeriod
-
-      if (updatablePeriod < 0n) {
-        newErrors.proposalUpdatablePeriod =
-          'Proposal updatable period must be non-negative'
-      }
-
-      if (votingPeriod && updatablePeriod > votingPeriod) {
-        newErrors.proposalUpdatablePeriod =
-          'Proposal updatable period must be less than or equal to voting period'
+  // Convert source config to form values
+  const initialValues: Step2ConfigFormValues = useMemo(() => {
+    const config = editedConfig || sourceConfig
+    if (!config) {
+      return {
+        name: '',
+        symbol: '',
+        reservedUntilTokenId: 0n,
+        founders: [],
+        reservePrice: 0n,
+        auctionDuration: { days: 0, hours: 0, minutes: 0, seconds: 0 },
+        proposalThresholdBps: 0n,
+        quorumThresholdBps: 0n,
+        votingDelay: { days: 0, hours: 0, minutes: 0, seconds: 0 },
+        votingPeriod: { days: 0, hours: 0, minutes: 0, seconds: 0 },
+        proposalUpdatablePeriod: { days: 0, hours: 0, minutes: 0, seconds: 0 },
       }
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    return {
+      name: config.name ?? '',
+      symbol: config.symbol ?? '',
+      reservedUntilTokenId: config.reservedUntilTokenId ?? 0n,
+      founders: config.founders ?? [],
+      reservePrice: config.reservePrice ?? 0n,
+      auctionDuration: numberSecondsToTimeStructure(Number(config.duration ?? 0)),
+      proposalThresholdBps: config.proposalThresholdBps ?? 0n,
+      quorumThresholdBps: config.quorumThresholdBps ?? 0n,
+      votingDelay: bigIntSecondsToTimeStructure(
+        typeof config.votingDelay === 'bigint' ? config.votingDelay : 0n
+      ),
+      votingPeriod: bigIntSecondsToTimeStructure(
+        typeof config.votingPeriod === 'bigint' ? config.votingPeriod : 0n
+      ),
+      proposalUpdatablePeriod: bigIntSecondsToTimeStructure(
+        typeof config.proposalUpdatablePeriod === 'bigint'
+          ? config.proposalUpdatablePeriod
+          : 0n
+      ),
+    }
+  }, [sourceConfig, editedConfig])
 
-  const handleContinue = async () => {
-    if (!validateConfig() || !localConfig) return
-
-    // Resolve any ENS names to addresses before proceeding
-    if (localConfig.founders && localConfig.founders.length > 0) {
-      try {
-        const resolvedFounders = await Promise.all(
-          localConfig.founders.map(async (founder, idx) => {
-            // Resolve ENS name if needed
-            try {
-              const resolved = await getEnsAddress(founder.wallet)
-
-              // Validate that the resolved value is actually a valid address
-              if (!resolved || !isAddress(resolved, { strict: false })) {
-                setErrors({
-                  [`founder_${idx}_wallet`]: 'Could not resolve address',
-                })
-                throw new Error(`Could not resolve address for founder ${idx + 1}`)
-              }
-
-              return {
-                ...founder,
-                wallet: getAddress(resolved) as AddressType,
-              }
-            } catch (error) {
-              console.error(`Error resolving founder address ${idx + 1}:`, error)
-              setErrors({
-                [`founder_${idx}_wallet`]: 'Failed to resolve address',
-              })
-              throw error
-            }
-          })
-        )
-
-        const configWithResolvedFounders = {
-          ...localConfig,
-          founders: resolvedFounders,
-        }
-
-        updateConfig(configWithResolvedFounders)
-        goToNextStep()
-      } catch (error) {
-        // Error already handled in setErrors above
-        console.error('Failed to resolve founder addresses:', error)
+  const handleSubmit = async (
+    values: Step2ConfigFormValues,
+    { setFieldError, setSubmitting }: FormikHelpers<Step2ConfigFormValues>
+  ) => {
+    // Additional validation for first founder
+    if (walletAddress && values.founders[0]) {
+      if (values.founders[0].wallet.toLowerCase() !== walletAddress.toLowerCase()) {
+        setFieldError('founders', 'First founder must be your connected wallet address')
+        setSubmitting(false)
         return
       }
-    } else {
-      updateConfig(localConfig)
+    }
+
+    // Check for duplicate founders
+    const walletAddresses = values.founders.map((f) => f.wallet.toLowerCase())
+    const duplicates = walletAddresses.filter(
+      (addr, idx) => walletAddresses.indexOf(addr) !== idx
+    )
+    if (duplicates.length > 0) {
+      setFieldError('founders', 'Duplicate founder addresses are not allowed')
+      setSubmitting(false)
+      return
+    }
+
+    // Resolve any ENS names to addresses before proceeding
+    try {
+      const resolvedFounders = await Promise.all(
+        values.founders.map(async (founder, idx) => {
+          try {
+            const resolved = await getEnsAddress(founder.wallet)
+
+            // Validate that the resolved value is actually a valid address
+            if (!resolved || !isAddress(resolved, { strict: false })) {
+              throw new Error(`Could not resolve address for founder ${idx + 1}`)
+            }
+
+            return {
+              ...founder,
+              wallet: getAddress(resolved) as AddressType,
+            }
+          } catch (error) {
+            console.error(`Error resolving founder address ${idx + 1}:`, error)
+            throw error
+          }
+        })
+      )
+
+      // Convert form values back to config format
+      const configToSave = {
+        ...(editedConfig || sourceConfig)!,
+        name: values.name,
+        symbol: values.symbol,
+        reservedUntilTokenId: values.reservedUntilTokenId,
+        founders: resolvedFounders,
+        reservePrice: values.reservePrice,
+        duration: timeStructureToNumberSeconds(values.auctionDuration),
+        proposalThresholdBps: values.proposalThresholdBps,
+        quorumThresholdBps: values.quorumThresholdBps,
+        votingDelay: timeStructureToBigIntSeconds(values.votingDelay),
+        votingPeriod: timeStructureToBigIntSeconds(values.votingPeriod),
+        proposalUpdatablePeriod: isV3OrHigher
+          ? timeStructureToBigIntSeconds(values.proposalUpdatablePeriod!)
+          : undefined,
+      }
+
+      updateConfig(configToSave)
       goToNextStep()
+    } catch (error) {
+      console.error('Failed to resolve founder addresses:', error)
+      setFieldError('founders', 'Failed to resolve one or more founder addresses')
+      setSubmitting(false)
     }
   }
 
-  const handleReset = () => {
-    setLocalConfig(sourceConfig)
-    setErrors({})
-  }
-
-  const handleAddFounder = () => {
-    if (!localConfig) return
-
-    const oneYearFromNow = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60
-    const newFounder = {
-      wallet: (walletAddress ||
-        '0x0000000000000000000000000000000000000000') as AddressType,
-      ownershipPct: 10,
-      vestExpiry: BigInt(oneYearFromNow),
-    }
-
-    const newFounders = [...(localConfig.founders || []), newFounder]
-    setLocalConfig({ ...localConfig, founders: newFounders })
-  }
-
-  const handleRemoveFounder = (index: number) => {
-    if (!localConfig || !localConfig.founders) return
-
-    const newFounders = localConfig.founders.filter((_, idx) => idx !== index)
-    setLocalConfig({ ...localConfig, founders: newFounders })
-  }
-
-  if (!localConfig || !sourceConfig) {
+  if (!sourceConfig) {
     return (
       <Stack gap="x4">
         <Heading size="md">No Configuration Loaded</Heading>
@@ -208,447 +172,476 @@ export const Step2_ReviewConfig: React.FC = () => {
   }
 
   return (
-    <Stack gap="x6">
-      <Box>
-        <Heading size="md" mb="x2">
-          Step 2: Review & Edit Configuration
-        </Heading>
-        <Text color="text3">
-          Review the configuration loaded from your source DAO. You can make edits before
-          deployment.
-        </Text>
-      </Box>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={step2ConfigValidationSchema(isV3OrHigher)}
+      onSubmit={handleSubmit}
+      enableReinitialize
+    >
+      {(formik) => {
+        const hasChanges =
+          stringifyWithBigInt(formik.values) !== stringifyWithBigInt(initialValues)
 
-      <Stack gap="x4">
-        {/* Basic Token Info */}
-        <Box p="x4" borderRadius="curved" borderColor="border" borderStyle="solid">
-          <Heading size="xs" mb="x4">
-            Token Information
-          </Heading>
-          <Stack gap="x4">
-            <Box>
-              <Label htmlFor="dao-name" mb="x2">
-                DAO Name
-              </Label>
-              <Input
-                id="dao-name"
-                value={localConfig.name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setLocalConfig({ ...localConfig, name: e.target.value })
-                }
-              />
-              {errors.name && (
-                <Text color="negative" fontSize={12} mt="x1">
-                  {errors.name}
+        const handleAddFounder = () => {
+          const oneYearFromNow = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60
+          const newFounder = {
+            wallet: (walletAddress ||
+              '0x0000000000000000000000000000000000000000') as AddressType,
+            ownershipPct: 10,
+            vestExpiry: BigInt(oneYearFromNow),
+          }
+
+          formik.setFieldValue('founders', [...formik.values.founders, newFounder])
+        }
+
+        const handleRemoveFounder = (index: number) => {
+          const newFounders = formik.values.founders.filter((_, idx) => idx !== index)
+          formik.setFieldValue('founders', newFounders)
+        }
+
+        const handleReset = () => {
+          formik.resetForm({ values: initialValues })
+        }
+
+        return (
+          <Form>
+            <Stack gap="x6">
+              <Box>
+                <Heading size="md" mb="x2">
+                  Step 2: Review & Edit Configuration
+                </Heading>
+                <Text color="text3">
+                  Review the configuration loaded from your source DAO. You can make edits
+                  before deployment.
                 </Text>
-              )}
-            </Box>
+              </Box>
 
-            <Box>
-              <Label htmlFor="token-symbol" mb="x2">
-                Token Symbol
-              </Label>
-              <Input
-                id="token-symbol"
-                value={localConfig.symbol}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setLocalConfig({ ...localConfig, symbol: e.target.value })
-                }
-              />
-              {errors.symbol && (
-                <Text color="negative" fontSize={12} mt="x1">
-                  {errors.symbol}
-                </Text>
-              )}
-            </Box>
-
-            <Box>
-              <Label htmlFor="reserved-tokens" mb="x2">
-                Reserved Tokens (0 to this ID)
-              </Label>
-              <Input
-                id="reserved-tokens"
-                type="number"
-                value={localConfig.reservedUntilTokenId?.toString() || '0'}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setLocalConfig({
-                    ...localConfig,
-                    reservedUntilTokenId: BigInt(e.target.value || '0'),
-                  })
-                }
-              />
-              {errors.reservedUntilTokenId && (
-                <Text color="negative" fontSize={12} mt="x1">
-                  {errors.reservedUntilTokenId}
-                </Text>
-              )}
-              <Text color="text4" fontSize={12} mt="x2">
-                Tokens 0-
-                {(localConfig.reservedUntilTokenId
-                  ? localConfig.reservedUntilTokenId - 1n
-                  : 0n
-                ).toString()}{' '}
-                will be reserved for merkle minting
-              </Text>
-            </Box>
-          </Stack>
-        </Box>
-
-        {/* Founders */}
-        <Box p="x4" borderRadius="curved" borderColor="border" borderStyle="solid">
-          <Flex justify="space-between" align="center" mb="x4">
-            <Heading size="xs">Founders ({localConfig.founders?.length || 0})</Heading>
-            <Button size="sm" variant="secondary" onClick={handleAddFounder}>
-              Add Founder
-            </Button>
-          </Flex>
-
-          {/* Info banner about first founder requirement */}
-          <Box p="x3" borderRadius="curved" backgroundColor="accent" mb="x4">
-            <Text fontSize={14} color="background1">
-              ℹ️ Your wallet must be the first founder to execute this migration. You can
-              edit ownership % and vest expiry, but cannot change or remove this founder.
-            </Text>
-          </Box>
-
-          {errors.founders && (
-            <Text color="negative" fontSize={12} mb="x3">
-              {errors.founders}
-            </Text>
-          )}
-          {localConfig.founders && localConfig.founders.length > 0 ? (
-            <Stack gap="x4">
-              {localConfig.founders.map((founder, idx) => (
+              <Stack gap="x4">
+                {/* Basic Token Info */}
                 <Box
-                  key={idx}
-                  p="x3"
+                  p="x4"
                   borderRadius="curved"
                   borderColor="border"
                   borderStyle="solid"
-                  backgroundColor={idx === 0 ? 'background2' : undefined}
                 >
-                  <Flex justify="space-between" align="center" mb="x2">
-                    <Text fontSize={12} color="text3">
-                      Founder {idx + 1} {idx === 0 && '(You)'}
-                    </Text>
-                    {idx > 0 && (
-                      <Button
-                        size="xs"
-                        variant="ghost"
-                        onClick={() => handleRemoveFounder(idx)}
-                        style={{ color: 'var(--color-negative)' }}
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </Flex>
-                  <Stack gap="x3">
+                  <Heading size="xs" mb="x4">
+                    Token Information
+                  </Heading>
+                  <Stack gap="x4">
                     <Box>
-                      <SmartInput
-                        inputLabel="Wallet Address"
-                        id={`founder-${idx}-wallet`}
-                        value={founder.wallet}
-                        type="text"
-                        placeholder="0x... or .eth"
-                        isAddress={true}
-                        disabled={idx === 0}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          const newFounders = [...localConfig.founders!]
-                          newFounders[idx] = {
-                            ...founder,
-                            wallet: e.target.value as AddressType,
-                          }
-                          setLocalConfig({ ...localConfig, founders: newFounders })
-                        }}
-                        errorMessage={errors[`founder_${idx}_wallet`]}
+                      <Label htmlFor="name" mb="x2">
+                        DAO Name
+                      </Label>
+                      <Input
+                        id="name"
+                        name="name"
+                        value={formik.values.name}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
                       />
+                      {formik.touched.name && formik.errors.name && (
+                        <Text color="negative" fontSize={12} mt="x1">
+                          {formik.errors.name}
+                        </Text>
+                      )}
                     </Box>
-                    <Flex gap="x3">
-                      <Box flex={1}>
-                        <Label htmlFor={`founder-${idx}-pct`} mb="x1" fontSize={12}>
-                          Ownership %
-                        </Label>
-                        <Input
-                          id={`founder-${idx}-pct`}
-                          type="number"
-                          min={0}
-                          max={100}
-                          value={founder.ownershipPct}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            const newFounders = [...localConfig.founders!]
-                            newFounders[idx] = {
-                              ...founder,
-                              ownershipPct: Number(e.target.value),
-                            }
-                            setLocalConfig({ ...localConfig, founders: newFounders })
-                          }}
-                        />
-                        {errors[`founder_${idx}_pct`] && (
+
+                    <Box>
+                      <Label htmlFor="symbol" mb="x2">
+                        Token Symbol
+                      </Label>
+                      <Input
+                        id="symbol"
+                        name="symbol"
+                        value={formik.values.symbol}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                      />
+                      {formik.touched.symbol && formik.errors.symbol && (
+                        <Text color="negative" fontSize={12} mt="x1">
+                          {formik.errors.symbol}
+                        </Text>
+                      )}
+                    </Box>
+
+                    <Box>
+                      <Label htmlFor="reservedUntilTokenId" mb="x2">
+                        Reserved Tokens (0 to this ID)
+                      </Label>
+                      <Input
+                        id="reservedUntilTokenId"
+                        name="reservedUntilTokenId"
+                        type="number"
+                        value={formik.values.reservedUntilTokenId?.toString() || '0'}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          formik.setFieldValue(
+                            'reservedUntilTokenId',
+                            BigInt(Math.floor(Number(e.target.value || '0')))
+                          )
+                        }
+                        onBlur={formik.handleBlur}
+                      />
+                      {formik.touched.reservedUntilTokenId &&
+                        formik.errors.reservedUntilTokenId && (
                           <Text color="negative" fontSize={12} mt="x1">
-                            {errors[`founder_${idx}_pct`]}
+                            {formik.errors.reservedUntilTokenId as string}
                           </Text>
                         )}
-                      </Box>
-                      <Box flex={1}>
-                        <Label
-                          htmlFor={`founder-${idx}-vestExpiry`}
-                          mb="x1"
-                          fontSize={12}
-                        >
-                          Vesting End Date
-                        </Label>
-                        <Input
-                          id={`founder-${idx}-vestExpiry`}
-                          type="date"
-                          value={
-                            founder.vestExpiry > 0n
-                              ? new Date(Number(founder.vestExpiry) * 1000)
-                                  .toISOString()
-                                  .split('T')[0]
-                              : ''
-                          }
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                            const newFounders = [...localConfig.founders!]
-                            newFounders[idx] = {
-                              ...founder,
-                              vestExpiry: e.target.value
-                                ? BigInt(
-                                    Math.floor(new Date(e.target.value).getTime() / 1000)
-                                  )
-                                : 0n,
-                            }
-                            setLocalConfig({ ...localConfig, founders: newFounders })
-                          }}
-                        />
-                        {founder.vestExpiry > 0n &&
-                          Number(founder.vestExpiry) < Date.now() / 1000 && (
-                            <Text color="warning" fontSize={12} mt="x1">
-                              ⚠️ Vesting has already completed on source DAO
-                            </Text>
-                          )}
-                      </Box>
-                    </Flex>
+                      <Text color="text4" fontSize={12} mt="x2">
+                        Tokens 0-
+                        {(formik.values.reservedUntilTokenId
+                          ? formik.values.reservedUntilTokenId - 1n
+                          : 0n
+                        ).toString()}{' '}
+                        will be reserved for merkle minting
+                      </Text>
+                    </Box>
                   </Stack>
                 </Box>
-              ))}
-            </Stack>
-          ) : (
-            <Text color="text3" fontSize={14}>
-              No founders configured. Click "Add Founder" to add one.
-            </Text>
-          )}
-        </Box>
 
-        {/* Auction Parameters */}
-        <Box p="x4" borderRadius="curved" borderColor="border" borderStyle="solid">
-          <Heading size="xs" mb="x4">
-            Auction Settings
-          </Heading>
-          <Stack gap="x4">
-            <Flex gap="x4">
-              <Box flex={1}>
-                <Label htmlFor="reserve-price" mb="x2">
-                  Reserve Price (ETH)
-                </Label>
-                <Input
-                  id="reserve-price"
-                  type="number"
-                  step="0.0001"
-                  value={(Number(localConfig.reservePrice) / 1e18).toString()}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setLocalConfig({
-                      ...localConfig,
-                      reservePrice: BigInt(Math.floor(Number(e.target.value) * 1e18)),
-                    })
-                  }
-                />
-              </Box>
-              <Box flex={1}>
-                <Label htmlFor="duration" mb="x2">
-                  Duration (seconds)
-                </Label>
-                <Input
-                  id="duration"
-                  type="number"
-                  value={localConfig.duration?.toString() || '0'}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setLocalConfig({
-                      ...localConfig,
-                      duration: Number(e.target.value || 0),
-                    })
-                  }
-                />
-              </Box>
-            </Flex>
-          </Stack>
-        </Box>
+                {/* Founders */}
+                <Box
+                  p="x4"
+                  borderRadius="curved"
+                  borderColor="border"
+                  borderStyle="solid"
+                >
+                  <Flex justify="space-between" align="center" mb="x4">
+                    <Heading size="xs">
+                      Founders ({formik.values.founders?.length || 0})
+                    </Heading>
+                    <Button size="sm" variant="secondary" onClick={handleAddFounder}>
+                      Add Founder
+                    </Button>
+                  </Flex>
 
-        {/* Governance Parameters */}
-        <Box p="x4" borderRadius="curved" borderColor="border" borderStyle="solid">
-          <Heading size="xs" mb="x4">
-            Governance Settings
-          </Heading>
-          <Stack gap="x4">
-            <Flex gap="x4">
-              <Box flex={1}>
-                <Label htmlFor="proposal-threshold" mb="x2">
-                  Proposal Threshold (%)
-                </Label>
-                <Input
-                  id="proposal-threshold"
-                  type="number"
-                  step="0.1"
-                  value={(Number(localConfig.proposalThresholdBps) / 100).toFixed(2)}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setLocalConfig({
-                      ...localConfig,
-                      proposalThresholdBps: BigInt(
-                        Math.round(parseFloat(e.target.value || '0') * 100)
-                      ),
-                    })
-                  }
-                />
-                <Text color="text4" fontSize={12} mt="x1">
-                  Minimum % of total NFTs required to create a proposal
-                </Text>
-              </Box>
-              <Box flex={1}>
-                <Label htmlFor="quorum-threshold" mb="x2">
-                  Quorum Threshold (%)
-                </Label>
-                <Input
-                  id="quorum-threshold"
-                  type="number"
-                  step="1"
-                  value={(Number(localConfig.quorumThresholdBps) / 100).toFixed(2)}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setLocalConfig({
-                      ...localConfig,
-                      quorumThresholdBps: BigInt(
-                        Math.round(parseFloat(e.target.value || '0') * 100)
-                      ),
-                    })
-                  }
-                />
-                <Text color="text4" fontSize={12} mt="x1">
-                  Minimum % of total NFTs that must vote 'For' to pass
-                </Text>
-              </Box>
-            </Flex>
+                  {/* Info banner about first founder requirement */}
+                  <Box p="x3" borderRadius="curved" backgroundColor="accent" mb="x4">
+                    <Text fontSize={14} color="background1">
+                      ℹ️ Your wallet must be the first founder to execute this migration.
+                      You can edit ownership % and vest expiry, but cannot change or
+                      remove this founder.
+                    </Text>
+                  </Box>
 
-            {isV3OrHigher && (
-              <Box>
-                <Label htmlFor="proposal-updatable-period" mb="x2">
-                  Updatable Period (days)
-                </Label>
-                <Input
-                  id="proposal-updatable-period"
-                  type="number"
-                  step="0.1"
-                  value={Number(
-                    (localConfig.proposalUpdatablePeriod || 0n) / 86400n
-                  ).toFixed(2)}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setLocalConfig({
-                      ...localConfig,
-                      proposalUpdatablePeriod: BigInt(
-                        Math.round(parseFloat(e.target.value || '0') * 86400)
-                      ),
-                    })
-                  }
-                />
-                <Text color="text4" fontSize={12} mt="x1">
-                  {Number(localConfig.proposalUpdatablePeriod || 0n).toLocaleString()}{' '}
-                  seconds - Period during which proposers can edit proposals after
-                  creation. Can be 0 to disable.
-                </Text>
-                {errors.proposalUpdatablePeriod && (
-                  <Text color="negative" fontSize={12} mt="x1">
-                    {errors.proposalUpdatablePeriod}
-                  </Text>
+                  {formik.errors.founders &&
+                    typeof formik.errors.founders === 'string' && (
+                      <Text color="negative" fontSize={12} mb="x3">
+                        {formik.errors.founders}
+                      </Text>
+                    )}
+                  {formik.values.founders && formik.values.founders.length > 0 ? (
+                    <Stack gap="x4">
+                      {formik.values.founders.map((founder, idx) => (
+                        <Box
+                          key={idx}
+                          p="x3"
+                          borderRadius="curved"
+                          borderColor="border"
+                          borderStyle="solid"
+                          backgroundColor={idx === 0 ? 'background2' : undefined}
+                        >
+                          <Flex justify="space-between" align="center" mb="x2">
+                            <Text fontSize={12} color="text3">
+                              Founder {idx + 1} {idx === 0 && '(You)'}
+                            </Text>
+                            {idx > 0 && (
+                              <Button
+                                size="xs"
+                                variant="ghost"
+                                onClick={() => handleRemoveFounder(idx)}
+                                style={{ color: 'var(--color-negative)' }}
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </Flex>
+                          <Stack gap="x3">
+                            <Box>
+                              <SmartInput
+                                inputLabel="Wallet Address"
+                                id={`founders.${idx}.wallet`}
+                                value={founder.wallet}
+                                type="text"
+                                placeholder="0x... or .eth"
+                                isAddress={true}
+                                disabled={idx === 0}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                  formik.setFieldValue(
+                                    `founders.${idx}.wallet`,
+                                    e.target.value as AddressType
+                                  )
+                                }}
+                                errorMessage={
+                                  formik.touched.founders?.[idx]?.wallet &&
+                                  formik.errors.founders?.[idx]
+                                    ? // @ts-ignore
+                                      formik.errors.founders[idx].wallet
+                                    : undefined
+                                }
+                              />
+                            </Box>
+                            <Flex gap="x3">
+                              <Box flex={1}>
+                                <Label
+                                  htmlFor={`founders.${idx}.ownershipPct`}
+                                  mb="x1"
+                                  fontSize={12}
+                                >
+                                  Ownership %
+                                </Label>
+                                <Input
+                                  id={`founders.${idx}.ownershipPct`}
+                                  name={`founders.${idx}.ownershipPct`}
+                                  type="number"
+                                  min={0}
+                                  max={100}
+                                  value={founder.ownershipPct}
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    formik.setFieldValue(
+                                      `founders.${idx}.ownershipPct`,
+                                      Number(e.target.value)
+                                    )
+                                  }}
+                                  onBlur={formik.handleBlur}
+                                />
+                                {formik.touched.founders?.[idx]?.ownershipPct &&
+                                  formik.errors.founders?.[idx] && (
+                                    <Text color="negative" fontSize={12} mt="x1">
+                                      {/* @ts-ignore */}
+                                      {formik.errors.founders[idx].ownershipPct}
+                                    </Text>
+                                  )}
+                              </Box>
+                              <Box flex={1}>
+                                <Label
+                                  htmlFor={`founders.${idx}.vestExpiry`}
+                                  mb="x1"
+                                  fontSize={12}
+                                >
+                                  Vesting End Date
+                                </Label>
+                                <Input
+                                  id={`founders.${idx}.vestExpiry`}
+                                  name={`founders.${idx}.vestExpiry`}
+                                  type="date"
+                                  value={
+                                    founder.vestExpiry > 0n
+                                      ? new Date(Number(founder.vestExpiry) * 1000)
+                                          .toISOString()
+                                          .split('T')[0]
+                                      : ''
+                                  }
+                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                    formik.setFieldValue(
+                                      `founders.${idx}.vestExpiry`,
+                                      e.target.value
+                                        ? BigInt(
+                                            Math.floor(
+                                              new Date(e.target.value).getTime() / 1000
+                                            )
+                                          )
+                                        : 0n
+                                    )
+                                  }}
+                                  onBlur={formik.handleBlur}
+                                />
+                                {founder.vestExpiry > 0n &&
+                                  Number(founder.vestExpiry) < Date.now() / 1000 && (
+                                    <Text color="warning" fontSize={12} mt="x1">
+                                      ⚠️ Vesting has already completed on source DAO
+                                    </Text>
+                                  )}
+                              </Box>
+                            </Flex>
+                          </Stack>
+                        </Box>
+                      ))}
+                    </Stack>
+                  ) : (
+                    <Text color="text3" fontSize={14}>
+                      No founders configured. Click "Add Founder" to add one.
+                    </Text>
+                  )}
+                </Box>
+
+                {/* Auction Parameters */}
+                <Box
+                  p="x4"
+                  borderRadius="curved"
+                  borderColor="border"
+                  borderStyle="solid"
+                >
+                  <Heading size="xs" mb="x4">
+                    Auction Settings
+                  </Heading>
+                  <Stack gap="x4">
+                    <Box>
+                      <Label htmlFor="reservePrice" mb="x2">
+                        Reserve Price (ETH)
+                      </Label>
+                      <Input
+                        id="reservePrice"
+                        name="reservePrice"
+                        type="number"
+                        step="0.0001"
+                        value={(Number(formik.values.reservePrice) / 1e18).toString()}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          formik.setFieldValue(
+                            'reservePrice',
+                            BigInt(Math.floor(Number(e.target.value) * 1e18))
+                          )
+                        }
+                        onBlur={formik.handleBlur}
+                      />
+                    </Box>
+
+                    <DaysHoursMinsSecs
+                      id="auctionDuration"
+                      value={formik.values.auctionDuration}
+                      inputLabel="Auction Duration"
+                      onChange={() => {}}
+                      formik={formik}
+                      errorMessage={formik.errors.auctionDuration}
+                      helperText="How long each NFT auction will run"
+                      marginBottom="x4"
+                    />
+                  </Stack>
+                </Box>
+
+                {/* Governance Parameters */}
+                <Box
+                  p="x4"
+                  borderRadius="curved"
+                  borderColor="border"
+                  borderStyle="solid"
+                >
+                  <Heading size="xs" mb="x4">
+                    Governance Settings
+                  </Heading>
+                  <Stack gap="x4">
+                    <Flex gap="x4">
+                      <Box flex={1}>
+                        <Label htmlFor="proposalThresholdBps" mb="x2">
+                          Proposal Threshold (%)
+                        </Label>
+                        <Input
+                          id="proposalThresholdBps"
+                          name="proposalThresholdBps"
+                          type="number"
+                          step="0.1"
+                          value={(
+                            Number(formik.values.proposalThresholdBps) / 100
+                          ).toFixed(2)}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            formik.setFieldValue(
+                              'proposalThresholdBps',
+                              BigInt(Math.round(parseFloat(e.target.value || '0') * 100))
+                            )
+                          }
+                          onBlur={formik.handleBlur}
+                        />
+                        <Text color="text4" fontSize={12} mt="x1">
+                          Minimum % of total NFTs required to create a proposal
+                        </Text>
+                      </Box>
+                      <Box flex={1}>
+                        <Label htmlFor="quorumThresholdBps" mb="x2">
+                          Quorum Threshold (%)
+                        </Label>
+                        <Input
+                          id="quorumThresholdBps"
+                          name="quorumThresholdBps"
+                          type="number"
+                          step="1"
+                          value={(Number(formik.values.quorumThresholdBps) / 100).toFixed(
+                            2
+                          )}
+                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                            formik.setFieldValue(
+                              'quorumThresholdBps',
+                              BigInt(Math.round(parseFloat(e.target.value || '0') * 100))
+                            )
+                          }
+                          onBlur={formik.handleBlur}
+                        />
+                        <Text color="text4" fontSize={12} mt="x1">
+                          Minimum % of total NFTs that must vote 'For' to pass
+                        </Text>
+                      </Box>
+                    </Flex>
+
+                    {isV3OrHigher && (
+                      <DaysHoursMinsSecs
+                        id="proposalUpdatablePeriod"
+                        value={formik.values.proposalUpdatablePeriod!}
+                        inputLabel="Updatable Period"
+                        onChange={() => {}}
+                        formik={formik}
+                        errorMessage={formik.errors.proposalUpdatablePeriod}
+                        helperText="Period during which proposers can edit proposals after creation. Can be 0 to disable."
+                        marginBottom="x4"
+                      />
+                    )}
+
+                    <DaysHoursMinsSecs
+                      id="votingDelay"
+                      value={formik.values.votingDelay}
+                      inputLabel="Voting Delay"
+                      onChange={() => {}}
+                      formik={formik}
+                      errorMessage={formik.errors.votingDelay}
+                      helperText="Time between proposal creation and voting start"
+                      marginBottom="x4"
+                    />
+
+                    <DaysHoursMinsSecs
+                      id="votingPeriod"
+                      value={formik.values.votingPeriod}
+                      inputLabel="Voting Period"
+                      onChange={() => {}}
+                      formik={formik}
+                      errorMessage={formik.errors.votingPeriod}
+                      helperText="How long a proposal remains open for voting"
+                      marginBottom="x4"
+                    />
+                  </Stack>
+                </Box>
+
+                {/* Changes indicator */}
+                {hasChanges && (
+                  <Box p="x3" borderRadius="curved" backgroundColor="background2">
+                    <Text fontSize={14} color="text1">
+                      ⚠️ You have made changes to the configuration. These will be used
+                      for deployment.
+                    </Text>
+                  </Box>
                 )}
-              </Box>
-            )}
+              </Stack>
 
-            <Flex gap="x4">
-              <Box flex={1}>
-                <Label htmlFor="voting-delay" mb="x2">
-                  Voting Delay (days)
-                </Label>
-                <Input
-                  id="voting-delay"
-                  type="number"
-                  step="0.1"
-                  value={(Number(localConfig.votingDelay) / 86400).toFixed(2)}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setLocalConfig({
-                      ...localConfig,
-                      votingDelay: BigInt(
-                        Math.round(parseFloat(e.target.value || '0') * 86400)
-                      ),
-                    })
-                  }
-                />
-                <Text color="text4" fontSize={12} mt="x1">
-                  {Number(localConfig.votingDelay).toLocaleString()} seconds - Time
-                  between proposal creation and voting start
-                </Text>
-              </Box>
-              <Box flex={1}>
-                <Label htmlFor="voting-period" mb="x2">
-                  Voting Period (days)
-                </Label>
-                <Input
-                  id="voting-period"
-                  type="number"
-                  step="0.1"
-                  value={(Number(localConfig.votingPeriod) / 86400).toFixed(2)}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setLocalConfig({
-                      ...localConfig,
-                      votingPeriod: BigInt(
-                        Math.round(parseFloat(e.target.value || '0') * 86400)
-                      ),
-                    })
-                  }
-                />
-                <Text color="text4" fontSize={12} mt="x1">
-                  {Number(localConfig.votingPeriod).toLocaleString()} seconds - How long a
-                  proposal remains open for voting
-                </Text>
-              </Box>
-            </Flex>
-          </Stack>
-        </Box>
-
-        {/* Changes indicator */}
-        {hasChanges && (
-          <Box p="x3" borderRadius="curved" backgroundColor="background2">
-            <Text fontSize={14} color="onWarning">
-              ⚠️ You have made changes to the configuration. These will be used for
-              deployment.
-            </Text>
-          </Box>
-        )}
-      </Stack>
-
-      <Flex justify="space-between">
-        <Button variant="secondary" onClick={goToPreviousStep}>
-          Back to Chain Selection
-        </Button>
-        <Flex gap="x3">
-          <Button
-            variant="secondary"
-            icon="refresh"
-            iconAlign="left"
-            onClick={handleReset}
-            disabled={!hasChanges}
-          >
-            Reset to Original
-          </Button>
-          <Button onClick={handleContinue}>Continue to Deployment</Button>
-        </Flex>
-      </Flex>
-    </Stack>
+              <Flex justify="space-between">
+                <Button variant="secondary" onClick={goToPreviousStep}>
+                  Back to Chain Selection
+                </Button>
+                <Flex gap="x3">
+                  <Button
+                    variant="secondary"
+                    icon="refresh"
+                    iconAlign="left"
+                    onClick={handleReset}
+                    disabled={!hasChanges}
+                  >
+                    Reset to Original
+                  </Button>
+                  <Button type="submit" disabled={formik.isSubmitting}>
+                    Continue to Deployment
+                  </Button>
+                </Flex>
+              </Flex>
+            </Stack>
+          </Form>
+        )
+      }}
+    </Formik>
   )
 }
