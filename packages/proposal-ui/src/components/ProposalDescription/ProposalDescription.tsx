@@ -348,9 +348,16 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
 
         {showMetadataSections && safeDiscussionUrl && (
           <Section title="Discussion">
-            <a href={safeDiscussionUrl} rel="noreferrer" target="_blank">
-              {safeDiscussionUrl}
-            </a>
+            <Flex width="100%" style={{ minWidth: 0 }}>
+              <a
+                href={safeDiscussionUrl}
+                rel="noreferrer"
+                target="_blank"
+                style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}
+              >
+                {safeDiscussionUrl}
+              </a>
+            </Flex>
           </Section>
         )}
 
