@@ -22,9 +22,11 @@ export interface Step2ConfigFormValues {
   proposalUpdatablePeriod?: TimeStructure
   votingDelay: TimeStructure
   votingPeriod: TimeStructure
+  timelockDelay: TimeStructure
 }
 
 const twentyFourWeeks = 60 * 60 * 24 * 7 * 24
+const fiveMinutes = 60 * 5
 
 export const step2ConfigValidationSchema = (isV3OrHigher: boolean) =>
   Yup.object().shape({
@@ -68,6 +70,10 @@ export const step2ConfigValidationSchema = (isV3OrHigher: boolean) =>
     ),
     votingPeriod: durationValidationSchema(
       { value: 600, description: '10 minutes' },
+      { value: twentyFourWeeks, description: '24 weeks' }
+    ),
+    timelockDelay: durationValidationSchema(
+      { value: fiveMinutes, description: '5 minutes' },
       { value: twentyFourWeeks, description: '24 weeks' }
     ),
     ...(isV3OrHigher && {

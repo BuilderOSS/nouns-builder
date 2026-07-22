@@ -62,6 +62,7 @@ export const Step2_ReviewConfig: React.FC = () => {
         votingDelay: { days: 0, hours: 0, minutes: 0, seconds: 0 },
         votingPeriod: { days: 0, hours: 0, minutes: 0, seconds: 0 },
         proposalUpdatablePeriod: { days: 0, hours: 0, minutes: 0, seconds: 0 },
+        timelockDelay: { days: 0, hours: 0, minutes: 0, seconds: 0 },
       }
     }
 
@@ -84,6 +85,11 @@ export const Step2_ReviewConfig: React.FC = () => {
         typeof config.proposalUpdatablePeriod === 'bigint'
           ? config.proposalUpdatablePeriod
           : 0n
+      ),
+      timelockDelay: bigIntSecondsToTimeStructure(
+        typeof config.timelockDelay === 'bigint' && config.timelockDelay >= 300n
+          ? config.timelockDelay
+          : 300n
       ),
     }
   }, [sourceConfig, editedConfig])
@@ -148,6 +154,7 @@ export const Step2_ReviewConfig: React.FC = () => {
         quorumThresholdBps: values.quorumThresholdBps,
         votingDelay: timeStructureToBigIntSeconds(values.votingDelay),
         votingPeriod: timeStructureToBigIntSeconds(values.votingPeriod),
+        timelockDelay: timeStructureToBigIntSeconds(values.timelockDelay),
         proposalUpdatablePeriod: isV3OrHigher
           ? timeStructureToBigIntSeconds(values.proposalUpdatablePeriod!)
           : undefined,
@@ -603,6 +610,17 @@ export const Step2_ReviewConfig: React.FC = () => {
                       formik={formik}
                       errorMessage={formik.errors.votingPeriod}
                       helperText="How long a proposal remains open for voting"
+                      marginBottom="x4"
+                    />
+
+                    <DaysHoursMinsSecs
+                      id="timelockDelay"
+                      value={formik.values.timelockDelay}
+                      inputLabel="Timelock Delay"
+                      onChange={() => {}}
+                      formik={formik}
+                      errorMessage={formik.errors.timelockDelay}
+                      helperText="Delay between when a passed proposal is queued and when it can be executed"
                       marginBottom="x4"
                     />
                   </Stack>
