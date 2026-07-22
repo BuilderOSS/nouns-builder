@@ -71,13 +71,19 @@ export const Step2_ReviewConfig: React.FC = () => {
       reservedUntilTokenId: config.reservedUntilTokenId ?? 0n,
       founders: config.founders ?? [],
       reservePrice: config.reservePrice ?? 0n,
-      auctionDuration: numberSecondsToTimeStructure(config.duration ?? 0),
+      auctionDuration: numberSecondsToTimeStructure(Number(config.duration ?? 0)),
       proposalThresholdBps: config.proposalThresholdBps ?? 0n,
       quorumThresholdBps: config.quorumThresholdBps ?? 0n,
-      votingDelay: bigIntSecondsToTimeStructure(config.votingDelay ?? 0n),
-      votingPeriod: bigIntSecondsToTimeStructure(config.votingPeriod ?? 0n),
+      votingDelay: bigIntSecondsToTimeStructure(
+        typeof config.votingDelay === 'bigint' ? config.votingDelay : 0n
+      ),
+      votingPeriod: bigIntSecondsToTimeStructure(
+        typeof config.votingPeriod === 'bigint' ? config.votingPeriod : 0n
+      ),
       proposalUpdatablePeriod: bigIntSecondsToTimeStructure(
-        config.proposalUpdatablePeriod ?? 0n
+        typeof config.proposalUpdatablePeriod === 'bigint'
+          ? config.proposalUpdatablePeriod
+          : 0n
       ),
     }
   }, [sourceConfig, editedConfig])
@@ -131,7 +137,7 @@ export const Step2_ReviewConfig: React.FC = () => {
 
       // Convert form values back to config format
       const configToSave = {
-        ...sourceConfig!,
+        ...(editedConfig || sourceConfig)!,
         name: values.name,
         symbol: values.symbol,
         reservedUntilTokenId: values.reservedUntilTokenId,
@@ -270,7 +276,7 @@ export const Step2_ReviewConfig: React.FC = () => {
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                           formik.setFieldValue(
                             'reservedUntilTokenId',
-                            BigInt(e.target.value || '0')
+                            BigInt(Math.floor(Number(e.target.value || '0')))
                           )
                         }
                         onBlur={formik.handleBlur}
@@ -498,6 +504,7 @@ export const Step2_ReviewConfig: React.FC = () => {
                       formik={formik}
                       errorMessage={formik.errors.auctionDuration}
                       helperText="How long each NFT auction will run"
+                      marginBottom="x4"
                     />
                   </Stack>
                 </Box>
@@ -568,11 +575,12 @@ export const Step2_ReviewConfig: React.FC = () => {
                       <DaysHoursMinsSecs
                         id="proposalUpdatablePeriod"
                         value={formik.values.proposalUpdatablePeriod!}
-                        inputLabel="Proposal Updatable Period"
+                        inputLabel="Updatable Period"
                         onChange={() => {}}
                         formik={formik}
                         errorMessage={formik.errors.proposalUpdatablePeriod}
                         helperText="Period during which proposers can edit proposals after creation. Can be 0 to disable."
+                        marginBottom="x4"
                       />
                     )}
 
@@ -584,6 +592,7 @@ export const Step2_ReviewConfig: React.FC = () => {
                       formik={formik}
                       errorMessage={formik.errors.votingDelay}
                       helperText="Time between proposal creation and voting start"
+                      marginBottom="x4"
                     />
 
                     <DaysHoursMinsSecs
@@ -594,6 +603,7 @@ export const Step2_ReviewConfig: React.FC = () => {
                       formik={formik}
                       errorMessage={formik.errors.votingPeriod}
                       helperText="How long a proposal remains open for voting"
+                      marginBottom="x4"
                     />
                   </Stack>
                 </Box>
@@ -601,7 +611,7 @@ export const Step2_ReviewConfig: React.FC = () => {
                 {/* Changes indicator */}
                 {hasChanges && (
                   <Box p="x3" borderRadius="curved" backgroundColor="background2">
-                    <Text fontSize={14} color="onWarning">
+                    <Text fontSize={14} color="text1">
                       ⚠️ You have made changes to the configuration. These will be used
                       for deployment.
                     </Text>
