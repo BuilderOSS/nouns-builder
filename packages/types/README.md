@@ -201,7 +201,6 @@ enum CHAIN_ID {
   BASE = 8453,
   BASE_SEPOLIA = 84532,
   ZORA = 7777777,
-  ZORA_SEPOLIA = 999999999,
   FOUNDRY = 31337,
 }
 
@@ -298,7 +297,6 @@ The package provides comprehensive support for all Builder protocol chains:
 - **Sepolia** (`CHAIN_ID.SEPOLIA`) - Chain ID: 11155111
 - **Base Sepolia** (`CHAIN_ID.BASE_SEPOLIA`) - Chain ID: 84532
 - **Optimism Sepolia** (`CHAIN_ID.OPTIMISM_SEPOLIA`) - Chain ID: 11155420
-- **Zora Sepolia** (`CHAIN_ID.ZORA_SEPOLIA`) - Chain ID: 999999999
 
 ### Development
 
