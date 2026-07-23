@@ -1,11 +1,11 @@
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
+import { useAuthStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { createSafeAppUrl, createSafeUrl } from '@buildeross/utils/safe'
 import { atoms, Box, Button, Icon, Stack, Text } from '@buildeross/zord'
 import { Address, isAddressEqual } from 'viem'
-import { useAccount } from 'wagmi'
 
 interface SenderDelegationProps {
   chainId: CHAIN_ID
@@ -22,7 +22,7 @@ export const SenderDelegation = ({
 
   const { isGnosisSafe: isSenderAGnosisSafe } = useIsGnosisSafe(senderAddress, chainId)
 
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   const isSenderConnected = address && isAddressEqual(senderAddress, address)
 

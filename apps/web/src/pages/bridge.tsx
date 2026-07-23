@@ -1,4 +1,5 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { useAuthStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Heading, Icon, Stack, Text } from '@buildeross/zord'
 import Head from 'next/head'
@@ -6,7 +7,7 @@ import Image from 'next/image'
 import React from 'react'
 import { getDefaultLayout } from 'src/layouts/DefaultLayout'
 import { bridgeActionButton, bridgeCardBody } from 'src/styles/bridge.css'
-import { useAccount, useBalance } from 'wagmi'
+import { useBalance } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
 
@@ -65,7 +66,7 @@ const NetworkCard: React.FC<{
   bridgeURL: string
   bridgeLogo: string
 }> = ({ chainId, bridgeLogo, bridgeURL }) => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { data: userBalance } = useBalance({
     address,
     chainId,

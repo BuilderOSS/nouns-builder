@@ -2,6 +2,7 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useCurrentAuction } from '@buildeross/hooks'
 import { auctionAbi } from '@buildeross/sdk/contract'
+import { useAuthStore } from '@buildeross/stores'
 import type {
   AddressType,
   CHAIN_ID,
@@ -14,7 +15,7 @@ import { ShareButton } from '@buildeross/ui/ShareButton'
 import { Button, Flex, Text } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useSWRConfig } from 'swr'
-import { useAccount, useConfig } from 'wagmi'
+import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import type { OnOpenBidModal } from '../types/modalStates'
@@ -41,7 +42,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
   const { getAuctionLink } = useLinks()
   const daoId = addresses.token
   const config = useConfig()
-  const { address: account } = useAccount()
+  const { address: account } = useAuthStore()
 
   const [isSettling, setIsSettling] = useState(false)
 

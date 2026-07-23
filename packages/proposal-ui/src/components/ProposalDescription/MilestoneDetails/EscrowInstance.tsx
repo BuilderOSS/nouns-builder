@@ -4,14 +4,19 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { type EscrowInstanceData } from '@buildeross/hooks/useInvoiceData'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import {
+  useAuthStore,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
 import { AddressType, CHAIN_ID, TransactionType } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { createSafeAppUrl, createSafeUrl } from '@buildeross/utils/safe'
 import { atoms, Box, Button, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import { useCallback, useMemo, useState } from 'react'
 import { encodeFunctionData, Hex } from 'viem'
-import { useAccount, useConfig, useReadContract } from 'wagmi'
+import { useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { MilestoneItem } from './MilestoneItem'
@@ -60,7 +65,7 @@ export const EscrowInstance = ({
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const { startProposalDraft } = useProposalStore()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const config = useConfig()
   const { getProposalLink } = useLinks()
 

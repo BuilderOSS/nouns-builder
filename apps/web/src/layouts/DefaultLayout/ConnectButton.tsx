@@ -1,14 +1,14 @@
+import { useAuthStore } from '@buildeross/stores'
 import { Flex } from '@buildeross/zord'
 import { ConnectButton as RKConnectButton } from '@rainbow-me/rainbowkit'
 import React from 'react'
-import { useAccount } from 'wagmi'
 
 import { connectButtonWrapper } from './Nav.styles.css'
 
 export const ConnectButton = () => {
-  const { address, chain: wagmiChain } = useAccount()
+  const { address } = useAuthStore()
 
-  if (address || wagmiChain) {
+  if (address) {
     return null
   }
 

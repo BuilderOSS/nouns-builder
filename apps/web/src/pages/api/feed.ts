@@ -4,9 +4,11 @@ import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { InvalidRequestError } from 'src/services/errors'
 import { fetchFeedDataService, getTtlByScope } from 'src/services/feedService'
+import { withAuth } from 'src/utils/api/authMiddleware'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 import { isAddress } from 'viem'
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const startTime = Date.now()
 
   // Handle OPTIONS preflight
@@ -184,3 +186,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: 'Internal server error' })
   }
 }
+
+export default withRateLimit({
+  maxRequests: 60,
+  windowSeconds: 60,
+  keyPrefix: 'feed',
+})(withAuth(handler))

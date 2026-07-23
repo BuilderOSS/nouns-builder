@@ -1,9 +1,10 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
+import { useAuthStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Button, Flex } from '@buildeross/zord'
 import { useCallback, useState } from 'react'
-import { useAccount, useConfig } from 'wagmi'
+import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { auctionActionButtonVariants } from '../Auction.css'
@@ -26,7 +27,7 @@ export const Settle = ({
   compact = false,
 }: SettleProps) => {
   const config = useConfig()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   const isWinner = owner != undefined && address?.toLowerCase() == owner?.toLowerCase()
 

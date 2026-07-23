@@ -2,6 +2,7 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { AirdropInstanceData } from '@buildeross/hooks/useAirdropData'
 import { useEthUsdPrice } from '@buildeross/hooks/useEthUsdPrice'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { useAuthStore } from '@buildeross/stores'
 import { type CHAIN_ID, TokenMetadata } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -19,7 +20,7 @@ import {
   isAddressEqual,
   parseAbi,
 } from 'viem'
-import { useAccount, useConfig, useReadContracts } from 'wagmi'
+import { useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { formatFeeDisplay } from '../utils/feeDisplay'
@@ -80,7 +81,7 @@ export const AirdropItem = ({
   chainId,
   tokenMetadata,
 }: AirdropItemProps) => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const config = useConfig()
   const { price: ethUsdPrice } = useEthUsdPrice()
   const [isClaiming, setIsClaiming] = useState(false)

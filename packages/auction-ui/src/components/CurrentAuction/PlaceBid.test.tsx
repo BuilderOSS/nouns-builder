@@ -22,7 +22,6 @@ vi.mock('wagmi', async (importOriginal) => {
   return {
     ...actual,
     useAccount: () => ({
-      address: '0x1234',
       chain: { id: CHAIN_ID.ETHEREUM },
     }),
     useBalance: () => ({ data: { value: mockBalanceValue } }),
@@ -30,6 +29,10 @@ vi.mock('wagmi', async (importOriginal) => {
     useReadContracts: () => ({ data: [parseEther('1'), 10n] }),
   }
 })
+
+vi.mock('@buildeross/stores', () => ({
+  useAuthStore: () => ({ address: '0x1234' }),
+}))
 
 vi.mock('wagmi/actions', () => ({
   simulateContract: vi.fn(),

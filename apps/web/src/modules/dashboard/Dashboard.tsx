@@ -6,6 +6,7 @@ import {
   useEnsData,
 } from '@buildeross/hooks'
 import { ProposalState } from '@buildeross/sdk/contract'
+import { useAuthStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
 import { DisplayPanel } from '@buildeross/ui/DisplayPanel'
@@ -13,7 +14,6 @@ import { Box, Stack, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
 import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import { useDaoListPreferences } from 'src/hooks/useDaoListPreferences'
-import { useAccount } from 'wagmi'
 
 import { CreateActions } from './CreateActions'
 import { DaoAuctionCard } from './DaoAuctionCard'
@@ -26,7 +26,7 @@ import { UserProfileCard } from './UserProfileCard'
 export type DashboardDaoProps = DashboardDaoWithState
 
 export const Dashboard: React.FC = () => {
-  const { address } = useAccount()
+  const { address, isAuthenticated } = useAuthStore()
   const { displayName, ensAvatar } = useEnsData(address)
   const [openAccordion, setOpenAccordion] = React.useState<'daos' | 'proposals' | null>(
     null
@@ -41,7 +41,7 @@ export const Dashboard: React.FC = () => {
     refresh: mutate,
   } = useDashboardData({
     address,
-    enabled: !!address,
+    enabled: !!address && isAuthenticated,
   })
 
   const chainSortedDaos = useMemo<DashboardDaoWithState[]>(() => {
@@ -171,7 +171,7 @@ export const Dashboard: React.FC = () => {
   const mainContent = (
     <>
       <UrgencyAlerts />
-      <Feed enableFilters />
+      {isAuthenticated && <Feed enableFilters />}
     </>
   )
 
@@ -181,7 +181,7 @@ export const Dashboard: React.FC = () => {
   if (error) {
     sidebarContent = (
       <Stack gap="x6">
-        {address && (
+        {address && isAuthenticated && (
           <>
             <UserProfileCard
               address={address}
@@ -211,7 +211,7 @@ export const Dashboard: React.FC = () => {
   } else if (isLoading) {
     sidebarContent = (
       <Stack gap="x6">
-        {address && (
+        {address && isAuthenticated && (
           <>
             <UserProfileCard
               address={address}
@@ -253,7 +253,7 @@ export const Dashboard: React.FC = () => {
         />
       </Stack>
     )
-  } else if (!address) {
+  } else if (!address || !isAuthenticated) {
     sidebarContent = <DashConnect />
   } else if (!daos?.length) {
     sidebarContent = (

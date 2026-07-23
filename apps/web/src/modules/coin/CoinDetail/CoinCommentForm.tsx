@@ -1,11 +1,12 @@
 import { ZORA_COMMENTS } from '@buildeross/constants'
 import { zoraCommentsAbi } from '@buildeross/sdk'
+import { useAuthStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { TextArea } from '@buildeross/ui/Fields'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { Address, erc20Abi, parseEther, zeroAddress } from 'viem'
-import { useAccount, useConfig, useReadContract } from 'wagmi'
+import { useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import {
@@ -26,7 +27,7 @@ export const CoinCommentForm: React.FC<CoinCommentFormProps> = ({
   onCommentPosted,
 }) => {
   const config = useConfig()
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useAuthStore()
   const [commentText, setCommentText] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | undefined>()

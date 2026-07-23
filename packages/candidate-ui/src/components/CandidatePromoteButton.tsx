@@ -1,12 +1,12 @@
 import { governorAbi } from '@buildeross/sdk/contract'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AnimatedModal, ContractButton, SuccessModalContent } from '@buildeross/ui'
 import { getErrorMessage } from '@buildeross/utils/errors'
 import { Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { type Hex } from 'viem'
-import { useAccount, useConfig } from 'wagmi'
+import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 export interface ProposerSignature {
@@ -44,7 +44,7 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
   onSuccess,
 }) => {
   const config = useConfig()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
 

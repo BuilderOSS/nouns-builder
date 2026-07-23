@@ -4,7 +4,7 @@ import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { useManagerVersion } from '@buildeross/hooks'
 import { managerAbi, managerV1Abi, managerV3Abi } from '@buildeross/sdk/contract'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -24,7 +24,7 @@ import {
   parseEther,
   zeroAddress,
 } from 'viem'
-import { useAccount, useConfig } from 'wagmi'
+import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
@@ -96,7 +96,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
     managerAddress: PUBLIC_MANAGER_ADDRESS[chain.id],
   })
 
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const config = useConfig()
 
   const {

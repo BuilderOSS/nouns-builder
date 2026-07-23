@@ -1,4 +1,4 @@
-import { useChainStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { Button } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useRouter } from 'next/router'
@@ -8,7 +8,8 @@ import { useAccount, useSwitchChain } from 'wagmi'
 import { marqueeButton } from './Home.css'
 
 export const GetStarted = () => {
-  const { address, chain: wagmiChain } = useAccount()
+  const { address } = useAuthStore()
+  const { chain: wagmiChain } = useAccount()
   const chain = useChainStore((x) => x.chain)
 
   const { openConnectModal } = useConnectModal()

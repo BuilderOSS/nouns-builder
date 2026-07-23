@@ -3,6 +3,7 @@
   "globalDependencies": ["**/.env", "**/.env.*local"],
   "globalEnv": [
     "ANALYZE",
+    "IRON_PASSWORD",
     "PINATA_API_KEY",
     "COINGECKO_API_KEY",
     "REDIS_URL",
