@@ -2,6 +2,8 @@ import { BASE_URL, SWR_KEYS } from '@buildeross/constants'
 import { useMinBidIncrement } from '@buildeross/hooks/useMinBidIncrement'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { averageWinningBid } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
+import { useAuthStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -12,9 +14,10 @@ import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
+import type { WriteContractParameters } from 'viem'
 import { formatEther, parseEther, stringToHex } from 'viem'
 import { useAccount, useBalance, useConfig, useReadContracts } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import {
   auctionActionButtonVariants,
@@ -69,7 +72,8 @@ const InnerPlaceBid = ({
   tokenAddress,
   onSuccess,
 }: PlaceBidProps) => {
-  const { address, chain: wagmiChain } = useAccount()
+  const { address } = useAuthStore()
+  const { chain: wagmiChain } = useAccount()
   const { data: balance } = useBalance({ address: address, chainId })
   const { mutate } = useSWRConfig()
   const { getAuctionLink } = useLinks()
@@ -156,7 +160,7 @@ const InnerPlaceBid = ({
     try {
       setCreatingBid(true)
 
-      let txHash: `0x${string}`
+      let request: WriteContractParameters
       if (referral) {
         const data = await simulateContract(config, {
           abi: auctionAbi,
@@ -167,7 +171,7 @@ const InnerPlaceBid = ({
           chainId,
           ...(bidCommentDataSuffix ? { dataSuffix: bidCommentDataSuffix } : {}),
         })
-        txHash = await writeContract(config, data.request)
+        request = data.request
       } else {
         const data = await simulateContract(config, {
           abi: auctionAbi,
@@ -178,10 +182,11 @@ const InnerPlaceBid = ({
           chainId,
           ...(bidCommentDataSuffix ? { dataSuffix: bidCommentDataSuffix } : {}),
         })
-        txHash = await writeContract(config, data.request)
+        request = data.request
       }
 
-      if (txHash) await waitForTransactionReceipt(config, { hash: txHash, chainId })
+      const result = await executeAppTransaction({ config, request, chainId })
+      if (result.kind === 'safe-proposed') return
 
       await mutate([
         SWR_KEYS.AUCTION_BIDS,

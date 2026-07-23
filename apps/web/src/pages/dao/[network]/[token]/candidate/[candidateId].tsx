@@ -19,6 +19,7 @@ import { getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { CandidateVoteSupport, getUserCandidateSignal } from '@buildeross/sdk/subgraph'
 import {
   type DaoContractAddresses,
+  useAuthStore,
   useCandidateStore,
   useChainStore,
   useDaoStore,
@@ -45,7 +46,7 @@ import { NextPageWithLayout } from 'src/pages/_app'
 import { votePageWrapper } from 'src/styles/vote.css'
 import useSWR, { useSWRConfig } from 'swr'
 import { isAddressEqual } from 'viem'
-import { useAccount, useReadContract } from 'wagmi'
+import { useReadContract } from 'wagmi'
 
 interface CandidateDetailPageProps {
   candidateId: string
@@ -150,7 +151,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   initialData,
 }) => {
   const router = useRouter()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { query, push, pathname } = router
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()

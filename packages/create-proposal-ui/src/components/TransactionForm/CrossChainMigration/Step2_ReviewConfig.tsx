@@ -1,5 +1,6 @@
 import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import { useManagerVersion } from '@buildeross/hooks'
+import { useAuthStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { DaysHoursMinsSecs, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
@@ -7,7 +8,6 @@ import { Box, Button, Flex, Heading, Input, Label, Stack, Text } from '@buildero
 import { Form, Formik, FormikHelpers } from 'formik'
 import { useMemo } from 'react'
 import { getAddress, isAddress } from 'viem'
-import { useAccount } from 'wagmi'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 import {
@@ -37,7 +37,7 @@ export const Step2_ReviewConfig: React.FC = () => {
     goToPreviousStep,
     targetChainId,
   } = useCrossChainMigration()
-  const { address: walletAddress } = useAccount()
+  const { address: walletAddress } = useAuthStore()
 
   // Check if target Manager contract supports v3 features
   const managerAddress = targetChainId ? PUBLIC_MANAGER_ADDRESS[targetChainId] : undefined

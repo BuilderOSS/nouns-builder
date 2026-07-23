@@ -1,6 +1,6 @@
 import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import { managerAbi } from '@buildeross/sdk/contract'
-import { useChainStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { CHAIN_ID, type TokenAllocation } from '@buildeross/types'
 import { Toggle } from '@buildeross/ui'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
@@ -15,7 +15,7 @@ import { FieldArray, Form, Formik, FormikProps, useFormikContext } from 'formik'
 import { motion } from 'framer-motion'
 import sum from 'lodash/sum'
 import React, { useEffect, useRef, useState } from 'react'
-import { useAccount, useReadContract } from 'wagmi'
+import { useReadContract } from 'wagmi'
 import { useShallow } from 'zustand/shallow'
 
 import { useFormStore } from '../../stores'
@@ -117,7 +117,7 @@ export const AllocationForm: React.FC<AllocationFormProps> = ({ title }) => {
     }))
   )
 
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   const hasExistingAllocation =
     founderAllocation.length > 1 ||

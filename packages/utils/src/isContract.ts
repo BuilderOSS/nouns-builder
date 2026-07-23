@@ -20,7 +20,7 @@ export const getCachedIsContract = async (
 ): Promise<boolean> => {
   if (!isAddress(address)) return false
   // eslint-disable-next-line no-param-reassign
-  address = getAddress(address)
+  address = getAddress(address) as Hex
   if (!isContractMap) isContractMap = new Map()
 
   const key = `${chainId}:${address}`

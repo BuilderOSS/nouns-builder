@@ -5,6 +5,10 @@ export {
   type GetAuctionRewardsResponse,
 } from './requests/getAuctionRewards'
 export { default as getDAOAddresses } from './requests/getDAOAddresses'
+export {
+  getDAOMembership,
+  type GetDAOMembershipResponse,
+} from './requests/getDAOMembership'
 export { getMetadataAttributes } from './requests/getMetadataAttributes'
 export { getPropertyItems } from './requests/getPropertyItems'
 export { getProposalState, ProposalState } from './requests/getProposalState'

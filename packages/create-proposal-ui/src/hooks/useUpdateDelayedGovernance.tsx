@@ -1,7 +1,9 @@
 import { governorAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useState } from 'react'
-import { usePublicClient, useWriteContract } from 'wagmi'
+import { useConfig } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 export const useUpdateDelayedGovernance = (
   targetGovernorAddress?: AddressType,
@@ -13,8 +15,7 @@ export const useUpdateDelayedGovernance = (
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string>()
 
-  const { writeContractAsync, isPending } = useWriteContract()
-  const publicClient = usePublicClient({ chainId: targetChainId })
+  const config = useConfig()
 
   const updateDelayedGovernance = async (delayedTimestamp: bigint) => {
     if (!targetGovernorAddress || !targetChainId) {
@@ -28,7 +29,7 @@ export const useUpdateDelayedGovernance = (
     setIsSuccess(false)
 
     try {
-      const hash = await writeContractAsync({
+      const { request } = await simulateContract(config, {
         abi: governorAbi,
         address: targetGovernorAddress,
         functionName: 'updateDelayedGovernanceExpirationTimestamp',
@@ -36,17 +37,22 @@ export const useUpdateDelayedGovernance = (
         chainId: targetChainId,
       })
 
+      const result = await executeAppTransaction({
+        config,
+        chainId: targetChainId,
+        request,
+      })
+      const hash = result.hash
+
       setTxHash(hash)
       setIsUpdating(false)
 
       // Wait for transaction receipt
-      if (publicClient) {
+      if (result.kind === 'mined') {
         setIsConfirming(true)
-        const receipt = await publicClient.waitForTransactionReceipt({ hash })
-
         setIsConfirming(false)
 
-        if (receipt.status !== 'success') {
+        if (result.receipt.status !== 'success') {
           throw new Error(
             'Transaction failed for updateDelayedGovernanceExpirationTimestamp'
           )
@@ -69,7 +75,7 @@ export const useUpdateDelayedGovernance = (
   return {
     updateDelayedGovernance,
     txHash,
-    isUpdating: isUpdating || isPending,
+    isUpdating,
     isConfirming,
     isSuccess,
     error,

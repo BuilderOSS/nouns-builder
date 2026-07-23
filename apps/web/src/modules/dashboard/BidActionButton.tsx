@@ -1,6 +1,7 @@
 import { Settle } from '@buildeross/auction-ui'
 import { useMinBidIncrement } from '@buildeross/hooks/useMinBidIncrement'
 import { auctionAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { maxChar } from '@buildeross/utils/helpers'
@@ -9,7 +10,7 @@ import * as Sentry from '@sentry/nextjs'
 import React, { useCallback, useMemo, useState } from 'react'
 import { Address, parseEther } from 'viem'
 import { useConfig, useReadContract } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { DashboardDaoProps } from './Dashboard'
 import { bidInput, minButton } from './dashboard.css'
@@ -66,8 +67,18 @@ export const BidActionButton = ({
         value: parseEther(bidAmount.toString()),
       })
 
-      const txHash = await writeContract(config, data.request)
-      if (txHash) await waitForTransactionReceipt(config, { hash: txHash, chainId })
+      const result = await executeAppTransaction({
+        config,
+        request: data.request,
+        chainId,
+      })
+
+      // Don't clear input for Safe proposals - user needs to execute via Safe UI
+      if (result.kind === 'safe-proposed') {
+        return
+      }
+
+      // Only clear input for mined transactions
       setBidAmount('')
     } catch (error) {
       console.error(error)

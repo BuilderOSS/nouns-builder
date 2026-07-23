@@ -2,6 +2,8 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useCurrentAuction } from '@buildeross/hooks'
 import { auctionAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
+import { useAuthStore } from '@buildeross/stores'
 import type {
   AddressType,
   CHAIN_ID,
@@ -14,8 +16,8 @@ import { ShareButton } from '@buildeross/ui/ShareButton'
 import { Button, Flex, Text } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useSWRConfig } from 'swr'
-import { useAccount, useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { useConfig } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 import type { OnOpenBidModal } from '../types/modalStates'
 
@@ -41,7 +43,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
   const { getAuctionLink } = useLinks()
   const daoId = addresses.token
   const config = useConfig()
-  const { address: account } = useAccount()
+  const { address: account } = useAuthStore()
 
   const [isSettling, setIsSettling] = useState(false)
 
@@ -90,11 +92,17 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
         chainId,
       })
 
-      const txHash = await writeContract(config, data.request)
-      await waitForTransactionReceipt(config, { hash: txHash, chainId })
-      await mutate([SWR_KEYS.AUCTION, chainId, addresses.auction.toLowerCase()])
+      const result = await executeAppTransaction({
+        config,
+        request: data.request,
+        chainId,
+      })
+      if (result.kind === 'mined') {
+        await mutate([SWR_KEYS.AUCTION, chainId, addresses.auction.toLowerCase()])
+      }
     } catch (error) {
       console.error('Error settling auction:', error)
+      throw error
     } finally {
       setIsSettling(false)
     }

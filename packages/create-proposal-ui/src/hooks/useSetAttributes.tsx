@@ -1,9 +1,11 @@
 import { merklePropertyMetadataAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { MerkleTree } from 'merkletreejs'
 import { useState } from 'react'
 import { encodePacked, keccak256 } from 'viem'
-import { usePublicClient, useWriteContract } from 'wagmi'
+import { useConfig } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 export const DEFAULT_ATTRIBUTES_BATCH_SIZE = 50
 
@@ -19,9 +21,9 @@ export const useSetAttributes = (
   const [tokensSet, setTokensSet] = useState<number>(alreadySet?.length || 0)
   const [totalTokens, setTotalTokens] = useState<number>(0)
   const [batchSize, setBatchSize] = useState<number>(DEFAULT_ATTRIBUTES_BATCH_SIZE)
+  const [isSettingAttributes, setIsSettingAttributes] = useState(false)
 
-  const { writeContractAsync, isPending } = useWriteContract()
-  const publicClient = usePublicClient({ chainId: targetChainId })
+  const config = useConfig()
 
   const setAllAttributes = async () => {
     if (!targetMetadataAddress || !attributesData || !attributesMerkleRoot) {
@@ -31,6 +33,7 @@ export const useSetAttributes = (
     }
 
     setError(undefined)
+    setIsSettingAttributes(true)
     setTxHashes([])
     setTokensSet(0)
 
@@ -159,13 +162,6 @@ export const useSetAttributes = (
 
       setTotalTokens(allParams.length + (alreadySet?.length || 0))
 
-      // Validate publicClient before processing
-      if (!publicClient) {
-        const errorMsg = 'Public client not available for transaction verification'
-        setError(errorMsg)
-        throw new Error(errorMsg)
-      }
-
       // Batch process
       const hashes: `0x${string}`[] = []
       const setTokenIds: number[] = [...(alreadySet || [])] // Start with already-set tokens
@@ -174,7 +170,7 @@ export const useSetAttributes = (
       for (let i = 0; i < allParams.length; i += batchSize) {
         const batch = allParams.slice(i, i + batchSize)
 
-        const hash = await writeContractAsync({
+        const { request } = await simulateContract(config, {
           abi: merklePropertyMetadataAbi,
           address: targetMetadataAddress,
           functionName: 'setManyAttributes',
@@ -182,13 +178,20 @@ export const useSetAttributes = (
           chainId: targetChainId,
         })
 
+        const result = await executeAppTransaction({
+          config,
+          chainId: targetChainId!,
+          request,
+        })
+        const hash = result.hash
+
         hashes.push(hash)
         setTxHashes([...hashes])
 
-        // Wait for transaction receipt
-        const receipt = await publicClient.waitForTransactionReceipt({ hash })
+        if (result.kind === 'safe-proposed') return { hashes, setTokenIds }
 
-        if (receipt.status !== 'success') {
+        // Wait for transaction receipt
+        if (result.receipt.status !== 'success') {
           throw new Error(`Transaction failed for batch ${Math.floor(i / batchSize) + 1}`)
         }
 
@@ -205,6 +208,8 @@ export const useSetAttributes = (
       console.error('[useSetAttributes] Error:', err)
       setError(message)
       throw err
+    } finally {
+      setIsSettingAttributes(false)
     }
   }
 
@@ -212,7 +217,7 @@ export const useSetAttributes = (
 
   return {
     setAllAttributes,
-    isSettingAttributes: isPending,
+    isSettingAttributes,
     txHashes,
     tokensSet,
     totalTokens,

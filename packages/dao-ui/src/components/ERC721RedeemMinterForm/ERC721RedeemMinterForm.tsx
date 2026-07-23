@@ -1,5 +1,6 @@
 import { ERC721_REDEEM_MINTER } from '@buildeross/constants'
 import { erc721RedeemMinterAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { ContractLink } from '@buildeross/ui/ContractLink'
@@ -8,7 +9,7 @@ import { Box, Button, Flex, Stack, Text, vars } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 import { formatEther, isAddressEqual, zeroAddress } from 'viem'
 import { useConfig, useReadContract } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { adminSection } from '../../styles/Section.css'
 import { Section } from '../AdminForm/Section'
@@ -58,10 +59,15 @@ export const ERC721RedeemMinterForm: React.FC = () => {
         args: [addresses.token!],
         chainId: chain.id,
       })
-      const hash = await writeContract(config, data.request)
-      await waitForTransactionReceipt(config, { hash, chainId: chain.id })
-      await refetch()
-      setIsEditing(true)
+      const result = await executeAppTransaction({
+        config,
+        request: data.request,
+        chainId: chain.id,
+      })
+      if (result.kind === 'mined') {
+        await refetch()
+        setIsEditing(true)
+      }
     } catch (error) {
       console.error('Failed to reset settings:', error)
     } finally {
