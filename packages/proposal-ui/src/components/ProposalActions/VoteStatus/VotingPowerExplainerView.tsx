@@ -171,6 +171,7 @@ export const VotingPowerExplainerView: React.FC<VotingPowerExplainerViewProps> =
       gap={'x1'}
       align={{ '@initial': 'center', '@768': 'flex-start' }}
       textAlign={{ '@initial': 'center', '@768': 'left' }}
+      style={{ minWidth: 0 }}
     >
       {renderBody()}
     </Flex>

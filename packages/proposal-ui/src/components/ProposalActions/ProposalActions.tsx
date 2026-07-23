@@ -161,7 +161,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
           candidateVersion={proposal.candidateVersion}
         />
 
-        <Flex gap="x2" direction={'row'}>
+        <Flex gap="x2" direction={'row'} style={{ flexShrink: 0 }}>
           {isProposer && (
             <UpdateProposalButton
               proposalId={proposal.proposalId}
