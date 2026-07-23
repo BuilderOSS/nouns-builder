@@ -1,10 +1,15 @@
 import type { AddressType } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { fetchDashboardDataService, getDashboardTtl } from 'src/services/dashboardService'
+import { withAuth } from 'src/utils/api/authMiddleware'
 import { withCors } from 'src/utils/api/cors'
 import { isAddress } from 'viem'
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  session: { address: string }
+) {
   const startTime = Date.now()
 
   // Validate address parameter
@@ -16,6 +21,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   if (!isAddress(address, { strict: false })) {
     return res.status(400).json({ error: 'Invalid address format' })
+  }
+
+  // Verify the authenticated user is requesting their own dashboard
+  if (address.toLowerCase() !== session.address.toLowerCase()) {
+    return res
+      .status(403)
+      .json({ error: 'Forbidden: You can only access your own dashboard' })
   }
 
   try {
@@ -65,4 +77,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withCors()(handler)
+export default withCors()(withAuth(handler))

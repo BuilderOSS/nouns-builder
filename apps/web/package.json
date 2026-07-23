@@ -45,6 +45,7 @@
     "framer-motion": "^12.12.1",
     "graphql-request": "^7.1.2",
     "ioredis": "^5.8.1",
+    "iron-session": "^8.0.4",
     "next": "^15.5.9",
     "nextjs-progressbar": "^0.0.16",
     "ox": "^0.14.0",
