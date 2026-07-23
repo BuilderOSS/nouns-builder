@@ -1,6 +1,6 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { tokenAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { SmartInput } from '@buildeross/ui/Fields'
@@ -8,13 +8,13 @@ import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Flex, Heading, Input, Stack, Text, theme } from '@buildeross/zord'
 import React from 'react'
 import { isAddress } from 'viem'
-import { useAccount, useConfig, useWriteContract } from 'wagmi'
+import { useConfig, useWriteContract } from 'wagmi'
 import { waitForTransactionReceipt } from 'wagmi/actions'
 
 import { adminSection } from '../../styles/Section.css'
 
 export const CustomMinterForm: React.FC = () => {
-  const { address: signerAddress } = useAccount()
+  const { address: signerAddress } = useAuthStore()
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const config = useConfig()

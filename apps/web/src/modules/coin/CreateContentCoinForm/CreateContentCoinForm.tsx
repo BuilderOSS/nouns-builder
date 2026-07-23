@@ -6,7 +6,7 @@ import {
 import { useClankerTokenPrice } from '@buildeross/hooks'
 import { uploadFile } from '@buildeross/ipfs-service'
 import { awaitSubgraphSync, ClankerTokenFragment } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import {
   CoinFormFields,
@@ -37,7 +37,7 @@ import { Form, Formik, type FormikHelpers, useFormikContext } from 'formik'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import { type Address, decodeEventLog, zeroAddress, zeroHash } from 'viem'
-import { useAccount, useConfig, useReadContract } from 'wagmi'
+import { useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { NoCreatorCoinWarning } from './NoCreatorCoinWarning'
@@ -91,7 +91,7 @@ const CreateContentCoinEconomicsPreview: React.FC<
   CreateContentCoinEconomicsPreviewProps
 > = ({ chainId, latestClankerToken, clankerTokenPriceUsd }) => {
   const formik = useFormikContext<CoinFormValues>()
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useAuthStore()
 
   // Prepare arguments for coinAddress call
   const { encodedPoolConfig, shouldFetch } = React.useMemo(() => {
@@ -212,7 +212,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
 }) => {
   const router = useRouter()
   const config = useConfig()
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useAuthStore()
   const [submitError, setSubmitError] = useState<string | undefined>()
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
   const [isDeploying, setIsDeploying] = useState(false)

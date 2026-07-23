@@ -2,6 +2,7 @@ import { BASE_URL, SWR_KEYS } from '@buildeross/constants'
 import { useMinBidIncrement } from '@buildeross/hooks/useMinBidIncrement'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { averageWinningBid } from '@buildeross/sdk/subgraph'
+import { useAuthStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -69,7 +70,8 @@ const InnerPlaceBid = ({
   tokenAddress,
   onSuccess,
 }: PlaceBidProps) => {
-  const { address, chain: wagmiChain } = useAccount()
+  const { address } = useAuthStore()
+  const { chain: wagmiChain } = useAccount()
   const { data: balance } = useBalance({ address: address, chainId })
   const { mutate } = useSWRConfig()
   const { getAuctionLink } = useLinks()

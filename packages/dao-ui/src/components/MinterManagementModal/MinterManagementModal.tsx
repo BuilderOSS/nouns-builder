@@ -1,7 +1,7 @@
 import { ERC721_REDEEM_MINTER, MERKLE_RESERVE_MINTER } from '@buildeross/constants'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { tokenAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { SmartInput } from '@buildeross/ui/Fields'
@@ -10,7 +10,7 @@ import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Button, Flex, Heading, Text, theme } from '@buildeross/zord'
 import React from 'react'
 import { isAddress, zeroAddress } from 'viem'
-import { useAccount, useConfig, useWriteContract } from 'wagmi'
+import { useConfig, useWriteContract } from 'wagmi'
 import { readContract, waitForTransactionReceipt } from 'wagmi/actions'
 
 interface MinterManagementModalProps {
@@ -143,7 +143,7 @@ export const MinterManagementModal: React.FC<MinterManagementModalProps> = ({
   isERC721RedeemMinter,
   onMinterEnabled,
 }) => {
-  const { address: signerAddress } = useAccount()
+  const { address: signerAddress } = useAuthStore()
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const config = useConfig()

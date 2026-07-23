@@ -8,8 +8,14 @@ import {
 import { governorAbi, treasuryAbi } from '@buildeross/sdk/contract'
 import { type Proposal } from '@buildeross/sdk/subgraph'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import {
+  useAuthStore,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
+import {
+  type AddressType,
   ProposalState,
   type SimulationOutput,
   TransactionBundle,
@@ -29,7 +35,7 @@ import dayjs from 'dayjs'
 import { Formik, type FormikProps } from 'formik'
 import React, { useState } from 'react'
 import { decodeEventLog, getAddress, type Hex, isAddress } from 'viem'
-import { useAccount, useConfig, useReadContracts } from 'wagmi'
+import { useConfig, useReadContracts } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { prepareProposalTransactions } from '../../utils/prepareTransactions'
@@ -105,7 +111,7 @@ export const ReviewProposalForm = ({
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((x) => x.chain)
   const config = useConfig()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const {
     updateProposalId,
     clearProposal,
@@ -276,7 +282,8 @@ export const ReviewProposalForm = ({
           setSimulating(true)
 
           const simulationResult = await simulateTransactions({
-            treasuryAddress: addresses.treasury,
+            tokenAddress: addresses.token as AddressType,
+            treasuryAddress: addresses.treasury as AddressType,
             chainId: chain.id,
             calldatas: calldata,
             values: transactionValues,

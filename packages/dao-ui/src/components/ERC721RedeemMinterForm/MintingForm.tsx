@@ -1,10 +1,11 @@
 import { erc721RedeemMinterAbi } from '@buildeross/sdk/contract'
+import { useAuthStore } from '@buildeross/stores'
 import { AddressType, Chain } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Box, Flex, Text, vars } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 import { formatEther } from 'viem'
-import { useAccount, useConfig, useReadContract } from 'wagmi'
+import { useConfig, useReadContract } from 'wagmi'
 import { waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import {
@@ -32,7 +33,7 @@ export const MintingForm: React.FC<MintingFormProps> = ({
   tokenAddress,
   pricePerToken,
 }) => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const config = useConfig()
   const [tokenIdInput, setTokenIdInput] = useState('')
   const [isMinting, setIsMinting] = useState(false)

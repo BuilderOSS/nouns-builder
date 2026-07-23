@@ -3,6 +3,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getRedisConnection } from 'src/services/redisConnection'
 import { withCors } from 'src/utils/api/cors'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 import { Address, isAddress } from 'viem'
 
 // Increase timeout to 60 seconds for DAOs with many members
@@ -75,4 +76,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
-export default withCors()(handler)
+export default withCors()(
+  withRateLimit({
+    maxRequests: 10,
+    windowSeconds: 60,
+    keyPrefix: 'migrate:snapshot',
+  })(handler)
+)

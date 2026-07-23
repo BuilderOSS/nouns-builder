@@ -3,7 +3,12 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useEthUsdPrice } from '@buildeross/hooks/useEthUsdPrice'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { useVotes } from '@buildeross/hooks/useVotes'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import {
+  useAuthStore,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
 import { AddressType, TokenMetadata, TransactionType } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
 import { Avatar } from '@buildeross/ui/Avatar'
@@ -27,7 +32,7 @@ import { createSafeAppUrl } from '@buildeross/utils/safe'
 import { atoms, Box, Button, Grid, Icon, Stack, Text } from '@buildeross/zord'
 import { useCallback, useMemo } from 'react'
 import { Address, encodeFunctionData, formatUnits, isAddressEqual } from 'viem'
-import { useAccount, useConfig } from 'wagmi'
+import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { formatFeeDisplay } from '../utils/feeDisplay'
@@ -79,7 +84,7 @@ export const StreamItem = ({
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const { startProposalDraft } = useProposalStore()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const config = useConfig()
   const { price: ethUsdPrice } = useEthUsdPrice()
   const { getProposalLink } = useLinks()

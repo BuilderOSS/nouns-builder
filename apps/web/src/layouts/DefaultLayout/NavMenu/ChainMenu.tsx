@@ -30,7 +30,7 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
 }) => {
   const [isChainInitialized, setIsChainInitialized] = React.useState(false)
   const router = useRouter()
-  const { address, chain: wagmiChain, connector } = useAccount()
+  const { isConnected, chain: wagmiChain, connector } = useAccount()
   const { switchChain } = useSwitchChain()
   const onDisconnect = useWalletDisconnect()
 
@@ -61,11 +61,11 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
       onSetActiveDropdown(undefined)
       const selected = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId)
       if (selected) setChain(selected)
-      if (address) {
+      if (isConnected) {
         onSwitchChain(chainId)
       }
     },
-    [onSetActiveDropdown, setChain, hasNetwork, onSwitchChain, address]
+    [onSetActiveDropdown, setChain, hasNetwork, onSwitchChain, isConnected]
   )
 
   const isSelectedChain = useCallback(
@@ -74,8 +74,8 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
   )
 
   const isWrongNetwork = useMemo(
-    () => hasNetwork && !!address && wagmiChain?.id !== selectedChain.id,
-    [address, wagmiChain?.id, selectedChain.id, hasNetwork]
+    () => hasNetwork && !!isConnected && wagmiChain?.id !== selectedChain.id,
+    [isConnected, wagmiChain?.id, selectedChain.id, hasNetwork]
   )
 
   // Handle route change start events

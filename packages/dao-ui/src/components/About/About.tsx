@@ -2,7 +2,7 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { tokenAbi } from '@buildeross/sdk/contract'
 import { SubgraphSDK } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { parseDaoMetadataString } from '@buildeross/utils/daoMetadata'
@@ -12,7 +12,7 @@ import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
 import { Address, formatEther } from 'viem'
-import { useAccount, useBalance, useReadContracts } from 'wagmi'
+import { useBalance, useReadContracts } from 'wagmi'
 
 import { about, daoInfo, daoName, statisticContent } from '../../styles/About.css'
 import { MembersList } from '../MembersList'
@@ -32,7 +32,7 @@ export const About: React.FC<AboutProps> = ({ onOpenTreasury }) => {
     addresses: { token, treasury },
   } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   const { data: membershipInfo } = useDaoMembership({
     chainId: chain.id,

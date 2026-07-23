@@ -45,10 +45,17 @@ export function useWalletDisconnect(): () => void {
       console.warn('useWalletDisconnect: walletconnect provider cleanup failed:', e)
     }
 
-    // 3) targeted localStorage cleanup
+    // 3) SIWE session logout
+    try {
+      await fetch('/api/siwe/logout', { method: 'POST' })
+    } catch (e) {
+      console.warn('useWalletDisconnect: SIWE logout failed:', e)
+    }
+
+    // 4) targeted localStorage cleanup
     cleanupStorage()
 
-    // 4) Reset Wagmi State
+    // 5) Reset Wagmi State
     resetWagmi()
   }, [disconnectAsync, connector, cleanupStorage, resetWagmi])
 

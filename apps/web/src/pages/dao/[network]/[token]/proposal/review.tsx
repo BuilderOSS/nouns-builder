@@ -12,7 +12,12 @@ import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { useProposal } from '@buildeross/hooks/useProposal'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import {
+  useAuthStore,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
 import { AddressType, ProposalCreateStage } from '@buildeross/types'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { generateProposalSalt } from '@buildeross/utils/proposalMetadata'
@@ -23,7 +28,6 @@ import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { useAccount } from 'wagmi'
 import { useShallow } from 'zustand/shallow'
 
 const ReviewProposalPage: NextPageWithLayout = () => {
@@ -31,7 +35,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   const { push } = useRouter()
 
   const { addresses } = useDaoStore()
-  const { address } = useAccount()
+  const { address, isAuthenticated } = useAuthStore()
   const { openConnectModal } = useConnectModal()
 
   const { isLoading, hasThreshold } = useVotes({
@@ -257,7 +261,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   if (isLoading) return null
 
-  if (!address) {
+  if (!address || !isAuthenticated) {
     return (
       <Flex
         direction="column"
@@ -272,9 +276,13 @@ const ReviewProposalPage: NextPageWithLayout = () => {
           Proposal review is restricted
         </Text>
         <Text color="text3">
-          You need to connect a wallet before you can review and submit a proposal.
+          {!address
+            ? 'You need to connect a wallet before you can review and submit a proposal.'
+            : 'You need to sign in with your wallet before you can review and submit a proposal.'}
         </Text>
-        <Button onClick={() => openConnectModal?.()}>Connect Wallet</Button>
+        <Button onClick={() => openConnectModal?.()}>
+          {!address ? 'Connect Wallet' : 'Sign In'}
+        </Button>
       </Flex>
     )
   }

@@ -6,6 +6,7 @@ import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { withCors } from 'src/utils/api/cors'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 import { zeroAddress } from 'viem'
 import { readContract } from 'wagmi/actions'
 
@@ -49,4 +50,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   } as L2MigratedResponse)
 }
 
-export default withCors()(handler)
+export default withCors()(
+  withRateLimit({
+    maxRequests: 30,
+    windowSeconds: 60,
+    keyPrefix: 'migrated',
+  })(handler)
+)

@@ -1,10 +1,11 @@
 import { MERKLE_RESERVE_MINTER } from '@buildeross/constants/addresses'
 import { merkleReserveMinterAbi } from '@buildeross/sdk/contract'
+import { useAuthStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { MerkleTree } from 'merkletreejs'
 import { useState } from 'react'
 import { encodeAbiParameters, keccak256, parseAbiParameters } from 'viem'
-import { useAccount, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
+import { usePublicClient, useReadContract, useWriteContract } from 'wagmi'
 
 import { DaoMemberSimplified } from './useGenerateMerkleRoots'
 
@@ -26,7 +27,7 @@ export const useMintReservedTokens = (
 
   const { writeContractAsync, isPending } = useWriteContract()
   const publicClient = usePublicClient({ chainId: targetChainId })
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   const minterAddress = targetChainId ? MERKLE_RESERVE_MINTER[targetChainId] : undefined
 

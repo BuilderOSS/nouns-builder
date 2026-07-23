@@ -4,13 +4,13 @@ import {
   type ProposalVoteFragment,
   ProposalVoteSupport as Support,
 } from '@buildeross/sdk/subgraph'
+import { useAuthStore } from '@buildeross/stores'
 import type { BytesType, CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Atoms, Box, Flex, Icon, IconType, Stack, Text } from '@buildeross/zord'
 import React, { ReactNode, useEffect, useRef, useState } from 'react'
-import { useAccount } from 'wagmi'
 
 import { ModalHeader } from './ModalHeader'
 
@@ -212,7 +212,7 @@ export const VoteModalWrapper: React.FC<VoteModalWrapperProps> = ({
   daoName,
   daoImage,
 }) => {
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useAuthStore()
   const [isSuccess, setIsSuccess] = useState<boolean>(false)
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 

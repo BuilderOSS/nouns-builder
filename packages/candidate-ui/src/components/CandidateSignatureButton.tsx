@@ -1,12 +1,12 @@
 import { attestCandidateSignature } from '@buildeross/sdk'
 import { governorAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AnimatedModal, ContractButton, SuccessModalContent } from '@buildeross/ui'
 import { getErrorMessage } from '@buildeross/utils/errors'
 import { Box, vars } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { type Hex } from 'viem'
-import { useAccount, useConfig, useReadContract, useWalletClient } from 'wagmi'
+import { useConfig, useReadContract, useWalletClient } from 'wagmi'
 
 import {
   CANDIDATE_SIGNATURE_VALIDITY_DAYS,
@@ -37,7 +37,7 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
   onSuccess,
 }) => {
   const config = useConfig()
-  const { address } = useAccount()
+  const { address, isAuthenticated } = useAuthStore()
   const { data: walletClient } = useWalletClient()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
@@ -60,9 +60,14 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
 
   const canSign = React.useMemo(() => {
     return (
-      !!address && !!walletClient && nonce !== undefined && !isProposer && voteWeight > 0n
+      !!address &&
+      isAuthenticated &&
+      !!walletClient &&
+      nonce !== undefined &&
+      !isProposer &&
+      voteWeight > 0n
     )
-  }, [address, walletClient, nonce, isProposer, voteWeight])
+  }, [address, isAuthenticated, walletClient, nonce, isProposer, voteWeight])
 
   const handleSign = useCallback(async () => {
     if (!canSign || !address || !walletClient || nonce === undefined) return

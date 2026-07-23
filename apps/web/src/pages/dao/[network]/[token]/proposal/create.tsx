@@ -35,7 +35,12 @@ import {
   TransactionTypeIcon,
 } from '@buildeross/proposal-ui'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import {
+  useAuthStore,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
@@ -54,7 +59,7 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import * as styles from 'src/styles/create.css'
 import { getAddress, isAddress, isAddressEqual } from 'viem'
-import { useAccount, useReadContract } from 'wagmi'
+import { useReadContract } from 'wagmi'
 import { useShallow } from 'zustand/shallow'
 
 const createSelectOption = (type: TransactionType) => ({
@@ -251,7 +256,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
     addresses,
   })
 
-  const { address } = useAccount()
+  const { address, isConnected, isAuthenticating } = useAuthStore()
   const { openConnectModal } = useConnectModal()
 
   const { isLoading, hasThreshold } = useVotes({
@@ -639,6 +644,8 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   if (isLoading) return null
 
+  // Show auth guard if not authenticated
+  // address is only set when fully authenticated
   if (!address) {
     return (
       <Flex
@@ -654,9 +661,19 @@ const CreateProposalPage: NextPageWithLayout = () => {
           Proposal creation is restricted
         </Text>
         <Text color="text3">
-          You need to connect a wallet before you can create a proposal.
+          {!isConnected
+            ? 'You need to connect a wallet before you can create a proposal.'
+            : isAuthenticating
+              ? 'Signing you in...'
+              : 'You need to sign in with your wallet before you can create a proposal.'}
         </Text>
-        <Button onClick={() => openConnectModal?.()}>Connect Wallet</Button>
+        <Button onClick={() => openConnectModal?.()} disabled={isAuthenticating}>
+          {!isConnected
+            ? 'Connect Wallet'
+            : isAuthenticating
+              ? 'Signing In...'
+              : 'Sign In'}
+        </Button>
       </Flex>
     )
   }

@@ -25,7 +25,12 @@ import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import { TRANSACTION_TYPES, TransactionTypeIcon } from '@buildeross/proposal-ui'
 import { getCandidateGroup } from '@buildeross/sdk'
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
-import { useCandidateStore, useChainStore, useDaoStore } from '@buildeross/stores'
+import {
+  useAuthStore,
+  useCandidateStore,
+  useChainStore,
+  useDaoStore,
+} from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
@@ -40,7 +45,7 @@ import React, { useMemo, useState } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { isAddressEqual } from 'viem'
-import { useAccount, useReadContract } from 'wagmi'
+import { useReadContract } from 'wagmi'
 import { useShallow } from 'zustand/shallow'
 
 type CreateStage = 'draft' | 'transactions' | 'review'
@@ -56,7 +61,7 @@ const CandidateCreatePageContent = () => {
   const router = useRouter()
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((state) => state.chain)
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { openConnectModal } = useConnectModal()
 
   const {
@@ -620,11 +625,11 @@ const CandidateCreatePageContent = () => {
 }
 
 const CandidateCreatePage: NextPageWithLayout = () => {
-  const { address } = useAccount()
+  const { address, isAuthenticated } = useAuthStore()
   const { addresses } = useDaoStore()
   const { openConnectModal } = useConnectModal()
 
-  if (!address || !addresses.token) {
+  if (!address || !isAuthenticated || !addresses.token) {
     return (
       <Flex
         direction="column"
@@ -639,9 +644,15 @@ const CandidateCreatePage: NextPageWithLayout = () => {
           Candidate creation is restricted
         </Text>
         <Text color="text3">
-          You need to connect a wallet before you can create or edit a candidate.
+          {!address
+            ? 'You need to connect a wallet before you can create or edit a candidate.'
+            : !isAuthenticated
+              ? 'You need to sign in with your wallet before you can create or edit a candidate.'
+              : 'Loading DAO information...'}
         </Text>
-        <Button onClick={() => openConnectModal?.()}>Connect Wallet</Button>
+        <Button onClick={() => openConnectModal?.()}>
+          {!address ? 'Connect Wallet' : 'Sign In'}
+        </Button>
       </Flex>
     )
   }

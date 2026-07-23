@@ -1,7 +1,7 @@
 import { PROTOCOL_REWARDS_MANAGER } from '@buildeross/constants'
 import { useAuctionRewards } from '@buildeross/hooks'
 import { protocolRewardsAbi } from '@buildeross/sdk/contract'
-import { useChainStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { ContractLink } from '@buildeross/ui/ContractLink'
@@ -9,7 +9,7 @@ import { Tooltip } from '@buildeross/ui/Tooltip'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { formatEther, Hex } from 'viem'
-import { useAccount, useConfig } from 'wagmi'
+import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { Section } from '../AdminForm/Section'
@@ -33,7 +33,7 @@ const LabelWithTooltip: React.FC<TooltipProps> = ({ label, tooltip }) => (
 export const AuctionRewards: React.FC<AuctionRewardsProps> = ({ auctionAddress }) => {
   const chain = useChainStore((state) => state.chain)
   const config = useConfig()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const [isWithdrawing, setIsWithdrawing] = useState(false)
   const { data, isLoading, error, mutate } = useAuctionRewards({
     chainId: chain.id,
