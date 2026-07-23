@@ -112,6 +112,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
       w={{ '@initial': '100%', '@768': 'auto' }}
       justify={'flex-start'}
       align={'center'}
+      style={{ minWidth: 0 }}
     >
       {/* Voting for proposal has not yet started (proposal is Pending) */}
       {/* Also show Pending for promoted proposals in Updatable state */}
@@ -127,10 +128,12 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
           align={'center'}
           gap={'x3'}
           textAlign={{ '@initial': 'center', '@768': 'left' }}
+          style={{ minWidth: 0 }}
         >
           <Flex
             className={proposalActionButtonVariants['voteDisabled']}
             w={{ '@initial': '100%', '@768': 'auto' }}
+            style={{ flexShrink: 0 }}
           >
             Submit Vote
           </Flex>
@@ -150,6 +153,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
             w={{ '@initial': '100%', '@768': 'auto' }}
             pb={{ '@initial': 'x2', '@768': 'x0' }}
             align={'center'}
+            style={{ flexShrink: 0 }}
           >
             <ContractButton
               chainId={chain.id}
@@ -160,7 +164,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
               {votesAvailable === 1 ? 'Submit Vote' : 'Submit Votes'}
             </ContractButton>
           </Flex>
-          <Flex pl={'x3'} mt={{ '@initial': 'x1', '@768': 'x0' }}>
+          <Flex pl={'x3'} mt={{ '@initial': 'x1', '@768': 'x0' }} style={{ minWidth: 0 }}>
             <VotingPowerExplainer
               snapshotVotes={votesAvailable}
               timeCreated={timeCreated}

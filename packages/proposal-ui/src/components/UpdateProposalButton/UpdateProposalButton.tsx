@@ -89,6 +89,7 @@ export function UpdateProposalButton({
       disabled={isDisabled}
       variant="secondary"
       size="sm"
+      style={{ minWidth: 149, flexShrink: 0, whiteSpace: 'nowrap' }}
       {...buttonProps}
     >
       <Flex align="center" gap="x2" fontSize="16">
