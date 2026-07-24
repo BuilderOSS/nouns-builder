@@ -2,10 +2,14 @@ import { ErrorResult, SimulationResult } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { InvalidRequestError } from 'src/services/errors'
 import { simulate } from 'src/services/simulationService'
+import { type DaoMembershipData, withDaoAuth } from 'src/utils/api/daoAuthMiddleware'
+import type { SiweMessage } from 'viem/siwe'
 
 async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<SimulationResult | ErrorResult>
+  res: NextApiResponse<SimulationResult | ErrorResult>,
+  _session: SiweMessage,
+  _membership: DaoMembershipData
 ) {
   if (req.method !== 'POST') {
     return res.status(405).send({ error: 'Only POST requests allowed' })
@@ -32,4 +36,4 @@ async function handler(
   }
 }
 
-export default handler
+export default withDaoAuth(handler)

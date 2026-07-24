@@ -10,6 +10,7 @@ import { Address, isAddress } from 'viem'
 import { InvalidRequestError } from './errors'
 
 export type SimulationRequestBody = {
+  tokenAddress: Address
   treasuryAddress: Address
   chainId: CHAIN_ID
   targets: Address[]
@@ -43,7 +44,7 @@ const simulateTransaction = async ({
   targets,
   calldatas,
   values,
-}: SimulationRequestBody): Promise<SimulationOutput[]> => {
+}: Omit<SimulationRequestBody, 'tokenAddress'>): Promise<SimulationOutput[]> => {
   const simulation = await axios.post(
     `https://api.tenderly.co/api/v1/account/${TENDERLY_USER}/project/${TENDERLY_PROJECT}/simulate-bundle`,
     {
@@ -71,6 +72,7 @@ const simulateTransaction = async ({
 }
 
 export async function simulate({
+  tokenAddress: _tokenAddress, // Used by auth middleware, not needed in simulation
   treasuryAddress,
   chainId,
   targets,

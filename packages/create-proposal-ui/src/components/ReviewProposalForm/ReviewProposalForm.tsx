@@ -10,6 +10,7 @@ import { type Proposal } from '@buildeross/sdk/subgraph'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import {
+  type AddressType,
   ProposalState,
   type SimulationOutput,
   TransactionBundle,
@@ -276,7 +277,8 @@ export const ReviewProposalForm = ({
           setSimulating(true)
 
           const simulationResult = await simulateTransactions({
-            treasuryAddress: addresses.treasury,
+            tokenAddress: addresses.token as AddressType,
+            treasuryAddress: addresses.treasury as AddressType,
             chainId: chain.id,
             calldatas: calldata,
             values: transactionValues,
