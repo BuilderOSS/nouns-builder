@@ -27,6 +27,8 @@ export function useWagmiAuthSync(
 
   const prevAddressRef = useRef<string | undefined>(undefined)
   const fetchingRef = useRef(false)
+  const verificationSeqRef = useRef(0)
+  const queuedVerificationRef = useRef(false)
 
   // Core sync effect - handles the main state flow
   useEffect(() => {
@@ -95,12 +97,19 @@ export function useWagmiAuthSync(
 
   // Session verification
   const verifySession = useCallback(async () => {
-    if (fetchingRef.current) return
+    const requestId = ++verificationSeqRef.current
+
+    if (fetchingRef.current) {
+      queuedVerificationRef.current = true
+      return
+    }
 
     fetchingRef.current = true
     try {
       const response = await fetch('/api/siwe/me')
       const json = await response.json()
+
+      if (requestId !== verificationSeqRef.current) return
 
       const sessionAddress =
         typeof json.address === 'string' ? json.address.toLowerCase() : undefined
@@ -116,11 +125,17 @@ export function useWagmiAuthSync(
         setRainbowKitAuthStatus(newStatus)
       }
     } catch {
+      if (requestId !== verificationSeqRef.current) return
+
       if (rainbowKitAuthStatus !== 'unauthenticated') {
         setRainbowKitAuthStatus('unauthenticated')
       }
     } finally {
       fetchingRef.current = false
+      if (queuedVerificationRef.current) {
+        queuedVerificationRef.current = false
+        void verifySession()
+      }
     }
   }, [address, rainbowKitAuthStatus, setRainbowKitAuthStatus])
 

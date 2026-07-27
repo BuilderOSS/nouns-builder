@@ -1,10 +1,14 @@
 import { getDAOMembership } from '@buildeross/sdk'
-import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import { type AddressType, CHAIN_ID } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { type Address } from 'viem'
+import { type Address, isAddress } from 'viem'
 import type { SiweMessage } from 'viem/siwe'
 
 import { withAuth } from './authMiddleware'
+
+const VALID_CHAIN_IDS = new Set<CHAIN_ID>(
+  Object.values(CHAIN_ID).filter((value): value is CHAIN_ID => typeof value === 'number')
+)
 
 export interface DaoMembershipData {
   userAddress: Address
@@ -55,10 +59,35 @@ export function withDaoAuth(
         }
 
         // Validate required parameters
-        if (!tokenAddress || !treasuryAddress || !chainId) {
+        if (
+          typeof tokenAddress !== 'string' ||
+          typeof treasuryAddress !== 'string' ||
+          typeof chainId !== 'number'
+        ) {
           return res.status(400).json({
             error: 'Bad Request',
             message: 'Request must include tokenAddress, treasuryAddress, and chainId',
+          })
+        }
+
+        if (!VALID_CHAIN_IDS.has(chainId)) {
+          return res.status(400).json({
+            error: 'Bad Request',
+            message: 'Invalid chain ID',
+          })
+        }
+
+        if (!isAddress(tokenAddress, { strict: false })) {
+          return res.status(400).json({
+            error: 'Bad Request',
+            message: 'tokenAddress must be a valid Ethereum address',
+          })
+        }
+
+        if (!isAddress(treasuryAddress, { strict: false })) {
+          return res.status(400).json({
+            error: 'Bad Request',
+            message: 'treasuryAddress must be a valid Ethereum address',
           })
         }
 
