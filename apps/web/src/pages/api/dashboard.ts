@@ -1,7 +1,7 @@
 import type { AddressType } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { fetchDashboardDataService, getDashboardTtl } from 'src/services/dashboardService'
-import { withAuth } from 'src/utils/api/authMiddleware'
+import { type AuthContext, withAuth } from 'src/utils/api/authMiddleware'
 import { withCors } from 'src/utils/api/cors'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 import { isAddress } from 'viem'
@@ -9,7 +9,7 @@ import { isAddress } from 'viem'
 async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
-  session: { address: string }
+  authContext: AuthContext
 ) {
   const startTime = Date.now()
 
@@ -25,7 +25,8 @@ async function handler(
   }
 
   // Verify the authenticated user is requesting their own dashboard
-  if (address.toLowerCase() !== session.address.toLowerCase()) {
+  // Use effectiveAddress (Safe if in Safe mode, else EOA)
+  if (address.toLowerCase() !== authContext.effectiveAddress.toLowerCase()) {
     return res
       .status(403)
       .json({ error: 'Forbidden: You can only access your own dashboard' })

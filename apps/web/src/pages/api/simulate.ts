@@ -4,12 +4,10 @@ import { InvalidRequestError } from 'src/services/errors'
 import { simulate } from 'src/services/simulationService'
 import { type DaoMembershipData, withDaoAuth } from 'src/utils/api/daoAuthMiddleware'
 import { withRateLimit } from 'src/utils/api/rateLimit'
-import type { SiweMessage } from 'viem/siwe'
 
 async function handler(
   req: NextApiRequest,
   res: NextApiResponse<SimulationResult | ErrorResult>,
-  _session: SiweMessage,
   _membership: DaoMembershipData
 ) {
   try {

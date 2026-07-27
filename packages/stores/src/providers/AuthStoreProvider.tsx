@@ -1,17 +1,13 @@
-import { createContext, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 
-import { getAuthStore } from '../createAuthStore'
-
-type AuthStoreContextType = {
-  store: ReturnType<typeof getAuthStore>
-}
-
-export const AuthStoreContext = createContext<AuthStoreContextType | null>(null)
-
+/**
+ * AuthStoreProvider - Kept for backward compatibility
+ *
+ * Since AuthStore is now a simple derived hook (not a Zustand store),
+ * this provider doesn't need to do anything except pass through children.
+ *
+ * This can be removed in a future cleanup once all imports are updated.
+ */
 export const AuthStoreProvider = ({ children }: { children: ReactNode }) => {
-  const store = getAuthStore()
-
-  return (
-    <AuthStoreContext.Provider value={{ store }}>{children}</AuthStoreContext.Provider>
-  )
+  return <>{children}</>
 }

@@ -34,6 +34,7 @@
     "@vanilla-extract/next-plugin": "^2.4.11",
     "@vanilla-extract/recipes": "^0.5.7",
     "@vercel/og": "^0.6.8",
+    "@wagmi/core": "^2.22.1",
     "@zoralabs/coins-sdk": "^0.4.3",
     "@zoralabs/protocol-deployments": "^0.7.2",
     "ai": "^5.0.76",

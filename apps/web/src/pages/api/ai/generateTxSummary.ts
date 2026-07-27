@@ -15,7 +15,7 @@ import { walletSnippet } from '@buildeross/utils/helpers'
 import * as Sentry from '@sentry/nextjs'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { AI_MODEL, generateCachedAiText } from 'src/utils/api/ai/summaries'
-import { withAuth } from 'src/utils/api/authMiddleware'
+import { type AuthContext, withAuth } from 'src/utils/api/authMiddleware'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 
 type RequestBody = {
@@ -269,7 +269,7 @@ Respond with 1-2 concise sentences describing this transaction, and nothing else
 async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
-  _session: { address: string }
+  _authContext: AuthContext
 ) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
