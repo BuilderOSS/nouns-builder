@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { InvalidRequestError } from 'src/services/errors'
 import { simulate } from 'src/services/simulationService'
 import { type DaoMembershipData, withDaoAuth } from 'src/utils/api/daoAuthMiddleware'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 import type { SiweMessage } from 'viem/siwe'
 
 async function handler(
@@ -36,4 +37,8 @@ async function handler(
   }
 }
 
-export default withDaoAuth(handler)
+export default withRateLimit({
+  maxRequests: 20,
+  windowSeconds: 60,
+  keyPrefix: 'simulate',
+})(withDaoAuth(handler))

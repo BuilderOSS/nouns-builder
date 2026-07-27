@@ -5,6 +5,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { InvalidRequestError } from 'src/services/errors'
 import { fetchFeedDataService, getTtlByScope } from 'src/services/feedService'
 import { withAuth } from 'src/utils/api/authMiddleware'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 import { isAddress } from 'viem'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -186,4 +187,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withAuth(handler)
+export default withRateLimit({
+  maxRequests: 60,
+  windowSeconds: 60,
+  keyPrefix: 'feed',
+})(withAuth(handler))

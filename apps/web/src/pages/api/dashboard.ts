@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import { fetchDashboardDataService, getDashboardTtl } from 'src/services/dashboardService'
 import { withAuth } from 'src/utils/api/authMiddleware'
 import { withCors } from 'src/utils/api/cors'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 import { isAddress } from 'viem'
 
 async function handler(
@@ -77,4 +78,10 @@ async function handler(
   }
 }
 
-export default withCors()(withAuth(handler))
+export default withCors()(
+  withRateLimit({
+    maxRequests: 60,
+    windowSeconds: 60,
+    keyPrefix: 'dashboard',
+  })(withAuth(handler))
+)

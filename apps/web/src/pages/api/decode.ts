@@ -6,6 +6,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { decodeTransaction } from 'src/services/abiService'
 import { InvalidRequestError, NotFoundError } from 'src/services/errors'
 import { withCors } from 'src/utils/api/cors'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 import { isHex } from 'viem'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -50,4 +51,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default withCors({ allowedMethods: ['POST'] })(handler)
+export default withCors({ allowedMethods: ['POST'] })(
+  withRateLimit({
+    maxRequests: 20,
+    windowSeconds: 60,
+    keyPrefix: 'decode',
+  })(handler)
+)
