@@ -1,5 +1,5 @@
 // Re-export hooks (maintains existing import paths)
-export { useAuthStore, useIsAuthenticated } from './hooks/useAuthStore'
+export { useAuthStore } from './hooks/useAuthStore'
 export * from './hooks/useCandidateStore'
 export { type ChainStoreWithHydration, useChainStore } from './hooks/useChainStore'
 export { useDaoStore } from './hooks/useDaoStore'

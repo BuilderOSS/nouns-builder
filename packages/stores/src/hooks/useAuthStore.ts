@@ -22,7 +22,3 @@ export function useAuthStore<T>(selector?: (s: AuthStoreProps) => T): T | AuthSt
 
   return storeState
 }
-
-// Convenience computed selector
-export const useIsAuthenticated = () =>
-  useAuthStore((s) => s.isConnected && s.authStatus === 'authenticated')

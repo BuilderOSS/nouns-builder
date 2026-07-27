@@ -8,6 +8,7 @@ export type AuthStoreState = {
   isConnected: boolean
   authStatus: AuthStatus
   chainId: number | undefined
+  isAuthenticated: boolean
 }
 
 export type AuthStoreActions = {
@@ -25,10 +26,15 @@ const initialState: AuthStoreState = {
   isConnected: false,
   authStatus: 'loading',
   chainId: undefined,
+  isAuthenticated: false,
 }
 
-const createAuthState: StateCreator<AuthStoreProps> = (set) => ({
+const createAuthState: StateCreator<AuthStoreProps> = (set, get) => ({
   ...initialState,
+  get isAuthenticated() {
+    const state = get()
+    return state.isConnected && state.authStatus === 'authenticated'
+  },
   setAddress: (address) => set({ address }),
   setIsConnected: (isConnected) => set({ isConnected }),
   setAuthStatus: (authStatus) => set({ authStatus }),
