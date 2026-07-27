@@ -1,11 +1,15 @@
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { Proposal } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import {
+  useAuthStore,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { Flex } from '@buildeross/zord'
 import React, { Fragment, useMemo } from 'react'
 import { getAddress } from 'viem'
-import { useAccount } from 'wagmi'
 
 import { parseProposalTransactions } from '../../utils/parseProposalTransactions'
 import { OverwriteDraftModal } from '../OverwriteDraftModal'
@@ -27,7 +31,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   proposal,
   onNavigateToUpdateProposal,
 }) => {
-  const { address: userAddress } = useAccount()
+  const { address: userAddress, isAuthenticated } = useAuthStore()
   const addresses = useDaoStore((state) => state.addresses)
   const chain = useChainStore((state) => state.chain)
   const {
@@ -129,7 +133,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
     setShowOverwriteModal(false)
   }, [])
 
-  if (!userAddress) return <ConnectWalletAction />
+  if (!userAddress || !isAuthenticated) return <ConnectWalletAction />
   if (isLoading) return null
 
   return (

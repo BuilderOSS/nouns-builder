@@ -3,8 +3,8 @@ import { MOBILE_PROFILE_MENU_LAYER, NAV_BUTTON_LAYER } from '@buildeross/constan
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useUserDaos } from '@buildeross/hooks/useUserDaos'
 import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
-import { useChainStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
+import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { NetworkController } from '@buildeross/ui/NetworkController'
@@ -19,7 +19,7 @@ import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import { useDaoListPreferences } from 'src/hooks/useDaoListPreferences'
 import { profileStatBadge } from 'src/styles/profile.css'
 import { formatUnits } from 'viem'
-import { useAccount, useBalance } from 'wagmi'
+import { useBalance } from 'wagmi'
 
 import { ConnectButton } from '../ConnectButton'
 import {
@@ -130,7 +130,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onOpenMenu,
   onSetActiveDropdown,
 }) => {
-  const { address } = useAccount()
+  const { address, isAuthenticated } = useAuthStore()
   const { chain: selectedChain } = useChainStore()
   const { displayName, ensAvatar } = useEnsData(address || '')
   const { data: balance } = useBalance({
@@ -330,13 +330,15 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const renderNavLinks = () => (
     <>
       <Flex direction={'column'} gap={'x0'}>
-        <Link href={'/dashboard'}>
-          <Flex align="center" justify={'center'} py={'x2'}>
-            <Text cursor={'pointer'} fontWeight={'display'}>
-              Dashboard
-            </Text>
-          </Flex>
-        </Link>
+        {isAuthenticated && (
+          <Link href={'/dashboard'}>
+            <Flex align="center" justify={'center'} py={'x2'}>
+              <Text cursor={'pointer'} fontWeight={'display'}>
+                Dashboard
+              </Text>
+            </Flex>
+          </Link>
+        )}
         <Link href={'/explore'}>
           <Flex align="center" justify={'center'} py={'x2'}>
             <Text cursor={'pointer'} fontWeight={'display'}>

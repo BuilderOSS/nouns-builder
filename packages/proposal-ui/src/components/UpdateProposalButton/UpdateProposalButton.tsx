@@ -1,9 +1,8 @@
 import { useProposalState, useProposalTimeline } from '@buildeross/hooks'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType, BytesType } from '@buildeross/types'
 import { Tooltip } from '@buildeross/ui'
 import { Button, ButtonProps, Flex, Icon, Stack } from '@buildeross/zord'
-import { useAccount } from 'wagmi'
 
 export interface UpdateProposalButtonProps extends Omit<ButtonProps, 'onClick'> {
   proposalId: BytesType
@@ -19,7 +18,7 @@ export function UpdateProposalButton({
   candidateVersion,
   ...buttonProps
 }: UpdateProposalButtonProps) {
-  const { address: connectedAddress } = useAccount()
+  const { address: connectedAddress, isAuthenticated } = useAuthStore()
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
 
@@ -49,7 +48,7 @@ export function UpdateProposalButton({
   // Determine if user can update
   const isProposer =
     connectedAddress && proposerAddress.toLowerCase() === connectedAddress.toLowerCase()
-  const canUpdate = isUpdatable && isInUpdatablePeriod && isProposer
+  const canUpdate = isUpdatable && isInUpdatablePeriod && isProposer && isAuthenticated
 
   // Don't show button if proposal is not updatable
   if (!isUpdatable && !isLoading) {
@@ -64,6 +63,8 @@ export function UpdateProposalButton({
   // Generate tooltip message when button is disabled
   const getDisabledReason = (): string | undefined => {
     if (isLoading) return undefined
+    if (!connectedAddress) return 'Connect wallet to update proposals'
+    if (!isAuthenticated) return 'Sign in to update proposals'
     if (!isProposer) return 'Only the proposer can update this proposal'
     if (!isInUpdatablePeriod) {
       if (updateDeadline) {
