@@ -1,20 +1,10 @@
-import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { getDAOAddresses } from '@buildeross/sdk'
+import { getDAOMembership } from '@buildeross/sdk'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { type Address, createPublicClient, http } from 'viem'
+import { type Address } from 'viem'
 import type { SiweMessage } from 'viem/siwe'
 
 import { withAuth } from './authMiddleware'
-
-// Helper to get chain from chain ID
-const getChain = (chainId: CHAIN_ID) => {
-  const chain = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === chainId)
-  if (!chain) {
-    throw new Error(`Unsupported chain ID: ${chainId}`)
-  }
-  return chain
-}
 
 export interface DaoMembershipData {
   userAddress: Address
@@ -72,15 +62,23 @@ export function withDaoAuth(
           })
         }
 
-        // Get DAO addresses from Manager contract
-        const daoAddresses = await getDAOAddresses(chainId, tokenAddress as AddressType)
+        const userAddress = session.address as Address
 
-        if (!daoAddresses) {
+        // Get DAO membership data via multicall (3 contract reads in 1 RPC call)
+        const membershipData = await getDAOMembership(
+          chainId,
+          tokenAddress as AddressType,
+          userAddress as AddressType
+        )
+
+        if (!membershipData) {
           return res.status(404).json({
             error: 'Not Found',
             message: 'DAO not found for the specified token address',
           })
         }
+
+        const { daoAddresses, hasBalance, hasVotes, isMember } = membershipData
 
         // Validate treasury address matches the DAO
         if (daoAddresses.treasury.toLowerCase() !== treasuryAddress.toLowerCase()) {
@@ -89,56 +87,6 @@ export function withDaoAuth(
             message: 'Treasury address does not match the specified DAO token',
           })
         }
-
-        // Create public client for the chain
-        const chain = getChain(chainId)
-        const publicClient = createPublicClient({
-          chain,
-          transport: http(),
-        })
-
-        const userAddress = session.address as Address
-
-        // Check DAO membership via two methods:
-        // 1. balanceOf - direct token ownership
-        // 2. getVotes - voting power (includes delegated votes)
-
-        const tokenAbi = [
-          {
-            inputs: [{ name: 'account', type: 'address' }],
-            name: 'balanceOf',
-            outputs: [{ name: '', type: 'uint256' }],
-            stateMutability: 'view',
-            type: 'function',
-          },
-          {
-            inputs: [{ name: 'account', type: 'address' }],
-            name: 'getVotes',
-            outputs: [{ name: '', type: 'uint256' }],
-            stateMutability: 'view',
-            type: 'function',
-          },
-        ] as const
-
-        // Call both methods in parallel
-        const [balance, votes] = await Promise.all([
-          publicClient.readContract({
-            address: daoAddresses.token as Address,
-            abi: tokenAbi,
-            functionName: 'balanceOf',
-            args: [userAddress],
-          }),
-          publicClient.readContract({
-            address: daoAddresses.token as Address,
-            abi: tokenAbi,
-            functionName: 'getVotes',
-            args: [userAddress],
-          }),
-        ])
-
-        const hasBalance = balance > 0n
-        const hasVotes = votes > 0n
-        const isMember = hasBalance || hasVotes
 
         const membership: DaoMembershipData = {
           userAddress,
