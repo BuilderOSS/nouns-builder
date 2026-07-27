@@ -19,7 +19,7 @@ import 'react-mde/lib/styles/css/react-mde-all.css'
 import 'src/styles/react-mde-theme.css'
 
 import { VercelAnalytics } from '@buildeross/analytics'
-import { type AuthStatus, AuthStoreProvider, useAuthStore } from '@buildeross/stores'
+import { AuthStoreProvider, getAuthStore } from '@buildeross/stores'
 import { LinkComponentProvider } from '@buildeross/ui/LinkComponentProvider'
 import { NetworkController } from '@buildeross/ui/NetworkController'
 import { vars } from '@buildeross/zord'
@@ -34,22 +34,16 @@ import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
 import Link from 'next/link'
 import NextNProgress from 'nextjs-progressbar'
-import {
-  type ReactElement,
-  type ReactNode,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { type ReactElement, type ReactNode, useMemo, useRef, useState } from 'react'
 import { Disclaimer } from 'src/components/Disclaimer'
 import { FrameProvider } from 'src/components/FrameProvider'
 import { LinksProvider } from 'src/components/LinksProvider'
+import { useWagmiAuthSync } from 'src/hooks/useWagmiAuthSync'
 import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { SWRConfig } from 'swr'
 import { createSiweMessage } from 'viem/siwe'
-import { useAccount, WagmiProvider } from 'wagmi'
+import { WagmiProvider } from 'wagmi'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -74,53 +68,12 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page)
   const fallback = pageProps?.fallback ?? {}
 
-  // Sync wagmi state to auth store
-  const { address, isConnected, chain } = useAccount()
-  const { setAddress, setIsConnected, setChainId, setAuthStatus } = useAuthStore()
-
-  useEffect(() => {
-    setAddress(address)
-    setIsConnected(isConnected)
-    setChainId(chain?.id)
-  }, [address, isConnected, chain?.id, setAddress, setIsConnected, setChainId])
-
-  const fetchingStatusRef = useRef(false)
   const verifyingRef = useRef(false)
   const [rainbowKitAuthStatus, setRainbowKitAuthStatus] =
     useState<AuthenticationStatus>('loading')
 
-  // Sync RainbowKit auth status to store
-  useEffect(() => {
-    setAuthStatus(rainbowKitAuthStatus as AuthStatus)
-  }, [rainbowKitAuthStatus, setAuthStatus])
-
-  // Fetch user when page loads or window is focused
-  useEffect(() => {
-    const fetchStatus = async () => {
-      if (fetchingStatusRef.current || verifyingRef.current) {
-        return
-      }
-
-      fetchingStatusRef.current = true
-
-      try {
-        const response = await fetch('/api/siwe/me')
-        const json = await response.json()
-        setRainbowKitAuthStatus(json.address ? 'authenticated' : 'unauthenticated')
-      } catch (_error) {
-        setRainbowKitAuthStatus('unauthenticated')
-      } finally {
-        fetchingStatusRef.current = false
-      }
-    }
-
-    // 1. page loads
-    fetchStatus()
-
-    // 2. window is focused (in case user logs out of another window)
-    window.addEventListener('focus', fetchStatus)
-    return () => window.removeEventListener('focus', fetchStatus)
-  }, [])
+  // Single hook handles all wagmi <-> AuthStore synchronization
+  useWagmiAuthSync(rainbowKitAuthStatus, setRainbowKitAuthStatus)
 
   const authAdapter = useMemo(() => {
     return createAuthenticationAdapter({
@@ -144,6 +97,10 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
       verify: async ({ message, signature }) => {
         verifyingRef.current = true
 
+        // Access store directly to avoid hooks in useMemo
+        const { setAuthenticating } = getAuthStore().getState()
+        setAuthenticating(true)
+
         try {
           const response = await fetch('/api/siwe/verify', {
             method: 'POST',
@@ -155,11 +112,14 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
 
           if (authenticated) {
             setRainbowKitAuthStatus('authenticated')
+          } else {
+            setAuthenticating(false)
           }
 
           return authenticated
         } catch (error) {
           console.error('Error verifying signature', error)
+          setAuthenticating(false)
           return false
         } finally {
           verifyingRef.current = false
@@ -168,10 +128,15 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
 
       signOut: async () => {
         setRainbowKitAuthStatus('unauthenticated')
+
+        // Access store directly to avoid hooks in useMemo
+        const { reset } = getAuthStore().getState()
+        reset()
+
         await fetch('/api/siwe/logout')
       },
     })
-  }, [])
+  }, [setRainbowKitAuthStatus])
 
   return (
     <RainbowKitAuthenticationProvider adapter={authAdapter} status={rainbowKitAuthStatus}>

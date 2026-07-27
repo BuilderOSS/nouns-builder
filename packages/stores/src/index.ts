@@ -7,7 +7,6 @@ export * from './hooks/useProposalStore'
 
 // Export store factories
 export {
-  type AuthStatus,
   type AuthStoreActions,
   type AuthStoreProps,
   type AuthStoreState,
