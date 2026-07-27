@@ -1,16 +1,11 @@
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCachedNftMetadata } from 'src/services/alchemyService'
-import { withAuth } from 'src/utils/api/authMiddleware'
 import { withCors } from 'src/utils/api/cors'
-import { withRateLimit } from 'src/utils/api/rateLimit'
+import { withTieredRateLimit } from 'src/utils/api/rateLimit'
 import { isAddress } from 'viem'
 
-async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  _session: { address: string }
-) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { chainId, contractAddress, tokenId } = req.query
 
   if (!chainId || !contractAddress || !tokenId) {
@@ -60,7 +55,11 @@ async function handler(
 }
 
 export default withCors()(
-  withRateLimit({
+  withTieredRateLimit({
     keyPrefix: 'alchemy:nftMetadata',
-  })(withAuth(handler))
+    anonymousMaxRequests: 3,
+    anonymousWindowSeconds: 60,
+    authenticatedMaxRequests: 30,
+    authenticatedWindowSeconds: 60,
+  })(handler)
 )

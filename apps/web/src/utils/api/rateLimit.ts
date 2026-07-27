@@ -1,6 +1,8 @@
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
 import { getRedisConnection } from 'src/services/redisConnection'
 
+import { getSession } from './authMiddleware'
+
 interface RateLimitOptions {
   /**
    * Maximum number of requests allowed within the time window
@@ -19,6 +21,44 @@ interface RateLimitOptions {
    * @default "api"
    */
   keyPrefix: string
+}
+
+interface TieredRateLimitOptions {
+  /**
+   * Shared key prefix for this endpoint family
+   */
+  keyPrefix: string
+
+  /**
+   * Anonymous request budget
+   */
+  anonymousMaxRequests?: number
+
+  /**
+   * Anonymous time window in seconds
+   */
+  anonymousWindowSeconds?: number
+
+  /**
+   * Authenticated request budget
+   */
+  authenticatedMaxRequests?: number
+
+  /**
+   * Authenticated time window in seconds
+   */
+  authenticatedWindowSeconds?: number
+}
+
+const getClientIp = (req: NextApiRequest) => {
+  const xff = req.headers['x-forwarded-for'] ?? req.headers['x-real-ip']
+  const rawIp = Array.isArray(xff)
+    ? xff[0]
+    : typeof xff === 'string'
+      ? xff.split(',')[0]?.trim()
+      : (req.socket.remoteAddress ?? 'unknown')
+
+  return rawIp || 'unknown'
 }
 
 /**
@@ -88,6 +128,74 @@ export const withRateLimit = ({
       } catch (error) {
         console.error('Rate limiting error:', error)
         // On rate limiting errors, continue without blocking (fail open)
+        return handler(req, res)
+      }
+    }) as T
+  }
+}
+
+export const withTieredRateLimit = ({
+  keyPrefix,
+  anonymousMaxRequests = 5,
+  anonymousWindowSeconds = 60,
+  authenticatedMaxRequests = 60,
+  authenticatedWindowSeconds = 60,
+}: TieredRateLimitOptions) => {
+  return <T extends NextApiHandler>(handler: T): T => {
+    return (async (req: NextApiRequest, res: NextApiResponse) => {
+      try {
+        const redisConnection = getRedisConnection()
+
+        // Skip rate limiting if Redis is not available
+        if (!redisConnection) {
+          console.warn('Rate limiting skipped: Redis connection not available')
+          return handler(req, res)
+        }
+
+        const route = req.url?.split('?')[0] ?? ''
+        const clientIp = getClientIp(req)
+        const session = await getSession(req, res)
+        const isAuthenticated = !!session?.address
+        const tier = isAuthenticated ? 'auth' : 'anon'
+        const identity = isAuthenticated ? session.address.toLowerCase() : clientIp
+        const maxRequests = isAuthenticated
+          ? authenticatedMaxRequests
+          : anonymousMaxRequests
+        const windowSeconds = isAuthenticated
+          ? authenticatedWindowSeconds
+          : anonymousWindowSeconds
+
+        const rateLimitKey = `${keyPrefix}:ratelimit:${route}:${tier}:${identity}`
+        const requests = await redisConnection.incr(rateLimitKey)
+
+        if (requests === 1) {
+          await redisConnection.expire(rateLimitKey, windowSeconds)
+        }
+
+        if (requests > maxRequests) {
+          res.setHeader('Retry-After', windowSeconds.toString())
+          res.status(429).json({
+            error: 'Rate limit exceeded',
+            retryAfter: windowSeconds,
+            limit: maxRequests,
+            windowSeconds,
+            tier,
+          })
+          return
+        }
+
+        res.setHeader('X-RateLimit-Limit', maxRequests.toString())
+        res.setHeader(
+          'X-RateLimit-Remaining',
+          Math.max(0, maxRequests - requests).toString()
+        )
+        res.setHeader('X-RateLimit-Tier', tier)
+        const resetAt = Math.floor(Date.now() / 1000) + windowSeconds
+        res.setHeader('X-RateLimit-Reset', resetAt.toString())
+
+        return handler(req, res)
+      } catch (error) {
+        console.error('Rate limiting error:', error)
         return handler(req, res)
       }
     }) as T
