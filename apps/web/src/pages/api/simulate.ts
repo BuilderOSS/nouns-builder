@@ -12,10 +12,6 @@ async function handler(
   _session: SiweMessage,
   _membership: DaoMembershipData
 ) {
-  if (req.method !== 'POST') {
-    return res.status(405).send({ error: 'Only POST requests allowed' })
-  }
-
   try {
     const result = await simulate(req.body)
     return res.status(200).json(result)
@@ -37,8 +33,19 @@ async function handler(
   }
 }
 
-export default withRateLimit({
+const authedHandler = withRateLimit({
   maxRequests: 20,
   windowSeconds: 60,
   keyPrefix: 'simulate',
 })(withDaoAuth(handler))
+
+export default async function simulateRoute(
+  req: NextApiRequest,
+  res: NextApiResponse<SimulationResult | ErrorResult>
+) {
+  if (req.method !== 'POST') {
+    return res.status(405).send({ error: 'Only POST requests allowed' })
+  }
+
+  return authedHandler(req, res)
+}

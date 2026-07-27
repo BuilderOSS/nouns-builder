@@ -47,6 +47,10 @@ export function useWagmiAuthSync(
     if (prevAddressRef.current && prevAddressRef.current !== address) {
       reset()
       setRainbowKitAuthStatus('unauthenticated')
+      prevAddressRef.current = address
+
+      void fetch('/api/siwe/logout', { method: 'POST' })
+      return
     }
     prevAddressRef.current = address
 
@@ -98,8 +102,16 @@ export function useWagmiAuthSync(
       const response = await fetch('/api/siwe/me')
       const json = await response.json()
 
-      // Only update if status actually changed
-      const newStatus = json.address ? 'authenticated' : 'unauthenticated'
+      const sessionAddress =
+        typeof json.address === 'string' ? json.address.toLowerCase() : undefined
+      const connectedAddress = address?.toLowerCase()
+
+      // Only consider the session authenticated when it matches the connected wallet.
+      const newStatus =
+        sessionAddress && connectedAddress && sessionAddress === connectedAddress
+          ? 'authenticated'
+          : 'unauthenticated'
+
       if (newStatus !== rainbowKitAuthStatus) {
         setRainbowKitAuthStatus(newStatus)
       }
@@ -110,7 +122,7 @@ export function useWagmiAuthSync(
     } finally {
       fetchingRef.current = false
     }
-  }, [rainbowKitAuthStatus, setRainbowKitAuthStatus])
+  }, [address, rainbowKitAuthStatus, setRainbowKitAuthStatus])
 
   // Initial check and window focus
   useEffect(() => {

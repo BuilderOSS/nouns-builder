@@ -108,7 +108,8 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
             body: JSON.stringify({ message, signature }),
           })
 
-          const authenticated = Boolean(response.ok)
+          const body = (await response.json()) as { ok?: boolean }
+          const authenticated = response.ok && body.ok === true
 
           if (authenticated) {
             setRainbowKitAuthStatus('authenticated')
