@@ -1,18 +1,12 @@
 import { auctionAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
-import { useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, Chain } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text, vars } from '@buildeross/zord'
 import React, { useState } from 'react'
-import {
-  useAccount,
-  useConfig,
-  useReadContract,
-  useSimulateContract,
-  useWriteContract,
-} from 'wagmi'
+import { useConfig, useReadContract, useSimulateContract, useWriteContract } from 'wagmi'
 import { readContract, waitForTransactionReceipt } from 'wagmi/actions'
 
 import {
@@ -41,7 +35,7 @@ export const PreAuction: React.FC<PreAuctionProps> = ({
   remainingTokensInReserve,
   openMinterModal,
 }) => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const config = useConfig()
   const { addresses } = useDaoStore()
 

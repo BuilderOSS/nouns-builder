@@ -1,9 +1,9 @@
 import { useDashboardData } from '@buildeross/hooks/useDashboardData'
 import { useInterval } from '@buildeross/hooks/useInterval'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
+import { useAuthStore } from '@buildeross/stores'
 import { Flex, Stack } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
-import { useAccount } from 'wagmi'
 
 import { UrgencyAlertItem } from './UrgencyAlertItem'
 import {
@@ -23,7 +23,7 @@ export const UrgencyAlerts: React.FC<UrgencyAlertsProps> = ({
   thresholds = DEFAULT_URGENCY_THRESHOLDS,
 }) => {
   const isMounted = useIsMounted()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { daos } = useDashboardData({ address, enabled: !!address })
   const { dismissedIds, dismissAlert } = useDismissedUrgencyAlerts(address)
   const [now, setNow] = useState(() => Math.floor(Date.now() / 1000))

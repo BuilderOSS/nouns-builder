@@ -4,7 +4,12 @@ import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
 import { type GalleryItem, useGalleryItems } from '@buildeross/hooks/useGalleryItems'
 import { useNowSeconds } from '@buildeross/hooks/useNowSeconds'
 import { useVotes } from '@buildeross/hooks/useVotes'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import {
+  useAuthStore,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
 import { CHAIN_ID, ProposalCreateStage, TransactionType } from '@buildeross/types'
 import { DropdownSelect, type SelectOption } from '@buildeross/ui/DropdownSelect'
 import { DropMintWidget } from '@buildeross/ui/DropMintWidget'
@@ -21,7 +26,6 @@ import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import React, { useMemo, useState } from 'react'
 import { Address, formatEther } from 'viem'
-import { useAccount } from 'wagmi'
 
 import { CoinCard } from '../Cards/CoinCard'
 import { CreatorCoinSection } from '../Cards/CreatorCoinSection'
@@ -147,7 +151,7 @@ export const Gallery: React.FC<GalleryProps> = ({
     addresses: { token, governor },
   } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { getCoinCreateLink } = useLinks()
 
   const { startProposalDraft } = useProposalStore()

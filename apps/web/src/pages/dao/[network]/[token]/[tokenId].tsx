@@ -16,7 +16,7 @@ import { useGovernorVersion } from '@buildeross/hooks/useContractVersion'
 import { useGalleryItems } from '@buildeross/hooks/useGalleryItems'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
-import { DaoContractAddresses } from '@buildeross/stores'
+import { DaoContractAddresses, useAuthStore } from '@buildeross/stores'
 import { AddressType, Chain, CHAIN_ID, ProposalCreateStage } from '@buildeross/types'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
@@ -30,7 +30,6 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { DaoOgMetadata } from 'src/pages/api/og/dao'
 import { isAddress } from 'viem'
-import { useAccount } from 'wagmi'
 
 interface TokenPageProps {
   collection: AddressType
@@ -52,7 +51,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
 }) => {
   const { query, push, pathname } = useRouter()
 
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId) as Chain
 

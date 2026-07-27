@@ -1,9 +1,8 @@
 import { type EscrowInstanceData, useInvoiceData } from '@buildeross/hooks/useInvoiceData'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { Proposal } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { Spinner } from '@buildeross/zord'
-import { useAccount } from 'wagmi'
 
 import { Section } from '../Section'
 import { EscrowInstance } from './EscrowInstance'
@@ -19,7 +18,7 @@ export const MilestoneDetails = ({
 }: MilestoneDetailsProps) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   const { hasThreshold } = useVotes({
     chainId: chain.id,

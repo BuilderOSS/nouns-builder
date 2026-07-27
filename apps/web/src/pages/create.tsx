@@ -11,7 +11,7 @@ import {
   VetoForm,
 } from '@buildeross/create-dao-ui'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
-import { useChainStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { Uploading } from '@buildeross/ui/Uploading'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -20,13 +20,12 @@ import React from 'react'
 import { Meta } from 'src/components/Meta'
 import { getCreateDaoLayout } from 'src/layouts/CreateDaoLayout'
 import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/create.css'
-import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
 
 const CreatePage: NextPageWithLayout = () => {
   const { activeSection, isUploadingToIPFS, ipfsUploadProgress } = useFormStore()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const chain = useChainStore((x) => x.chain)
 
   const { isGnosisSafe } = useIsGnosisSafe(address, chain.id)

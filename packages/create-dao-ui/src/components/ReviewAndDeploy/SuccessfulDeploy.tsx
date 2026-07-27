@@ -1,6 +1,6 @@
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -10,7 +10,7 @@ import {
 } from '@buildeross/utils/transformFileProperties'
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
-import { useAccount, useConfig, useReadContract } from 'wagmi'
+import { useConfig, useReadContract } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
@@ -70,7 +70,7 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
   } = useDaoStore()
   const [isPendingTransaction, setIsPendingTransaction] = useState<boolean>(false)
   const [deploymentError, setDeploymentError] = useState<string | undefined>()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   const { data: tokenOwner } = useReadContract({
     query: {

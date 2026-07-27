@@ -1,9 +1,9 @@
 import { useFeed } from '@buildeross/hooks'
 import { FeedEventType } from '@buildeross/sdk/subgraph'
+import { useAuthStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID, FeedItem as FeedItemType } from '@buildeross/types'
 import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useAccount } from 'wagmi'
 
 import { FeedFiltersModal } from './FeedFiltersModal'
 import { FeedItem } from './FeedItem'
@@ -92,7 +92,7 @@ export const Feed: React.FC<FeedProps> = (props) => {
   const externalFilterMode = isExternalFilterMode(props)
 
   // Internal filter state (only used if not in external mode)
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const filterStore = useFeedFiltersStore(externalFilterMode ? undefined : address)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
 
