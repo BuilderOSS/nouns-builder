@@ -19,6 +19,7 @@ import 'react-mde/lib/styles/css/react-mde-all.css'
 import 'src/styles/react-mde-theme.css'
 
 import { VercelAnalytics } from '@buildeross/analytics'
+import { type AuthStatus, AuthStoreProvider, useAuthStore } from '@buildeross/stores'
 import { LinkComponentProvider } from '@buildeross/ui/LinkComponentProvider'
 import { NetworkController } from '@buildeross/ui/NetworkController'
 import { vars } from '@buildeross/zord'
@@ -48,7 +49,7 @@ import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { SWRConfig } from 'swr'
 import { createSiweMessage } from 'viem/siwe'
-import { WagmiProvider } from 'wagmi'
+import { useAccount, WagmiProvider } from 'wagmi'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,13 +70,29 @@ type AppPropsWithLayout = AppProps & {
   Component: NextPageWithLayout
 }
 
-function App({ Component, pageProps, err }: AppPropsWithLayout) {
+function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page)
   const fallback = pageProps?.fallback ?? {}
 
+  // Sync wagmi state to auth store
+  const { address, isConnected, chain } = useAccount()
+  const { setAddress, setIsConnected, setChainId, setAuthStatus } = useAuthStore()
+
+  useEffect(() => {
+    setAddress(address)
+    setIsConnected(isConnected)
+    setChainId(chain?.id)
+  }, [address, isConnected, chain?.id, setAddress, setIsConnected, setChainId])
+
   const fetchingStatusRef = useRef(false)
   const verifyingRef = useRef(false)
-  const [authStatus, setAuthStatus] = useState<AuthenticationStatus>('loading')
+  const [rainbowKitAuthStatus, setRainbowKitAuthStatus] =
+    useState<AuthenticationStatus>('loading')
+
+  // Sync RainbowKit auth status to store
+  useEffect(() => {
+    setAuthStatus(rainbowKitAuthStatus as AuthStatus)
+  }, [rainbowKitAuthStatus, setAuthStatus])
 
   // Fetch user when page loads or window is focused
   useEffect(() => {
@@ -89,9 +106,9 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
       try {
         const response = await fetch('/api/siwe/me')
         const json = await response.json()
-        setAuthStatus(json.address ? 'authenticated' : 'unauthenticated')
+        setRainbowKitAuthStatus(json.address ? 'authenticated' : 'unauthenticated')
       } catch (_error) {
-        setAuthStatus('unauthenticated')
+        setRainbowKitAuthStatus('unauthenticated')
       } finally {
         fetchingStatusRef.current = false
       }
@@ -137,7 +154,7 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
           const authenticated = Boolean(response.ok)
 
           if (authenticated) {
-            setAuthStatus(authenticated ? 'authenticated' : 'unauthenticated')
+            setRainbowKitAuthStatus('authenticated')
           }
 
           return authenticated
@@ -150,41 +167,49 @@ function App({ Component, pageProps, err }: AppPropsWithLayout) {
       },
 
       signOut: async () => {
-        setAuthStatus('unauthenticated')
+        setRainbowKitAuthStatus('unauthenticated')
         await fetch('/api/siwe/logout')
       },
     })
   }, [])
 
   return (
+    <RainbowKitAuthenticationProvider adapter={authAdapter} status={rainbowKitAuthStatus}>
+      <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }}>
+        <SWRConfig value={{ fallback }}>
+          <NextNProgress
+            color={vars.color.primary}
+            startPosition={0.125}
+            stopDelayMs={200}
+            height={2}
+            showOnShallow={false}
+            options={{ showSpinner: false }}
+          />
+          <FrameProvider>
+            <AppThemeProvider>
+              <LinksProvider>
+                <LinkComponentProvider LinkComponent={Link}>
+                  {getLayout(<Component {...pageProps} err={err} />)}
+                </LinkComponentProvider>
+              </LinksProvider>
+            </AppThemeProvider>
+          </FrameProvider>
+        </SWRConfig>
+        <NetworkController.Mainnet>
+          <VercelAnalytics />
+        </NetworkController.Mainnet>
+      </RainbowKitProvider>
+    </RainbowKitAuthenticationProvider>
+  )
+}
+
+function App(props: AppPropsWithLayout) {
+  return (
     <WagmiProvider config={clientConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitAuthenticationProvider adapter={authAdapter} status={authStatus}>
-          <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }}>
-            <SWRConfig value={{ fallback }}>
-              <NextNProgress
-                color={vars.color.primary}
-                startPosition={0.125}
-                stopDelayMs={200}
-                height={2}
-                showOnShallow={false}
-                options={{ showSpinner: false }}
-              />
-              <FrameProvider>
-                <AppThemeProvider>
-                  <LinksProvider>
-                    <LinkComponentProvider LinkComponent={Link}>
-                      {getLayout(<Component {...pageProps} err={err} />)}
-                    </LinkComponentProvider>
-                  </LinksProvider>
-                </AppThemeProvider>
-              </FrameProvider>
-            </SWRConfig>
-            <NetworkController.Mainnet>
-              <VercelAnalytics />
-            </NetworkController.Mainnet>
-          </RainbowKitProvider>
-        </RainbowKitAuthenticationProvider>
+        <AuthStoreProvider>
+          <AppContent {...props} />
+        </AuthStoreProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )

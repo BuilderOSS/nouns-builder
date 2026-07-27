@@ -1,10 +1,18 @@
 // Re-export hooks (maintains existing import paths)
+export { useAuthStore, useIsAuthenticated } from './hooks/useAuthStore'
 export * from './hooks/useCandidateStore'
 export { type ChainStoreWithHydration, useChainStore } from './hooks/useChainStore'
 export { useDaoStore } from './hooks/useDaoStore'
 export * from './hooks/useProposalStore'
 
 // Export store factories
+export {
+  type AuthStatus,
+  type AuthStoreActions,
+  type AuthStoreProps,
+  type AuthStoreState,
+  getAuthStore,
+} from './createAuthStore'
 export {
   buildCandidateStoreNamespace,
   CANDIDATE_STORE_IDENTIFIER,
@@ -35,6 +43,7 @@ export {
 } from './createProposalStore'
 
 // Export providers
+export { AuthStoreProvider } from './providers/AuthStoreProvider'
 export { CandidateStoreProvider } from './providers/CandidateStoreProvider'
 export { ChainStoreProvider } from './providers/ChainStoreProvider'
 export { DaoStoreProvider } from './providers/DaoStoreProvider'
