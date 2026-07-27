@@ -55,5 +55,8 @@
     "test:fork": "turbo run test:fork",
     "type-check": "turbo run type-check",
     "version-packages": "changeset version"
+  },
+  "dependencies": {
+    "@wagmi/core": "^2.22.1"
   }
 }

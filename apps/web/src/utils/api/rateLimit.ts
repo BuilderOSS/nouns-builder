@@ -155,9 +155,9 @@ export const withTieredRateLimit = ({
         const route = req.url?.split('?')[0] ?? ''
         const clientIp = getClientIp(req)
         const session = await getSession(req, res)
-        const isAuthenticated = !!session?.address
+        const isAuthenticated = !!session?.siwe?.address
         const tier = isAuthenticated ? 'auth' : 'anon'
-        const identity = isAuthenticated ? session.address.toLowerCase() : clientIp
+        const identity = isAuthenticated ? session!.siwe!.address.toLowerCase() : clientIp
         const maxRequests = isAuthenticated
           ? authenticatedMaxRequests
           : anonymousMaxRequests
