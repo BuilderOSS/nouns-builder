@@ -104,6 +104,13 @@ export function useWagmiAuthSync(
       return
     }
 
+    // Wait for wagmi to hydrate before verifying
+    // If wallet is connected but address not loaded yet, skip verification
+    // The effect will re-run when address becomes available (dependency array includes address)
+    if (isConnected && !address) {
+      return
+    }
+
     fetchingRef.current = true
     try {
       const response = await fetch('/api/siwe/me')
@@ -137,7 +144,7 @@ export function useWagmiAuthSync(
         void verifySession()
       }
     }
-  }, [address, rainbowKitAuthStatus, setRainbowKitAuthStatus])
+  }, [address, isConnected, rainbowKitAuthStatus, setRainbowKitAuthStatus])
 
   // Initial check and window focus
   useEffect(() => {
