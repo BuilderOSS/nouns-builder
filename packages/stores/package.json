@@ -36,7 +36,8 @@
   "peerDependencies": {
     "@buildeross/constants": "0.3.2",
     "@buildeross/types": "0.3.2",
-    "react": "^19.2.1"
+    "react": "^19.2.1",
+    "wagmi": "^2.15.4"
   },
   "publishConfig": {
     "access": "public"
