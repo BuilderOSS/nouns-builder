@@ -2,7 +2,6 @@ import {
   AttestationParams,
   EAS_CONTRACT_ADDRESS,
   easAbi,
-  PROPDATE_SCHEMA,
   PROPDATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
@@ -19,11 +18,10 @@ import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { getErrorMessage } from '@buildeross/utils/errors'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
-import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { Field, FieldProps, Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { getAddress, type Hex, zeroHash } from 'viem'
+import { encodeAbiParameters, getAddress, type Hex, zeroHash } from 'viem'
 import { useConfig } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 import * as Yup from 'yup'
@@ -143,14 +141,15 @@ export const PropDateForm = ({
           messageType = MessageType.INLINE_JSON
         }
 
-        const schemaEncoder = new SchemaEncoder(PROPDATE_SCHEMA)
-
-        return schemaEncoder.encodeData([
-          { name: 'proposalId', value: values.proposalId as Hex, type: 'bytes32' },
-          { name: 'originalMessageId', value: originalMessageId, type: 'bytes32' },
-          { name: 'messageType', value: messageType, type: 'uint8' },
-          { name: 'message', value: message, type: 'string' },
-        ]) as Hex
+        return encodeAbiParameters(
+          [
+            { name: 'proposalId', type: 'bytes32' },
+            { name: 'originalMessageId', type: 'bytes32' },
+            { name: 'messageType', type: 'uint8' },
+            { name: 'message', type: 'string' },
+          ],
+          [values.proposalId as Hex, originalMessageId, messageType, message]
+        )
       })()
 
       const attestParams: AttestationParams = {

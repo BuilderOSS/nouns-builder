@@ -25,6 +25,8 @@ import {
   daoEditorSpacerActive,
   daoEditorSpacerLabel,
   profileDaoLink,
+  profileDaoLinkActive,
+  profileDaoFilterButton,
   profileHiddenDaoLink,
   profileStatBadge,
 } from 'src/styles/profile.css'
@@ -55,8 +57,11 @@ type RowMetric = {
 }
 
 type ProfileDaoListProps = {
+  headerAction?: React.ReactNode
   daos: ProfileDaoListItem[]
   isOwnProfile: boolean
+  activeDaoKeys?: string[]
+  onDaoClick?: (dao: ProfileDaoListItem) => void
   userAddress: string
 }
 
@@ -68,6 +73,7 @@ type ProfileDaoListRowProps = {
   isDragging: boolean
   isEditing: boolean
   isHidden: boolean
+  isSelected?: boolean
   isReorderable?: boolean
   insertGapLabel?: string
   isInsertGapActive: boolean
@@ -87,6 +93,7 @@ const ProfileDaoListRow = React.memo(
     isDragging,
     isEditing,
     isHidden,
+    isSelected = false,
     isReorderable = true,
     insertGapLabel,
     isInsertGapActive,
@@ -160,6 +167,7 @@ const ProfileDaoListRow = React.memo(
           }}
           className={[
             !isEditing ? profileDaoLink : undefined,
+            isSelected ? profileDaoLinkActive : undefined,
             isHidden ? profileHiddenDaoLink : undefined,
             isDragging ? daoEditorDragging : undefined,
           ]}
@@ -264,8 +272,11 @@ const getScrollableAncestor = (node: HTMLElement): HTMLElement | Window => {
 }
 
 export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
+  activeDaoKeys = [],
   daos,
+  headerAction,
   isOwnProfile,
+  onDaoClick,
   userAddress,
 }) => {
   const [isEditingDaos, setIsEditingDaos] = React.useState(false)
@@ -294,6 +305,10 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
   const chainSlugsById = React.useMemo(
     () => new Map(PUBLIC_DEFAULT_CHAINS.map((chain) => [chain.id, chain.slug])),
     []
+  )
+  const activeDaoKeySet = React.useMemo(
+    () => new Set(activeDaoKeys.map((daoKey) => daoKey.toLowerCase())),
+    [activeDaoKeys]
   )
 
   const sortedOrderedDaos = React.useMemo(
@@ -758,17 +773,20 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     <Flex ref={listRef} direction="column" gap="x3" w="100%">
       <Flex mb="x4" w="100%" align="center" justify="space-between" gap="x2">
         <Text fontWeight="display">DAOs</Text>
-        {isOwnProfile && daos.length > 0 ? (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={activeDragKey !== null}
-            onClick={() => setIsEditingDaos((current) => !current)}
-          >
-            <Icon id={isEditingDaos ? 'check' : 'pencil'} size="sm" />
-            {isEditingDaos ? 'Done' : 'Edit'}
-          </Button>
-        ) : null}
+        <Flex align="center" gap="x2">
+          {headerAction}
+          {isOwnProfile && daos.length > 0 ? (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={activeDragKey !== null}
+              onClick={() => setIsEditingDaos((current) => !current)}
+            >
+              <Icon id={isEditingDaos ? 'check' : 'pencil'} size="sm" />
+              {isEditingDaos ? 'Done' : 'Edit'}
+            </Button>
+          ) : null}
+        </Flex>
       </Flex>
 
       {daosForDisplay.map((dao, index) => {
@@ -784,6 +802,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
             isDragging={isDragging}
             isEditing={isEditingDaos}
             isHidden={isHidden}
+            isSelected={!isEditingDaos && activeDaoKeySet.has(daoKey.toLowerCase())}
             isReorderable={isEditingDaos}
             onMoveUp={isEditingDaos ? () => moveDaoToIndex(index, index - 1) : undefined}
             onMoveDown={
@@ -801,6 +820,14 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
           <Box key={daoKey}>
             {isEditingDaos ? (
               row
+            ) : onDaoClick ? (
+              <button
+                type="button"
+                className={profileDaoFilterButton}
+                onClick={() => onDaoClick(dao)}
+              >
+                {row}
+              </button>
             ) : (
               <Link
                 href={`/dao/${chainSlugsById.get(dao.chainId)}/${dao.collectionAddress}`}
@@ -852,6 +879,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
                   isDragging={false}
                   isEditing={isEditingDaos}
                   isHidden={true}
+                  isSelected={!isEditingDaos && activeDaoKeySet.has(daoKey.toLowerCase())}
                   isReorderable={false}
                   onMoveUp={undefined}
                   onMoveDown={undefined}
@@ -866,6 +894,14 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
                 <Box key={daoKey}>
                   {isEditingDaos ? (
                     row
+                  ) : onDaoClick ? (
+                    <button
+                      type="button"
+                      className={profileDaoFilterButton}
+                      onClick={() => onDaoClick(dao)}
+                    >
+                      {row}
+                    </button>
                   ) : (
                     <Link
                       href={`/dao/${chainSlugsById.get(dao.chainId)}/${dao.collectionAddress}`}

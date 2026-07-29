@@ -43,7 +43,6 @@ const queryClient = new QueryClient({
       // With SSR, we usually want to set some default staleTime
       // above 0 to avoid refetching immediately on the client
       staleTime: 5000,
-      refetchInterval: 5000,
     },
   },
 })

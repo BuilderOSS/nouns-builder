@@ -95,7 +95,7 @@
   "scripts": {
     "analyze": "ANALYZE=true next build",
     "build": "next build",
-    "clean": "node -e \"require('fs').rmSync('.next', { recursive: true, force: true }); require('fs').rmSync('.turbo', { recursive: true, force: true });\"",
+    "clean": "node -e \"const fs = require('fs'); const opts = { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }; fs.rmSync('.next', opts); fs.rmSync('.turbo', opts);\"",
     "dev": "pnpm clean && pnpm exec next dev",
     "lint": "pnpm type-check && eslint --fix .",
     "start": "next start",

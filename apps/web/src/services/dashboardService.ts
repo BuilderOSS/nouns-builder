@@ -35,12 +35,40 @@ function log(message: string, data?: any) {
   }
 }
 
+function formatErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error)
+
+  if (message.includes('Status: 429') || message.includes('over rate limit')) {
+    return 'RPC rate limited (429)'
+  }
+
+  return message.split('\n')[0] || message
+}
+
 /**
  * Generate cache key for user dashboard
  */
 function generateCacheKey(address: AddressType): string {
   const hash = keccak256(address).slice(0, 18)
   return `${CACHE_CONFIG.DASHBOARD_PREFIX}:${hash}`
+}
+
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  label: string
+): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout>
+
+  return Promise.race([
+    promise.finally(() => clearTimeout(timeout)),
+    new Promise<T>((_, reject) => {
+      timeout = setTimeout(
+        () => reject(new Error(`${label} timed out after ${timeoutMs}ms`)),
+        timeoutMs
+      )
+    }),
+  ])
 }
 
 /**
@@ -74,37 +102,50 @@ export type DashboardDaoWithState = Omit<DashboardDaoBase, 'proposals'> & {
   >
 }
 
+function emptyProposalStateDao(dao: DashboardDaoBase): DashboardDaoWithState {
+  return {
+    ...dao,
+    proposals: [],
+  }
+}
+
 /**
  * Fetch DAO proposal states with controlled concurrency
  */
 async function fetchDaoProposalState(
   dao: DashboardDaoBase
 ): Promise<DashboardDaoWithState> {
-  try {
-    // Use controlled concurrency to avoid overwhelming RPC
-    const proposalTasks = dao.proposals.map(
-      (proposal) => () =>
-        fetchProposalStateWithRetry(
-          dao.chainId,
-          proposal.dao.governorAddress,
-          proposal.proposalId
-        ).then((state) => ({ ...proposal, state }))
-    )
+  // Use serial proposal-state reads per DAO to avoid overwhelming public RPCs.
+  const proposalTasks = dao.proposals.map((proposal) => async () => {
+    try {
+      const state = await fetchProposalStateWithRetry(
+        dao.chainId,
+        proposal.dao.governorAddress,
+        proposal.proposalId,
+        0
+      )
 
-    const proposals = await executeConcurrently(proposalTasks)
+      return { ...proposal, state }
+    } catch (error) {
+      console.warn('Dashboard proposal state unavailable:', {
+        chainId: dao.chainId,
+        dao: dao.tokenAddress,
+        proposalId: proposal.proposalId,
+        error: formatErrorMessage(error),
+      })
 
-    return {
-      ...dao,
-      proposals: proposals.filter((proposal) =>
-        ACTIVE_PROPOSAL_STATES.includes(proposal.state)
-      ),
+      return null
     }
-  } catch (error: any) {
-    throw new Error(
-      error?.message
-        ? `RPC Error: ${error.message}`
-        : 'Error fetch Dashboard data from RPC'
-    )
+  })
+
+  const proposals = await executeConcurrently(proposalTasks, 1)
+
+  return {
+    ...dao,
+    proposals: proposals.filter(
+      (proposal): proposal is NonNullable<(typeof proposals)[number]> =>
+        !!proposal && ACTIVE_PROPOSAL_STATES.includes(proposal.state)
+    ),
   }
 }
 
@@ -120,7 +161,18 @@ async function fetchDashboardData(
 
     // Use controlled concurrency for DAO proposal state fetching
     const daoTasks = userDaos.map((dao) => () => fetchDaoProposalState(dao))
-    const resolved = await executeConcurrently(daoTasks)
+    const resolved = await withTimeout(
+      executeConcurrently(daoTasks),
+      8000,
+      'Dashboard proposal state enrichment'
+    ).catch((error) => {
+      console.warn('Dashboard proposal state enrichment unavailable:', {
+        address,
+        error: formatErrorMessage(error),
+      })
+
+      return userDaos.map(emptyProposalStateDao)
+    })
 
     return resolved
   } catch (error: any) {
