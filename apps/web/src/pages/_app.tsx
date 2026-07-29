@@ -49,7 +49,7 @@ import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { SWRConfig } from 'swr'
 import { createSiweMessage } from 'viem/siwe'
-import { WagmiProvider } from 'wagmi'
+import { useConfig, WagmiProvider } from 'wagmi'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +78,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const verifyingRef = useRef(false)
   const [rainbowKitAuthStatus, setRainbowKitAuthStatus] =
     useState<AuthenticationStatus>('loading')
+  const config = useConfig()
 
   // Simple session verification (RainbowKit pattern)
   useEffect(() => {
@@ -106,6 +107,27 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
     window.addEventListener('focus', verifySession)
     return () => window.removeEventListener('focus', verifySession)
   }, [])
+
+  // Cross-tab synchronization: detect when another tab clears wagmi storage
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      // Check if wagmi storage was cleared in another tab
+      if (e.key?.startsWith('wagmi.') && e.newValue === null) {
+        // Another tab disconnected - sync wagmi state immediately
+        config.setState((x) => ({
+          ...x,
+          connections: new Map(),
+          current: null,
+          status: 'disconnected',
+        }))
+        // Also clear auth status
+        setRainbowKitAuthStatus('unauthenticated')
+      }
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    return () => window.removeEventListener('storage', handleStorageChange)
+  }, [config])
 
   const authAdapter = useMemo(() => {
     return createAuthenticationAdapter({
