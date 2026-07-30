@@ -1,3 +1,4 @@
+import { getAddress } from 'viem'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -8,9 +9,10 @@ import {
   validateSplitRecipients,
 } from './splits'
 
-const A = '0xAbC0000000000000000000000000000000000001'
-const B = '0xAbC0000000000000000000000000000000000002'
-const C = '0xAbC0000000000000000000000000000000000003'
+// Lowercase so they pass strict (EIP-55) address validation.
+const A = '0xabc0000000000000000000000000000000000001'
+const B = '0xabc0000000000000000000000000000000000002'
+const C = '0xabc0000000000000000000000000000000000003'
 
 const rs = (list: Array<[string, number]>): SplitRecipient[] =>
   list.map(([address, percentAllocation]) => ({ address, percentAllocation }))
@@ -56,7 +58,7 @@ describe('validateSplitRecipients', () => {
     const errs = validateSplitRecipients(
       rs([
         [A, 50],
-        [A.toLowerCase(), 50],
+        [getAddress(A), 50], // same address, EIP-55 checksummed casing
       ])
     )
     expect(errs.some((e) => /Duplicate/.test(e.message))).toBe(true)
@@ -67,6 +69,26 @@ describe('validateSplitRecipients', () => {
       rs([
         [A, 33.33333],
         [B, 66.66667],
+      ])
+    )
+    expect(errs.some((e) => /decimal places/.test(e.message))).toBe(true)
+  })
+
+  it('rejects non-finite (NaN) allocations', () => {
+    const errs = validateSplitRecipients(
+      rs([
+        [A, Number('not-a-number')],
+        [B, 50],
+      ])
+    )
+    expect(errs.some((e) => /valid number/.test(e.message))).toBe(true)
+  })
+
+  it('rejects exponential-notation precision bypasses', () => {
+    const errs = validateSplitRecipients(
+      rs([
+        [A, 1e-7],
+        [B, 99.9999999],
       ])
     )
     expect(errs.some((e) => /decimal places/.test(e.message))).toBe(true)
@@ -101,6 +123,6 @@ describe('prepareSplitConfigForSDK', () => {
 
 describe('formatSplitAddress', () => {
   it('shortens an address', () => {
-    expect(formatSplitAddress(A)).toBe('0xAbC0...0001')
+    expect(formatSplitAddress(A)).toBe('0xabc0...0001')
   })
 })

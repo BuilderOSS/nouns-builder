@@ -32,7 +32,16 @@ const MAX_RECIPIENTS = 500
 const MAX_DECIMALS = 4
 const PERCENT_EPSILON = 0.0001
 
-const decimalPlaces = (n: number): number => (n.toString().split('.')[1] || '').length
+/**
+ * True when `n` carries more than MAX_DECIMALS decimal places. Uses a scaled
+ * integer comparison so exponential notation (e.g. `1e-7`) can't slip past a
+ * string-based `.split('.')` check, and returns true for non-finite input.
+ */
+const exceedsMaxDecimals = (n: number): boolean => {
+  if (!Number.isFinite(n)) return true
+  const scaled = n * 10 ** MAX_DECIMALS
+  return Math.abs(scaled - Math.round(scaled)) > 1e-6
+}
 
 /** Validate a split's recipient list. Returns an empty array when valid. */
 export const validateSplitRecipients = (
@@ -61,11 +70,21 @@ export const validateSplitRecipients = (
         field: `recipients[${i}].address`,
         message: `Recipient ${i + 1}: address is required`,
       })
-    } else if (!isAddress(r.address, { strict: false })) {
+    } else if (!isAddress(r.address)) {
+      // Strict (EIP-55) validation: a mixed-case address that fails its
+      // checksum is rejected, since the split's funds recipient is immutable
+      // and a mistyped address would permanently misroute proceeds.
       errors.push({
         field: `recipients[${i}].address`,
         message: `Recipient ${i + 1}: invalid address`,
       })
+    }
+    if (!Number.isFinite(r.percentAllocation)) {
+      errors.push({
+        field: `recipients[${i}].percentAllocation`,
+        message: `Recipient ${i + 1}: percentage must be a valid number`,
+      })
+      return
     }
     if (r.percentAllocation <= 0) {
       errors.push({
@@ -79,7 +98,7 @@ export const validateSplitRecipients = (
         message: `Recipient ${i + 1}: percentage cannot exceed 100%`,
       })
     }
-    if (decimalPlaces(r.percentAllocation) > MAX_DECIMALS) {
+    if (exceedsMaxDecimals(r.percentAllocation)) {
       errors.push({
         field: `recipients[${i}].percentAllocation`,
         message: `Recipient ${i + 1}: max ${MAX_DECIMALS} decimal places`,
