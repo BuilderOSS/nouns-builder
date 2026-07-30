@@ -58,10 +58,10 @@ const formatAxisDate = (unixSeconds: number): string =>
     year: '2-digit',
   })
 
-const startTimeFromNow = (window: RevenueWindow): number => {
-  if (window === RevenueWindow['All']) return 0
+const startTimeFromNow = (windowKey: RevenueWindow): number => {
+  if (windowKey === RevenueWindow['All']) return 0
   const nowInSeconds = Math.floor(Date.now() / 1000)
-  return nowInSeconds - parseInt(window) * 24 * 60 * 60
+  return nowInSeconds - parseInt(windowKey) * 24 * 60 * 60
 }
 
 const Metric: React.FC<{ label: string; value: string }> = ({ label, value }) => (
@@ -81,16 +81,16 @@ export const TreasuryAnalytics = () => {
     addresses: { token },
   } = useDaoStore()
 
-  const [window, setWindow] = useState(RevenueWindow['All'])
+  const [selectedWindow, setSelectedWindow] = useState(RevenueWindow['All'])
 
-  const { data, isValidating } = useSWR(
+  const { data, isValidating, error } = useSWR(
     token && chain.id
       ? ([
           SWR_KEYS.AUCTION_HISTORY,
           'treasury-analytics',
           token,
           chain.id,
-          window,
+          selectedWindow,
         ] as const)
       : null,
     async ([, , _token, _chainId, _window]) => {
@@ -105,7 +105,8 @@ export const TreasuryAnalytics = () => {
 
       for (let page = 0; page < MAX_PAGES; page++) {
         const { data } = await axios.get<{ auctionHistory: AuctionHistoryQuery }>(
-          `${BASE_URL}/api/auctionHistory/${_token}?chainId=${_chainId}&startTime=${cursor}`
+          `${BASE_URL}/api/auctionHistory/${_token}?chainId=${_chainId}&startTime=${cursor}`,
+          { timeout: 15_000 }
         )
         const batch = data.auctionHistory.dao?.auctions ?? []
         if (batch.length === 0) break
@@ -156,8 +157,8 @@ export const TreasuryAnalytics = () => {
               variant={'ghost'}
               size={'sm'}
               px={'x2'}
-              className={w === window ? windowTab.selected : windowTab.unselected}
-              onClick={() => setWindow(w)}
+              className={w === selectedWindow ? windowTab.selected : windowTab.unselected}
+              onClick={() => setSelectedWindow(w)}
             >
               {WINDOW_LABELS[w]}
             </Button>
@@ -174,6 +175,12 @@ export const TreasuryAnalytics = () => {
       >
         {isValidating && !data ? (
           <Box className={chartSkeleton} />
+        ) : error && !data ? (
+          <Flex className={chartBox} align={'center'} justify={'center'}>
+            <Text variant="paragraph-md" color={'negative'}>
+              Couldn&apos;t load auction revenue. Please try again later.
+            </Text>
+          </Flex>
         ) : hasChart ? (
           <svg
             className={chartSvg}

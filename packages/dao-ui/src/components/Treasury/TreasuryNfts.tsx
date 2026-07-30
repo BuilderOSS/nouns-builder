@@ -21,7 +21,7 @@ export const TreasuryNfts = () => {
   const chain = useChainStore((x) => x.chain)
   const treasury = addresses.treasury as AddressType | undefined
 
-  const { data, isValidating } = useSWR(
+  const { data, isValidating, error } = useSWR(
     treasury && chain.id ? (['treasury-dao-nfts', chain.id, treasury] as const) : null,
     ([, _chainId, _treasury]) => tokensQuery(_chainId, _treasury),
     { revalidateOnFocus: false }
@@ -30,6 +30,14 @@ export const TreasuryNfts = () => {
   const tokens = data?.tokens ?? []
 
   if (!treasury) return null
+
+  // A subgraph/network failure must read as an error, not "no NFTs" — otherwise
+  // a fetch failure is indistinguishable from a legitimately empty treasury.
+  const emptyMessage = error
+    ? "Couldn't load treasury NFTs. Please try again later."
+    : isValidating
+      ? 'Loading…'
+      : 'No DAO NFTs held in the treasury.'
 
   return (
     <Flex direction={'column'} width={'100%'} mb={'x8'}>
@@ -47,8 +55,8 @@ export const TreasuryNfts = () => {
 
       {tokens.length === 0 ? (
         <Box className={emptyBox}>
-          <Text variant="paragraph-md" color={'tertiary'}>
-            {isValidating ? 'Loading…' : 'No DAO NFTs held in the treasury.'}
+          <Text variant="paragraph-md" color={error ? 'negative' : 'tertiary'}>
+            {emptyMessage}
           </Text>
         </Box>
       ) : (
