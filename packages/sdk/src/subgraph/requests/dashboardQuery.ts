@@ -20,7 +20,7 @@ export const dashboardRequest = async (
     if (memberAddress.toLowerCase() === '0x0000000000000000000000000000000000000000')
       throw new Error('Zero address not allowed')
 
-    const data = await Promise.all(
+    const results = await Promise.allSettled(
       PUBLIC_DEFAULT_CHAINS.map((chain) =>
         SDK.connect(chain.id)
           .daosForDashboard({
@@ -30,6 +30,10 @@ export const dashboardRequest = async (
           .then((x) => ({ ...x, chainId: chain.id }))
       )
     )
+
+    const data = results
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => result.value)
 
     return data
       .map((queries) =>
