@@ -20,16 +20,6 @@ export const PUBLIC_SUBGRAPH_URL: Map<CHAIN_ID, string> = new Map([
   [CHAIN_ID.FOUNDRY, ''],
 ])
 
-const UPDATABLE_PROPOSALS_SUBGRAPH_CHAINS = PUBLIC_IS_TESTNET
-  ? new Set<CHAIN_ID>([
-      CHAIN_ID.ETHEREUM,
-      CHAIN_ID.OPTIMISM,
-      CHAIN_ID.SEPOLIA,
-      CHAIN_ID.OPTIMISM_SEPOLIA,
-      CHAIN_ID.BASE_SEPOLIA,
-    ])
-  : new Set<CHAIN_ID>()
-
 export const supportsUpdatableProposals = (chainId: CHAIN_ID): boolean => {
-  return UPDATABLE_PROPOSALS_SUBGRAPH_CHAINS.has(chainId)
+  return chainId !== CHAIN_ID.BASE
 }
