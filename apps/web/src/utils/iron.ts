@@ -1,4 +1,5 @@
 import type { SessionOptions } from 'iron-session'
+import type { Address } from 'viem'
 import type { SiweMessage } from 'viem/siwe'
 
 export const ironOptions: SessionOptions = {
@@ -12,4 +13,7 @@ export const ironOptions: SessionOptions = {
 export interface IronSessionData {
   nonce?: string
   siwe?: SiweMessage
+  delegateAddress?: Address
+  safeAddress?: Address
+  safeChainId?: number
 }

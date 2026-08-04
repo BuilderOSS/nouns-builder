@@ -45,6 +45,10 @@ import {
 import { Disclaimer } from 'src/components/Disclaimer'
 import { FrameProvider } from 'src/components/FrameProvider'
 import { LinksProvider } from 'src/components/LinksProvider'
+import {
+  SafeDelegateProvider,
+  useSafeDelegateContext,
+} from 'src/contexts/SafeDelegateContext'
 import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { SWRConfig } from 'swr'
@@ -77,7 +81,8 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const fetchingStatusRef = useRef(false)
   const verifyingRef = useRef(false)
   const [rainbowKitAuthStatus, setRainbowKitAuthStatus] =
-    useState<AuthenticationStatus>('loading')
+    useState<AuthenticationStatus>('unauthenticated')
+  const { safeAddress, chainId, clearSafeDelegateInfo } = useSafeDelegateContext()
   const config = useConfig()
 
   // Simple session verification (RainbowKit pattern)
@@ -92,7 +97,8 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
       try {
         const response = await fetch('/api/siwe/me')
         const json = await response.json()
-        setRainbowKitAuthStatus(json.address ? 'authenticated' : 'unauthenticated')
+        const newStatus = json.address ? 'authenticated' : 'unauthenticated'
+        setRainbowKitAuthStatus(newStatus)
       } catch (_error) {
         setRainbowKitAuthStatus('unauthenticated')
       } finally {
@@ -133,19 +139,23 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
     return createAuthenticationAdapter({
       getNonce: async () => {
         const response = await fetch('/api/siwe/nonce')
-        return await response.text()
+        const nonce = await response.text()
+        return nonce
       },
 
-      createMessage: ({ nonce, address, chainId }) => {
-        return createSiweMessage({
+      createMessage: ({ nonce, address, chainId: msgChainId }) => {
+        const message = createSiweMessage({
           domain: window.location.host,
           address,
-          statement: 'Sign in with Ethereum to Nouns Builder',
+          statement: safeAddress
+            ? `Sign in as delegate for Safe ${safeAddress}`
+            : 'Sign in with Ethereum to Nouns Builder',
           uri: window.location.origin,
           version: '1',
-          chainId,
+          chainId: msgChainId,
           nonce,
         })
+        return message
       },
 
       verify: async ({ message, signature }) => {
@@ -155,7 +165,12 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           const response = await fetch('/api/siwe/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, signature }),
+            body: JSON.stringify({
+              message,
+              signature,
+              safeAddress,
+              safeChainId: chainId,
+            }),
           })
 
           const body = (await response.json()) as { ok?: boolean }
@@ -167,7 +182,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
 
           return authenticated
         } catch (error) {
-          console.error('Error verifying signature', error)
+          console.error('[Auth] Error verifying signature', error)
           return false
         } finally {
           verifyingRef.current = false
@@ -176,10 +191,11 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
 
       signOut: async () => {
         setRainbowKitAuthStatus('unauthenticated')
+        clearSafeDelegateInfo()
         await fetch('/api/siwe/logout', { method: 'POST' })
       },
     })
-  }, [setRainbowKitAuthStatus])
+  }, [setRainbowKitAuthStatus, safeAddress, chainId, clearSafeDelegateInfo])
 
   return (
     <AuthStatusContext.Provider value={rainbowKitAuthStatus}>
@@ -187,7 +203,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
         adapter={authAdapter}
         status={rainbowKitAuthStatus}
       >
-        <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }}>
+        <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }} modalSize="compact">
           <SWRConfig value={{ fallback }}>
             <NextNProgress
               color={vars.color.primary}
@@ -220,7 +236,9 @@ function App(props: AppPropsWithLayout) {
   return (
     <WagmiProvider config={clientConfig}>
       <QueryClientProvider client={queryClient}>
-        <AppContent {...props} />
+        <SafeDelegateProvider>
+          <AppContent {...props} />
+        </SafeDelegateProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )
