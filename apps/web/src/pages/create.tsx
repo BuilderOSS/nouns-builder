@@ -16,10 +16,10 @@ import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useAccount } from 'wagmi'
 import { Meta } from 'src/components/Meta'
 import { getCreateDaoLayout } from 'src/layouts/CreateDaoLayout'
 import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/create.css'
+import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
 

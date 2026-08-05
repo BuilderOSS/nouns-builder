@@ -28,11 +28,6 @@ export function getSavedSafeInfo(): SavedSafeInfo | null {
 }
 
 /**
- * Alias for getSavedSafeInfo for consistency
- */
-export const getSafeInfo = getSavedSafeInfo
-
-/**
  * Save Safe information to localStorage
  */
 export function setSafeInfo(

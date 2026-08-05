@@ -1,16 +1,17 @@
-import { CHAIN_ID } from '@buildeross/types'
 import {
   clearSafeInfo,
   type EIP1193Provider,
-  getSafeInfo as getSavedSafeInfo,
+  getSavedSafeInfo,
   isOwnerOfSafe,
   type SafeInfo,
   SafeOwnerProvider,
 } from '@buildeross/utils'
 import { getSafeInfo as getSafeInfoFromChain } from '@buildeross/utils/safeService'
-import type { Address, PublicClient } from 'viem'
+import { getConnectors } from '@wagmi/core'
+import type { PublicClient } from 'viem'
 import { createPublicClient, http } from 'viem'
 import {
+  type Config,
   type Connector,
   createConnector,
   type CreateConnectorFn,
@@ -18,6 +19,13 @@ import {
 } from 'wagmi'
 
 createSafeOwnerConnector.type = 'safeOwner' as const
+
+// Global reference to wagmi config (set after config is created)
+let wagmiConfig: Config | null = null
+
+export function setWagmiConfig(config: Config) {
+  wagmiConfig = config
+}
 
 /**
  * Creates a static SafeOwnerConnector that reads Safe configuration from localStorage.
@@ -49,8 +57,12 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
      * Find EOA connector by ID from wagmi config
      */
     function findEOAConnector(connectorId: string): Connector | null {
-      const connectors = config._internal.connectors.getState()
-      return connectors.find((c) => c.id === connectorId) || null
+      if (!wagmiConfig) {
+        console.error('[SafeOwnerConnector] wagmiConfig not initialized')
+        return null
+      }
+      const connectors = getConnectors(wagmiConfig)
+      return connectors.find((c: Connector) => c.id === connectorId) || null
     }
 
     /**
@@ -142,7 +154,9 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
       }) => {
         const saved = loadSafeConfig()
         if (!saved) {
-          throw new Error('No Safe configuration found. Please connect via Safe mode first.')
+          throw new Error(
+            'No Safe configuration found. Please connect via Safe mode first.'
+          )
         }
 
         // Find and cache EOA connector

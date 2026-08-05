@@ -1,10 +1,6 @@
 import { CHAIN_ID } from '@buildeross/types'
 import { isOwnerOfSafe, isSafeAddress } from '@buildeross/utils/safeService'
-import {
-  clearSafeInfo,
-  getSavedSafeInfo,
-  setSafeInfo as saveSafeInfo,
-} from '@buildeross/utils/safeStorage'
+import { clearSafeInfo, getSavedSafeInfo } from '@buildeross/utils/safeStorage'
 import { useCallback, useEffect, useState } from 'react'
 import type { Address } from 'viem'
 
@@ -124,8 +120,8 @@ export function useSafeAuth(): UseSafeAuthReturn {
       error: null,
     })
 
-    // Save to localStorage
-    saveSafeInfo(safeAddress, chainId)
+    // Note: localStorage persistence is handled by CustomWalletModal during connection
+    // This hook only manages React state for the auth adapter
     return true
   }, [])
 

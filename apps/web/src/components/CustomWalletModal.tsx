@@ -4,10 +4,18 @@ import { CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import { isOwnerOfSafe, isSafeAddress, setSafeInfo } from '@buildeross/utils'
 import { Box, Button, Stack, Text } from '@buildeross/zord'
+import { getConnectors } from '@wagmi/core'
 import { useEffect, useState } from 'react'
 import type { Address } from 'viem'
 import { createSiweMessage } from 'viem/siwe'
-import { useAccount, useConnect, useDisconnect, useSignMessage, useConfig } from 'wagmi'
+import {
+  type Connector,
+  useAccount,
+  useConfig,
+  useConnect,
+  useDisconnect,
+  useSignMessage,
+} from 'wagmi'
 
 import { useWalletConnectors } from '../hooks/useWalletConnectors'
 import { addRecentWalletId } from '../utils/recentWalletIds'
@@ -95,12 +103,16 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
         }
 
         // Store Safe info with EOA connector ID for persistence
-        setSafeInfo(pendingSafeInfo.safeAddress, pendingSafeInfo.chainId, activeConnector.id)
+        setSafeInfo(
+          pendingSafeInfo.safeAddress,
+          pendingSafeInfo.chainId,
+          activeConnector.id
+        )
 
         // Find SafeOwnerConnector from wagmi config
-        const safeConnector = wagmiConfig._internal.connectors
-          .getState()
-          .find((c) => c.id === 'safeOwner')
+        const safeConnector = getConnectors(wagmiConfig).find(
+          (c: Connector) => c.id === 'safeOwner'
+        )
 
         if (!safeConnector) {
           throw new Error('SafeOwnerConnector not found in wagmi config')
@@ -133,6 +145,7 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
     activeConnector,
     connectAsync,
     disconnectAsync,
+    wagmiConfig,
   ])
 
   // Handle SIWE authentication when user clicks sign button
@@ -284,9 +297,9 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
       setSafeInfo(safeAddress, safeChainId as CHAIN_ID, activeConnector.id)
 
       // Find SafeOwnerConnector from wagmi config
-      const safeConnector = wagmiConfig._internal.connectors
-        .getState()
-        .find((c) => c.id === 'safeOwner')
+      const safeConnector = getConnectors(wagmiConfig).find(
+        (c: Connector) => c.id === 'safeOwner'
+      )
 
       if (!safeConnector) {
         throw new Error('SafeOwnerConnector not found in wagmi config')

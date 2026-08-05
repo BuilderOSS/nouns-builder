@@ -18,7 +18,7 @@ import React from 'react'
 import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import { useDaoListPreferences } from 'src/hooks/useDaoListPreferences'
 import { profileStatBadge } from 'src/styles/profile.css'
-import { formatUnits, type Address } from 'viem'
+import { type Address, formatUnits } from 'viem'
 import { useAccount, useBalance } from 'wagmi'
 
 import { ConnectButton } from '../ConnectButton'

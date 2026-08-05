@@ -13,7 +13,10 @@ import {
 import { Attribution } from 'ox/erc8021'
 import { createConfig, CreateConnectorFn } from 'wagmi'
 
-import { createSafeOwnerConnector } from '../connectors/safeOwnerConnector'
+import {
+  createSafeOwnerConnector,
+  setWagmiConfig,
+} from '../connectors/safeOwnerConnector'
 
 const appName = 'Nouns Builder'
 const appDescription = 'Nouns Builder'
@@ -71,3 +74,6 @@ export const clientConfig = createConfig({
   connectors,
   ...(dataSuffix ? { dataSuffix } : {}),
 })
+
+// Initialize SafeOwnerConnector with config reference
+setWagmiConfig(clientConfig)
