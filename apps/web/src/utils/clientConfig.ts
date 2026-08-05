@@ -13,6 +13,8 @@ import {
 import { Attribution } from 'ox/erc8021'
 import { createConfig, CreateConnectorFn } from 'wagmi'
 
+import { createSafeOwnerConnector } from '../connectors/safeOwnerConnector'
+
 const appName = 'Nouns Builder'
 const appDescription = 'Nouns Builder'
 const appUrl = BASE_URL
@@ -52,6 +54,7 @@ const rainbowConnectors = connectorsForWallets(
 const connectors: CreateConnectorFn[] = [
   ...rainbowConnectors,
   miniAppConnector as unknown as CreateConnectorFn,
+  createSafeOwnerConnector(), // Safe owner connector for delegated authentication
 ]
 
 const baseBuilderCode = process.env.NEXT_PUBLIC_BASE_BUILDER_CODE?.trim()

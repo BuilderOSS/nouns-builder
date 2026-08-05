@@ -18,8 +18,8 @@ import React from 'react'
 import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import { useDaoListPreferences } from 'src/hooks/useDaoListPreferences'
 import { profileStatBadge } from 'src/styles/profile.css'
-import { formatUnits } from 'viem'
-import { useBalance } from 'wagmi'
+import { formatUnits, type Address } from 'viem'
+import { useAccount, useBalance } from 'wagmi'
 
 import { ConnectButton } from '../ConnectButton'
 import {
@@ -132,7 +132,23 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
 }) => {
   const { address, isAuthenticated } = useAuthStore()
   const { chain: selectedChain } = useChainStore()
+  const { connector } = useAccount()
+
+  // Detect Safe mode and get EOA address
+  const isSafeMode = connector?.id === 'safeOwner'
+  const [eoaAddress, setEoaAddress] = React.useState<Address | null>(null)
+
+  React.useEffect(() => {
+    if (isSafeMode && connector && 'getEOAAddress' in connector) {
+      ;(connector as any).getEOAAddress().then((addr: Address) => setEoaAddress(addr))
+    } else {
+      setEoaAddress(null)
+    }
+  }, [isSafeMode, connector])
+
   const { displayName, ensAvatar } = useEnsData(address || '')
+  const eoaEnsData = useEnsData(eoaAddress || '')
+
   const { data: balance } = useBalance({
     address: address!,
     chainId: selectedChain.id,
@@ -239,15 +255,61 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
               aria-label="Open profile"
             >
               <Avatar address={address!} src={ensAvatar} size={'40'} />
-              <Flex direction={'column'} ml={'x2'}>
-                <Text fontWeight={'display'}>{displayName}</Text>
-                <Text variant={'paragraph-md'} color={'tertiary'}>
-                  {userBalance}
-                </Text>
+              <Flex direction={'column'} ml={'x2'} style={{ flex: 1, minWidth: 0 }}>
+                {isSafeMode ? (
+                  <>
+                    <Flex align="center" gap="x2">
+                      <NextImage
+                        src="/icons/wallets/safe.svg"
+                        alt="Safe"
+                        width={16}
+                        height={16}
+                        style={{ borderRadius: '4px', flexShrink: 0 }}
+                      />
+                      <Text
+                        fontWeight={'display'}
+                        style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                      >
+                        {displayName}
+                      </Text>
+                    </Flex>
+                    <Text variant={'paragraph-md'} color={'tertiary'}>
+                      {userBalance}
+                    </Text>
+                    {eoaAddress && (
+                      <Flex align="center" gap="x1" mt="x1">
+                        <Text
+                          variant={'label-sm'}
+                          color={'text3'}
+                          style={{ flexShrink: 0 }}
+                        >
+                          Owner:
+                        </Text>
+                        <Text
+                          variant={'label-sm'}
+                          color={'text3'}
+                          style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                        >
+                          {eoaEnsData.displayName}
+                        </Text>
+                      </Flex>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Text fontWeight={'display'}>{displayName}</Text>
+                    <Text variant={'paragraph-md'} color={'tertiary'}>
+                      {userBalance}
+                    </Text>
+                  </>
+                )}
               </Flex>
             </Flex>
           </Link>
-          <CopyButton text={address!} />
+          <Flex direction="column" gap="x1">
+            <CopyButton text={address!} />
+            {isSafeMode && eoaAddress && <CopyButton text={eoaAddress} />}
+          </Flex>
         </Flex>
 
         <Button

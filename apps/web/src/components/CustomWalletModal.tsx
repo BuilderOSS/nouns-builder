@@ -2,14 +2,13 @@
 
 import { CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
-import { isOwnerOfSafe, isSafeAddress } from '@buildeross/utils/safeService'
+import { isOwnerOfSafe, isSafeAddress, setSafeInfo } from '@buildeross/utils'
 import { Box, Button, Stack, Text } from '@buildeross/zord'
 import { useEffect, useState } from 'react'
 import type { Address } from 'viem'
 import { createSiweMessage } from 'viem/siwe'
-import { useAccount, useConnect, useDisconnect, useSignMessage } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useSignMessage, useConfig } from 'wagmi'
 
-import { safeOwnerConnector } from '../connectors/safeOwnerConnector'
 import { useWalletConnectors } from '../hooks/useWalletConnectors'
 import { addRecentWalletId } from '../utils/recentWalletIds'
 import { SafeAddressModal } from './SafeAddressModal'
@@ -22,6 +21,7 @@ interface CustomWalletModalProps {
 
 export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
   const { address, isConnected, connector: activeConnector, chainId } = useAccount()
+  const wagmiConfig = useConfig()
   const [showSafeFlow, setShowSafeFlow] = useState(false)
   const [safeModeActive, setSafeModeActive] = useState(false)
   const [showSignPrompt, setShowSignPrompt] = useState(false)
@@ -94,12 +94,17 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
           return
         }
 
-        // Create SafeOwnerConnector function
-        const safeConnector = safeOwnerConnector({
-          safeAddress: pendingSafeInfo.safeAddress,
-          chainId: pendingSafeInfo.chainId,
-          eoaConnector: activeConnector,
-        })
+        // Store Safe info with EOA connector ID for persistence
+        setSafeInfo(pendingSafeInfo.safeAddress, pendingSafeInfo.chainId, activeConnector.id)
+
+        // Find SafeOwnerConnector from wagmi config
+        const safeConnector = wagmiConfig._internal.connectors
+          .getState()
+          .find((c) => c.id === 'safeOwner')
+
+        if (!safeConnector) {
+          throw new Error('SafeOwnerConnector not found in wagmi config')
+        }
 
         // Connect to Safe connector (don't disconnect EOA - SafeOwnerConnector needs it)
         await connectAsync({ connector: safeConnector })
@@ -275,12 +280,17 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
         return
       }
 
-      // Create SafeOwnerConnector function
-      const safeConnector = safeOwnerConnector({
-        safeAddress,
-        chainId: safeChainId as CHAIN_ID,
-        eoaConnector: activeConnector,
-      })
+      // Store Safe info with EOA connector ID for persistence
+      setSafeInfo(safeAddress, safeChainId as CHAIN_ID, activeConnector.id)
+
+      // Find SafeOwnerConnector from wagmi config
+      const safeConnector = wagmiConfig._internal.connectors
+        .getState()
+        .find((c) => c.id === 'safeOwner')
+
+      if (!safeConnector) {
+        throw new Error('SafeOwnerConnector not found in wagmi config')
+      }
 
       // Connect to Safe connector (don't disconnect EOA - SafeOwnerConnector needs it)
       await connectAsync({ connector: safeConnector })

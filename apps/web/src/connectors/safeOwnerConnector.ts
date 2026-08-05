@@ -1,11 +1,13 @@
 import { CHAIN_ID } from '@buildeross/types'
 import {
+  clearSafeInfo,
   type EIP1193Provider,
-  getSafeInfo,
+  getSafeInfo as getSavedSafeInfo,
   isOwnerOfSafe,
   type SafeInfo,
   SafeOwnerProvider,
 } from '@buildeross/utils'
+import { getSafeInfo as getSafeInfoFromChain } from '@buildeross/utils/safeService'
 import type { Address, PublicClient } from 'viem'
 import { createPublicClient, http } from 'viem'
 import {
@@ -15,17 +17,16 @@ import {
   ProviderNotFoundError,
 } from 'wagmi'
 
-export interface SafeOwnerParameters {
-  safeAddress: Address
-  chainId: CHAIN_ID
-  eoaConnector: Connector
-}
+createSafeOwnerConnector.type = 'safeOwner' as const
 
-safeOwnerConnector.type = 'safeOwner' as const
-
-export function safeOwnerConnector(parameters: SafeOwnerParameters): CreateConnectorFn {
-  const { safeAddress, chainId, eoaConnector } = parameters
-
+/**
+ * Creates a static SafeOwnerConnector that reads Safe configuration from localStorage.
+ * This connector works with wagmi's built-in persistence and reconnection system.
+ *
+ * Safe info (address, chainId, eoaConnectorId) is stored in localStorage and loaded on-demand.
+ * The EOA connector is discovered from wagmi's config by ID.
+ */
+export function createSafeOwnerConnector(): CreateConnectorFn {
   type Provider = SafeOwnerProvider | undefined
   type Properties = {
     safeInfo: SafeInfo | null
@@ -34,184 +35,283 @@ export function safeOwnerConnector(parameters: SafeOwnerParameters): CreateConne
   let provider_: Provider | undefined
   let safeInfo_: SafeInfo | null = null
   let publicClient_: PublicClient | null = null
+  let eoaConnector_: Connector | null = null
 
-  return createConnector<Provider, Properties>((config) => ({
-    id: 'safeOwner',
-    name: `Safe (${safeAddress.slice(0, 6)}...${safeAddress.slice(-4)})`,
-    type: safeOwnerConnector.type,
-
-    async setup() {
-      // Fetch Safe info during setup
-      try {
-        safeInfo_ = await getSafeInfo(safeAddress, chainId)
-      } catch (error) {
-        console.error('Failed to fetch Safe info:', error)
-      }
-    },
+  return createConnector<Provider, Properties>((config) => {
+    /**
+     * Load Safe configuration from localStorage
+     */
+    function loadSafeConfig() {
+      return getSavedSafeInfo()
+    }
 
     /**
-     * Connect method with type assertion for wagmi compatibility.
-     *
-     * Type assertion (as any) is necessary here due to TypeScript's limitation with
-     * generic conditional types. wagmi expects:
-     *   connect<withCapabilities extends boolean>(...)
-     *   => Promise<{ accounts: withCapabilities extends true ? CapabilityAccount[] : Address[] }>
-     *
-     * The issue: TypeScript cannot verify that runtime branching (if/else) matches
-     * compile-time conditional types (withCapabilities extends true ? X : Y).
-     * This is a known limitation - conditional generic types are resolved at compile-time,
-     * while our implementation logic executes at runtime.
-     *
-     * This pattern is standard in wagmi core connectors for the same reason.
-     * The runtime behavior is correct - we return Address[] (Safe doesn't support EIP-5792
-     * wallet capabilities), which satisfies the interface contract.
+     * Find EOA connector by ID from wagmi config
      */
-    connect: (async (_parameters?: {
-      chainId?: number
-      isReconnecting?: boolean
-      withCapabilities?: boolean
-    }) => {
-      // Note: We don't call eoaConnector.connect() here because the EOA is already
-      // connected when this Safe connector is created. Calling connect() again would
-      // prompt the user for wallet approval a second time.
+    function findEOAConnector(connectorId: string): Connector | null {
+      const connectors = config._internal.connectors.getState()
+      return connectors.find((c) => c.id === connectorId) || null
+    }
 
-      // Verify EOA is still authorized
-      const isAuthorized = await eoaConnector.isAuthorized()
-      if (!isAuthorized) {
-        throw new Error('EOA wallet is not authorized. Please reconnect.')
-      }
+    /**
+     * Clear cached state
+     */
+    function clearCache() {
+      provider_ = undefined
+      safeInfo_ = null
+      publicClient_ = null
+      eoaConnector_ = null
+    }
 
-      // Fetch Safe info if not already loaded
-      if (!safeInfo_) {
-        safeInfo_ = await getSafeInfo(safeAddress, chainId)
-      }
+    return {
+      id: 'safeOwner',
+      name: 'Safe',
+      type: createSafeOwnerConnector.type,
 
-      // Return Safe address as the connected account
-      // Note: We don't implement withCapabilities since Safe doesn't support EIP-5792
-      return {
-        accounts: [safeAddress],
-        chainId: Number(chainId),
-      }
-    }) as any,
+      async setup() {
+        // Called once when connector is initialized
+        // We defer loading until needed for performance
+      },
 
-    async disconnect() {
-      // Clean up provider
-      if (provider_) {
-        provider_.removeAllListeners()
-        provider_ = undefined
-      }
+      /**
+       * Check if this connector should auto-reconnect.
+       * Returns true if:
+       * 1. Safe info exists in localStorage
+       * 2. EOA connector exists and is authorized
+       * 3. EOA is still a Safe owner
+       */
+      async isAuthorized() {
+        try {
+          const saved = loadSafeConfig()
+          if (!saved) return false
 
-      // Optionally disconnect EOA connector
-      // await eoaConnector.disconnect()
-    },
+          // Find the EOA connector
+          const eoaConnector = findEOAConnector(saved.eoaConnectorId)
+          if (!eoaConnector) return false
 
-    async getAccounts() {
-      // Always return Safe address
-      return [safeAddress]
-    },
-
-    async getProvider() {
-      if (!provider_) {
-        // Get EOA provider
-        const rawProvider = await eoaConnector.getProvider()
-        if (!rawProvider) {
-          throw new ProviderNotFoundError()
-        }
-
-        // Type assert to EIP1193Provider (all wallet providers implement this)
-        const eoaProvider = rawProvider as EIP1193Provider
-
-        // Create public client if not already created
-        if (!publicClient_) {
-          // Find the chain from config
-          const chain = config.chains.find((c) => c.id === chainId)
-          if (!chain) {
-            throw new Error(`Chain ${chainId} not found in wagmi config`)
+          // Check if EOA connector is still authorized
+          const eoaAuthorized = await eoaConnector.isAuthorized()
+          if (!eoaAuthorized) {
+            // EOA no longer authorized, clear stale Safe info
+            clearSafeInfo()
+            return false
           }
 
-          // Create public client using viem
-          publicClient_ = createPublicClient({
-            chain,
-            transport: http(),
-          })
+          // Get EOA accounts
+          const eoaAccounts = await eoaConnector.getAccounts()
+          if (!eoaAccounts || eoaAccounts.length === 0) {
+            clearSafeInfo()
+            return false
+          }
+
+          // Verify EOA is still a Safe owner
+          const isOwner = await isOwnerOfSafe(
+            eoaAccounts[0],
+            saved.safeAddress,
+            saved.chainId
+          )
+
+          if (!isOwner) {
+            // No longer an owner, clear stale Safe info
+            clearSafeInfo()
+            return false
+          }
+
+          return true
+        } catch (error) {
+          console.error('[SafeOwnerConnector] isAuthorized error:', error)
+          return false
+        }
+      },
+
+      /**
+       * Connect method with type assertion for wagmi compatibility.
+       *
+       * Type assertion (as any) is necessary here due to TypeScript's limitation with
+       * generic conditional types. wagmi expects:
+       *   connect<withCapabilities extends boolean>(...)
+       *   => Promise<{ accounts: withCapabilities extends true ? CapabilityAccount[] : Address[] }>
+       *
+       * This pattern is standard in wagmi core connectors.
+       * The runtime behavior is correct - we return Address[] (Safe doesn't support EIP-5792).
+       */
+      connect: (async (_parameters?: {
+        chainId?: number
+        isReconnecting?: boolean
+        withCapabilities?: boolean
+      }) => {
+        const saved = loadSafeConfig()
+        if (!saved) {
+          throw new Error('No Safe configuration found. Please connect via Safe mode first.')
         }
 
-        // Ensure we have Safe info
+        // Find and cache EOA connector
+        eoaConnector_ = findEOAConnector(saved.eoaConnectorId)
+        if (!eoaConnector_) {
+          throw new Error(
+            `EOA connector '${saved.eoaConnectorId}' not found. Please reconnect your wallet.`
+          )
+        }
+
+        // Verify EOA connector is authorized (should be true from isAuthorized check)
+        const eoaAuthorized = await eoaConnector_.isAuthorized()
+        if (!eoaAuthorized) {
+          throw new Error('EOA wallet is not authorized. Please reconnect.')
+        }
+
+        // Fetch Safe info if not already loaded
         if (!safeInfo_) {
-          safeInfo_ = await getSafeInfo(safeAddress, chainId)
+          try {
+            safeInfo_ = await getSafeInfoFromChain(saved.safeAddress, saved.chainId)
+          } catch (error) {
+            console.error('[SafeOwnerConnector] Failed to fetch Safe info:', error)
+            throw new Error('Failed to load Safe information')
+          }
         }
 
-        // Verify we have Safe info before creating provider
-        if (!safeInfo_) {
-          throw new Error('Failed to fetch Safe info')
+        // Return Safe address as the connected account
+        return {
+          accounts: [saved.safeAddress],
+          chainId: Number(saved.chainId),
+        }
+      }) as any,
+
+      async disconnect() {
+        // Clean up provider
+        if (provider_) {
+          provider_.removeAllListeners()
         }
 
-        // Create SafeOwnerProvider
-        provider_ = new SafeOwnerProvider(safeInfo_, eoaProvider, publicClient_)
-      }
+        // Clear cached state
+        clearCache()
 
-      return provider_
-    },
+        // Clear Safe info from storage
+        clearSafeInfo()
+      },
 
-    async getChainId() {
-      return chainId
-    },
+      async getAccounts() {
+        const saved = loadSafeConfig()
+        if (!saved) return []
+        return [saved.safeAddress]
+      },
 
-    async isAuthorized() {
-      try {
-        // Check if EOA connector is still authorized
-        const eoaAuthorized = await eoaConnector.isAuthorized()
-        if (!eoaAuthorized) return false
+      async getProvider() {
+        const saved = loadSafeConfig()
+        if (!saved) {
+          throw new Error('No Safe configuration found')
+        }
 
-        // Check if EOA is still an owner of the Safe
-        const eoaAccounts = await eoaConnector.getAccounts()
-        if (!eoaAccounts || eoaAccounts.length === 0) return false
+        if (!provider_) {
+          // Get EOA connector
+          if (!eoaConnector_) {
+            eoaConnector_ = findEOAConnector(saved.eoaConnectorId)
+          }
+          if (!eoaConnector_) {
+            throw new ProviderNotFoundError()
+          }
 
-        const isOwner = await isOwnerOfSafe(eoaAccounts[0], safeAddress, chainId)
-        return isOwner
-      } catch {
-        return false
-      }
-    },
+          // Get EOA provider
+          const rawProvider = await eoaConnector_.getProvider()
+          if (!rawProvider) {
+            throw new ProviderNotFoundError()
+          }
 
-    async switchChain({ chainId: newChainId }) {
-      // Safes are chain-specific contracts
-      // Cannot switch to different chain
-      if (newChainId !== chainId) {
-        throw new Error(
-          'Cannot switch chain for Safe. Safes are chain-specific smart contracts.'
-        )
-      }
+          // Type assert to EIP1193Provider
+          const eoaProvider = rawProvider as EIP1193Provider
 
-      return config.chains.find((c) => c.id === chainId)!
-    },
+          // Create public client if not already created
+          if (!publicClient_) {
+            const chain = config.chains.find((c) => c.id === saved.chainId)
+            if (!chain) {
+              throw new Error(`Chain ${saved.chainId} not found in wagmi config`)
+            }
 
-    onAccountsChanged(_accounts) {
-      // EOA accounts changed, but we still report Safe address
-      config.emitter.emit('change', { accounts: [safeAddress] })
-    },
+            publicClient_ = createPublicClient({
+              chain,
+              transport: http(),
+            })
+          }
 
-    onChainChanged(newChainId) {
-      // Safes don't change chains
-      // If EOA chain changed, we may need to disconnect
-      if (Number(newChainId) !== chainId) {
+          // Ensure we have Safe info
+          if (!safeInfo_) {
+            safeInfo_ = await getSafeInfoFromChain(saved.safeAddress, saved.chainId)
+          }
+
+          if (!safeInfo_) {
+            throw new Error('Failed to fetch Safe info')
+          }
+
+          // Create SafeOwnerProvider
+          provider_ = new SafeOwnerProvider(safeInfo_, eoaProvider, publicClient_)
+        }
+
+        return provider_
+      },
+
+      async getChainId() {
+        const saved = loadSafeConfig()
+        if (!saved) {
+          throw new Error('No Safe configuration found')
+        }
+        return saved.chainId
+      },
+
+      async switchChain({ chainId: newChainId }) {
+        const saved = loadSafeConfig()
+        if (!saved) {
+          throw new Error('No Safe configuration found')
+        }
+
+        // Safes are chain-specific contracts - cannot switch chains
+        if (newChainId !== saved.chainId) {
+          throw new Error(
+            'Cannot switch chain for Safe. Safes are chain-specific smart contracts.'
+          )
+        }
+
+        return config.chains.find((c) => c.id === saved.chainId)!
+      },
+
+      onAccountsChanged(_accounts) {
+        const saved = loadSafeConfig()
+        if (saved) {
+          // EOA accounts changed, but we still report Safe address
+          config.emitter.emit('change', { accounts: [saved.safeAddress] })
+        }
+      },
+
+      onChainChanged(newChainId) {
+        const saved = loadSafeConfig()
+        if (saved && Number(newChainId) !== saved.chainId) {
+          // Safe is on a different chain, disconnect
+          config.emitter.emit('disconnect')
+        }
+      },
+
+      onDisconnect() {
+        clearCache()
+        clearSafeInfo()
         config.emitter.emit('disconnect')
-      }
-    },
+      },
 
-    onDisconnect() {
-      config.emitter.emit('disconnect')
-    },
+      // Custom property to expose Safe info
+      get safeInfo() {
+        return safeInfo_
+      },
 
-    // Custom property to expose Safe info
-    get safeInfo() {
-      return safeInfo_
-    },
+      // Custom method to get EOA address for signing
+      async getEOAAddress() {
+        const saved = loadSafeConfig()
+        if (!saved) return null
 
-    // Custom method to get EOA address for signing
-    async getEOAAddress() {
-      const eoaAccounts = await eoaConnector.getAccounts()
-      return eoaAccounts?.[0] || null
-    },
-  }))
+        if (!eoaConnector_) {
+          eoaConnector_ = findEOAConnector(saved.eoaConnectorId)
+        }
+        if (!eoaConnector_) return null
+
+        const eoaAccounts = await eoaConnector_.getAccounts()
+        return eoaAccounts?.[0] || null
+      },
+    }
+  })
 }

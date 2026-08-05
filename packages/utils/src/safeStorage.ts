@@ -5,6 +5,7 @@ const STORAGE_KEY = 'safe-info'
 export interface SavedSafeInfo {
   safeAddress: Address
   chainId: number
+  eoaConnectorId: string
   timestamp: number
 }
 
@@ -27,15 +28,25 @@ export function getSavedSafeInfo(): SavedSafeInfo | null {
 }
 
 /**
+ * Alias for getSavedSafeInfo for consistency
+ */
+export const getSafeInfo = getSavedSafeInfo
+
+/**
  * Save Safe information to localStorage
  */
-export function setSafeInfo(safeAddress: Address, chainId: number): void {
+export function setSafeInfo(
+  safeAddress: Address,
+  chainId: number,
+  eoaConnectorId: string
+): void {
   if (typeof window === 'undefined') return
 
   try {
     const data: SavedSafeInfo = {
       safeAddress,
       chainId,
+      eoaConnectorId,
       timestamp: Date.now(),
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
