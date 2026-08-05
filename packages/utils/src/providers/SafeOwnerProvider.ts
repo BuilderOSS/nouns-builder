@@ -84,11 +84,6 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
       case 'eth_signTypedData_v4': {
         // Delegate signing to EOA provider
         // Need to replace Safe address with EOA address in params
-        console.log('[SafeOwnerProvider] Signing request:', {
-          method,
-          params: paramsArray,
-        })
-
         const eoaAccounts = (await this.eoaProvider.request({
           method: 'eth_accounts',
         })) as string[]
@@ -98,8 +93,6 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
         }
 
         const eoaAddress = eoaAccounts[0]
-        console.log('[SafeOwnerProvider] EOA address:', eoaAddress)
-        console.log('[SafeOwnerProvider] Safe address:', this.safe.safeAddress)
 
         // Replace Safe address with EOA address in params
         // For personal_sign: [message, address]
@@ -110,13 +103,11 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
             typeof param === 'string' &&
             param.toLowerCase() === this.safe.safeAddress.toLowerCase()
           ) {
-            console.log('[SafeOwnerProvider] Replaced Safe address with EOA address')
             return eoaAddress
           }
           return param
         })
 
-        console.log('[SafeOwnerProvider] Modified params:', modifiedParams)
         return this.eoaProvider.request({ method, params: modifiedParams })
       }
 

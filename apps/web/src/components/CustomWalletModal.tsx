@@ -147,9 +147,6 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
 
       if (isSafeMode && activeConnector && 'getEOAAddress' in activeConnector) {
         const eoaAddress = await (activeConnector as any).getEOAAddress()
-        console.log('[CustomWalletModal] Safe mode detected')
-        console.log('[CustomWalletModal] EOA address:', eoaAddress)
-        console.log('[CustomWalletModal] Safe address:', address)
         if (eoaAddress) {
           signingAddress = eoaAddress
           safeAddress = address // address is the Safe address
@@ -174,13 +171,8 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
         nonce,
       })
 
-      console.log('[CustomWalletModal] SIWE message:', message)
-      console.log('[CustomWalletModal] Message address:', signingAddress)
-      console.log('[CustomWalletModal] Current wagmi address:', address)
-
       // 3. Sign message with EOA
       const signature = await signMessageAsync({ message })
-      console.log('[CustomWalletModal] Signature:', signature)
 
       // 4. Verify signature
       const verifyResponse = await fetch('/api/siwe/verify', {
@@ -206,7 +198,6 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
           setShowSignPrompt(false)
         }, 300)
       } else {
-        console.error('[CustomWalletModal] Verification failed:', verifyBody)
         setAuthError(verifyBody.message || 'Verification failed')
         setIsAuthenticating(false)
         setShowSignPrompt(true) // Show sign prompt again for retry
