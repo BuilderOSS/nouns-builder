@@ -2,6 +2,11 @@ import { SAFE_SERVICE_URL } from '@buildeross/constants/safe'
 import { CHAIN_ID } from '@buildeross/types'
 import type { Address } from 'viem'
 
+import type { SafeInfo } from './providers/types'
+
+// Re-export SafeInfo for backwards compatibility
+export type { SafeInfo }
+
 export interface SafeDelegate {
   delegate: Address
   delegator: Address
@@ -14,6 +19,18 @@ export interface DelegatesResponse {
   next: string | null
   previous: string | null
   results: SafeDelegate[]
+}
+
+export interface SafeApiResponse {
+  address: Address
+  nonce: number
+  threshold: number
+  owners: Address[]
+  masterCopy: Address
+  modules: Address[]
+  fallbackHandler: Address
+  guard: Address
+  version: string
 }
 
 // Cache for delegation checks to avoid excessive API calls
@@ -91,4 +108,81 @@ export async function getSafesForDelegate(
     console.error('Error fetching Safes for delegate:', error)
     return []
   }
+}
+
+/**
+ * Get Safe information including owners
+ */
+export async function getSafeInfo(
+  safeAddress: Address,
+  chainId: CHAIN_ID
+): Promise<SafeInfo | null> {
+  const baseUrl = SAFE_SERVICE_URL[chainId]
+  if (!baseUrl) {
+    console.warn(`Safe Service not available for chain ${chainId}`)
+    return null
+  }
+
+  try {
+    const url = `${baseUrl}/api/v1/safes/${safeAddress}/`
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null
+      }
+      console.error(`Safe API error: ${response.status}`, await response.text())
+      return null
+    }
+
+    const data: SafeApiResponse = await response.json()
+
+    // Transform API response to SafeInfo format
+    return {
+      safeAddress,
+      chainId,
+      threshold: data.threshold,
+      owners: data.owners,
+      isReadOnly: false,
+      nonce: data.nonce,
+      version: data.version,
+    }
+  } catch (error) {
+    console.error('Error fetching Safe info:', error)
+    return null
+  }
+}
+
+/**
+ * Check if an address is a valid Safe
+ */
+export async function isSafeAddress(
+  address: Address,
+  chainId: CHAIN_ID
+): Promise<boolean> {
+  const safeInfo = await getSafeInfo(address, chainId)
+  return safeInfo !== null
+}
+
+/**
+ * Get list of owners for a Safe
+ */
+export async function getSafeOwners(
+  safeAddress: Address,
+  chainId: CHAIN_ID
+): Promise<Address[]> {
+  const safeInfo = await getSafeInfo(safeAddress, chainId)
+  return safeInfo?.owners || []
+}
+
+/**
+ * Check if an address is an owner of a given Safe
+ */
+export async function isOwnerOfSafe(
+  ownerAddress: Address,
+  safeAddress: Address,
+  chainId: CHAIN_ID
+): Promise<boolean> {
+  const owners = await getSafeOwners(safeAddress, chainId)
+  return owners.some((owner) => owner.toLowerCase() === ownerAddress.toLowerCase())
 }

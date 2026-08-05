@@ -1,5 +1,5 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { isDelegateForSafe } from '@buildeross/utils/safeService'
+import { isOwnerOfSafe } from '@buildeross/utils/safeService'
 import { getIronSession } from 'iron-session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { withRateLimit } from 'src/utils/api/rateLimit'
@@ -15,11 +15,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       try {
         const { message, signature, safeAddress, safeChainId } = req.body
         const siweMessage = parseSiweMessage(message) as SiweMessage
-        const delegateAddress = siweMessage.address
+        const eoaAddress = siweMessage.address
 
-        // Verify the delegate's signature (EOA signature)
+        // Verify the EOA's signature
         const valid = await verifyMessage({
-          address: delegateAddress,
+          address: eoaAddress,
           message,
           signature,
         })
@@ -31,30 +31,27 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         if (siweMessage.nonce !== session.nonce)
           return res.status(422).json({ message: 'Invalid nonce.' })
 
-        // If safeAddress provided, verify delegation relationship
+        // If safeAddress provided, verify ownership relationship
         if (safeAddress && safeChainId) {
-          const isDelegate = await isDelegateForSafe(
-            delegateAddress as Address,
+          const isOwner = await isOwnerOfSafe(
+            eoaAddress as Address,
             safeAddress as Address,
             safeChainId as CHAIN_ID
           )
 
-          if (!isDelegate) {
+          if (!isOwner) {
             return res.status(403).json({
-              message: 'Not authorized as delegate for this Safe',
+              message: 'Not authorized as owner for this Safe',
             })
           }
 
-          // Store both addresses in session
-          session.delegateAddress = delegateAddress as Address
+          // Store both EOA address and Safe address in session
+          session.eoaAddress = eoaAddress as Address
           session.safeAddress = safeAddress as Address
           session.safeChainId = safeChainId as number
 
-          // Modify siwe message to use Safe address for authorization
-          session.siwe = {
-            ...siweMessage,
-            address: safeAddress as Address,
-          }
+          // Store SIWE message with original EOA address
+          session.siwe = siweMessage
         } else {
           // Normal EOA authentication
           session.siwe = siweMessage

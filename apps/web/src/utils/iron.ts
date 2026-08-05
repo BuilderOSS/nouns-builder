@@ -13,7 +13,7 @@ export const ironOptions: SessionOptions = {
 export interface IronSessionData {
   nonce?: string
   siwe?: SiweMessage
-  delegateAddress?: Address
+  eoaAddress?: Address
   safeAddress?: Address
   safeChainId?: number
 }

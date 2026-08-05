@@ -1,14 +1,15 @@
 'use client'
 
-import { useSafeDelegateAuth } from '@buildeross/hooks'
+import { CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
+import { isOwnerOfSafe, isSafeAddress } from '@buildeross/utils/safeService'
 import { Box, Button, Stack, Text } from '@buildeross/zord'
 import { useEffect, useState } from 'react'
 import type { Address } from 'viem'
 import { createSiweMessage } from 'viem/siwe'
-import { useAccount, useSignMessage } from 'wagmi'
+import { useAccount, useConnect, useDisconnect, useSignMessage } from 'wagmi'
 
-import { useSafeDelegateContext } from '../contexts/SafeDelegateContext'
+import { safeOwnerConnector } from '../connectors/safeOwnerConnector'
 import { useWalletConnectors } from '../hooks/useWalletConnectors'
 import { addRecentWalletId } from '../utils/recentWalletIds'
 import { SafeAddressModal } from './SafeAddressModal'
@@ -25,24 +26,109 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
   const [safeModeActive, setSafeModeActive] = useState(false)
   const [showSignPrompt, setShowSignPrompt] = useState(false)
   const [isAuthenticating, setIsAuthenticating] = useState(false)
+  const [isValidatingSafe, setIsValidatingSafe] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
-  const { state } = useSafeDelegateAuth()
-  const {
-    safeAddress,
-    chainId: safeChainId,
-    setSafeDelegateInfo,
-  } = useSafeDelegateContext()
+  const [safeValidationError, setSafeValidationError] = useState<string | null>(null)
+  const [pendingSafeInfo, setPendingSafeInfo] = useState<{
+    safeAddress: Address
+    chainId: CHAIN_ID
+  } | null>(null)
   const { signMessageAsync } = useSignMessage()
+  const { connectAsync } = useConnect()
+  const { disconnectAsync } = useDisconnect()
 
   // Get wallet connectors from our hook (similar to RainbowKit's useWalletConnectors)
   const wallets = useWalletConnectors()
 
-  // Show sign prompt when wallet connects
+  // Show sign prompt when wallet connects (only for non-Safe connectors)
   useEffect(() => {
-    if (isConnected && !safeModeActive && !showSignPrompt && !isAuthenticating) {
+    if (
+      isConnected &&
+      !safeModeActive &&
+      !showSignPrompt &&
+      !isAuthenticating &&
+      activeConnector?.id !== 'safeOwner'
+    ) {
       setShowSignPrompt(true)
     }
-  }, [isConnected, safeModeActive, showSignPrompt, isAuthenticating])
+  }, [isConnected, safeModeActive, showSignPrompt, isAuthenticating, activeConnector?.id])
+
+  // Show sign prompt after Safe connector switch completes
+  useEffect(() => {
+    if (
+      isConnected &&
+      activeConnector?.id === 'safeOwner' &&
+      !showSignPrompt &&
+      !isAuthenticating
+    ) {
+      setShowSignPrompt(true)
+    }
+  }, [isConnected, activeConnector?.id, showSignPrompt, isAuthenticating])
+
+  // Handle EOA connection in Safe mode
+  useEffect(() => {
+    const validateAndSwitchToSafe = async () => {
+      if (
+        !isConnected ||
+        !safeModeActive ||
+        !pendingSafeInfo ||
+        !address ||
+        !activeConnector
+      )
+        return
+
+      setIsValidatingSafe(true)
+      setSafeValidationError(null)
+
+      try {
+        // Validate that connected wallet is an owner
+        const isOwner = await isOwnerOfSafe(
+          address,
+          pendingSafeInfo.safeAddress,
+          pendingSafeInfo.chainId
+        )
+
+        if (!isOwner) {
+          setSafeValidationError('Your wallet is not an owner of this Safe')
+          setIsValidatingSafe(false)
+          return
+        }
+
+        // Create SafeOwnerConnector function
+        const safeConnector = safeOwnerConnector({
+          safeAddress: pendingSafeInfo.safeAddress,
+          chainId: pendingSafeInfo.chainId,
+          eoaConnector: activeConnector,
+        })
+
+        // Connect to Safe connector (don't disconnect EOA - SafeOwnerConnector needs it)
+        await connectAsync({ connector: safeConnector })
+
+        // Clear pending info
+        // Note: Don't set showSignPrompt here - let the useEffect handle it
+        // after wagmi state updates to safeOwner connector
+        setPendingSafeInfo(null)
+        setSafeModeActive(false)
+        setIsValidatingSafe(false)
+      } catch (error) {
+        console.error('[CustomWalletModal] Failed to switch to Safe connector:', error)
+        const errorMessage =
+          error instanceof Error ? error.message : 'Failed to validate Safe ownership'
+        setSafeValidationError(errorMessage)
+        setIsValidatingSafe(false)
+      }
+    }
+
+    validateAndSwitchToSafe()
+  }, [
+    isConnected,
+    safeModeActive,
+    pendingSafeInfo,
+    address,
+    activeConnector,
+    connectAsync,
+    disconnectAsync,
+  ])
 
   // Handle SIWE authentication when user clicks sign button
   const handleSignMessage = async () => {
@@ -52,16 +138,35 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
     setAuthError(null)
 
     try {
+      // Detect if using SafeOwnerConnector
+      const isSafeMode = activeConnector?.id === 'safeOwner'
+
+      // For Safe mode, get the EOA address that will actually sign
+      let signingAddress = address
+      let safeAddress: Address | null = null
+
+      if (isSafeMode && activeConnector && 'getEOAAddress' in activeConnector) {
+        const eoaAddress = await (activeConnector as any).getEOAAddress()
+        console.log('[CustomWalletModal] Safe mode detected')
+        console.log('[CustomWalletModal] EOA address:', eoaAddress)
+        console.log('[CustomWalletModal] Safe address:', address)
+        if (eoaAddress) {
+          signingAddress = eoaAddress
+          safeAddress = address // address is the Safe address
+        }
+      }
+
       // 1. Get nonce
       const nonceResponse = await fetch('/api/siwe/nonce')
       const nonce = await nonceResponse.text()
 
       // 2. Create SIWE message
+      // Note: In Safe mode, we sign with EOA address, not Safe address
       const message = createSiweMessage({
         domain: window.location.host,
-        address,
-        statement: safeAddress
-          ? `Sign in as delegate for Safe ${safeAddress}`
+        address: signingAddress, // EOA address in Safe mode
+        statement: isSafeMode
+          ? `Sign in as owner for Safe ${safeAddress}`
           : 'Sign in with Ethereum to Nouns Builder',
         uri: window.location.origin,
         version: '1',
@@ -69,8 +174,13 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
         nonce,
       })
 
-      // 3. Sign message
+      console.log('[CustomWalletModal] SIWE message:', message)
+      console.log('[CustomWalletModal] Message address:', signingAddress)
+      console.log('[CustomWalletModal] Current wagmi address:', address)
+
+      // 3. Sign message with EOA
       const signature = await signMessageAsync({ message })
+      console.log('[CustomWalletModal] Signature:', signature)
 
       // 4. Verify signature
       const verifyResponse = await fetch('/api/siwe/verify', {
@@ -79,8 +189,8 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
         body: JSON.stringify({
           message,
           signature,
-          safeAddress,
-          safeChainId,
+          safeAddress: safeAddress, // Send Safe address if in Safe mode
+          safeChainId: isSafeMode ? chainId : null,
         }),
       })
 
@@ -131,25 +241,71 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
     }
   }
 
-  const handleSafeDelegateClick = () => {
+  const handleSafeClick = () => {
     setShowSafeFlow(true)
   }
 
-  const handleSafeSubmit = async (safeAddress: Address, chainId: number) => {
-    // Always save the Safe info first
-    setSafeDelegateInfo(safeAddress, chainId)
+  const handleSafeSubmit = async (safeAddress: Address, safeChainId: number) => {
+    setIsValidatingSafe(true)
+    setSafeValidationError(null)
 
-    // If not connected, we need to connect first
-    if (!isConnected) {
-      setSafeModeActive(true)
+    try {
+      // 1. Validate that the address is actually a Safe
+      const isValid = await isSafeAddress(safeAddress, safeChainId as CHAIN_ID)
+
+      if (!isValid) {
+        setSafeValidationError('This address is not a Safe on the selected network')
+        setIsValidatingSafe(false)
+        return
+      }
+
+      // 2. If not connected, save Safe info and show wallet list
+      if (!isConnected) {
+        setPendingSafeInfo({ safeAddress, chainId: safeChainId as CHAIN_ID })
+        setSafeModeActive(true)
+        setShowSafeFlow(false)
+        setIsValidatingSafe(false)
+        return
+      }
+
+      // 3. Validate that connected wallet is an owner
+      const isOwner = await isOwnerOfSafe(address!, safeAddress, safeChainId as CHAIN_ID)
+
+      if (!isOwner) {
+        setSafeValidationError('Your wallet is not an owner of this Safe')
+        setIsValidatingSafe(false)
+        return
+      }
+
+      // 4. Create SafeOwnerConnector with current EOA connector
+      if (!activeConnector) {
+        setSafeValidationError('No wallet connected')
+        setIsValidatingSafe(false)
+        return
+      }
+
+      // Create SafeOwnerConnector function
+      const safeConnector = safeOwnerConnector({
+        safeAddress,
+        chainId: safeChainId as CHAIN_ID,
+        eoaConnector: activeConnector,
+      })
+
+      // Connect to Safe connector (don't disconnect EOA - SafeOwnerConnector needs it)
+      await connectAsync({ connector: safeConnector })
+
+      // 5. Close Safe flow
+      // Note: Don't set showSignPrompt here - let the useEffect handle it
+      // after wagmi state updates to safeOwner connector
       setShowSafeFlow(false)
-      // Wait for wallet connection before validating
-      return
+      setIsValidatingSafe(false)
+    } catch (error) {
+      console.error('[CustomWalletModal] Safe validation error:', error)
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to validate Safe ownership'
+      setSafeValidationError(errorMessage)
+      setIsValidatingSafe(false)
     }
-
-    // If already connected, close modal and let auth adapter handle validation
-    setShowSafeFlow(false)
-    onClose()
   }
 
   const handleSafeCancel = () => {
@@ -157,21 +313,23 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
     setSafeModeActive(false)
   }
 
-  // Create consolidated wallet list: Installed first, then Popular, then Safe Delegate
+  // Create consolidated wallet list: Installed first, then Popular, then Safe (unless in Safe mode)
   const installedWallets = wallets.filter((wallet) => !wallet.isRainbowKitConnector)
   const popularWallets = wallets.filter((wallet) => wallet.isRainbowKitConnector)
 
-  // Add Safe Delegate as a pseudo-wallet at the end
+  // Add Safe as a pseudo-wallet at the end (hide when safeModeActive)
   const safeWalletOption = {
-    id: 'safe-delegate',
-    name: 'Safe Delegate',
+    id: 'safe',
+    name: 'Safe',
     iconUrl: '/icons/wallets/safe.svg',
     iconBackground: '#12ff80',
     recent: false,
-    isSafeDelegate: true,
+    isSafe: true,
   }
 
-  const allWalletOptions = [...installedWallets, ...popularWallets, safeWalletOption]
+  const allWalletOptions = safeModeActive
+    ? [...installedWallets, ...popularWallets]
+    : [...installedWallets, ...popularWallets, safeWalletOption]
 
   if (showSafeFlow) {
     return (
@@ -179,10 +337,8 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
         <SafeAddressModal
           onSubmit={handleSafeSubmit}
           onCancel={handleSafeCancel}
-          isValidating={state.isValidating}
-          error={state.error}
-          initialSafeAddress={state.safeAddress || undefined}
-          initialChainId={state.chainId || undefined}
+          isValidating={isValidatingSafe}
+          error={safeValidationError}
         />
       </AnimatedModal>
     )
@@ -198,12 +354,12 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
               <Text variant="heading-sm">Sign Message</Text>
               <Text variant="paragraph-sm" color="text3">
                 To complete authentication, you need to sign a message with your wallet.
-                {safeAddress && (
+                {activeConnector?.id === 'safeOwner' && address && (
                   <>
                     {' '}
-                    You will be signing in as a delegate for Safe{' '}
+                    You will be signing in as an owner for Safe{' '}
                     <Text as="span" color="text1" style={{ fontWeight: 600 }}>
-                      {safeAddress.slice(0, 6)}...{safeAddress.slice(-4)}
+                      {address.slice(0, 6)}...{address.slice(-4)}
                     </Text>
                     .
                   </>
@@ -281,16 +437,32 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
       <Box p="x5" style={{ width: '90vw', maxWidth: '380px' }}>
         <Stack gap="x4">
           <Stack gap="x1">
-            <Text variant="label-lg">Connect Wallet</Text>
+            <Text variant="label-lg">
+              {safeModeActive ? 'Connect as Safe Owner' : 'Connect Wallet'}
+            </Text>
             <Text variant="label-sm" color="text3">
-              Choose how you want to connect
+              {safeModeActive
+                ? `Connect with a wallet that is one of the owners of this Safe`
+                : 'Choose how you want to connect'}
             </Text>
           </Stack>
+
+          {safeValidationError && safeModeActive && (
+            <Stack
+              p="x3"
+              borderRadius="curved"
+              style={{ backgroundColor: 'rgba(255, 59, 48, 0.1)' }}
+            >
+              <Text variant="paragraph-sm" color="negative">
+                {safeValidationError}
+              </Text>
+            </Stack>
+          )}
 
           <Stack gap="x1">
             {allWalletOptions.map((wallet) => {
               const isActive = activeConnector?.id === wallet.id
-              const isSafeDelegate = 'isSafeDelegate' in wallet && wallet.isSafeDelegate
+              const isSafe = 'isSafe' in wallet && wallet.isSafe
 
               return (
                 <WalletOption
@@ -299,9 +471,7 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
                   icon={wallet.iconUrl}
                   iconBackground={wallet.iconBackground}
                   onClick={() =>
-                    isSafeDelegate
-                      ? handleSafeDelegateClick()
-                      : handleWalletConnect(wallet)
+                    isSafe ? handleSafeClick() : handleWalletConnect(wallet)
                   }
                   recent={wallet.recent}
                   disabled={isActive}

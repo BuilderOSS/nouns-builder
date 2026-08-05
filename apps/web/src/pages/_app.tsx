@@ -19,6 +19,7 @@ import 'react-mde/lib/styles/css/react-mde-all.css'
 import 'src/styles/react-mde-theme.css'
 
 import { VercelAnalytics } from '@buildeross/analytics'
+import { useSafeAuth } from '@buildeross/hooks'
 import { AuthStatusContext } from '@buildeross/stores'
 import { LinkComponentProvider } from '@buildeross/ui/LinkComponentProvider'
 import { NetworkController } from '@buildeross/ui/NetworkController'
@@ -45,10 +46,6 @@ import {
 import { Disclaimer } from 'src/components/Disclaimer'
 import { FrameProvider } from 'src/components/FrameProvider'
 import { LinksProvider } from 'src/components/LinksProvider'
-import {
-  SafeDelegateProvider,
-  useSafeDelegateContext,
-} from 'src/contexts/SafeDelegateContext'
 import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { SWRConfig } from 'swr'
@@ -82,7 +79,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const verifyingRef = useRef(false)
   const [rainbowKitAuthStatus, setRainbowKitAuthStatus] =
     useState<AuthenticationStatus>('unauthenticated')
-  const { safeAddress, chainId, clearSafeDelegateInfo } = useSafeDelegateContext()
+  const { state: safeState, clearSafe } = useSafeAuth()
   const config = useConfig()
 
   // Simple session verification (RainbowKit pattern)
@@ -147,8 +144,8 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
         const message = createSiweMessage({
           domain: window.location.host,
           address,
-          statement: safeAddress
-            ? `Sign in as delegate for Safe ${safeAddress}`
+          statement: safeState.safeAddress
+            ? `Sign in as owner for Safe ${safeState.safeAddress}`
             : 'Sign in with Ethereum to Nouns Builder',
           uri: window.location.origin,
           version: '1',
@@ -168,8 +165,8 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
             body: JSON.stringify({
               message,
               signature,
-              safeAddress,
-              safeChainId: chainId,
+              safeAddress: safeState.safeAddress,
+              safeChainId: safeState.chainId,
             }),
           })
 
@@ -191,11 +188,11 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
 
       signOut: async () => {
         setRainbowKitAuthStatus('unauthenticated')
-        clearSafeDelegateInfo()
+        clearSafe()
         await fetch('/api/siwe/logout', { method: 'POST' })
       },
     })
-  }, [setRainbowKitAuthStatus, safeAddress, chainId, clearSafeDelegateInfo])
+  }, [setRainbowKitAuthStatus, safeState.safeAddress, safeState.chainId, clearSafe])
 
   return (
     <AuthStatusContext.Provider value={rainbowKitAuthStatus}>
@@ -236,9 +233,7 @@ function App(props: AppPropsWithLayout) {
   return (
     <WagmiProvider config={clientConfig}>
       <QueryClientProvider client={queryClient}>
-        <SafeDelegateProvider>
-          <AppContent {...props} />
-        </SafeDelegateProvider>
+        <AppContent {...props} />
       </QueryClientProvider>
     </WagmiProvider>
   )

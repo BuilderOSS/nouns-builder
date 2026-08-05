@@ -62,13 +62,24 @@ export function SafeAddressModal({
       style={{ width: '90vw', maxWidth: '380px' }}
     >
       <Stack gap="x2">
-        <Text variant="label-lg">Connect as Safe Delegate</Text>
+        <Text variant="label-lg">Connect as Safe Owner</Text>
         <Text variant="paragraph-sm" color="text3">
-          Enter the Safe address you want to represent and select the network.
+          Select the network and enter the Safe address. You'll need to connect with a
+          wallet that is one of the owners of this Safe.
         </Text>
       </Stack>
 
-      <Stack gap="x3">
+      <Stack gap="x2">
+        <DropdownSelect
+          id="network"
+          value={chainId}
+          options={SUPPORTED_CHAINS}
+          onChange={(value) => setChainId(value)}
+          inputLabel="Network"
+          disabled={isValidating}
+          height="x12"
+        />
+
         <SmartInput
           id="safe-address"
           type={FIELD_TYPES.TEXT}
@@ -82,15 +93,6 @@ export function SafeAddressModal({
           disabled={isValidating}
           isAddress={true}
           errorMessage={inputError}
-        />
-
-        <DropdownSelect
-          id="network"
-          value={chainId}
-          options={SUPPORTED_CHAINS}
-          onChange={(value) => setChainId(value)}
-          inputLabel="Network"
-          disabled={isValidating}
         />
 
         {error && (

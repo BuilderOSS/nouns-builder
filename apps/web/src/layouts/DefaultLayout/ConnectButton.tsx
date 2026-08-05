@@ -2,11 +2,14 @@ import { Button, Flex } from '@buildeross/zord'
 import { ConnectButton as RKConnectButton } from '@rainbow-me/rainbowkit'
 import React, { useState } from 'react'
 import { CustomWalletModal } from 'src/components/CustomWalletModal'
+import { useAccount } from 'wagmi'
 
 import { connectButtonWrapper } from './Nav.styles.css'
 
 export const ConnectButton = () => {
   const [showModal, setShowModal] = useState(false)
+  const { connector } = useAccount()
+  const isSafeMode = connector?.id === 'safeOwner'
 
   return (
     <Flex
@@ -95,14 +98,22 @@ export const ConnectButton = () => {
             )
           }
 
-          // Connected - use RainbowKit's account modal
+          // Connected - wagmi automatically shows Safe address when using SafeOwnerConnector
           return (
             <Flex gap="x2" align="center">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={openChainModal}
-                style={{ fontSize: '16px', paddingLeft: '24px', paddingRight: '24px' }}
+                onClick={isSafeMode ? undefined : openChainModal}
+                disabled={isSafeMode}
+                style={{
+                  fontSize: '16px',
+                  paddingLeft: '24px',
+                  paddingRight: '24px',
+                  opacity: isSafeMode ? 0.6 : 1,
+                  cursor: isSafeMode ? 'not-allowed' : 'pointer',
+                }}
+                title={isSafeMode ? 'Cannot switch chain for Safe' : undefined}
               >
                 {chain?.hasIcon && chain.iconUrl && (
                   // eslint-disable-next-line @next/next/no-img-element

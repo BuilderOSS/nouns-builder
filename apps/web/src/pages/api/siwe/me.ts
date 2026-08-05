@@ -10,7 +10,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const session = await getIronSession<IronSessionData>(req, res, ironOptions)
       res.send({
         address: session.siwe?.address,
-        delegateAddress: session.delegateAddress,
+        eoaAddress: session.eoaAddress,
         safeAddress: session.safeAddress,
         safeChainId: session.safeChainId,
       })
