@@ -6,9 +6,10 @@ import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
-import { useMemo } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
+import { fadingMessage, PROPDATE_COLLAPSED_HEIGHT } from './PropDateCard.css'
 import { PropDateReplyCard } from './PropDateReplyCard'
 
 export const PropDateCard = ({
@@ -39,6 +40,42 @@ export const PropDateCard = ({
     () => [...replies].sort((a, b) => a.timeCreated - b.timeCreated),
     [replies]
   )
+
+  // Collapse long milestone reports so the feed stays scannable. Mirrors the
+  // About-page DaoDescription pattern: measure the rendered message and only
+  // clamp + show a toggle when it actually overflows the collapsed height.
+  const [isOverHeight, setIsOverHeight] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
+  const messageRef = useRef<HTMLDivElement>(null)
+  const messageId = useId()
+
+  const collapsedHeight = useMemo(
+    () => Number.parseInt(PROPDATE_COLLAPSED_HEIGHT, 10),
+    []
+  )
+
+  const updateOverflowState = useCallback(() => {
+    const contentHeight = messageRef.current?.scrollHeight || 0
+    setIsOverHeight(contentHeight > collapsedHeight)
+  }, [collapsedHeight])
+
+  useEffect(() => {
+    setIsExpanded(false)
+  }, [propDate.message])
+
+  useEffect(() => {
+    updateOverflowState()
+    let observer: ResizeObserver | null = null
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(() => updateOverflowState())
+      if (messageRef.current) observer.observe(messageRef.current)
+    }
+    window.addEventListener('resize', updateOverflowState)
+    return () => {
+      observer?.disconnect()
+      window.removeEventListener('resize', updateOverflowState)
+    }
+  }, [propDate.message, updateOverflowState])
 
   return (
     <Flex
@@ -96,14 +133,37 @@ export const PropDateCard = ({
       </Flex>
 
       {propDate.message && (
-        <Box
-          borderRadius={'curved'}
-          pt="x4"
-          px="x4"
-          backgroundColor={'background2'}
-          className={messageStyle}
-        >
-          <MarkdownDisplay>{propDate.message}</MarkdownDisplay>
+        <Box>
+          <Box
+            ref={messageRef}
+            id={messageId}
+            borderRadius={'curved'}
+            pt="x4"
+            px="x4"
+            backgroundColor={'background2'}
+            className={[messageStyle, !isExpanded && isOverHeight ? fadingMessage : '']
+              .filter(Boolean)
+              .join(' ')}
+            style={{
+              maxHeight: isExpanded ? 'none' : PROPDATE_COLLAPSED_HEIGHT,
+              overflow: isExpanded ? 'visible' : 'hidden',
+            }}
+          >
+            <MarkdownDisplay>{propDate.message}</MarkdownDisplay>
+          </Box>
+          {isOverHeight && (
+            <Flex justify="center" mt="x2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded((v) => !v)}
+                aria-expanded={isExpanded}
+                aria-controls={messageId}
+              >
+                {isExpanded ? 'Show less' : 'Read full update →'}
+              </Button>
+            </Flex>
+          )}
         </Box>
       )}
       {repliesSorted && repliesSorted.length > 0 && (
