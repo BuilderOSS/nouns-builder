@@ -1,6 +1,10 @@
+import debug from 'debug'
 import { EventEmitter } from 'events'
 import type { PublicClient } from 'viem'
 
+import type { SafeTransactionHandler } from '../safe/handler'
+import { getSafeTransactionHandler } from '../safe/handler'
+import { executeSafeTransaction } from '../safe/proposeTransaction'
 import type {
   CallParams,
   EIP1193Provider,
@@ -8,16 +12,53 @@ import type {
   SendTransactionParams,
 } from './types'
 
+const debugSafe = debug('app:safe')
+
 /**
- * Custom EIP-1193 provider that presents a Safe as the connected account
+ * Custom EIP-1193 provider that presents a Safe wallet as the connected account
  * while delegating signing operations to an EOA wallet.
  *
- * Based on @safe-global/safe-apps-provider but works outside iframe context.
+ * This provider enables seamless integration of Safe multi-sig wallets with wagmi/viem
+ * by implementing the standard EIP-1193 provider interface. It intelligently routes
+ * different types of requests:
+ *
+ * - **Account/Chain info**: Returns Safe address and chain
+ * - **Signing operations** (personal_sign, eth_signTypedData): Delegates to EOA for SIWE/authentication
+ * - **Transactions** (eth_sendTransaction): Routes through Safe transaction handler for multi-sig
+ * - **Read operations** (eth_call, getBalance, etc.): Uses public client for efficiency
+ *
+ * Based on @safe-global/safe-apps-provider but designed to work outside Safe Apps iframe context,
+ * allowing Safe wallets to be used as a standard wagmi connector.
+ *
+ * @example
+ * ```typescript
+ * const safeProvider = new SafeOwnerProvider(
+ *   {
+ *     safeAddress: '0x123...',
+ *     chainId: 1,
+ *     threshold: 2,
+ *     owners: ['0xabc...', '0xdef...'],
+ *   },
+ *   eoaProvider, // From wallet (MetaMask, etc.)
+ *   publicClient  // Viem public client for reads
+ * )
+ *
+ * // Use with wagmi
+ * const config = createConfig({
+ *   // ...
+ *   connectors: [injected({ target: safeProvider })],
+ * })
+ *
+ * // Clean up when done
+ * safeProvider.destroy()
+ * ```
  */
 export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
   private readonly safe: SafeInfo
   private readonly eoaProvider: EIP1193Provider
   private readonly publicClient: PublicClient
+  private transactionHandler?: SafeTransactionHandler
+  private eventCleanup?: () => void
 
   constructor(safe: SafeInfo, eoaProvider: EIP1193Provider, publicClient: PublicClient) {
     super()
@@ -29,26 +70,62 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
     this.setupEventForwarding()
   }
 
+  /**
+   * Cleanup event listeners to prevent memory leaks.
+   * Call this when the provider is no longer needed.
+   */
+  destroy(): void {
+    this.eventCleanup?.()
+    this.removeAllListeners()
+  }
+
+  /**
+   * Set a custom transaction handler for this provider instance
+   * Useful for testing or special cases. Falls back to global handler if not set.
+   */
+  setTransactionHandler(handler: SafeTransactionHandler): void {
+    this.transactionHandler = handler
+  }
+
   private setupEventForwarding(): void {
     // Forward certain events from EOA provider, but modify accounts
-    const originalOn = this.eoaProvider.on.bind(this.eoaProvider)
+    const originalOn = this.eoaProvider.on?.bind(this.eoaProvider)
+    const originalOff = this.eoaProvider.removeListener?.bind(this.eoaProvider)
+
+    // Track event handlers for cleanup
+    const accountsHandler = (..._args: unknown[]) => {
+      const [accounts] = _args as [string[] | undefined]
+      // The Safe account is only usable while a backing owner EOA is connected.
+      this.emit(
+        'accountsChanged',
+        accounts && accounts.length > 0 ? [this.safe.safeAddress] : []
+      )
+    }
+
+    const chainHandler = (...args: unknown[]) => {
+      // Forward chain changes
+      const [chainId] = args
+      this.emit('chainChanged', chainId as string)
+    }
+
+    const disconnectHandler = () => {
+      this.emit('disconnect')
+    }
 
     // Listen to EOA provider events
     if (originalOn) {
-      originalOn('accountsChanged', (..._args: unknown[]) => {
-        // EOA changed, but we still report Safe address
-        this.emit('accountsChanged', [this.safe.safeAddress])
-      })
+      originalOn('accountsChanged', accountsHandler)
+      originalOn('chainChanged', chainHandler)
+      originalOn('disconnect', disconnectHandler)
 
-      originalOn('chainChanged', (...args: unknown[]) => {
-        // Forward chain changes
-        const [chainId] = args
-        this.emit('chainChanged', chainId as string)
-      })
-
-      originalOn('disconnect', () => {
-        this.emit('disconnect')
-      })
+      // Setup cleanup function
+      this.eventCleanup = () => {
+        if (originalOff) {
+          originalOff('accountsChanged', accountsHandler)
+          originalOff('chainChanged', chainHandler)
+          originalOff('disconnect', disconnectHandler)
+        }
+      }
     }
   }
 
@@ -111,14 +188,71 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
         return this.eoaProvider.request({ method, params: modifiedParams })
       }
 
-      // Transaction methods - error for now (Safe Transaction Service TBD)
-      case 'eth_sendTransaction':
+      // Transaction methods - handle Safe transactions
+      case 'eth_sendTransaction': {
+        // Validate transaction parameters before type assertion
+        if (!paramsArray || !paramsArray[0] || typeof paramsArray[0] !== 'object') {
+          throw new Error('eth_sendTransaction requires transaction parameters')
+        }
+
+        const txParams = paramsArray[0] as SendTransactionParams & {
+          safeTransactions?: SendTransactionParams[]
+        }
+
+        // Validate required transaction fields
+        if (!txParams.to && !txParams.safeTransactions?.length) {
+          throw new Error('Transaction must have a "to" address')
+        }
+
+        debugSafe('✓ eth_sendTransaction called:', {
+          to: txParams.to,
+          value: txParams.value,
+          safeAddress: this.safe.safeAddress,
+          threshold: this.safe.threshold,
+        })
+
+        // Auto-execute for 1-of-N Safes (no multi-sig needed)
+        if (this.safe.threshold === 1) {
+          debugSafe(' Threshold is 1, auto-executing transaction')
+          const txHash = await executeSafeTransaction(
+            this.safe,
+            txParams.safeTransactions ?? txParams,
+            this.eoaProvider
+          )
+          debugSafe(' Transaction executed:', txHash)
+          return txHash
+        }
+
+        // Multi-sig: use instance handler or fall back to global handler
+        debugSafe(' Multi-sig Safe, using handler')
+        const handler = this.transactionHandler ?? getSafeTransactionHandler()
+        if (!handler) {
+          debugSafe('ERROR:  No handler registered!')
+          throw new Error(
+            'Safe transaction handler not initialized. ' +
+              'This is a multi-signature Safe transaction that requires approval from other owners. ' +
+              'Please ensure SafeTransactionProvider is mounted in your app.'
+          )
+        }
+
+        debugSafe(' Handler found, calling it...')
+        // Handler will show modal and return safeTxHash
+        const result = await handler({
+          safeInfo: this.safe,
+          transaction: txParams,
+          ...(txParams.safeTransactions
+            ? { transactions: txParams.safeTransactions }
+            : {}),
+          eoaProvider: this.eoaProvider,
+        })
+
+        debugSafe(' Handler returned result:', result)
+        // Return safeTxHash (treated like txHash by wagmi)
+        return result.safeTxHash
+      }
+
       case 'eth_sendRawTransaction':
-        throw new Error(
-          'Safe transactions are not yet supported. ' +
-            'This feature will use Safe Transaction Service for multi-signature approval. ' +
-            'For now, only SIWE authentication is supported.'
-        )
+        throw new Error('Raw transactions are not supported for Safe wallets')
 
       // Read operations - use publicClient
       case 'eth_call': {

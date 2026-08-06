@@ -6,6 +6,7 @@ export default defineConfig({
     'src/contract/*.ts',
     'src/subgraph/*.ts',
     'src/eas/*.ts',
+    'src/transaction/*.ts',
     '!src/*.test.ts',
   ],
   format: ['cjs', 'esm'],

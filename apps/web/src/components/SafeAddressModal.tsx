@@ -1,5 +1,7 @@
 'use client'
 
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { SAFE_SERVICE_URL } from '@buildeross/constants/safe'
 import { CHAIN_ID } from '@buildeross/types'
 import { DropdownSelect, FIELD_TYPES, SmartInput } from '@buildeross/ui'
 import { Button, Flex, Stack, Text } from '@buildeross/zord'
@@ -16,13 +18,17 @@ interface SafeAddressModalProps {
   initialChainId?: CHAIN_ID
 }
 
-const SUPPORTED_CHAINS = [
-  { value: CHAIN_ID.ETHEREUM, label: 'Ethereum' },
-  { value: CHAIN_ID.OPTIMISM, label: 'Optimism' },
-  { value: CHAIN_ID.BASE, label: 'Base' },
-  { value: CHAIN_ID.SEPOLIA, label: 'Sepolia' },
-  { value: CHAIN_ID.BASE_SEPOLIA, label: 'Base Sepolia' },
-]
+// Dynamically build supported chains from SAFE_SERVICE_URL + PUBLIC_DEFAULT_CHAINS
+const getSupportedChains = () => {
+  return PUBLIC_DEFAULT_CHAINS.filter(
+    (chain) => SAFE_SERVICE_URL[chain.id as CHAIN_ID] !== undefined
+  ).map((chain) => ({
+    value: chain.id as CHAIN_ID,
+    label: chain.name,
+  }))
+}
+
+const SUPPORTED_CHAINS = getSupportedChains()
 
 export function SafeAddressModal({
   onSubmit,

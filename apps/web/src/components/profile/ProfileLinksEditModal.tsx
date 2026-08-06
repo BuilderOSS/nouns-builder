@@ -5,6 +5,7 @@ import {
   PROFILE_LINK_SCHEMA,
   PROFILE_LINK_SCHEMA_UID,
 } from '@buildeross/constants'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import type { AddressType } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
@@ -22,7 +23,7 @@ import {
 } from 'src/utils/profileIdentity'
 import { encodeAbiParameters, zeroHash } from 'viem'
 import { useAccount, useConfig, useSwitchChain } from 'wagmi'
-import { waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 type ProfileLinkKey = 'website' | 'x' | 'farcaster'
 
@@ -114,8 +115,8 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
   const attestProfileLinks = async (
     easAddress: `0x${string}`,
     updates: ProfileLinkUpdate[]
-  ): Promise<`0x${string}`> => {
-    const hash = await writeContract(config, {
+  ): Promise<'safe-proposed' | `0x${string}`> => {
+    const { request } = await simulateContract(config, {
       abi: easAbi,
       address: easAddress,
       chainId: PROFILE_LINK_EAS_CHAIN_ID,
@@ -142,18 +143,26 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
         ],
       ],
     })
-    await waitForTransactionReceipt(config, {
-      hash,
+
+    const result = await executeAppTransaction({
+      config,
+      request,
       chainId: PROFILE_LINK_EAS_CHAIN_ID,
     })
 
-    return hash
+    if (result.kind === 'safe-proposed') {
+      return 'safe-proposed'
+    }
+
+    return result.hash
   }
 
   const saveProfileLinks = async (
     easAddress: `0x${string}`,
     updates: ProfileLinkUpdate[]
-  ): Promise<`0x${string}`[]> => [await attestProfileLinks(easAddress, updates)]
+  ): Promise<('safe-proposed' | `0x${string}`)[]> => [
+    await attestProfileLinks(easAddress, updates),
+  ]
 
   const handleSave = async () => {
     let updates: ProfileLinkUpdate[]
@@ -190,7 +199,12 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
 
       const hashes = await saveProfileLinks(easAddress, updates)
 
-      setTxHashes(hashes)
+      // Don't show success for Safe proposals - user needs to execute via Safe UI
+      if (hashes.includes('safe-proposed')) {
+        return
+      }
+
+      setTxHashes(hashes as `0x${string}`[])
       onSaved?.()
     } catch (err) {
       console.error('Failed to update profile links:', err)

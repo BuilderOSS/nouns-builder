@@ -203,6 +203,11 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
 
       const result = await attestCandidate(params)
 
+      // Don't show success for Safe proposals - user needs to execute via Safe UI
+      if (result.kind === 'safe-proposed') {
+        return
+      }
+
       setIsTxSuccess(true)
       clearCandidate()
 

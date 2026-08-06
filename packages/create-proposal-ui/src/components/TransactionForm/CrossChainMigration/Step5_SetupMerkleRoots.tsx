@@ -165,8 +165,10 @@ export const Step5_SetupMerkleRoots: React.FC = () => {
 
     try {
       // Serialize transactions to avoid nonce issues
-      await setAttributesRoot(activeAttributesRoot)
-      await setMintSettings(activeMemberRoot)
+      const attributesResult = await setAttributesRoot(activeAttributesRoot)
+      if (typeof attributesResult !== 'string') return
+      const membersResult = await setMintSettings(activeMemberRoot)
+      if (typeof membersResult !== 'string') return
 
       // Save to context (in case they came from cache and weren't already saved)
       setAttributesMerkleRoot(activeAttributesRoot)

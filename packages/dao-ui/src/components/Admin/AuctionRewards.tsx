@@ -1,6 +1,7 @@
 import { PROTOCOL_REWARDS_MANAGER } from '@buildeross/constants'
 import { useAuctionRewards } from '@buildeross/hooks'
 import { protocolRewardsAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -8,9 +9,9 @@ import { ContractLink } from '@buildeross/ui/ContractLink'
 import { Tooltip } from '@buildeross/ui/Tooltip'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
-import { formatEther, Hex } from 'viem'
+import { formatEther } from 'viem'
 import { useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { Section } from '../AdminForm/Section'
 
@@ -58,12 +59,12 @@ export const AuctionRewards: React.FC<AuctionRewardsProps> = ({ auctionAddress }
         account: address,
       })
 
-      const txHash: Hex = await writeContract(config, simulateData.request)
-
-      await waitForTransactionReceipt(config, {
-        hash: txHash,
+      const result = await executeAppTransaction({
+        config,
+        request: simulateData.request,
         chainId: chain.id,
       })
+      if (result.kind === 'safe-proposed') return
 
       // Refresh the auction rewards data
       await mutate()

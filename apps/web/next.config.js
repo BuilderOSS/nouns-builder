@@ -148,6 +148,15 @@ const basicConfig = {
       })
     )
 
+    // Tree-shake debug package in production
+    if (!dev) {
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^debug$/, (resource) => {
+          resource.request = require.resolve('./src/utils/debug-noop.js')
+        })
+      )
+    }
+
     return {
       ...config,
       // Hot-fix for $RefreshReg issues: https://github.com/vanilla-extract-css/vanilla-extract/issues/679#issuecomment-1402839249

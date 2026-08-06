@@ -1,8 +1,8 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { MOBILE_PROFILE_MENU_LAYER, NAV_BUTTON_LAYER } from '@buildeross/constants/layers'
+import { SAFE_HOME_URL } from '@buildeross/constants/safe'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useUserDaos } from '@buildeross/hooks/useUserDaos'
-import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
@@ -16,6 +16,7 @@ import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
+import { useAppDisconnect } from 'src/hooks/useAppDisconnect'
 import { useDaoListPreferences } from 'src/hooks/useDaoListPreferences'
 import { profileStatBadge } from 'src/styles/profile.css'
 import { type Address, formatUnits } from 'viem'
@@ -134,15 +135,27 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const { chain: selectedChain } = useChainStore()
   const { connector } = useAccount()
 
-  // Detect Safe mode and get EOA address
+  // Detect Safe mode and get EOA address + Safe chainId
   const isSafeMode = connector?.id === 'safeOwner'
   const [eoaAddress, setEoaAddress] = React.useState<Address | null>(null)
+  const [safeChainId, setSafeChainId] = React.useState<CHAIN_ID | null>(null)
 
   React.useEffect(() => {
-    if (isSafeMode && connector && 'getEOAAddress' in connector) {
-      ;(connector as any).getEOAAddress().then((addr: Address) => setEoaAddress(addr))
+    if (isSafeMode && connector) {
+      // Fetch EOA address
+      if ('getEOAAddress' in connector) {
+        ;(connector as any).getEOAAddress().then((addr: Address) => setEoaAddress(addr))
+      }
+
+      // Fetch Safe's actual chainId
+      if ('getChainId' in connector) {
+        ;(connector as any)
+          .getChainId()
+          .then((chainId: number) => setSafeChainId(chainId as CHAIN_ID))
+      }
     } else {
       setEoaAddress(null)
+      setSafeChainId(null)
     }
   }, [isSafeMode, connector])
 
@@ -205,13 +218,18 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const [isMobile, setIsMobile] = React.useState(false)
 
   React.useEffect(() => {
+    // Check if window is defined (SSR safety)
+    if (typeof window === 'undefined') return
+
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768)
     }
-    if (!!window) {
-      window.addEventListener('resize', handleResize)
-      handleResize()
-    }
+
+    // Set initial value
+    handleResize()
+
+    // Add listener
+    window.addEventListener('resize', handleResize)
 
     return () => {
       window.removeEventListener('resize', handleResize)
@@ -230,7 +248,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     }
   }, [isMobile, activeDropdown])
 
-  const onDisconnect = useWalletDisconnect()
+  const onDisconnect = useAppDisconnect()
 
   const renderConnectedUserCommon = ({ isStatic = false }: { isStatic?: boolean }) => (
     <>
@@ -256,61 +274,82 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
             >
               <Avatar address={address!} src={ensAvatar} size={'40'} />
               <Flex direction={'column'} ml={'x2'} style={{ flex: 1, minWidth: 0 }}>
-                {isSafeMode ? (
-                  <>
-                    <Flex align="center" gap="x2">
-                      <NextImage
-                        src="/icons/wallets/safe.svg"
-                        alt="Safe"
-                        width={16}
-                        height={16}
-                        style={{ borderRadius: '4px', flexShrink: 0 }}
-                      />
-                      <Text
-                        fontWeight={'display'}
-                        style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-                      >
-                        {displayName}
-                      </Text>
-                    </Flex>
-                    <Text variant={'paragraph-md'} color={'tertiary'}>
-                      {userBalance}
-                    </Text>
-                    {eoaAddress && (
-                      <Flex align="center" gap="x1" mt="x1">
-                        <Text
-                          variant={'label-sm'}
-                          color={'text3'}
-                          style={{ flexShrink: 0 }}
-                        >
-                          Owner:
-                        </Text>
-                        <Text
-                          variant={'label-sm'}
-                          color={'text3'}
-                          style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
-                        >
-                          {eoaEnsData.displayName}
-                        </Text>
-                      </Flex>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <Text fontWeight={'display'}>{displayName}</Text>
-                    <Text variant={'paragraph-md'} color={'tertiary'}>
-                      {userBalance}
-                    </Text>
-                  </>
-                )}
+                <Text fontWeight={'display'}>{displayName}</Text>
+                <Text variant={'paragraph-md'} color={'tertiary'}>
+                  {userBalance}
+                </Text>
               </Flex>
             </Flex>
           </Link>
-          <Flex direction="column" gap="x1">
-            <CopyButton text={address!} />
-            {isSafeMode && eoaAddress && <CopyButton text={eoaAddress} />}
-          </Flex>
+          <CopyButton text={address!} />
         </Flex>
+
+        {/* Safe Details Card - Only shown in Safe mode */}
+        {isSafeMode &&
+          connector &&
+          'safeInfo' in connector &&
+          safeChainId &&
+          SAFE_HOME_URL[safeChainId] && (
+            <Box
+              p="x3"
+              borderRadius="curved"
+              backgroundColor="background2"
+              borderWidth="thin"
+              borderStyle="solid"
+              borderColor="border"
+            >
+              <Flex direction="column" gap="x2">
+                {/* Safe Header - Clickable link to Safe app */}
+                <Link
+                  href={`${SAFE_HOME_URL[safeChainId]}:${address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <Flex align="center" gap="x2" style={{ cursor: 'pointer' }}>
+                    <NextImage
+                      src="/icons/wallets/safe.svg"
+                      alt="Safe"
+                      width={20}
+                      height={20}
+                      style={{ borderRadius: '4px', flexShrink: 0 }}
+                    />
+                    <Text fontWeight="display" variant="paragraph-md">
+                      Safe Multisig
+                    </Text>
+                    <Icon id="external-16" />
+                  </Flex>
+                </Link>
+
+                {/* Threshold Info */}
+                {(connector as any).safeInfo?.threshold && (
+                  <Text variant="paragraph-sm" color="text3">
+                    {(connector as any).safeInfo.threshold} of{' '}
+                    {(connector as any).safeInfo.owners.length} signatures required
+                  </Text>
+                )}
+
+                {/* Owner Info */}
+                {eoaAddress && (
+                  <Flex align="center" justify="space-between">
+                    <Flex align="center" gap="x2" style={{ flex: 1, minWidth: 0 }}>
+                      <Text variant="label-sm" color="text3" style={{ flexShrink: 0 }}>
+                        Owner:
+                      </Text>
+                      <Avatar address={eoaAddress} size={'20'} />
+                      <Text
+                        variant="paragraph-sm"
+                        style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                      >
+                        {eoaEnsData.displayName}
+                      </Text>
+                    </Flex>
+                    <CopyButton text={eoaAddress} variant="icon" />
+                  </Flex>
+                )}
+              </Flex>
+            </Box>
+          )}
 
         <Button
           className={disconnectButton}

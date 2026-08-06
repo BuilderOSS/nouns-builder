@@ -6,6 +6,7 @@ import { PublicClient, WalletClient } from 'viem'
 interface UseExecuteSwapParams {
   walletClient?: WalletClient
   publicClient?: PublicClient
+  isSafeMode?: boolean
 }
 
 interface ExecuteSwapParams {
@@ -47,6 +48,7 @@ export function applySlippageBps(amountOut: bigint, slippageBps: bigint): bigint
 export function useExecuteSwap({
   walletClient,
   publicClient,
+  isSafeMode = false,
 }: UseExecuteSwapParams): UseExecuteSwapReturn {
   const [isExecuting, setIsExecuting] = useState(false)
   const [error, setError] = useState<Error | null>(null)
@@ -59,6 +61,9 @@ export function useExecuteSwap({
     amountOut,
     slippage = 0.01,
   }: ExecuteSwapParams): Promise<`0x${string}`> => {
+    if (isSafeMode) {
+      throw new Error('Swaps are not supported with Safe wallets')
+    }
     if (!walletClient) {
       throw new Error('Wallet client not connected')
     }

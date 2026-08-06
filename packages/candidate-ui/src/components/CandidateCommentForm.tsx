@@ -194,9 +194,10 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
     const actualSupport = signalEnabled ? support : CandidateVoteSupportEnum.NONE
 
     try {
+      let result
       if (withSignature) {
         // Submit signal/comment + signature in one transaction
-        await attestCommentWithSignature({
+        result = await attestCommentWithSignature({
           config,
           chainId: chain.id,
           walletClient: walletClient!,
@@ -215,7 +216,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
         })
       } else {
         // Submit only comment/signal
-        await attestCandidateComment({
+        result = await attestCandidateComment({
           config,
           chainId: chain.id,
           daoTokenAddress: addresses.token!,
@@ -224,6 +225,11 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           comment: comment.trim(),
           parentCommentUID,
         })
+      }
+
+      // Don't reset form or show success for Safe proposals - user needs to execute via Safe UI
+      if (result.kind === 'safe-proposed') {
+        return
       }
 
       // Reset form

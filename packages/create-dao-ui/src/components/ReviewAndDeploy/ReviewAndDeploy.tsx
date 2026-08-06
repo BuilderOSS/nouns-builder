@@ -3,7 +3,7 @@ import { L2_CHAINS } from '@buildeross/constants/chains'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { useManagerVersion } from '@buildeross/hooks'
 import { managerAbi, managerV1Abi, managerV3Abi } from '@buildeross/sdk/contract'
-import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -25,7 +25,7 @@ import {
   zeroAddress,
 } from 'viem'
 import { useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
 import { TokenAllocation } from '../AllocationForm'
@@ -269,7 +269,7 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
     setIsPendingTransaction(true)
     let transaction
     try {
-      let txHash: `0x${string}`
+      let result
       if (version?.startsWith('3')) {
         // Use v3 ABI with proposalUpdatablePeriod
         const data = await simulateContract(config, {
@@ -284,7 +284,11 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
             govParams,
           ],
         })
-        txHash = await writeContract(config, data.request)
+        result = await executeAppTransaction({
+          config,
+          request: data.request,
+          chainId: chain.id,
+        })
       } else if (version?.startsWith('2')) {
         // Use v2 ABI without proposalUpdatablePeriod
         const data = await simulateContract(config, {
@@ -299,7 +303,11 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
             govParams,
           ],
         })
-        txHash = await writeContract(config, data.request)
+        result = await executeAppTransaction({
+          config,
+          request: data.request,
+          chainId: chain.id,
+        })
       } else {
         // Use v1 ABI (no reservedUntilTokenId)
         const data = await simulateContract(config, {
@@ -309,16 +317,21 @@ export const ReviewAndDeploy: React.FC<ReviewAndDeploy> = ({
           functionName: 'deploy',
           args: [founderParams, tokenParams, auctionParams, govParams],
         })
-        txHash = await writeContract(config, data.request)
-      }
-
-      if (txHash) {
-        transaction = await waitForTransactionReceipt(config, {
-          hash: txHash,
+        result = await executeAppTransaction({
+          config,
+          request: data.request,
           chainId: chain.id,
         })
-        await awaitSubgraphSync(chain.id, transaction.blockNumber)
       }
+
+      if (result?.kind === 'safe-proposed') {
+        setIsPendingTransaction(false)
+        setDeploymentError(
+          'Deployment proposal submitted to Safe. Additional signatures are required before deployment.'
+        )
+        return
+      }
+      transaction = result.receipt
     } catch (e) {
       console.error('Error deploying DAO:', e)
       setIsPendingTransaction(false)

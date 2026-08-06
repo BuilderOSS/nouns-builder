@@ -1,13 +1,13 @@
 import { auctionAbi, tokenAbi } from '@buildeross/sdk/contract'
-import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useAuthStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, Chain } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Text, vars } from '@buildeross/zord'
 import React, { useState } from 'react'
-import { useConfig, useReadContract, useSimulateContract, useWriteContract } from 'wagmi'
-import { readContract, waitForTransactionReceipt } from 'wagmi/actions'
+import { useConfig, useReadContract, useSimulateContract } from 'wagmi'
+import { readContract, simulateContract } from 'wagmi/actions'
 
 import {
   preAuctionButtonVariants,
@@ -73,21 +73,20 @@ export const PreAuction: React.FC<PreAuctionProps> = ({
     chainId: chain.id,
   })
 
-  const { writeContractAsync } = useWriteContract()
-
   /* handle start of auction  */
   const handleStartAuction = async () => {
     if (!unpauseData) return
     setIsUnPausing(true)
     try {
-      const txHash = await writeContractAsync(unpauseData.request)
-      const receipt = await waitForTransactionReceipt(config, {
-        hash: txHash,
+      const result = await executeAppTransaction({
+        config,
+        request: unpauseData.request,
         chainId: chain.id,
       })
-      await awaitSubgraphSync(chain.id, receipt.blockNumber)
+      if (result.kind !== 'mined') return
     } catch (e) {
       console.error(e)
+      return
     } finally {
       setIsUnPausing(false)
     }
@@ -166,20 +165,27 @@ export const PreAuction: React.FC<PreAuctionProps> = ({
 
     setIsUpdatingReservedTokenId(true)
     try {
-      const txHash = await writeContractAsync({
+      const { request } = await simulateContract(config, {
         abi: tokenAbi,
         address: addresses.token as AddressType,
         functionName: 'setReservedUntilTokenId',
         args: [BigInt(newReservedTokenId)],
         chainId: chain.id,
       })
-      await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
+
+      const result = await executeAppTransaction({
+        config,
+        chainId: chain.id,
+        request,
+      })
+      if (result.kind === 'safe-proposed') return
       await refetchReservedTokenId()
       setIsEditingReservedTokenId(false)
       setNewReservedTokenId('')
       setValidationError('')
     } catch (e) {
       console.error(e)
+      return
     } finally {
       setIsUpdatingReservedTokenId(false)
     }
