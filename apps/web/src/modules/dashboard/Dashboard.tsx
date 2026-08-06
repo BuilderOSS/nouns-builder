@@ -15,6 +15,7 @@ import React, { useMemo } from 'react'
 import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import { useDaoListPreferences } from 'src/hooks/useDaoListPreferences'
 
+import { landingContainer } from '../playground/components/PlaygroundLanding.css'
 import { CreateActions } from './CreateActions'
 import { DaoAuctionCard } from './DaoAuctionCard'
 import { DaoProposals } from './DaoProposals'
@@ -332,6 +333,14 @@ export const Dashboard: React.FC = () => {
           }
         />
       </Stack>
+    )
+  }
+
+  if (!address || !isAuthenticated) {
+    return (
+      <div className={landingContainer}>
+        <DashConnect />
+      </div>
     )
   }
 

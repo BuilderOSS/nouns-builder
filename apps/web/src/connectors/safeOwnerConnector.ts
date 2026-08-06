@@ -6,7 +6,6 @@ import {
   type SafeInfo,
   SafeOwnerProvider,
 } from '@buildeross/utils'
-import { getSafeInfo as getSafeInfoFromChain } from '@buildeross/utils/safeService'
 import { getConnectors } from '@wagmi/core'
 import type { PublicClient } from 'viem'
 import { createPublicClient, http } from 'viem'
@@ -173,13 +172,17 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
           throw new Error('EOA wallet is not authorized. Please reconnect.')
         }
 
-        // Fetch Safe info if not already loaded
+        // Load Safe info from cache if not already loaded
         if (!safeInfo_) {
-          try {
-            safeInfo_ = await getSafeInfoFromChain(saved.safeAddress, saved.chainId)
-          } catch (error) {
-            console.error('[SafeOwnerConnector] Failed to fetch Safe info:', error)
-            throw new Error('Failed to load Safe information')
+          // Use cached SafeInfo from localStorage (already fetched during validation)
+          safeInfo_ = {
+            safeAddress: saved.safeAddress,
+            chainId: saved.chainId,
+            threshold: saved.threshold,
+            owners: saved.owners,
+            isReadOnly: false,
+            nonce: saved.nonce,
+            version: saved.version,
           }
         }
 
@@ -248,11 +251,16 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
 
           // Ensure we have Safe info
           if (!safeInfo_) {
-            safeInfo_ = await getSafeInfoFromChain(saved.safeAddress, saved.chainId)
-          }
-
-          if (!safeInfo_) {
-            throw new Error('Failed to fetch Safe info')
+            // Use cached SafeInfo from localStorage (already fetched during validation)
+            safeInfo_ = {
+              safeAddress: saved.safeAddress,
+              chainId: saved.chainId,
+              threshold: saved.threshold,
+              owners: saved.owners,
+              isReadOnly: false,
+              nonce: saved.nonce,
+              version: saved.version,
+            }
           }
 
           // Create SafeOwnerProvider
@@ -310,6 +318,21 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
 
       // Custom property to expose Safe info
       get safeInfo() {
+        // Lazily load from localStorage if not already cached
+        if (!safeInfo_) {
+          const saved = loadSafeConfig()
+          if (saved) {
+            safeInfo_ = {
+              safeAddress: saved.safeAddress,
+              chainId: saved.chainId,
+              threshold: saved.threshold,
+              owners: saved.owners,
+              isReadOnly: false,
+              nonce: saved.nonce,
+              version: saved.version,
+            }
+          }
+        }
         return safeInfo_
       },
 

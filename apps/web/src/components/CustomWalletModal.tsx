@@ -2,7 +2,11 @@
 
 import { CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
-import { isOwnerOfSafe, isSafeAddress, setSafeInfo } from '@buildeross/utils'
+import {
+  getSafeInfo as getSafeInfoFromChain,
+  type SafeInfo,
+  setSafeInfo,
+} from '@buildeross/utils'
 import { Box, Button, Stack, Text } from '@buildeross/zord'
 import { getConnectors } from '@wagmi/core'
 import { useEffect, useState } from 'react'
@@ -37,10 +41,7 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
   const [isValidatingSafe, setIsValidatingSafe] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
   const [safeValidationError, setSafeValidationError] = useState<string | null>(null)
-  const [pendingSafeInfo, setPendingSafeInfo] = useState<{
-    safeAddress: Address
-    chainId: CHAIN_ID
-  } | null>(null)
+  const [pendingSafeInfo, setPendingSafeInfo] = useState<SafeInfo | null>(null)
   const { signMessageAsync } = useSignMessage()
   const { connectAsync } = useConnect()
   const { disconnectAsync } = useDisconnect()
@@ -90,10 +91,8 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
 
       try {
         // Validate that connected wallet is an owner
-        const isOwner = await isOwnerOfSafe(
-          address,
-          pendingSafeInfo.safeAddress,
-          pendingSafeInfo.chainId
+        const isOwner = pendingSafeInfo.owners.some(
+          (owner) => owner.toLowerCase() === address.toLowerCase()
         )
 
         if (!isOwner) {
@@ -103,11 +102,7 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
         }
 
         // Store Safe info with EOA connector ID for persistence
-        setSafeInfo(
-          pendingSafeInfo.safeAddress,
-          pendingSafeInfo.chainId,
-          activeConnector.id
-        )
+        setSafeInfo(pendingSafeInfo, activeConnector.id)
 
         // Find SafeOwnerConnector from wagmi config
         const safeConnector = getConnectors(wagmiConfig).find(
@@ -264,10 +259,10 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
     setSafeValidationError(null)
 
     try {
-      // 1. Validate that the address is actually a Safe
-      const isValid = await isSafeAddress(safeAddress, safeChainId as CHAIN_ID)
+      // 1. Fetch Safe info (validates it's a Safe and gets owners, threshold, etc.)
+      const safeInfo = await getSafeInfoFromChain(safeAddress, safeChainId as CHAIN_ID)
 
-      if (!isValid) {
+      if (!safeInfo) {
         setSafeValidationError('This address is not a Safe on the selected network')
         setIsValidatingSafe(false)
         return
@@ -275,7 +270,7 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
 
       // 2. If not connected, save Safe info and show wallet list
       if (!isConnected) {
-        setPendingSafeInfo({ safeAddress, chainId: safeChainId as CHAIN_ID })
+        setPendingSafeInfo(safeInfo)
         setSafeModeActive(true)
         setShowSafeFlow(false)
         setIsValidatingSafe(false)
@@ -283,7 +278,9 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
       }
 
       // 3. Validate that connected wallet is an owner
-      const isOwner = await isOwnerOfSafe(address!, safeAddress, safeChainId as CHAIN_ID)
+      const isOwner = safeInfo.owners.some(
+        (owner) => owner.toLowerCase() === address!.toLowerCase()
+      )
 
       if (!isOwner) {
         setSafeValidationError('Your wallet is not an owner of this Safe')
@@ -299,7 +296,7 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
       }
 
       // Store Safe info with EOA connector ID for persistence
-      setSafeInfo(safeAddress, safeChainId as CHAIN_ID, activeConnector.id)
+      setSafeInfo(safeInfo, activeConnector.id)
 
       // Find SafeOwnerConnector from wagmi config
       const safeConnector = getConnectors(wagmiConfig).find(

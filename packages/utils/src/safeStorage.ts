@@ -1,11 +1,17 @@
 import type { Address } from 'viem'
 
+import type { SafeInfo } from './providers/types'
+
 const STORAGE_KEY = 'safe-info'
 
 export interface SavedSafeInfo {
   safeAddress: Address
   chainId: number
   eoaConnectorId: string
+  threshold: number
+  owners: Address[]
+  nonce?: number
+  version?: string
   timestamp: number
 }
 
@@ -30,18 +36,18 @@ export function getSavedSafeInfo(): SavedSafeInfo | null {
 /**
  * Save Safe information to localStorage
  */
-export function setSafeInfo(
-  safeAddress: Address,
-  chainId: number,
-  eoaConnectorId: string
-): void {
+export function setSafeInfo(safeInfo: SafeInfo, eoaConnectorId: string): void {
   if (typeof window === 'undefined') return
 
   try {
     const data: SavedSafeInfo = {
-      safeAddress,
-      chainId,
+      safeAddress: safeInfo.safeAddress,
+      chainId: safeInfo.chainId,
       eoaConnectorId,
+      threshold: safeInfo.threshold,
+      owners: safeInfo.owners,
+      nonce: safeInfo.nonce,
+      version: safeInfo.version,
       timestamp: Date.now(),
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
