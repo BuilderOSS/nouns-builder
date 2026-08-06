@@ -1,6 +1,9 @@
 import { EventEmitter } from 'events'
 import type { PublicClient } from 'viem'
 
+import type { SafeTransactionHandler } from '../safe/handler'
+import { getSafeTransactionHandler } from '../safe/handler'
+import { executeSafeTransaction } from '../safe/proposeTransaction'
 import type {
   CallParams,
   EIP1193Provider,
@@ -18,6 +21,7 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
   private readonly safe: SafeInfo
   private readonly eoaProvider: EIP1193Provider
   private readonly publicClient: PublicClient
+  private transactionHandler?: SafeTransactionHandler
 
   constructor(safe: SafeInfo, eoaProvider: EIP1193Provider, publicClient: PublicClient) {
     super()
@@ -27,6 +31,14 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
 
     // Forward events from EOA provider
     this.setupEventForwarding()
+  }
+
+  /**
+   * Set a custom transaction handler for this provider instance
+   * Useful for testing or special cases. Falls back to global handler if not set.
+   */
+  setTransactionHandler(handler: SafeTransactionHandler): void {
+    this.transactionHandler = handler
   }
 
   private setupEventForwarding(): void {
@@ -111,14 +123,55 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
         return this.eoaProvider.request({ method, params: modifiedParams })
       }
 
-      // Transaction methods - error for now (Safe Transaction Service TBD)
-      case 'eth_sendTransaction':
+      // Transaction methods - handle Safe transactions
+      case 'eth_sendTransaction': {
+        const txParams = paramsArray[0] as SendTransactionParams
+        console.log('[SafeOwnerProvider] eth_sendTransaction called:', {
+          to: txParams.to,
+          value: txParams.value,
+          safeAddress: this.safe.safeAddress,
+          threshold: this.safe.threshold,
+        })
+
+        // Auto-execute for 1-of-N Safes (no multi-sig needed)
+        if (this.safe.threshold === 1) {
+          console.log('[SafeOwnerProvider] Threshold is 1, auto-executing transaction')
+          const txHash = await executeSafeTransaction(
+            this.safe,
+            txParams,
+            this.eoaProvider
+          )
+          console.log('[SafeOwnerProvider] Transaction executed:', txHash)
+          return txHash
+        }
+
+        // Multi-sig: use instance handler or fall back to global handler
+        console.log('[SafeOwnerProvider] Multi-sig Safe, using handler')
+        const handler = this.transactionHandler ?? getSafeTransactionHandler()
+        if (!handler) {
+          console.error('[SafeOwnerProvider] No handler registered!')
+          throw new Error(
+            'Safe transaction handler not initialized. ' +
+              'This is a multi-signature Safe transaction that requires approval from other owners. ' +
+              'Please ensure SafeTransactionProvider is mounted in your app.'
+          )
+        }
+
+        console.log('[SafeOwnerProvider] Handler found, calling it...')
+        // Handler will show modal and return safeTxHash
+        const result = await handler({
+          safeInfo: this.safe,
+          transaction: txParams,
+          eoaProvider: this.eoaProvider,
+        })
+
+        console.log('[SafeOwnerProvider] Handler returned result:', result)
+        // Return safeTxHash (treated like txHash by wagmi)
+        return result.safeTxHash
+      }
+
       case 'eth_sendRawTransaction':
-        throw new Error(
-          'Safe transactions are not yet supported. ' +
-            'This feature will use Safe Transaction Service for multi-signature approval. ' +
-            'For now, only SIWE authentication is supported.'
-        )
+        throw new Error('Raw transactions are not supported for Safe wallets')
 
       // Read operations - use publicClient
       case 'eth_call': {

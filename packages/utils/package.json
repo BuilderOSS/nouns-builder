@@ -3,6 +3,9 @@
   "description": "Shared utilities and helper functions for BuilderOSS apps",
   "version": "0.3.2",
   "dependencies": {
+    "@safe-global/api-kit": "^5.0.2",
+    "@safe-global/protocol-kit": "^8.0.5",
+    "@safe-global/safe-core-sdk-types": "^5.1.0",
     "bignumber.js": "^9.3.0",
     "decimal.js": "^10.6.0",
     "sablier": "^2.0.1",

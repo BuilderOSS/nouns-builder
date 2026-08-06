@@ -74,6 +74,15 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
     }
   }, [isConnected, activeConnector?.id, showSignPrompt, isAuthenticating])
 
+  // Reset authentication states when disconnected
+  useEffect(() => {
+    if (!isConnected) {
+      setShowSignPrompt(false)
+      setAuthError(null)
+      setIsAuthenticating(false)
+    }
+  }, [isConnected])
+
   // Handle EOA connection in Safe mode
   useEffect(() => {
     const validateAndSwitchToSafe = async () => {
