@@ -5,7 +5,8 @@ import {
 } from '@buildeross/constants'
 import { useClankerTokenPrice } from '@buildeross/hooks'
 import { uploadFile } from '@buildeross/ipfs-service'
-import { awaitSubgraphSync, ClankerTokenFragment } from '@buildeross/sdk/subgraph'
+import { ClankerTokenFragment } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import {
@@ -38,7 +39,7 @@ import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import { type Address, decodeEventLog, zeroAddress, zeroHash } from 'viem'
 import { useConfig, useReadContract } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { NoCreatorCoinWarning } from './NoCreatorCoinWarning'
 
@@ -301,14 +302,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       })
 
       // Execute the transaction
-      const txHash = await writeContract(config, simulation.request)
-
-      // Wait for confirmation
-      if (txHash) {
-        await waitForTransactionReceipt(config, { hash: txHash, chainId })
-      }
-
-      return txHash
+      return executeAppTransaction({ config, request: simulation.request, chainId })
     },
     [config, userAddress, treasury, chainId]
   )
@@ -423,15 +417,9 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       )
 
       // Success! Parse transaction and navigate to coin page
-      if (txHash) {
+      if (txHash?.kind === 'mined') {
         try {
-          // Wait for transaction receipt to get logs
-          const receipt = await waitForTransactionReceipt(config, {
-            hash: txHash,
-            chainId,
-          })
-
-          await awaitSubgraphSync(chainId, receipt.blockNumber)
+          const receipt = txHash.receipt
 
           // Parse logs to find the coin address from CoinCreatedV4 event
           let coinAddress: Address | null = null

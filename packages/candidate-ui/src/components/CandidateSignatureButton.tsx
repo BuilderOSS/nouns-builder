@@ -81,7 +81,7 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
       Math.floor(Date.now() / 1000) + CANDIDATE_SIGNATURE_VALIDITY_SECONDS
 
     try {
-      await attestCandidateSignature({
+      const result = await attestCandidateSignature({
         config,
         chainId: chain.id,
         walletClient,
@@ -95,6 +95,11 @@ export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> =
         nonce,
         deadline: freshDeadline,
       })
+
+      // Don't show success for Safe proposals - user needs to execute via Safe UI
+      if (result.kind === 'safe-proposed') {
+        return
+      }
 
       setIsTxSuccess(true)
 

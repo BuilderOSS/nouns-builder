@@ -1,5 +1,5 @@
 import { metadataAbi, tokenAbi } from '@buildeross/sdk/contract'
-import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { CopyButton } from '@buildeross/ui/CopyButton'
@@ -11,7 +11,7 @@ import {
 import { Box, Flex, Paragraph, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { useConfig, useReadContract } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { useFormStore } from '../../stores'
 import { deployPendingButtonStyle } from './ReviewAndDeploy.css'
@@ -118,12 +118,12 @@ export const SuccessfulDeploy: React.FC<DeployedDaoProps> = ({
           chainId: chain.id,
           args: [transaction.names, transaction.items, transaction.data],
         })
-        const txHash = await writeContract(config, data.request)
-        const reciept = await waitForTransactionReceipt(config, {
-          hash: txHash,
+        const result = await executeAppTransaction({
+          config,
+          request: data.request,
           chainId: chain.id,
         })
-        await awaitSubgraphSync(chain.id, reciept.blockNumber)
+        if (result.kind !== 'mined') return
       } catch (err) {
         console.warn(err)
         setIsPendingTransaction(false)

@@ -10,7 +10,8 @@ export {
   type AuthenticationStatus,
   AuthStatusContext,
   type AuthStoreState,
-  getAuthStore,
+  SessionContext,
+  type SessionData,
 } from './createAuthStore'
 export {
   buildCandidateStoreNamespace,

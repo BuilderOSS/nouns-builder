@@ -1,6 +1,7 @@
 import { ERC721_REDEEM_MINTER, MERKLE_RESERVE_MINTER } from '@buildeross/constants'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { tokenAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -10,8 +11,8 @@ import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Button, Flex, Heading, Text, theme } from '@buildeross/zord'
 import React from 'react'
 import { isAddress, zeroAddress } from 'viem'
-import { useConfig, useWriteContract } from 'wagmi'
-import { readContract, waitForTransactionReceipt } from 'wagmi/actions'
+import { useConfig } from 'wagmi'
+import { readContract, simulateContract } from 'wagmi/actions'
 
 interface MinterManagementModalProps {
   open: boolean
@@ -147,7 +148,6 @@ export const MinterManagementModal: React.FC<MinterManagementModalProps> = ({
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const config = useConfig()
-  const { writeContractAsync } = useWriteContract()
 
   const [isSettingUpMinter, setIsSettingUpMinter] = React.useState(false)
   const [customMinterInput, setCustomMinterInput] = React.useState<string>('')
@@ -318,7 +318,7 @@ export const MinterManagementModal: React.FC<MinterManagementModalProps> = ({
     try {
       setIsSettingUpMinter(true)
 
-      const txHash = await writeContractAsync({
+      const { request } = await simulateContract(config, {
         abi: tokenAbi,
         address: addresses.token!,
         functionName: 'updateMinters',
@@ -326,9 +326,13 @@ export const MinterManagementModal: React.FC<MinterManagementModalProps> = ({
         chainId: chain.id,
       })
 
-      if (txHash) {
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
-      }
+      const result = await executeAppTransaction({
+        config,
+        chainId: chain.id,
+        request,
+      })
+
+      if (result.kind === 'safe-proposed') return
 
       setPendingMinterStates({})
       close()
@@ -343,15 +347,7 @@ export const MinterManagementModal: React.FC<MinterManagementModalProps> = ({
     } finally {
       setIsSettingUpMinter(false)
     }
-  }, [
-    getChangesToApply,
-    chain.id,
-    addresses.token,
-    config,
-    writeContractAsync,
-    close,
-    onMinterEnabled,
-  ])
+  }, [getChangesToApply, chain.id, addresses.token, config, close, onMinterEnabled])
 
   const handleResetChanges = React.useCallback(() => {
     setPendingMinterStates({})

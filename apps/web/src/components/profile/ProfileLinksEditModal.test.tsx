@@ -6,17 +6,18 @@ import { ProfileLinksEditModal } from './ProfileLinksEditModal'
 
 const {
   readContractMock,
+  simulateContractMock,
   waitForTransactionReceiptMock,
   writeContractMock,
-  awaitSubgraphSyncMock,
 } = vi.hoisted(() => ({
   readContractMock: vi.fn(),
+  simulateContractMock: vi.fn(),
   waitForTransactionReceiptMock: vi.fn(),
   writeContractMock: vi.fn(),
-  awaitSubgraphSyncMock: vi.fn(),
 }))
 
-vi.mock('wagmi', () => ({
+vi.mock('wagmi', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('wagmi')>()),
   useAccount: () => ({ chainId: 8453 }),
   useConfig: () => ({}),
   useSwitchChain: () => ({ switchChainAsync: vi.fn() }),
@@ -24,12 +25,9 @@ vi.mock('wagmi', () => ({
 
 vi.mock('wagmi/actions', () => ({
   readContract: readContractMock,
+  simulateContract: simulateContractMock,
   waitForTransactionReceipt: waitForTransactionReceiptMock,
   writeContract: writeContractMock,
-}))
-
-vi.mock('@buildeross/sdk/subgraph', () => ({
-  awaitSubgraphSync: awaitSubgraphSyncMock,
 }))
 
 vi.mock('@buildeross/ui/Modal', () => ({
@@ -40,12 +38,12 @@ vi.mock('@buildeross/ui/Modal', () => ({
 describe('ProfileLinksEditModal', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    simulateContractMock.mockImplementation((_config, request) => ({ request }))
     writeContractMock.mockResolvedValue(`0x${'1'.repeat(64)}`)
     waitForTransactionReceiptMock.mockResolvedValue({
       status: 'success',
       blockNumber: 12345n,
     })
-    awaitSubgraphSyncMock.mockResolvedValue(true)
   })
 
   it('uses the pre-registered schema and batches changed links into one multi-attest', async () => {
@@ -74,10 +72,10 @@ describe('ProfileLinksEditModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Save links' }))
 
-    await waitFor(() => expect(writeContractMock).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(simulateContractMock).toHaveBeenCalledTimes(1))
 
     expect(readContractMock).not.toHaveBeenCalled()
-    expect(writeContractMock).toHaveBeenCalledWith(
+    expect(simulateContractMock).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
         functionName: 'multiAttest',
@@ -94,6 +92,7 @@ describe('ProfileLinksEditModal', () => {
         ],
       })
     )
+    expect(writeContractMock).toHaveBeenCalledTimes(1)
   })
 
   it('validates form inputs and shows errors', async () => {

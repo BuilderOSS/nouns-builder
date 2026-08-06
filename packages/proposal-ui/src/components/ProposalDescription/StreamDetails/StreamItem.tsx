@@ -3,6 +3,7 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useEthUsdPrice } from '@buildeross/hooks/useEthUsdPrice'
 import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
 import { useVotes } from '@buildeross/hooks/useVotes'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import {
   useAuthStore,
   useChainStore,
@@ -33,7 +34,7 @@ import { atoms, Box, Button, Grid, Icon, Stack, Text } from '@buildeross/zord'
 import { useCallback, useMemo } from 'react'
 import { Address, encodeFunctionData, formatUnits, isAddressEqual } from 'viem'
 import { useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { formatFeeDisplay } from '../utils/feeDisplay'
 import { SenderDelegation } from './SenderDelegation'
@@ -159,11 +160,12 @@ export const StreamItem = ({
         value: liveData.minFeeWei,
       })
 
-      const txHash = await writeContract(config, data.request)
-      await waitForTransactionReceipt(config, {
-        hash: txHash,
+      const result = await executeAppTransaction({
+        config,
+        request: data.request,
         chainId: chain.id,
       })
+      if (result.kind !== 'mined') return
       refetchLiveData()
     } catch (error) {
       console.error('Error withdrawing from stream:', error)
@@ -192,11 +194,12 @@ export const StreamItem = ({
         args: [liveData.streamId],
       })
 
-      const txHash = await writeContract(config, data.request)
-      await waitForTransactionReceipt(config, {
-        hash: txHash,
+      const result = await executeAppTransaction({
+        config,
+        request: data.request,
         chainId: chain.id,
       })
+      if (result.kind !== 'mined') return
     } catch (error) {
       console.error('Error canceling stream:', error)
     } finally {

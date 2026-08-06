@@ -1,10 +1,19 @@
 import { Button, Flex } from '@buildeross/zord'
 import { ConnectButton as RKConnectButton } from '@rainbow-me/rainbowkit'
+import dynamic from 'next/dynamic'
 import React, { useState } from 'react'
-import { CustomWalletModal } from 'src/components/CustomWalletModal'
 import { useAccount } from 'wagmi'
 
 import { connectButtonWrapper } from './Nav.styles.css'
+
+// Lazy load WalletConnectDialog for better performance
+const WalletConnectDialog = dynamic(
+  () =>
+    import('src/components/WalletConnectDialog').then((mod) => ({
+      default: mod.WalletConnectDialog,
+    })),
+  { ssr: false }
+)
 
 export const ConnectButton = () => {
   const [showModal, setShowModal] = useState(false)
@@ -62,7 +71,7 @@ export const ConnectButton = () => {
                 >
                   Connect
                 </Button>
-                <CustomWalletModal
+                <WalletConnectDialog
                   isOpen={showModal}
                   onClose={() => setShowModal(false)}
                 />

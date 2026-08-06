@@ -1,4 +1,5 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import {
@@ -20,7 +21,7 @@ import isEqual from 'lodash/isEqual'
 import React, { BaseSyntheticEvent } from 'react'
 import { formatEther, isAddressEqual, parseEther, zeroAddress } from 'viem'
 import { useConfig, useReadContracts } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { adminSection } from '../../styles/Section.css'
 import { Section } from '../AdminForm/Section'
@@ -89,8 +90,12 @@ export const PreAuctionForm: React.FC<PreAuctionFormSettingsProps> = () => {
           functionName: 'setDuration',
           args: [BigInt(toSeconds(newDuration))],
         })
-        const hash = await writeContract(config, data.request)
-        await waitForTransactionReceipt(config, { hash, chainId: chain.id })
+        const result = await executeAppTransaction({
+          config,
+          request: data.request,
+          chainId: chain.id,
+        })
+        if (result.kind === 'safe-proposed') return
       }
 
       const newReservePrice = values.auctionReservePrice
@@ -101,8 +106,12 @@ export const PreAuctionForm: React.FC<PreAuctionFormSettingsProps> = () => {
           functionName: 'setReservePrice',
           args: [parseEther(newReservePrice.toString())],
         })
-        const hash = await writeContract(config, data.request)
-        await waitForTransactionReceipt(config, { hash, chainId: chain.id })
+        const result = await executeAppTransaction({
+          config,
+          request: data.request,
+          chainId: chain.id,
+        })
+        if (result.kind === 'safe-proposed') return
       }
 
       if (supportsFounderReward) {
@@ -138,8 +147,12 @@ export const PreAuctionForm: React.FC<PreAuctionFormSettingsProps> = () => {
               },
             ],
           })
-          const hash = await writeContract(config, data.request)
-          await waitForTransactionReceipt(config, { hash, chainId: chain.id })
+          const result = await executeAppTransaction({
+            config,
+            request: data.request,
+            chainId: chain.id,
+          })
+          if (result.kind === 'safe-proposed') return
         }
       }
     } finally {

@@ -3,9 +3,11 @@ import {
   merklePropertyMetadataAbi,
   merkleReserveMinterAbi,
 } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useState } from 'react'
-import { usePublicClient, useWriteContract } from 'wagmi'
+import { useConfig } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 const UINT_64_MAX = 18446744073709551615n
 
@@ -17,9 +19,9 @@ export const useSetMerkleRoots = (
   const [attributesTxHash, setAttributesTxHash] = useState<`0x${string}`>()
   const [membersTxHash, setMembersTxHash] = useState<`0x${string}`>()
   const [error, setError] = useState<string>()
+  const [isSettingRoots, setIsSettingRoots] = useState(false)
 
-  const { writeContractAsync, isPending } = useWriteContract()
-  const publicClient = usePublicClient({ chainId: targetChainId })
+  const config = useConfig()
 
   const setAttributesRoot = async (merkleRoot: `0x${string}`) => {
     if (!targetMetadataAddress) {
@@ -28,9 +30,10 @@ export const useSetMerkleRoots = (
     }
 
     setError(undefined)
+    setIsSettingRoots(true)
 
     try {
-      const hash = await writeContractAsync({
+      const { request } = await simulateContract(config, {
         abi: merklePropertyMetadataAbi,
         address: targetMetadataAddress,
         functionName: 'setAttributeMerkleRoot',
@@ -38,15 +41,19 @@ export const useSetMerkleRoots = (
         chainId: targetChainId,
       })
 
+      const result = await executeAppTransaction({
+        config,
+        chainId: targetChainId!,
+        request,
+      })
+      if (result.kind === 'safe-proposed') return result
+      const hash = result.hash
+
       setAttributesTxHash(hash)
 
       // Wait for transaction receipt
-      if (publicClient) {
-        const receipt = await publicClient.waitForTransactionReceipt({ hash })
-
-        if (receipt.status !== 'success') {
-          throw new Error('Transaction failed for setAttributeMerkleRoot')
-        }
+      if (result.kind === 'mined' && result.receipt.status !== 'success') {
+        throw new Error('Transaction failed for setAttributeMerkleRoot')
       }
 
       return hash
@@ -54,6 +61,8 @@ export const useSetMerkleRoots = (
       const message = err instanceof Error ? err.message : 'Failed to set attributes root'
       setError(message)
       throw new Error(message)
+    } finally {
+      setIsSettingRoots(false)
     }
   }
 
@@ -70,9 +79,10 @@ export const useSetMerkleRoots = (
     }
 
     setError(undefined)
+    setIsSettingRoots(true)
 
     try {
-      const hash = await writeContractAsync({
+      const { request } = await simulateContract(config, {
         abi: merkleReserveMinterAbi,
         address: minterAddress,
         functionName: 'setMintSettings',
@@ -88,15 +98,19 @@ export const useSetMerkleRoots = (
         chainId: targetChainId,
       })
 
+      const result = await executeAppTransaction({
+        config,
+        chainId: targetChainId,
+        request,
+      })
+      if (result.kind === 'safe-proposed') return result
+      const hash = result.hash
+
       setMembersTxHash(hash)
 
       // Wait for transaction receipt
-      if (publicClient) {
-        const receipt = await publicClient.waitForTransactionReceipt({ hash })
-
-        if (receipt.status !== 'success') {
-          throw new Error('Transaction failed for setMintSettings')
-        }
+      if (result.kind === 'mined' && result.receipt.status !== 'success') {
+        throw new Error('Transaction failed for setMintSettings')
       }
 
       return hash
@@ -104,13 +118,15 @@ export const useSetMerkleRoots = (
       const message = err instanceof Error ? err.message : 'Failed to set mint settings'
       setError(message)
       throw new Error(message)
+    } finally {
+      setIsSettingRoots(false)
     }
   }
 
   return {
     setAttributesRoot,
     setMintSettings,
-    isSettingRoots: isPending,
+    isSettingRoots,
     attributesTxHash,
     membersTxHash,
     error,

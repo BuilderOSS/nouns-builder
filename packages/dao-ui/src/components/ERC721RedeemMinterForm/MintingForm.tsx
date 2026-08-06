@@ -1,4 +1,5 @@
 import { erc721RedeemMinterAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useAuthStore } from '@buildeross/stores'
 import { AddressType, Chain } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -6,7 +7,7 @@ import { Box, Flex, Text, vars } from '@buildeross/zord'
 import React, { useCallback, useMemo, useState } from 'react'
 import { formatEther } from 'viem'
 import { useConfig, useReadContract } from 'wagmi'
-import { waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import {
   errorMessage,
@@ -38,6 +39,7 @@ export const MintingForm: React.FC<MintingFormProps> = ({
   const [tokenIdInput, setTokenIdInput] = useState('')
   const [isMinting, setIsMinting] = useState(false)
   const [mintSuccess, setMintSuccess] = useState(false)
+  const [mintError, setMintError] = useState<string | null>(null)
 
   const { error, tokenIds, isValid } = useMemo(
     () => validateTokenIdInput(tokenIdInput),
@@ -65,9 +67,10 @@ export const MintingForm: React.FC<MintingFormProps> = ({
 
     setIsMinting(true)
     setMintSuccess(false)
+    setMintError(null)
 
     try {
-      const hash = await writeContract(config, {
+      const { request } = await simulateContract(config, {
         abi: erc721RedeemMinterAbi,
         address: minterAddress,
         functionName: 'mintFromReserve',
@@ -76,12 +79,27 @@ export const MintingForm: React.FC<MintingFormProps> = ({
         chainId: chain.id,
       })
 
-      await waitForTransactionReceipt(config, { hash, chainId: chain.id })
+      const result = await executeAppTransaction({
+        config,
+        request,
+        chainId: chain.id,
+      })
 
+      // Don't show success for Safe proposals - user needs to execute via Safe UI
+      if (result.kind === 'safe-proposed') {
+        setIsMinting(false)
+        return
+      }
+
+      // Only show success for mined transactions
       setMintSuccess(true)
       setTokenIdInput('')
+      setMintError(null)
     } catch (error) {
       console.error('Minting failed:', error)
+      const errorMessage =
+        error instanceof Error ? error.message : 'Minting failed. Please try again.'
+      setMintError(errorMessage)
     } finally {
       setIsMinting(false)
     }
@@ -150,6 +168,21 @@ export const MintingForm: React.FC<MintingFormProps> = ({
         >
           <Text color="text1" fontSize="14" fontWeight="label">
             ✓ Minting successful! Your tokens have been minted.
+          </Text>
+        </Box>
+      )}
+
+      {mintError && (
+        <Box
+          mt="x4"
+          p="x4"
+          style={{
+            background: `color-mix(in srgb, ${vars.color.negative} 18%, transparent)`,
+            borderRadius: '8px',
+          }}
+        >
+          <Text color="negative" fontSize="14" fontWeight="label">
+            {mintError}
           </Text>
         </Box>
       )}

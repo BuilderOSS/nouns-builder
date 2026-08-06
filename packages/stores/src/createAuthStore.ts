@@ -9,7 +9,7 @@ import { useAccount } from 'wagmi'
 export type AuthenticationStatus = 'loading' | 'unauthenticated' | 'authenticated'
 
 /**
- * AuthStore - Derived state from RainbowKit + wagmi
+ * AuthStore - Derived state from RainbowKit + wagmi + Session
  *
  * Key invariant: address is ONLY set when user is fully authenticated
  * (wallet connected + SIWE signed)
@@ -24,12 +24,34 @@ export type AuthStoreState = {
   // Only set when FULLY authenticated (connected + SIWE signed)
   address: AddressType | undefined
 
+  // Safe-specific fields (when user authenticated via Safe wallet)
+  eoaAddress?: AddressType
+  safeAddress?: AddressType
+  isSafeMode: boolean
+
   // State flags
   isConnected: boolean // Wallet is connected
   isConnecting: boolean // Wallet connection in progress (always false for now)
   isAuthenticating: boolean // SIWE signature in progress (derived from status === 'loading')
   isAuthenticated: boolean // Fully authenticated (connected + signed)
 }
+
+/**
+ * Session data from useSession hook
+ * Can be provided via SessionContext
+ */
+export interface SessionData {
+  address?: AddressType
+  eoaAddress?: AddressType
+  safeAddress?: AddressType
+  safeChainId?: number
+}
+
+/**
+ * Context to share session data from SWR
+ * This allows session data to be accessed across the app
+ */
+export const SessionContext = createContext<SessionData | null>(null)
 
 /**
  * Context to share RainbowKit authentication status
@@ -39,11 +61,13 @@ export const AuthStatusContext = createContext<AuthenticationStatus>('loading')
 
 /**
  * Hook to get authentication state
- * Derives state from RainbowKit's authentication status (via context) and wagmi's wallet connection
+ * Derives state from RainbowKit's authentication status (via context),
+ * wagmi's wallet connection, and session data (from SWR)
  */
 export function useAuthStore(): AuthStoreState {
-  const { address: walletAddress, isConnected: walletConnected } = useAccount()
+  const { isConnected: walletConnected } = useAccount()
   const authStatus = useContext(AuthStatusContext)
+  const session = useContext(SessionContext)
 
   // SSR safety: always treat as loading during server-side rendering
   // This prevents hydration mismatches between server and client
@@ -53,32 +77,21 @@ export function useAuthStore(): AuthStoreState {
   const isAuthenticated = safeAuthStatus === 'authenticated'
   const isAuthenticating = safeAuthStatus === 'loading'
 
+  // Determine primary address (Safe address takes precedence)
+  const address = session?.safeAddress || session?.address
+
   return {
-    // Address only available when authenticated
-    address:
-      isAuthenticated && walletAddress ? (walletAddress as AddressType) : undefined,
+    // Address from session (Safe address if available, otherwise EOA)
+    address: isAuthenticated && address ? (address as AddressType) : undefined,
+
+    // Safe-specific fields
+    eoaAddress: session?.eoaAddress as AddressType | undefined,
+    safeAddress: session?.safeAddress as AddressType | undefined,
+    isSafeMode: !!session?.safeAddress,
 
     isConnected: walletConnected,
     isConnecting: false, // wagmi handles this internally
     isAuthenticating,
     isAuthenticated,
-  }
-}
-
-// For backward compatibility - some code may call getAuthStore().getState()
-// This is deprecated and should be replaced with useAuthStore() hook
-export const getAuthStore = () => {
-  console.warn(
-    'getAuthStore() is deprecated. Use the useAuthStore() hook instead. ' +
-      'Direct store access is no longer supported.'
-  )
-  return {
-    getState: () => ({
-      address: undefined,
-      isConnected: false,
-      isConnecting: false,
-      isAuthenticating: false,
-      isAuthenticated: false,
-    }),
   }
 }

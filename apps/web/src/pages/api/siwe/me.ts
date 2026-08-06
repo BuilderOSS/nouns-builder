@@ -2,6 +2,7 @@ import { getIronSession } from 'iron-session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 import { ironOptions, type IronSessionData } from 'src/utils/iron'
+import { SIWE_ME_RATE_LIMIT_KEY_PREFIX } from 'src/utils/siweAuthFlow'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { method } = req
@@ -25,5 +26,5 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 export default withRateLimit({
   maxRequests: 120,
   windowSeconds: 60,
-  keyPrefix: 'siwe:me',
+  keyPrefix: SIWE_ME_RATE_LIMIT_KEY_PREFIX,
 })(handler)

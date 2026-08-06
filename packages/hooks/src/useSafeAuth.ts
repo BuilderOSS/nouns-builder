@@ -120,8 +120,8 @@ export function useSafeAuth(): UseSafeAuthReturn {
       error: null,
     })
 
-    // Note: localStorage persistence is handled by CustomWalletModal during connection
-    // This hook only manages React state for the auth adapter
+    // Persistence is handled by the app-level wallet flow during connection.
+    // This hook only manages React state for the auth adapter.
     return true
   }, [])
 

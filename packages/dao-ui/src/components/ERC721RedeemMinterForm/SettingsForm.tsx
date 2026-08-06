@@ -1,4 +1,5 @@
 import { erc721RedeemMinterAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { AddressType, Chain } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui'
 import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
@@ -8,7 +9,7 @@ import { Formik, FormikValues } from 'formik'
 import React from 'react'
 import { parseEther } from 'viem'
 import { useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import {
   ERC721RedeemMinterFormValues,
@@ -65,8 +66,12 @@ export const SettingsForm: React.FC<SettingsFormProps> = ({
         chainId: chain.id,
       })
 
-      const hash = await writeContract(config, data.request)
-      await waitForTransactionReceipt(config, { hash, chainId: chain.id })
+      const result = await executeAppTransaction({
+        config,
+        request: data.request,
+        chainId: chain.id,
+      })
+      if (result.kind !== 'mined') return
 
       onSuccess()
     } catch (error) {

@@ -4,7 +4,7 @@ import {
   PROFILE_LINK_EAS_CHAIN_ID,
   PROFILE_LINK_SCHEMA_UID,
 } from '@buildeross/constants'
-import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import type { AddressType } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
@@ -23,7 +23,7 @@ import {
 } from 'src/utils/profileIdentity'
 import { encodeAbiParameters, zeroHash } from 'viem'
 import { useAccount, useConfig, useSwitchChain } from 'wagmi'
-import { waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import {
   type ProfileLinksFormValues,
@@ -57,7 +57,6 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
   const { switchChainAsync } = useSwitchChain()
   const [error, setError] = React.useState<string | null>(null)
   const [isSaving, setIsSaving] = React.useState(false)
-  const [isSyncing, setIsSyncing] = React.useState(false)
   const [isSwitchingNetwork, setIsSwitchingNetwork] = React.useState(false)
   const mountedRef = React.useRef(true)
 
@@ -88,7 +87,6 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
     resetForm()
     setError(null)
     setIsSaving(false)
-    setIsSyncing(false)
     setIsSwitchingNetwork(false)
   }, [open, resetForm])
 
@@ -128,8 +126,8 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
   const attestProfileLinks = async (
     easAddress: `0x${string}`,
     updates: ProfileLinkUpdate[]
-  ): Promise<void> => {
-    const hash = await writeContract(config, {
+  ): Promise<'safe-proposed' | `0x${string}`> => {
+    const { request } = await simulateContract(config, {
       abi: easAbi,
       address: easAddress,
       chainId: PROFILE_LINK_EAS_CHAIN_ID,
@@ -157,17 +155,17 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
       ],
     })
 
-    const receipt = await waitForTransactionReceipt(config, {
-      hash,
+    const result = await executeAppTransaction({
+      config,
+      request,
       chainId: PROFILE_LINK_EAS_CHAIN_ID,
     })
 
-    if (!mountedRef.current) return
+    if (result.kind === 'safe-proposed') {
+      return 'safe-proposed'
+    }
 
-    setIsSaving(false)
-    setIsSyncing(true)
-
-    await awaitSubgraphSync(PROFILE_LINK_EAS_CHAIN_ID, receipt.blockNumber)
+    return result.hash
   }
 
   async function handleSave(values: ProfileLinksFormValues) {
@@ -180,7 +178,6 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
 
     setError(null)
     setIsSaving(true)
-    setIsSyncing(false)
     setIsSwitchingNetwork(false)
 
     try {
@@ -210,18 +207,27 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
         throw new Error('Profile link attestations are not supported on this network.')
       }
 
-      await attestProfileLinks(easAddress, updates)
+      const result = await attestProfileLinks(easAddress, updates)
 
       if (!mountedRef.current) return
 
-      // Call onSaved after subgraph sync - wrapped in try-catch
+      // Handle Safe proposals - don't auto-close modal
+      if (result === 'safe-proposed') {
+        setError(
+          'Profile links proposed to your Safe. Other owners must sign it before changes take effect.'
+        )
+        setIsSaving(false)
+        return
+      }
+
+      // Call onSaved after successful transaction - wrapped in try-catch
       try {
         onSaved?.()
       } catch (callbackError) {
         console.error('onSaved callback error:', callbackError)
       }
 
-      // Auto-close modal
+      // Auto-close modal for regular wallet transactions
       onClose()
     } catch (err) {
       if (!mountedRef.current) return
@@ -234,7 +240,6 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
       if (lowerMessage.includes('user rejected')) {
         setError('Transaction was cancelled')
         setIsSaving(false)
-        setIsSyncing(false)
         setIsSwitchingNetwork(false)
         return
       }
@@ -250,7 +255,6 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
           'Base RPC is rate limiting requests. Please wait a minute and try again, or switch to a wallet/RPC that is not rate-limited.'
         )
         setIsSaving(false)
-        setIsSyncing(false)
         setIsSwitchingNetwork(false)
         return
       }
@@ -263,16 +267,14 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
           'Profile links update failed. Please check your wallet and try again.'
       )
       setIsSaving(false)
-      setIsSyncing(false)
       setIsSwitchingNetwork(false)
     }
   }
 
-  const isLoading = isSaving || isSyncing || isSwitchingNetwork
+  const isLoading = isSaving || isSwitchingNetwork
   const getButtonText = () => {
     if (isSwitchingNetwork) return 'Switching network...'
     if (isSaving) return 'Saving...'
-    if (isSyncing) return 'Syncing...'
     return 'Save links'
   }
 
