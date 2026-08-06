@@ -1,7 +1,7 @@
 'use client'
 
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
-import { SAFE_HOME_URL } from '@buildeross/constants/safe'
+import { SAFE_CHAIN_PREFIX } from '@buildeross/constants/safe'
 import type { CHAIN_ID } from '@buildeross/types'
 import { formatCryptoVal, truncateAddress } from '@buildeross/utils'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
@@ -63,8 +63,8 @@ export function SafeTransactionModal({
   }
 
   const safeAppUrl =
-    safeTxHash && SAFE_HOME_URL[chainId]
-      ? `${SAFE_HOME_URL[chainId]}:${safeAddress}/transactions/queue?id=multisig_${safeAddress}_${safeTxHash}`
+    safeTxHash && SAFE_CHAIN_PREFIX[chainId]
+      ? `https://app.safe.global/transactions/queue?safe=${SAFE_CHAIN_PREFIX[chainId]}:${safeAddress}`
       : null
 
   return (
@@ -102,7 +102,6 @@ export function SafeTransactionModal({
                         {truncateAddress(targetAddress)}
                       </Text>
                     </Text>
-                    <Icon id="external-16" />
                   </Flex>
                 </Box>
                 {txValue && txValue !== '0x0' && txValue !== '0' && (
@@ -140,10 +139,10 @@ export function SafeTransactionModal({
         {/* Proposing State */}
         {state === 'proposing' && (
           <Stack gap="x3" align="center">
+            <Icon id="refresh" size="xl" />
             <Text variant="label-md" color="text1">
               Submitting to Safe Service...
             </Text>
-            <Box style={{ fontSize: '40px' }}>⏳</Box>
             <Text variant="paragraph-sm" color="text3" style={{ textAlign: 'center' }}>
               Please check your wallet and approve the signature request.
             </Text>
@@ -154,7 +153,7 @@ export function SafeTransactionModal({
         {state === 'success' && (
           <>
             <Stack gap="x2" align="center">
-              <Box style={{ fontSize: '48px', lineHeight: 1 }}>✓</Box>
+              <Icon id="check-in-circle" size="xl" color="positive" />
               <Text variant="label-md" color="text1">
                 Transaction Proposed
               </Text>
@@ -190,7 +189,7 @@ export function SafeTransactionModal({
         {state === 'error' && (
           <>
             <Stack gap="x2" align="center">
-              <Box style={{ fontSize: '48px', lineHeight: 1, color: '#FF3B30' }}>✕</Box>
+              <Icon id="cross" size="xl" color="negative" />
               <Text variant="label-md" color="text1">
                 Transaction Failed
               </Text>

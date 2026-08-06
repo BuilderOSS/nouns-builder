@@ -3,6 +3,7 @@ import type { CHAIN_ID } from '@buildeross/types'
 import SafeApiKit from '@safe-global/api-kit'
 import Safe from '@safe-global/protocol-kit'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
+import { getAddress } from 'viem'
 
 import type { EIP1193Provider, SafeInfo, SendTransactionParams } from '../providers/types'
 
@@ -37,16 +38,17 @@ export async function proposeSafeTransaction(
   }
   console.log('[SafeAPI] Safe Service URL:', serviceUrl)
 
-  // Get EOA address (signer)
+  // Get EOA address (signer) and checksum it
   console.log('[SafeAPI] Getting EOA accounts...')
   const accounts = (await eoaProvider.request({ method: 'eth_accounts' })) as string[]
-  const senderAddress = accounts[0]
+  const rawSenderAddress = accounts[0]
 
-  if (!senderAddress) {
+  if (!rawSenderAddress) {
     console.error('[SafeAPI] No EOA account found')
     throw new Error('No EOA account connected')
   }
-  console.log('[SafeAPI] EOA address:', senderAddress)
+  const senderAddress = getAddress(rawSenderAddress)
+  console.log('[SafeAPI] EOA address (checksummed):', senderAddress)
 
   // Create Safe API Kit with API key
   console.log('[SafeAPI] Initializing Safe API Kit...')
@@ -55,18 +57,22 @@ export async function proposeSafeTransaction(
     apiKey,
   })
 
+  // Checksum addresses for Safe API
+  const safeAddress = getAddress(safeInfo.safeAddress)
+  const targetAddress = getAddress(transaction.to)
+
   // Create Protocol Kit instance using EIP1193Provider directly
   console.log('[SafeAPI] Initializing Safe Protocol Kit...')
   const protocolKit = await Safe.init({
     provider: eoaProvider as any, // Safe SDK accepts EIP1193Provider
     signer: senderAddress,
-    safeAddress: safeInfo.safeAddress,
+    safeAddress,
   })
   console.log('[SafeAPI] Protocol Kit initialized')
 
-  // Build Safe transaction
+  // Build Safe transaction with checksummed address
   const safeTransaction: MetaTransactionData = {
-    to: transaction.to,
+    to: targetAddress,
     value: transaction.value?.toString() || '0',
     data: transaction.data || '0x',
   }
@@ -77,20 +83,24 @@ export async function proposeSafeTransaction(
   })
   console.log('[SafeAPI] Safe transaction created')
 
-  // Sign transaction with EOA
+  // Get transaction hash
+  console.log('[SafeAPI] Getting transaction hash...')
+  const safeTxHash = await protocolKit.getTransactionHash(safeTx)
+  console.log('[SafeAPI] Transaction hash:', safeTxHash)
+
+  // Sign transaction hash with EOA
   console.log('[SafeAPI] Requesting signature from EOA...')
-  const signedSafeTx = await protocolKit.signTransaction(safeTx)
-  const safeTxHash = await protocolKit.getTransactionHash(signedSafeTx)
-  console.log('[SafeAPI] Transaction signed, hash:', safeTxHash)
+  const senderSignature = await protocolKit.signHash(safeTxHash)
+  console.log('[SafeAPI] Transaction hash signed')
 
   // Propose to Safe Service
   console.log('[SafeAPI] Proposing transaction to Safe Service...')
   await apiKit.proposeTransaction({
-    safeAddress: safeInfo.safeAddress,
-    safeTransactionData: signedSafeTx.data,
+    safeAddress,
+    safeTransactionData: safeTx.data,
     safeTxHash,
     senderAddress,
-    senderSignature: signedSafeTx.signatures.get(senderAddress.toLowerCase())?.data || '',
+    senderSignature: senderSignature.data,
   })
   console.log('[SafeAPI] Transaction successfully proposed to Safe Service')
 
@@ -151,29 +161,34 @@ export async function executeSafeTransaction(
     }
   }
 
-  // Get EOA address (signer)
+  // Get EOA address (signer) and checksum it
   console.log('[SafeAPI] Getting EOA accounts...')
   const accounts = (await eoaProvider.request({ method: 'eth_accounts' })) as string[]
-  const senderAddress = accounts[0]
+  const rawSenderAddress = accounts[0]
 
-  if (!senderAddress) {
+  if (!rawSenderAddress) {
     console.error('[SafeAPI] No EOA account found')
     throw new Error('No EOA account connected')
   }
-  console.log('[SafeAPI] EOA address:', senderAddress)
+  const senderAddress = getAddress(rawSenderAddress)
+  console.log('[SafeAPI] EOA address (checksummed):', senderAddress)
+
+  // Checksum addresses for Safe API
+  const safeAddress = getAddress(safeInfo.safeAddress)
+  const targetAddress = getAddress(transaction.to)
 
   // Create Protocol Kit instance using EIP1193Provider directly
   console.log('[SafeAPI] Initializing Safe Protocol Kit...')
   const protocolKit = await Safe.init({
     provider: eoaProvider as any, // Safe SDK accepts EIP1193Provider
     signer: senderAddress,
-    safeAddress: safeInfo.safeAddress,
+    safeAddress,
   })
   console.log('[SafeAPI] Protocol Kit initialized')
 
-  // Build Safe transaction
+  // Build Safe transaction with checksummed address
   const safeTransaction: MetaTransactionData = {
-    to: transaction.to,
+    to: targetAddress,
     value: transaction.value?.toString() || '0',
     data: transaction.data || '0x',
   }

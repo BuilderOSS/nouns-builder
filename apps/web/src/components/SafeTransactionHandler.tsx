@@ -43,7 +43,7 @@ export function SafeTransactionHandler() {
 
   const handleConfirm = async () => {
     if (!modalState.params) {
-      return { safeTxHash: '' }
+      return { safeTxHash: '0x' }
     }
 
     try {
@@ -55,7 +55,9 @@ export function SafeTransactionHandler() {
       )
 
       // Resolve the promise that SafeOwnerProvider is waiting on
-      modalState.resolve?.({ safeTxHash })
+      // Return empty hash so wagmi's waitForTransactionReceipt fails quickly
+      // (Safe transactions are only proposed, not executed yet, so no on-chain tx to wait for)
+      modalState.resolve?.({ safeTxHash: '0x' })
 
       return { safeTxHash }
     } catch (error) {
@@ -66,8 +68,11 @@ export function SafeTransactionHandler() {
   }
 
   const handleClose = () => {
-    // User cancelled - reject the promise
-    modalState.reject?.(new Error('User cancelled Safe transaction'))
+    // Only reject if transaction wasn't confirmed yet
+    // (if it was confirmed, promise is already resolved)
+    if (modalState.reject) {
+      modalState.reject(new Error('User cancelled Safe transaction'))
+    }
     setModalState({
       isOpen: false,
       params: null,
