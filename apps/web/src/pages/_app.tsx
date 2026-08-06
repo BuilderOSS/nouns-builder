@@ -94,7 +94,20 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
       try {
         const response = await fetch('/api/siwe/me')
         const json = await response.json()
-        const newStatus = json.address ? 'authenticated' : 'unauthenticated'
+
+        // Get current wagmi account
+        const currentAccount = config.state.current
+          ? config.state.connections.get(config.state.current)?.accounts?.[0]
+          : undefined
+
+        // Authenticated if:
+        // 1. Session has an address
+        // 2. That address matches the current wagmi account (or no account connected)
+        const newStatus =
+          json.address && (!currentAccount || json.address === currentAccount)
+            ? 'authenticated'
+            : 'unauthenticated'
+
         setRainbowKitAuthStatus(newStatus)
       } catch (_error) {
         setRainbowKitAuthStatus('unauthenticated')
@@ -109,7 +122,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
     // Verify on window focus (in case user logs out of another window)
     window.addEventListener('focus', verifySession)
     return () => window.removeEventListener('focus', verifySession)
-  }, [])
+  }, [config])
 
   // Cross-tab synchronization: detect when another tab clears wagmi storage
   useEffect(() => {

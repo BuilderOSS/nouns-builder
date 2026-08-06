@@ -9,7 +9,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     case 'GET':
       const session = await getIronSession<IronSessionData>(req, res, ironOptions)
       res.send({
-        address: session.siwe?.address,
+        // For Safe mode, return Safe address; otherwise return EOA address
+        address: session.safeAddress || session.siwe?.address,
         eoaAddress: session.eoaAddress,
         safeAddress: session.safeAddress,
         safeChainId: session.safeChainId,

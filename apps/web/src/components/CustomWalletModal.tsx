@@ -207,14 +207,19 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
       const verifyBody = await verifyResponse.json()
 
       if (verifyResponse.ok && verifyBody.ok) {
-        // Trigger a page refresh to update auth status
-        window.dispatchEvent(new Event('focus'))
-        // Close modal after short delay
+        // Clear Safe mode state
+        setSafeModeActive(false)
+        setPendingSafeInfo(null)
+
+        // Close modal immediately
+        onClose()
+        setIsAuthenticating(false)
+        setShowSignPrompt(false)
+
+        // Trigger session re-verification after modal closes
         setTimeout(() => {
-          onClose()
-          setIsAuthenticating(false)
-          setShowSignPrompt(false)
-        }, 300)
+          window.dispatchEvent(new Event('focus'))
+        }, 100)
       } else {
         setAuthError(verifyBody.message || 'Verification failed')
         setIsAuthenticating(false)
