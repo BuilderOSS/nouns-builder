@@ -20,7 +20,7 @@ import { useConnectModal } from '@rainbow-me/rainbowkit'
 import React, { ReactNode, useMemo } from 'react'
 import { zeroAddress as ZERO_ADDRESS } from 'viem'
 
-import { SafeTransactionHandler } from '../../contexts/SafeTransactionHandler'
+import { SafeTransactionHandler } from '../../components/SafeTransactionHandler'
 import { Nav as DefaultLayoutNav } from '../DefaultLayout/Nav'
 
 type BoxProps = React.ComponentProps<typeof Box>

@@ -24,9 +24,7 @@ export function SafeTransactionHandler() {
 
   // Register global handler on mount
   useEffect(() => {
-    console.log('[SafeTransactionHandler] Mounted and registering handler')
     registerSafeTransactionHandler(async (params) => {
-      console.log('[SafeTransactionHandler] Handler called, opening modal')
       // Show modal and wait for user interaction
       return new Promise((resolve, reject) => {
         setModalState({
@@ -78,13 +76,6 @@ export function SafeTransactionHandler() {
     })
   }
 
-  console.log(
-    '[SafeTransactionHandler] Rendering, isOpen:',
-    modalState.isOpen,
-    'hasParams:',
-    !!modalState.params
-  )
-
   if (!modalState.params) {
     return null
   }
@@ -97,6 +88,9 @@ export function SafeTransactionHandler() {
       threshold={modalState.params.safeInfo.threshold}
       ownersCount={modalState.params.safeInfo.owners.length}
       chainId={modalState.params.safeInfo.chainId}
+      targetAddress={modalState.params.transaction.to}
+      txValue={modalState.params.transaction.value}
+      txData={modalState.params.transaction.data}
       onConfirm={handleConfirm}
     />
   )

@@ -8,8 +8,12 @@ export const safeToastWrapper = style({
   left: 0,
   width: '100vw',
   height: '100vh',
-  pointerEvents: 'none', // Don't block clicks, no backdrop
+  pointerEvents: 'none', // Don't block clicks on backdrop
   zIndex: z.SAFE_TRANSACTION_LAYER,
+  background: vars.color.backdrop,
+  opacity: 0.4, // Faint backdrop, less prominent than regular modals
+  backdropFilter: 'blur(5px)', // Lighter blur effect
+  WebkitBackdropFilter: 'blur(5px)',
 })
 
 export const safeToastContainer = style({
@@ -21,7 +25,7 @@ export const safeToastContainer = style({
   zIndex: z.SAFE_TRANSACTION_LAYER,
   background: vars.color.background1,
   borderRadius: '12px',
-  padding: '32px',
+  padding: '20px',
   boxShadow: '0 4px 24px rgba(0, 0, 0, 0.15)',
   pointerEvents: 'auto', // Re-enable pointer events for the content
   selectors: {
@@ -36,7 +40,7 @@ export const safeToastContainer = style({
       top: '8px',
       right: '8px',
       width: 'calc(100vw - 16px)',
-      padding: '24px',
+      padding: '16px',
     },
   },
 })

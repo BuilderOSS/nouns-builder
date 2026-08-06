@@ -1,10 +1,12 @@
 'use client'
 
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { SAFE_HOME_URL } from '@buildeross/constants/safe'
 import type { CHAIN_ID } from '@buildeross/types'
+import { formatCryptoVal, truncateAddress } from '@buildeross/utils'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import { useState } from 'react'
-import type { Address } from 'viem'
+import { type Address, formatEther } from 'viem'
 
 import { SafeToastModal } from './SafeToastModal'
 
@@ -15,6 +17,9 @@ interface SafeTransactionModalProps {
   threshold: number
   ownersCount: number
   chainId: CHAIN_ID
+  targetAddress: string
+  txValue?: string
+  txData?: string
   onConfirm: () => Promise<{ safeTxHash: string }>
 }
 
@@ -25,6 +30,9 @@ export function SafeTransactionModal({
   threshold,
   ownersCount,
   chainId,
+  targetAddress,
+  txValue,
+  txData,
   onConfirm,
 }: SafeTransactionModalProps) {
   const [state, setState] = useState<'idle' | 'proposing' | 'success' | 'error'>('idle')
@@ -61,25 +69,62 @@ export function SafeTransactionModal({
 
   return (
     <SafeToastModal isOpen={isOpen} onClose={handleClose}>
-      <Stack gap="x4">
+      <Stack gap="x3">
         {/* Idle State */}
         {state === 'idle' && (
           <>
             <Stack gap="x2">
-              <Text variant="heading-sm">Propose Transaction to Safe</Text>
+              <Text variant="label-md" color="text1">
+                Propose Transaction to Safe
+              </Text>
               <Text variant="paragraph-sm" color="text3">
                 This is a multi-signature Safe wallet requiring {threshold} of{' '}
                 {ownersCount} signatures.
               </Text>
-              <Box p="x3" borderRadius="curved" backgroundColor="background2">
-                <Text
-                  variant="label-sm"
-                  color="text3"
-                  style={{ wordBreak: 'break-all', fontSize: '13px' }}
-                >
-                  Safe: {safeAddress}
-                </Text>
-              </Box>
+              <Stack gap="x2">
+                <Box p="x2" borderRadius="curved" backgroundColor="background2">
+                  <Flex align="center" gap="x1">
+                    <Text variant="label-sm" color="text3" style={{ fontSize: '12px' }}>
+                      To:{' '}
+                      <Text
+                        as="a"
+                        href={`${ETHERSCAN_BASE_URL[chainId]}/address/${targetAddress}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="label-sm"
+                        color="text3"
+                        style={{
+                          fontSize: '12px',
+                          textDecoration: 'underline',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {truncateAddress(targetAddress)}
+                      </Text>
+                    </Text>
+                    <Icon id="external-16" />
+                  </Flex>
+                </Box>
+                {txValue && txValue !== '0x0' && txValue !== '0' && (
+                  <Box p="x2" borderRadius="curved" backgroundColor="background2">
+                    <Text variant="label-sm" color="text3" style={{ fontSize: '12px' }}>
+                      Value: {formatCryptoVal(formatEther(BigInt(txValue)))} ETH
+                    </Text>
+                  </Box>
+                )}
+                {txData && txData !== '0x' && (
+                  <Box p="x2" borderRadius="curved" backgroundColor="background2">
+                    <Text
+                      variant="label-sm"
+                      color="text3"
+                      style={{ wordBreak: 'break-all', fontSize: '12px' }}
+                    >
+                      Function: {txData.slice(0, 10)}
+                      {txData.length > 10 && '...'}
+                    </Text>
+                  </Box>
+                )}
+              </Stack>
             </Stack>
             <Stack gap="x2">
               <Button onClick={handleConfirm} w="100%" variant="primary">
@@ -94,9 +139,11 @@ export function SafeTransactionModal({
 
         {/* Proposing State */}
         {state === 'proposing' && (
-          <Stack gap="x4" align="center">
-            <Text variant="heading-sm">Submitting to Safe Service...</Text>
-            <Box style={{ fontSize: '48px' }}>⏳</Box>
+          <Stack gap="x3" align="center">
+            <Text variant="label-md" color="text1">
+              Submitting to Safe Service...
+            </Text>
+            <Box style={{ fontSize: '40px' }}>⏳</Box>
             <Text variant="paragraph-sm" color="text3" style={{ textAlign: 'center' }}>
               Please check your wallet and approve the signature request.
             </Text>
@@ -107,8 +154,10 @@ export function SafeTransactionModal({
         {state === 'success' && (
           <>
             <Stack gap="x2" align="center">
-              <Box style={{ fontSize: '56px', lineHeight: 1 }}>✓</Box>
-              <Text variant="heading-sm">Transaction Proposed</Text>
+              <Box style={{ fontSize: '48px', lineHeight: 1 }}>✓</Box>
+              <Text variant="label-md" color="text1">
+                Transaction Proposed
+              </Text>
               <Text variant="paragraph-sm" color="text3" style={{ textAlign: 'center' }}>
                 This transaction has been submitted to your Safe and is awaiting
                 signatures from other owners.
@@ -141,11 +190,13 @@ export function SafeTransactionModal({
         {state === 'error' && (
           <>
             <Stack gap="x2" align="center">
-              <Box style={{ fontSize: '56px', lineHeight: 1, color: '#FF3B30' }}>✕</Box>
-              <Text variant="heading-sm">Transaction Failed</Text>
+              <Box style={{ fontSize: '48px', lineHeight: 1, color: '#FF3B30' }}>✕</Box>
+              <Text variant="label-md" color="text1">
+                Transaction Failed
+              </Text>
               {error && (
                 <Box
-                  p="x3"
+                  p="x2"
                   borderRadius="curved"
                   style={{ backgroundColor: 'rgba(255, 59, 48, 0.1)' }}
                   w="100%"
