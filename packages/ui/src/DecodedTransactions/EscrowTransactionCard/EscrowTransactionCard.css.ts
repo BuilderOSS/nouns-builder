@@ -42,8 +42,6 @@ export const sectionLabel = style({
   marginBottom: '0.6rem',
 })
 
-export const milestone = style({ marginBottom: '0.65rem' })
-
 export const milestoneName = style({ fontSize: '13px', color: vars.color.text3 })
 
 export const milestoneAmount = style({
@@ -52,20 +50,29 @@ export const milestoneAmount = style({
   color: vars.color.text1,
 })
 
-export const barTrack = style({
-  height: '6px',
+/** A single allocation bar split into one segment per milestone. */
+export const stackedBar = style({
+  display: 'flex',
+  height: '10px',
   width: '100%',
   borderRadius: vars.radii.round,
-  background: 'rgba(128,128,128,0.18)',
-  marginTop: '0.35rem',
   overflow: 'hidden',
+  background: 'rgba(128,128,128,0.18)',
+  marginBottom: '0.85rem',
 })
 
-export const barFill = style({
-  height: '100%',
+export const segment = style({ height: '100%' })
+
+export const milestoneRow = style({
+  paddingTop: '0.3rem',
+  paddingBottom: '0.3rem',
+})
+
+export const dot = style({
+  width: '9px',
+  height: '9px',
   borderRadius: vars.radii.round,
-  background: '#10b981',
-  transition: 'width 0.2s ease',
+  flexShrink: 0,
 })
 
 export const partyRow = style({

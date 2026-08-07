@@ -12,6 +12,9 @@ import { type Address, formatUnits } from 'viem'
 import { parseEscrowDeploy } from './escrowDeploy'
 import * as styles from './EscrowTransactionCard.css'
 
+// Distinct green shades so adjacent milestone segments read apart without gaps.
+const SEGMENT_COLORS = ['#059669', '#10b981', '#34d399', '#6ee7b7']
+
 const Party: React.FC<{ label: string; address?: string }> = ({ label, address }) => {
   const { ensName } = useEnsData(address)
   if (!address) return null
@@ -77,23 +80,40 @@ export const EscrowTransactionCard: React.FC<EscrowTransactionCardProps> = ({
         <Text className={styles.sectionLabel}>
           Milestones · {milestoneAmounts.length}
         </Text>
-        {milestoneAmounts.map((amount, i) => {
-          const pct = totalAmount > 0n ? Number((amount * 10000n) / totalAmount) / 100 : 0
-          return (
-            <Box key={i} className={styles.milestone}>
-              <Flex justify="space-between" align="baseline" gap="x2">
-                <Text className={styles.milestoneName}>Milestone {i + 1}</Text>
-                <Text className={styles.milestoneAmount}>{fmt(amount)}</Text>
-              </Flex>
-              <Box className={styles.barTrack}>
-                <Box
-                  className={styles.barFill}
-                  style={{ width: `${Math.max(pct, 2)}%` }}
-                />
-              </Box>
-            </Box>
-          )
-        })}
+        <Box className={styles.stackedBar}>
+          {milestoneAmounts.map((amount, i) => {
+            const pct =
+              totalAmount > 0n ? Number((amount * 10000n) / totalAmount) / 100 : 0
+            return (
+              <Box
+                key={i}
+                className={styles.segment}
+                style={{
+                  width: `${pct}%`,
+                  background: SEGMENT_COLORS[i % SEGMENT_COLORS.length],
+                }}
+              />
+            )
+          })}
+        </Box>
+        {milestoneAmounts.map((amount, i) => (
+          <Flex
+            key={i}
+            justify="space-between"
+            align="center"
+            gap="x2"
+            className={styles.milestoneRow}
+          >
+            <Flex align="center" gap="x2">
+              <Box
+                className={styles.dot}
+                style={{ background: SEGMENT_COLORS[i % SEGMENT_COLORS.length] }}
+              />
+              <Text className={styles.milestoneName}>Milestone {i + 1}</Text>
+            </Flex>
+            <Text className={styles.milestoneAmount}>{fmt(amount)}</Text>
+          </Flex>
+        ))}
       </Box>
 
       <Box className={styles.section}>
