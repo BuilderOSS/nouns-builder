@@ -16,6 +16,7 @@ import { treasuryWrapper } from './Treasury.css'
 import { TreasuryAnalytics } from './TreasuryAnalytics'
 import { TreasuryComposition } from './TreasuryComposition'
 import { TreasuryNfts } from './TreasuryNfts'
+import { TreasuryRecentTransactions } from './TreasuryRecentTransactions'
 
 export const Treasury = () => {
   const { addresses } = useDaoStore()
@@ -137,6 +138,7 @@ export const Treasury = () => {
         </Flex>
       </Grid>
       <TreasuryComposition />
+      <TreasuryRecentTransactions />
       <TreasuryNfts />
       <TreasuryAnalytics />
     </Flex>
