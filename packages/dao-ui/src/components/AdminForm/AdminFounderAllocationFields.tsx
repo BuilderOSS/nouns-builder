@@ -40,7 +40,7 @@ export const AdminFounderAllocationFields = ({
 
           return (
             <Flex key={`founder-${index}`} direction="column" mb={'x4'}>
-              <Flex>
+              <Flex pr={'x6'} position={'relative'}>
                 <Flex style={{ flex: '2 1 0' }}>
                   <SmartInput
                     inputLabel="Founder allocations"
@@ -96,17 +96,18 @@ export const AdminFounderAllocationFields = ({
                     }
                   />
                 </Flex>
-              </Flex>
-
-              <Flex align={'center'} justify={'space-between'} style={{ marginTop: -24 }}>
                 <Button
                   type="button"
                   variant="unset"
                   onClick={() => removeFounderAddress(index)}
+                  position={'absolute'}
+                  style={{ right: -8, bottom: 52 }}
                 >
                   <Icon id="trash" />
                 </Button>
+              </Flex>
 
+              <Flex align={'center'} justify={'flex-end'} style={{ marginTop: -24 }}>
                 {founder?.allocationPercentage && founder?.endDate ? (
                   <Text variant="eyebrow" ml={'auto'}>
                     ~{' '}
