@@ -17,6 +17,7 @@ import {
   barFill,
   barTrack,
   donutCard,
+  donutCardStacked,
   donutCenter,
   donutCenterLabel,
   donutCenterSub,
@@ -25,6 +26,7 @@ import {
   donutSvg,
   donutWrap,
   layout,
+  layoutStacked,
   legend,
   legendDot,
   legendItem,
@@ -169,6 +171,8 @@ export const TreasuryComposition = () => {
     .map((a) => ({ name: a.symbol, color: a.color, value: a.usd }))
 
   const hasUsd = totalUsd > 0
+  // With only one or two assets the 320px|1fr grid looks lopsided; stack it.
+  const stacked = allAssets.length <= 2
 
   if (!treasury) return null
 
@@ -186,8 +190,8 @@ export const TreasuryComposition = () => {
         )}
       </Flex>
 
-      <Box className={layout}>
-        <Box className={donutCard}>
+      <Box className={stacked ? layoutStacked : layout}>
+        <Box className={stacked ? `${donutCard} ${donutCardStacked}` : donutCard}>
           {hasUsd ? (
             <Donut slices={slices} totalUsd={totalUsd} />
           ) : (

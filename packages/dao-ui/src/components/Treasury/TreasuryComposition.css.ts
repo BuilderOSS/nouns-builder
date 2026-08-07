@@ -13,6 +13,23 @@ export const layout = style({
   },
 })
 
+/**
+ * Few-asset fallback: the 320px|1fr grid leaves a sparse, lopsided right column
+ * when a DAO holds only one or two priced assets. Stack the donut over
+ * full-width rows instead so it stays balanced.
+ */
+export const layoutStacked = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
+})
+
+export const donutCardStacked = style({
+  alignSelf: 'center',
+  width: '100%',
+  maxWidth: '360px',
+})
+
 export const donutCard = style({
   display: 'flex',
   flexDirection: 'column',
