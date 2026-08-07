@@ -240,20 +240,25 @@ export const TreasuryAnalytics = () => {
             </Text>
           </Flex>
         )}
-      </Box>
 
-      <Grid className={metricsGrid} display={'grid'} mt={'x4'}>
-        <Metric label="Revenue" value={`${formatCryptoVal(metrics.totalRevenue)} ETH`} />
-        <Metric label="Auctions" value={`${metrics.auctionsSettled}`} />
-        <Metric
-          label="Avg. Winning Bid"
-          value={`${formatCryptoVal(metrics.averageWinningBid)} ETH`}
-        />
-        <Metric
-          label="Highest Sale"
-          value={`${formatCryptoVal(metrics.highestSale)} ETH`}
-        />
-      </Grid>
+        <Box mt={'x4'} pt={'x4'} style={{ borderTop: '1px solid var(--colors-border)' }}>
+          <Grid className={metricsGrid} display={'grid'}>
+            <Metric
+              label="Revenue"
+              value={`${formatCryptoVal(metrics.totalRevenue)} ETH`}
+            />
+            <Metric label="Auctions" value={`${metrics.auctionsSettled}`} />
+            <Metric
+              label="Avg. Winning Bid"
+              value={`${formatCryptoVal(metrics.averageWinningBid)} ETH`}
+            />
+            <Metric
+              label="Highest Sale"
+              value={`${formatCryptoVal(metrics.highestSale)} ETH`}
+            />
+          </Grid>
+        </Box>
+      </Box>
     </Flex>
   )
 }
