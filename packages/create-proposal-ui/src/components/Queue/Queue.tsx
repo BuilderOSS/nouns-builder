@@ -6,6 +6,7 @@ import React from 'react'
 import { useTransactionComposer } from '../shared'
 import { TransactionCard } from '../TransactionCard'
 import { ConfirmRemove } from './ConfirmRemove'
+import { queueInfoBox, queueInfoIcon, queueInfoText } from './Queue.css'
 
 interface QueueProps {
   setQueueModalOpen?: (value: boolean) => void
@@ -102,6 +103,15 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = fals
         mt={'x6'}
         mb={'x8'}
       />
+      {transactions.length > 0 && (
+        <Flex className={queueInfoBox} align="center" gap="x2">
+          <Icon id="question" size="sm" fill="text3" className={queueInfoIcon} />
+          <Text color="text3" className={queueInfoText}>
+            Queued transactions can&apos;t be edited. Remove one and add a replacement
+            instead.
+          </Text>
+        </Flex>
+      )}
       <Button
         variant="outline"
         onClick={handleClearAll}
