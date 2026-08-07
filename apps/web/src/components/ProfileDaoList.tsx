@@ -1,5 +1,8 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { CHAIN_ID } from '@buildeross/types'
 import { DaoAvatar } from '@buildeross/ui/Avatar'
+import { StatBadge } from '@buildeross/ui/StatBadge'
+import { isTestnetChain } from '@buildeross/utils'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import NextImage from 'next/image'
 import Link from 'next/link'
@@ -23,6 +26,7 @@ import {
   daoEditorSpacerLabel,
   profileDaoLink,
   profileHiddenDaoLink,
+  profileStatBadge,
 } from 'src/styles/profile.css'
 
 type ProfileDaoListItem = {
@@ -92,6 +96,8 @@ const ProfileDaoListRow = React.memo(
     onToggleHidden,
     setRowRef,
   }: ProfileDaoListRowProps) => {
+    const isTestnet = isTestnetChain(dao.chainId as CHAIN_ID)
+
     const handleToggleHidden = React.useCallback(() => {
       onToggleHidden(dao, isHidden)
     }, [dao, isHidden, onToggleHidden])
@@ -165,20 +171,33 @@ const ProfileDaoListRow = React.memo(
               auctionAddress={dao.auctionAddress}
               chainId={dao.chainId}
             />
-            <Flex align="center" justify="space-between" flex="1" style={{ minWidth: 0 }}>
+            <Flex
+              align="center"
+              justify="space-between"
+              flex="1"
+              gap="x2"
+              style={{ minWidth: 0 }}
+            >
               <Text fontWeight="display">{dao.name}</Text>
-              {chainIcon ? (
-                <NextImage
-                  src={chainIcon}
-                  alt=""
-                  height={16}
-                  width={16}
-                  style={{
-                    borderRadius: '999px',
-                    objectFit: 'contain',
-                  }}
-                />
-              ) : null}
+              <Flex align="center" gap="x1" style={{ minWidth: 0 }}>
+                {isTestnet ? (
+                  <StatBadge variant="default" className={profileStatBadge}>
+                    Testnet
+                  </StatBadge>
+                ) : null}
+                {chainIcon ? (
+                  <NextImage
+                    src={chainIcon}
+                    alt=""
+                    height={16}
+                    width={16}
+                    style={{
+                      borderRadius: '999px',
+                      objectFit: 'contain',
+                    }}
+                  />
+                ) : null}
+              </Flex>
             </Flex>
           </Flex>
           {isEditing ? (

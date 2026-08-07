@@ -4,9 +4,12 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useUserDaos } from '@buildeross/hooks/useUserDaos'
 import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { useChainStore } from '@buildeross/stores'
+import { CHAIN_ID } from '@buildeross/types'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { NetworkController } from '@buildeross/ui/NetworkController'
+import { StatBadge } from '@buildeross/ui/StatBadge'
+import { isTestnetChain } from '@buildeross/utils'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Icon, PopUp, Text, vars } from '@buildeross/zord'
 import NextImage from 'next/image'
@@ -14,6 +17,7 @@ import Link from 'next/link'
 import React from 'react'
 import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import { useDaoListPreferences } from 'src/hooks/useDaoListPreferences'
+import { profileStatBadge } from 'src/styles/profile.css'
 import { formatUnits } from 'viem'
 import { useAccount, useBalance } from 'wagmi'
 
@@ -53,6 +57,7 @@ type DaoRowProps = {
 
 const DaoRow: React.FC<DaoRowProps> = ({ dao, index, isHidden }) => {
   const chainMeta = PUBLIC_DEFAULT_CHAINS.find((chain) => chain.id === dao.chainId)
+  const isTestnet = isTestnetChain(dao.chainId as CHAIN_ID)
 
   return (
     <Flex
@@ -93,8 +98,13 @@ const DaoRow: React.FC<DaoRowProps> = ({ dao, index, isHidden }) => {
       <Flex
         align="center"
         gap="x1"
-        style={{ minWidth: '24px', justifyContent: 'flex-end' }}
+        style={{ minWidth: '24px', justifyContent: 'flex-end', flexShrink: 0 }}
       >
+        {isTestnet ? (
+          <StatBadge variant="default" className={profileStatBadge}>
+            Testnet
+          </StatBadge>
+        ) : null}
         <Flex width="x4" height="x4" align="center" justify="center">
           {chainMeta?.icon && (
             <NextImage
