@@ -17,7 +17,6 @@ import {
   barFill,
   barTrack,
   donutCard,
-  donutCardStacked,
   donutCenter,
   donutCenterLabel,
   donutCenterSub,
@@ -111,12 +110,16 @@ export const TreasuryComposition = () => {
       args: [treasury as `0x${string}`],
       chainId: chain.id,
     })),
-    // Keep the last good balances on screen while a refetch is in flight or the
-    // query key changes (clanker tokens arriving, subgraph error-[] flips) — the
-    // app polls every 5s, so without this the rows flicker empty on each refetch.
+    // The app sets a global 5s refetchInterval; at that cadence an occasional
+    // failed multicall would drop a token row for a cycle (keepPreviousData only
+    // holds data *while* fetching, not when a refetch returns a partial failure)
+    // — the rows visibly blink. Treasury balances change rarely, so disable the
+    // poll (they still refresh on mount/focus) and keep the last good data.
     query: {
       enabled: !!treasury && tokenList.length > 0,
       placeholderData: keepPreviousData,
+      refetchInterval: false,
+      staleTime: 30_000,
     },
   })
 
@@ -191,7 +194,7 @@ export const TreasuryComposition = () => {
       </Flex>
 
       <Box className={stacked ? layoutStacked : layout}>
-        <Box className={stacked ? `${donutCard} ${donutCardStacked}` : donutCard}>
+        <Box className={donutCard}>
           {hasUsd ? (
             <Donut slices={slices} totalUsd={totalUsd} />
           ) : (
