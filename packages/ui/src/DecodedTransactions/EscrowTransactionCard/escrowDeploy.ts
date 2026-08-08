@@ -74,6 +74,10 @@ export const parseEscrowDeploy = (
         Hex,
         bigint,
       ]
+      const escrow = decodeEscrowData(escrowData)
+      // decodeEscrowData returns {} on an ABI mismatch; without parties there's
+      // nothing meaningful to show, so fall back to the raw calldata view.
+      if (!escrow.clientAddress && !escrow.resolverAddress) return null
       const milestones = [...milestoneAmounts]
       return {
         version,
@@ -81,7 +85,7 @@ export const parseEscrowDeploy = (
         milestoneAmounts: milestones,
         totalAmount: milestones.reduce((sum, a) => sum + a, 0n),
         fundAmount,
-        escrow: decodeEscrowData(escrowData),
+        escrow,
       }
     }
 

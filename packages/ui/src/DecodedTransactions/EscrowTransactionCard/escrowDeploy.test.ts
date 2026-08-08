@@ -47,6 +47,13 @@ const calldataV2 = encodeFunctionData({
   args: [PROVIDER, MILESTONES, escrowData, `0x${'75'.repeat(32)}`, FUND],
 })
 
+// Same outer calldata, but the nested escrow bytes are undecodable (garbage).
+const calldataV2NoEscrow = encodeFunctionData({
+  abi: deployEscrowAbi,
+  functionName: 'deployEscrow',
+  args: [PROVIDER, MILESTONES, '0x1234', `0x${'75'.repeat(32)}`, FUND],
+})
+
 const baseBundler = getEscrowBundler(CHAIN_ID.BASE)
 
 describe('matchEscrowBundler', () => {
@@ -97,5 +104,9 @@ describe('parseEscrowDeploy', () => {
 
   it('returns null for undecodable calldata', () => {
     expect(parseEscrowDeploy(CHAIN_ID.BASE, baseBundler, '0xdeadbeef')).toBeNull()
+  })
+
+  it('returns null when the nested escrow data is empty/undecodable', () => {
+    expect(parseEscrowDeploy(CHAIN_ID.BASE, baseBundler, calldataV2NoEscrow)).toBeNull()
   })
 })

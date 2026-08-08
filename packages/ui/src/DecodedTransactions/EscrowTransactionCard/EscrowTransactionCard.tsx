@@ -3,7 +3,7 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useTokenMetadataSingle } from '@buildeross/hooks/useTokenMetadata'
 import type { CHAIN_ID } from '@buildeross/types'
-import { ESCROW_TYPE_V1 } from '@buildeross/utils/escrow'
+import { ESCROW_TYPE_V1, getWrappedTokenAddress } from '@buildeross/utils/escrow'
 import { formatDateTime, walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
@@ -53,13 +53,27 @@ export const EscrowTransactionCard: React.FC<EscrowTransactionCardProps> = ({
 
   if (!parsed) return null
 
-  const decimals = tokenMetadata?.decimals ?? 18
+  // Amounts are in the escrow token's smallest unit, so formatting needs its
+  // decimals. Prefer live metadata; fall back to 18 only for the chain's wrapped
+  // native (the usual escrow token, reliably 18-decimal). For any other token
+  // whose metadata hasn't resolved we don't know the scale, so show a placeholder
+  // rather than render, say, a 6-decimal USDC amount 1e12 times too small.
+  let wrappedNative: string | undefined
+  try {
+    wrappedNative = getWrappedTokenAddress(chainId)
+  } catch {}
+  const isWrappedNative =
+    !!tokenAddress && tokenAddress.toLowerCase() === wrappedNative?.toLowerCase()
+  const decimals = tokenMetadata?.decimals ?? (isWrappedNative ? 18 : undefined)
   const symbol =
-    tokenMetadata?.symbol ?? (tokenAddress ? walletSnippet(tokenAddress) : '')
+    tokenMetadata?.symbol ??
+    (isWrappedNative ? 'ETH' : tokenAddress ? walletSnippet(tokenAddress) : '')
   const fmt = (v: bigint) =>
-    `${Number(formatUnits(v, decimals)).toLocaleString(undefined, {
-      maximumFractionDigits: 4,
-    })} ${symbol}`.trim()
+    decimals == null
+      ? '…'
+      : `${Number(formatUnits(v, decimals)).toLocaleString(undefined, {
+          maximumFractionDigits: 4,
+        })} ${symbol}`.trim()
 
   const { milestoneAmounts, totalAmount, escrow, version, provider } = parsed
   const isLegacy = escrow.escrowType
