@@ -29,21 +29,37 @@ export const sourceSub = style({
   fontSize: '10px',
 })
 
-export const nodeLabel = style({
-  fill: vars.color.text1,
+// Recipient nodes are HTML (rendered inside <foreignObject>) so their avatar can
+// show a real ENS image with a deterministic gradient fallback — these use
+// `color` (HTML) rather than `fill` (SVG text).
+export const nodeRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+})
+
+export const nodeText = style({
+  display: 'flex',
+  flexDirection: 'column',
+  minWidth: 0,
+})
+
+export const nodeLabelHtml = style({
+  color: vars.color.text1,
   fontSize: '12px',
   fontWeight: 600,
+  lineHeight: 1.2,
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  maxWidth: '128px',
 })
 
-export const nodePct = style({
-  fill: '#10b981',
+export const nodePctHtml = style({
+  color: '#10b981',
   fontSize: '11px',
   fontWeight: 700,
-})
-
-export const nodeSub = style({
-  fill: vars.color.text3,
-  fontSize: '9px',
+  lineHeight: 1.2,
 })
 
 export const emptyState = style({

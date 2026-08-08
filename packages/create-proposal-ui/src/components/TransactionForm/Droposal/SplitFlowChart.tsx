@@ -1,6 +1,8 @@
 'use client'
 
+import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useDaoStore } from '@buildeross/stores'
+import { Avatar } from '@buildeross/ui/Avatar'
 import React, { useMemo } from 'react'
 import { useAccount } from 'wagmi'
 
@@ -9,13 +11,45 @@ import {
   container,
   emptyState,
   legend,
-  nodeLabel,
-  nodePct,
-  nodeSub,
+  nodeLabelHtml,
+  nodePctHtml,
+  nodeRow,
+  nodeText,
   sourceLabel,
   sourceSub,
   svg as svgClass,
 } from './SplitFlowChart.css'
+
+/**
+ * A single recipient node: resolves the recipient's ENS name + avatar and draws
+ * them (HTML via <foreignObject> so the avatar image and gradient fallback can
+ * render inside the SVG). Falls back to the truncated address when there's no
+ * ENS name, and labels the DAO treasury / the connected user specially.
+ */
+const RecipientNode: React.FC<{
+  address: string
+  percent: number
+  x: number
+  y: number
+  isTreasury: boolean
+  isYou: boolean
+}> = ({ address, percent, x, y, isTreasury, isYou }) => {
+  const { displayName, ensAvatar } = useEnsData(address)
+  const label = isTreasury
+    ? 'DAO Treasury'
+    : `${displayName || formatSplitAddress(address)}${isYou ? ' (You)' : ''}`
+  return (
+    <foreignObject x={x - 20} y={y - 20} width={190} height={44}>
+      <div className={nodeRow}>
+        <Avatar address={address} src={isTreasury ? undefined : ensAvatar} size="40" />
+        <div className={nodeText}>
+          <div className={nodeLabelHtml}>{label}</div>
+          <div className={nodePctHtml}>{percent.toFixed(2)}%</div>
+        </div>
+      </div>
+    </foreignObject>
+  )
+}
 
 const W = 480
 const H = 340
@@ -142,7 +176,7 @@ export const SplitFlowChart: React.FC<{ recipients: SplitRecipient[] }> = ({
             )
           })}
 
-        {/* Recipient nodes */}
+        {/* Recipient nodes — ENS name + avatar, rendered as HTML foreignObjects */}
         {valid.map((recipient, index) => {
           const spacing = avail / valid.length
           const targetY = PAD + spacing * index + spacing / 2
@@ -151,28 +185,15 @@ export const SplitFlowChart: React.FC<{ recipients: SplitRecipient[] }> = ({
           const isYou =
             !!address && recipient.address.toLowerCase() === address.toLowerCase()
           return (
-            <g key={`node-${recipient.address.toLowerCase()}`}>
-              <circle
-                cx={TARGET_X}
-                cy={targetY}
-                r="16"
-                fill="#10b981"
-                fillOpacity="0.18"
-                stroke="#10b981"
-                strokeWidth="2"
-              />
-              <text x={TARGET_X + 26} y={targetY - 4} className={nodeLabel}>
-                {isTreasury ? 'DAO Treasury' : formatSplitAddress(recipient.address)}
-              </text>
-              <text x={TARGET_X + 26} y={targetY + 11} className={nodePct}>
-                {recipient.percentAllocation.toFixed(2)}%
-              </text>
-              {isYou && !isTreasury && (
-                <text x={TARGET_X + 26} y={targetY + 23} className={nodeSub}>
-                  (You)
-                </text>
-              )}
-            </g>
+            <RecipientNode
+              key={`node-${recipient.address.toLowerCase()}`}
+              address={recipient.address}
+              percent={recipient.percentAllocation}
+              x={TARGET_X}
+              y={targetY}
+              isTreasury={isTreasury}
+              isYou={isYou && !isTreasury}
+            />
           )
         })}
       </svg>
