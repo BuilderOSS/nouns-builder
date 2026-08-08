@@ -74,6 +74,21 @@ describe('deriveRecentTransactions', () => {
     expect(rows.find((r) => r.tag === 'Auction #761')).toBeUndefined()
   })
 
+  it('excludes an executed:false proposal even if it carries a timestamp', () => {
+    const rows = deriveRecentTransactions(
+      [
+        {
+          proposalNumber: 99,
+          values: [eth(5).toString()],
+          executed: false,
+          executedAt: 4000,
+        },
+      ],
+      []
+    )
+    expect(rows).toHaveLength(0)
+  })
+
   it('caps to the limit', () => {
     const many: ProposalLike[] = Array.from({ length: 20 }, (_, i) => ({
       proposalNumber: i + 1,

@@ -72,7 +72,7 @@ export const TreasuryRecentTransactions = () => {
           gap={'x2'}
         >
           <Text className={styles.title}>Treasury activity</Text>
-          <Text className={styles.sub}>From proposals &amp; auctions · last 30d</Text>
+          <Text className={styles.sub}>From proposals &amp; auctions</Text>
         </Flex>
 
         {txs.length === 0 ? (

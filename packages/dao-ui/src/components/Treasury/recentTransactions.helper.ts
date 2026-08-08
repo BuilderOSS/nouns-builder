@@ -50,7 +50,10 @@ export const deriveRecentTransactions = (
   limit = 12
 ): RecentTx[] => {
   const proposalTxs: RecentTx[] = proposals
-    .filter((p) => !!p.executedAt)
+    // Only executed proposals are outflows. `executedAt` is set iff a proposal
+    // executed, but guard on `executed` too (when the source provides it) so an
+    // `executed: false` record with a stray timestamp is never counted.
+    .filter((p) => !!p.executedAt && p.executed !== false)
     .map((p) => ({
       dir: 'out',
       title: p.title?.trim() || `Proposal ${p.proposalNumber}`,

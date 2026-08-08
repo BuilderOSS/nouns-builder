@@ -6,8 +6,7 @@ import { daoClankerTokensRequest } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
 import { Box, Flex, Text } from '@buildeross/zord'
-import { keepPreviousData } from '@tanstack/react-query'
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
 import { erc20Abi, formatEther } from 'viem'
 import { useBalance, useReadContracts } from 'wagmi'
@@ -110,18 +109,32 @@ export const TreasuryComposition = () => {
       args: [treasury as `0x${string}`],
       chainId: chain.id,
     })),
-    // The app sets a global 5s refetchInterval; at that cadence an occasional
-    // failed multicall would drop a token row for a cycle (keepPreviousData only
-    // holds data *while* fetching, not when a refetch returns a partial failure)
-    // — the rows visibly blink. Treasury balances change rarely, so disable the
-    // poll (they still refresh on mount/focus) and keep the last good data.
+    // Treasury balances change rarely, so don't poll: the app sets a global 5s
+    // refetchInterval, and at that cadence an occasional failed read would drop a
+    // token row for a cycle, so rows visibly blinked. They still refresh on
+    // mount/focus, and the per-token last-good cache below keeps a row visible
+    // across a failed read (without ever showing another DAO's balance).
     query: {
       enabled: !!treasury && tokenList.length > 0,
-      placeholderData: keepPreviousData,
       refetchInterval: false,
       staleTime: 30_000,
     },
   })
+
+  // Last known-good balance per token address. `allowFailure` reads can come back
+  // as `failure` (or a clanker token can arrive a beat later than the commons),
+  // which would otherwise zero the balance and drop the row. Keyed by address and
+  // reset when the DAO changes, so a stale value never leaks across treasuries —
+  // resetting during render (not in an effect) means it's cleared before the
+  // memo below reads it, so the switch never shows the previous DAO's numbers.
+  const daoKey = `${chain.id}:${treasury ?? ''}`
+  const lastGood = useRef<{ key: string; map: Record<string, bigint> }>({
+    key: daoKey,
+    map: {},
+  })
+  if (lastGood.current.key !== daoKey) {
+    lastGood.current = { key: daoKey, map: {} }
+  }
 
   const { ethAsset, tokenAssets, totalUsd } = useMemo(() => {
     const price = ethUsd ?? 0
@@ -139,11 +152,17 @@ export const TreasuryComposition = () => {
 
     const assets: Asset[] = tokenList
       .map((t, i) => {
+        const key = t.address.toLowerCase()
         const entry = balances?.[i]
-        const raw =
-          entry?.status === 'success' && typeof entry.result === 'bigint'
-            ? entry.result
-            : 0n
+        let raw: bigint
+        if (entry?.status === 'success' && typeof entry.result === 'bigint') {
+          raw = entry.result
+          lastGood.current.map[key] = raw
+        } else {
+          // Failed read or not-yet-fetched token: reuse this token's last good
+          // value so its row stays put instead of flickering to zero.
+          raw = lastGood.current.map[key] ?? 0n
+        }
         return { t, raw, i }
       })
       .filter(({ raw }) => raw > 0n)
