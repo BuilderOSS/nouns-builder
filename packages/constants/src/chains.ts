@@ -1,10 +1,10 @@
 import { Chain, CHAIN_ID } from '@buildeross/types'
 import {
   base,
-  baseSepolia,
+  // baseSepolia,
   mainnet,
   optimism,
-  optimismSepolia,
+  // optimismSepolia,
   sepolia,
   zora,
 } from 'wagmi/chains'
@@ -76,18 +76,18 @@ const TESTNET_CHAINS_UNSORTED: Chains = [
     slug: 'sepolia',
     icon: '/chains/ethereum.svg',
   },
-  {
-    ...optimismSepolia,
-    id: CHAIN_ID.OPTIMISM_SEPOLIA,
-    slug: 'op-sepolia',
-    icon: '/chains/optimism.svg',
-  },
-  {
-    ...baseSepolia,
-    id: CHAIN_ID.BASE_SEPOLIA,
-    slug: 'base-sepolia',
-    icon: '/chains/base.svg',
-  },
+  // {
+  //   ...optimismSepolia,
+  //   id: CHAIN_ID.OPTIMISM_SEPOLIA,
+  //   slug: 'op-sepolia',
+  //   icon: '/chains/optimism.svg',
+  // },
+  // {
+  //   ...baseSepolia,
+  //   id: CHAIN_ID.BASE_SEPOLIA,
+  //   slug: 'base-sepolia',
+  //   icon: '/chains/base.svg',
+  // },
 ] as const satisfies Chains
 
 export const TESTNET_CHAINS: Chains = sortNonEmptyChains(TESTNET_CHAINS_UNSORTED)
@@ -120,7 +120,7 @@ export const PUBLIC_ALL_CHAINS: Chains = sortNonEmptyChains(
 )
 
 const PUBLIC_DEFAULT_CHAINS_UNSORTED = PUBLIC_IS_TESTNET
-  ? PUBLIC_ALL_CHAINS_UNSORTED
+  ? TESTNET_CHAINS_UNSORTED
   : MAINNET_CHAINS_UNSORTED
 
 export const PUBLIC_DEFAULT_CHAINS: Chains = sortNonEmptyChains(
