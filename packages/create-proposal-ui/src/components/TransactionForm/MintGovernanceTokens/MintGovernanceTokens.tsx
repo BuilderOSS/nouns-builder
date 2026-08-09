@@ -134,7 +134,7 @@ export const MintGovernanceTokens: React.FC = () => {
 
   if (isLoading)
     return (
-      <Stack>
+      <Stack role="status" aria-live="polite" aria-label="Loading mint governance tokens">
         <Spinner />{' '}
       </Stack>
     )
