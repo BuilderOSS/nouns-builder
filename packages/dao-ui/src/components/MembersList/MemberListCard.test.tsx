@@ -38,6 +38,34 @@ describe('MemberCard', () => {
     expect(screen.getByText('Active')).toBeInTheDocument()
   })
 
+  it('renders Auction House badge when the member is the auction contract', () => {
+    render(
+      <MemberCard
+        member={member}
+        totalSupply={100}
+        isActive
+        auctionAddress={member.voter}
+      />
+    )
+
+    expect(screen.getByText('Auction House')).toBeInTheDocument()
+    expect(screen.queryByText('Active')).toBeNull()
+  })
+
+  it('renders Treasury badge when the member is the treasury contract', () => {
+    render(
+      <MemberCard
+        member={member}
+        totalSupply={100}
+        isActive
+        treasuryAddress={member.voter}
+      />
+    )
+
+    expect(screen.getByText('Treasury')).toBeInTheDocument()
+    expect(screen.queryByText('Active')).toBeNull()
+  })
+
   it('does not render badge when isActive is false or undefined', () => {
     const { rerender } = render(
       <MemberCard member={member} totalSupply={100} isActive={false} />

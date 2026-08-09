@@ -34,3 +34,24 @@ export const dismissButton = style([
     mb: 'x2',
   }),
 ])
+
+export const queueInfoBox = style([
+  atoms({
+    p: 'x3',
+    mb: 'x4',
+    borderRadius: 'curved',
+    backgroundColor: 'background2',
+  }),
+  {
+    border: `1px solid ${vars.color.border}`,
+  },
+])
+
+export const queueInfoIcon = style({
+  flexShrink: 0,
+})
+
+export const queueInfoText = style({
+  fontSize: '14px',
+  lineHeight: '18px',
+})
