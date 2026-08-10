@@ -62,7 +62,7 @@ export const ConfigureUpdatablePeriodModal: React.FC<
           borderRadius="phat"
           borderWidth="normal"
           borderColor="warning"
-          backgroundColor="warningSecondary"
+          borderStyle="solid"
           p="x4"
         >
           <Flex direction="column" gap="x3">
@@ -89,17 +89,8 @@ export const ConfigureUpdatablePeriodModal: React.FC<
               />
               <Box as="label" htmlFor="disclaimer-checkbox" style={{ cursor: 'pointer' }}>
                 <Text fontSize="14" color="text1">
-                  I understand this upgrade is unaudited (
-                  <Box
-                    as="a"
-                    href={PR_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ textDecoration: 'underline' }}
-                  >
-                    PR #5
-                  </Box>
-                  ) and take full responsibility for any risks.
+                  I understand this upgrade is unaudited and take full responsibility for
+                  any risks.
                 </Text>
               </Box>
             </Flex>
@@ -192,11 +183,8 @@ export const ConfigureUpdatablePeriodModal: React.FC<
                   ).toFixed(2)} days)`
                 : undefined
             }
+            helperText="Must not exceed the voting period."
           />
-
-          <Text color="text3" fontSize="14" mt="x2">
-            Must not exceed the voting period.
-          </Text>
         </Box>
 
         <Flex gap="x4" justify="flex-end">
