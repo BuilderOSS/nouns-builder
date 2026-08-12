@@ -1,5 +1,7 @@
-import { PUBLIC_SUBGRAPH_URL } from '@buildeross/constants'
-import { PROFILE_LINK_EAS_CHAIN_ID } from '@buildeross/constants/eas'
+import {
+  PROFILE_LINK_EAS_CHAIN_ID,
+  PROFILE_LINK_SCHEMA_UID,
+} from '@buildeross/constants/eas'
 import { CHAIN_ID } from '@buildeross/types'
 import { isChainIdSupportedByEAS } from '@buildeross/utils'
 import { GraphQLClient, gql } from 'graphql-request'
@@ -16,37 +18,61 @@ export type ProfileLinkOverride = {
   revoked: boolean
 }
 
-type ProfileLinkOverrideResponse = {
-  profileLinkOverrides?: Array<{
+type EasDecodedField = {
+  name?: string
+  value?: {
+    value?: unknown
+  }
+}
+
+type ProfileLinkAttestationResponse = {
+  attestations?: Array<{
     id: string
-    key: string
-    value: string
-    timestamp: string | number
-    creator: string
+    attester: string
+    recipient: string
+    time: string | number
+    decodedDataJson: string
     revoked: boolean
   }>
 }
 
 const PROFILE_LINK_KEYS = new Set<ProfileLinkKey>(['website', 'x', 'farcaster'])
 
-const PROFILE_LINK_OVERRIDES_QUERY = gql`
-  query profileLinkOverrides($profile: Bytes!, $first: Int!, $skip: Int!) {
-    profileLinkOverrides(
-      where: { profile: $profile, revoked: false }
-      orderBy: timestamp
-      orderDirection: desc
-      first: $first
-      skip: $skip
-    ) {
+const PROFILE_LINK_EAS_GRAPHQL_URL: Partial<Record<CHAIN_ID, string>> = {
+  [CHAIN_ID.BASE]: 'https://base.easscan.org/graphql',
+  [CHAIN_ID.BASE_SEPOLIA]: 'https://base-sepolia.easscan.org/graphql',
+}
+
+const PROFILE_LINK_ATTESTATIONS_QUERY = gql`
+  query profileLinkAttestations($where: AttestationWhereInput) {
+    attestations(where: $where, orderBy: { time: desc }) {
       id
-      key
-      value
-      timestamp
-      creator
+      attester
+      recipient
+      time
+      decodedDataJson
       revoked
     }
   }
 `
+
+const decodeProfileLinkAttestation = (
+  decodedDataJson: string
+): { key: ProfileLinkKey; value: string } | null => {
+  try {
+    const decoded = JSON.parse(decodedDataJson) as EasDecodedField[]
+    const key = decoded.find((field) => field.name === 'key')?.value?.value
+    const value = decoded.find((field) => field.name === 'value')?.value?.value
+
+    if (typeof key !== 'string' || !PROFILE_LINK_KEYS.has(key as ProfileLinkKey))
+      return null
+    if (typeof value !== 'string') return null
+
+    return { key: key as ProfileLinkKey, value }
+  } catch {
+    return null
+  }
+}
 
 export async function getProfileLinkOverrides(
   profileAddress: string,
@@ -62,44 +88,43 @@ export async function getProfileLinkOverrides(
     return []
   }
 
-  const subgraphUrl = PUBLIC_SUBGRAPH_URL.get(chainId)
-  if (!subgraphUrl) {
-    console.error('No subgraph URL found for profile link chain')
+  const graphqlUrl = PROFILE_LINK_EAS_GRAPHQL_URL[chainId]
+  if (!graphqlUrl) {
+    console.error('No EAS GraphQL URL found for profile link chain')
     return []
   }
 
   try {
-    const client = new GraphQLClient(subgraphUrl, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+    const profile = profileAddress.toLowerCase()
+    const client = new GraphQLClient(graphqlUrl, {
+      headers: { 'Content-Type': 'application/json' },
     })
-
-    const response = await client.request<ProfileLinkOverrideResponse>(
-      PROFILE_LINK_OVERRIDES_QUERY,
+    const response = await client.request<ProfileLinkAttestationResponse>(
+      PROFILE_LINK_ATTESTATIONS_QUERY,
       {
-        profile: profileAddress.toLowerCase(),
-        first: 1000,
-        skip: 0,
+        where: {
+          recipient: { equals: profile },
+          schemaId: { equals: PROFILE_LINK_SCHEMA_UID },
+        },
       }
     )
-
     const latestByKey = new Map<ProfileLinkKey, ProfileLinkOverride>()
 
-    for (const override of response.profileLinkOverrides ?? []) {
-      const key = override.key.toLowerCase()
-      if (!PROFILE_LINK_KEYS.has(key as ProfileLinkKey)) continue
+    for (const attestation of response.attestations ?? []) {
+      if (attestation.revoked) continue
+      if (attestation.attester.toLowerCase() !== profile) continue
+      if (attestation.recipient.toLowerCase() !== profile) continue
 
-      const typedKey = key as ProfileLinkKey
-      if (latestByKey.has(typedKey)) continue
+      const link = decodeProfileLinkAttestation(attestation.decodedDataJson)
+      if (!link || latestByKey.has(link.key)) continue
 
-      latestByKey.set(typedKey, {
-        id: override.id as Hex,
-        key: typedKey,
-        value: override.value,
-        timestamp: Number(override.timestamp),
-        creator: override.creator as Hex,
-        revoked: override.revoked,
+      latestByKey.set(link.key, {
+        id: attestation.id as Hex,
+        key: link.key,
+        value: link.value,
+        timestamp: Number(attestation.time),
+        creator: attestation.attester as Hex,
+        revoked: false,
       })
     }
 
