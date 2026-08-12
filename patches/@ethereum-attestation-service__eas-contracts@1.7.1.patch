@@ -1,0 +1,18 @@
+diff --git a/dist/typechain-types/factories/@openzeppelin/contracts/access/index.d.ts b/dist/typechain-types/factories/@openzeppelin/contracts/access/index.d.ts
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/dist/typechain-types/factories/@openzeppelin/contracts/access/index.d.ts
+@@ -0,0 +1 @@
++export { Ownable__factory } from "./Ownable__factory";
+diff --git a/dist/typechain-types/factories/@openzeppelin/contracts/access/index.js b/dist/typechain-types/factories/@openzeppelin/contracts/access/index.js
+new file mode 100644
+index 0000000..2222222
+--- /dev/null
++++ b/dist/typechain-types/factories/@openzeppelin/contracts/access/index.js
+@@ -0,0 +1,5 @@
++"use strict";
++Object.defineProperty(exports, "__esModule", { value: true });
++exports.Ownable__factory = void 0;
++var Ownable__factory_1 = require("./Ownable__factory");
++Object.defineProperty(exports, "Ownable__factory", { enumerable: true, get: function () { return Ownable__factory_1.Ownable__factory; } });

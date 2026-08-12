@@ -15,6 +15,11 @@ overrides:
   '@tanstack/query-core': ^5.90.3
   '@tanstack/react-query': ^5.90.3
 
+patchedDependencies:
+  '@ethereum-attestation-service/eas-contracts@1.7.1':
+    hash: 37958a15d11d45363f2fc8ddf66921d05ce4d55af1f1aa7f9cef8523c1019499
+    path: patches/@ethereum-attestation-service__eas-contracts@1.7.1.patch
+
 importers:
 
   .:
@@ -14180,7 +14185,7 @@ snapshots:
 
   '@eslint/js@8.57.1': {}
 
-  '@ethereum-attestation-service/eas-contracts@1.7.1(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.18.10)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)':
+  '@ethereum-attestation-service/eas-contracts@1.7.1(patch_hash=37958a15d11d45363f2fc8ddf66921d05ce4d55af1f1aa7f9cef8523c1019499)(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.18.10)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)':
     dependencies:
       hardhat: 2.22.4(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.18.10)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
@@ -14191,7 +14196,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@ethereum-attestation-service/eas-contracts@1.7.1(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.19.15)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)':
+  '@ethereum-attestation-service/eas-contracts@1.7.1(patch_hash=37958a15d11d45363f2fc8ddf66921d05ce4d55af1f1aa7f9cef8523c1019499)(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.19.15)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)':
     dependencies:
       hardhat: 2.22.4(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.19.15)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
@@ -14204,7 +14209,7 @@ snapshots:
 
   '@ethereum-attestation-service/eas-sdk@2.9.0(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.18.10)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)':
     dependencies:
-      '@ethereum-attestation-service/eas-contracts': 1.7.1(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.18.10)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)
+      '@ethereum-attestation-service/eas-contracts': 1.7.1(patch_hash=37958a15d11d45363f2fc8ddf66921d05ce4d55af1f1aa7f9cef8523c1019499)(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.18.10)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@openzeppelin/merkle-tree': 1.0.8
       ethers: 6.15.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       js-base64: 3.7.8
@@ -14224,7 +14229,7 @@ snapshots:
 
   '@ethereum-attestation-service/eas-sdk@2.9.0(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.19.15)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)':
     dependencies:
-      '@ethereum-attestation-service/eas-contracts': 1.7.1(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.19.15)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)
+      '@ethereum-attestation-service/eas-contracts': 1.7.1(patch_hash=37958a15d11d45363f2fc8ddf66921d05ce4d55af1f1aa7f9cef8523c1019499)(bufferutil@4.0.9)(ts-node@10.9.2(@types/node@22.19.15)(typescript@5.9.3))(typescript@5.9.3)(utf-8-validate@5.0.10)
       '@openzeppelin/merkle-tree': 1.0.8
       ethers: 6.15.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       js-base64: 3.7.8

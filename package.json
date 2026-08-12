@@ -21,6 +21,9 @@
   },
   "packageManager": "pnpm@10.28.2",
   "pnpm": {
+    "patchedDependencies": {
+      "@ethereum-attestation-service/eas-contracts@1.7.1": "patches/@ethereum-attestation-service__eas-contracts@1.7.1.patch"
+    },
     "overrides": {
       "react": "^19.2.1",
       "react-dom": "^19.2.1",
