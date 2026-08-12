@@ -6,7 +6,6 @@ import React from 'react'
 import {
   walletScannerMenu,
   walletScannerMenuButton,
-  walletScannerMenuCheckbox,
   walletScannerMenuItem,
   walletScannerMenuRoot,
 } from 'src/styles/profile.css'
@@ -29,6 +28,9 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
   address,
 }) => {
   const menuId = React.useId().replace(/:/g, '')
+  const menuRootRef = React.useRef<HTMLDivElement>(null)
+  const menuButtonRef = React.useRef<HTMLButtonElement>(null)
+  const [isOpen, setIsOpen] = React.useState(false)
   const scannerLinks = React.useMemo(
     () =>
       PUBLIC_DEFAULT_CHAINS.map((chain) => {
@@ -46,46 +48,65 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
     [address]
   )
 
+  React.useEffect(() => {
+    if (!isOpen) return
+
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (!menuRootRef.current?.contains(event.target as Node)) setIsOpen(false)
+    }
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setIsOpen(false)
+      menuButtonRef.current?.focus()
+    }
+
+    document.addEventListener('pointerdown', closeOnOutsidePointer)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsidePointer)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [isOpen])
+
   if (!scannerLinks.length) return null
 
   return (
-    <div className={walletScannerMenuRoot}>
-      <input
-        id={menuId}
-        type="checkbox"
-        className={walletScannerMenuCheckbox}
-        aria-label="Open wallet scanner links"
-        aria-haspopup="menu"
-      />
-      <label
-        htmlFor={menuId}
+    <div ref={menuRootRef} className={walletScannerMenuRoot}>
+      <button
+        ref={menuButtonRef}
+        type="button"
         className={walletScannerMenuButton}
         aria-label="Open wallet scanner links"
         aria-haspopup="menu"
+        aria-controls={menuId}
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((open) => !open)}
       >
         <Icon id="dots" size="sm" />
-      </label>
+      </button>
 
-      <div className={walletScannerMenu} role="menu">
-        {scannerLinks.map((link) => (
-          <a
-            key={link.chainId}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={walletScannerMenuItem}
-            role="menuitem"
-          >
-            <span>
-              <Text fontWeight="display">{link.chainName}</Text>
-              <Text color="text3" fontSize="12">
-                {link.label}
-              </Text>
-            </span>
-            <Icon id="external-16" size="sm" />
-          </a>
-        ))}
-      </div>
+      {isOpen ? (
+        <div id={menuId} className={walletScannerMenu} role="menu">
+          {scannerLinks.map((link) => (
+            <a
+              key={link.chainId}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={walletScannerMenuItem}
+              role="menuitem"
+            >
+              <span>
+                <Text fontWeight="display">{link.chainName}</Text>
+                <Text color="text3" fontSize="12">
+                  {link.label}
+                </Text>
+              </span>
+              <Icon id="external-16" size="sm" />
+            </a>
+          ))}
+        </div>
+      ) : null}
     </div>
   )
 }

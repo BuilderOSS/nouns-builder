@@ -257,28 +257,55 @@ export const activityTypeDropdown = style({
   },
 })
 
-export const activityTypeDropdownButton = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  gap: '12px',
+export const compactFilterControl = style({
   width: '100%',
   minHeight: '40px',
-  padding: '0 8px 0 12px',
   border: `1px solid ${color.border}`,
   borderRadius: '8px',
   backgroundColor: color.background2,
   color: color.text1,
   cursor: 'pointer',
   fontSize: '14px',
-  textAlign: 'left',
   selectors: {
+    '&:focus-visible': {
+      outline: `3px solid ${color.positive}`,
+      outlineOffset: '2px',
+    },
     'html[data-theme-mode="dark"] &': {
       backgroundColor: vars.color.background2,
       borderColor: vars.color.border,
       color: vars.color.text1,
     },
   },
+})
+
+export const activityTypeDropdownButton = style([
+  compactFilterControl,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: '12px',
+    padding: '0 8px 0 12px',
+    textAlign: 'left',
+  },
+])
+
+export const compactFilterSelect = style([
+  compactFilterControl,
+  {
+    appearance: 'none',
+    padding: '0 36px 0 12px',
+  },
+])
+
+export const compactFilterChevron = style({
+  position: 'absolute',
+  top: '50%',
+  right: '8px',
+  display: 'flex',
+  transform: 'translateY(-50%)',
+  pointerEvents: 'none',
 })
 
 export const activityTypeDropdownMenu = style({
@@ -326,6 +353,17 @@ export const activityTypeDropdownOption = style({
       backgroundColor: vars.color.background2,
     },
   },
+})
+
+export const activityKindDropdown = style({
+  position: 'relative',
+  width: '144px',
+})
+
+export const activityKindDropdownMenu = style({
+  right: 0,
+  left: 'auto',
+  minWidth: '190px',
 })
 
 export const filterSummaryChip = style({
@@ -477,17 +515,6 @@ export const walletScannerMenuRoot = style({
   alignItems: 'center',
 })
 
-export const walletScannerMenuCheckbox = style({
-  position: 'absolute',
-  inset: 0,
-  zIndex: 2,
-  width: '28px',
-  height: '28px',
-  margin: 0,
-  opacity: 0.01,
-  cursor: 'pointer',
-})
-
 export const walletScannerMenuButton = style({
   display: 'inline-flex',
   alignItems: 'center',
@@ -500,7 +527,6 @@ export const walletScannerMenuButton = style({
   backgroundColor: 'transparent',
   color: color.text2,
   cursor: 'pointer',
-  pointerEvents: 'none',
   selectors: {
     '&:hover': {
       backgroundColor: color.background2,
@@ -513,7 +539,7 @@ export const walletScannerMenuButton = style({
       backgroundColor: vars.color.background2,
       color: vars.color.text1,
     },
-    [`${walletScannerMenuCheckbox}:focus-visible + &`]: {
+    '&:focus-visible': {
       boxShadow: `0 0 0 2px ${color.accent}`,
     },
   },
@@ -522,9 +548,9 @@ export const walletScannerMenuButton = style({
 export const walletScannerMenu = style({
   position: 'absolute',
   top: 'calc(100% + 6px)',
-  left: 0,
-  zIndex: 30,
-  display: 'none',
+  right: 0,
+  zIndex: 100,
+  display: 'block',
   minWidth: '190px',
   padding: '6px',
   border: `1px solid ${color.border}`,
@@ -535,15 +561,6 @@ export const walletScannerMenu = style({
     'html[data-theme-mode="dark"] &': {
       backgroundColor: vars.color.background1,
       borderColor: vars.color.border,
-    },
-    [`${walletScannerMenuRoot}:hover &`]: {
-      display: 'block',
-    },
-    [`${walletScannerMenuRoot}:focus-within &`]: {
-      display: 'block',
-    },
-    [`${walletScannerMenuCheckbox}:checked ~ &`]: {
-      display: 'block',
     },
   },
 })
@@ -671,6 +688,656 @@ export const profileDaoFilterButton = style({
   color: 'inherit',
   textAlign: 'inherit',
   cursor: 'pointer',
+})
+
+export const profilePage = style({
+  width: '100%',
+  maxWidth: '1440px',
+  margin: '0 auto',
+  padding: '32px 16px 64px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '24px',
+  '@media': {
+    '(min-width: 768px)': {
+      padding: '48px 32px 80px',
+      gap: '32px',
+    },
+  },
+})
+
+export const profileSurface = style({
+  width: '100%',
+  border: `1px solid ${color.border}`,
+  borderRadius: '12px',
+  backgroundColor: color.background1,
+  overflow: 'hidden',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
+    },
+  },
+})
+
+export const profileHeaderSurface = style({
+  position: 'relative',
+  zIndex: 10,
+  overflow: 'visible',
+})
+
+export const profileHeaderMain = style({
+  padding: '24px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '20px',
+  '@media': {
+    '(min-width: 768px)': {
+      padding: '32px',
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+    },
+  },
+})
+
+export const profileHeaderIdentity = style({
+  minWidth: 0,
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '16px',
+  '@media': {
+    '(min-width: 640px)': {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+    },
+  },
+})
+
+export const profileHeaderNameRow = style({
+  width: '100%',
+  minWidth: 0,
+  display: 'flex',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  columnGap: '16px',
+  rowGap: '12px',
+})
+
+export const profileHeaderCopyRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  flex: '0 1 460px',
+  minWidth: 0,
+  maxWidth: '100%',
+  padding: '6px 10px',
+  border: `1px solid ${color.border}`,
+  borderRadius: '8px',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.border,
+    },
+  },
+})
+
+export const profileWalletAddress = style({
+  flex: 1,
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  fontFamily: 'monospace',
+  fontSize: '13px',
+})
+
+export const profileHeaderActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: '8px',
+  flexShrink: 0,
+})
+
+export const profileStats = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  borderTop: `1px solid ${color.border}`,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.border,
+    },
+  },
+  '@media': {
+    '(min-width: 640px)': {
+      gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+    },
+  },
+})
+
+export const profileStat = style({
+  minHeight: '96px',
+  padding: '16px 12px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '6px',
+  textAlign: 'center',
+  borderRight: `1px solid ${color.border}`,
+  borderBottom: `1px solid ${color.border}`,
+  selectors: {
+    '&:first-child': {
+      gridColumn: '1 / -1',
+    },
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.border,
+    },
+  },
+  '@media': {
+    '(min-width: 640px)': {
+      borderBottom: 0,
+      selectors: {
+        '&:first-child': {
+          gridColumn: 'auto',
+        },
+      },
+    },
+  },
+})
+
+export const profileStatValue = style({
+  fontSize: '28px',
+  lineHeight: 1,
+  fontWeight: 700,
+})
+
+export const profileSection = style({
+  padding: '20px',
+  '@media': {
+    '(min-width: 768px)': {
+      padding: '24px',
+    },
+  },
+})
+
+export const profileSectionHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  flexWrap: 'wrap',
+  gap: '12px',
+  marginBottom: '20px',
+})
+
+export const daoSelectorList = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  gap: '8px',
+  padding: '2px',
+  '@media': {
+    '(min-width: 640px)': {
+      gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+    },
+    '(min-width: 768px)': {
+      gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    },
+    '(min-width: 1200px)': {
+      gridTemplateColumns: 'repeat(6, minmax(0, 1fr))',
+    },
+  },
+})
+
+export const daoSelectorCard = style({
+  position: 'relative',
+  minWidth: 0,
+  minHeight: '60px',
+  padding: '8px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  color: color.text1,
+  backgroundColor: color.background2,
+  border: `1px solid ${color.border}`,
+  borderRadius: '8px',
+  textAlign: 'left',
+  transition: 'border-color 0.12s ease, box-shadow 0.12s ease, background 0.12s ease',
+  selectors: {
+    '&:hover': { borderColor: color.text3 },
+    'html[data-theme-mode="dark"] &': {
+      color: vars.color.text1,
+      backgroundColor: vars.color.background2,
+      borderColor: vars.color.border,
+    },
+  },
+})
+
+export const daoSelectorFilterButton = style({
+  position: 'absolute',
+  inset: 0,
+  zIndex: 0,
+  border: 0,
+  borderRadius: '8px',
+  background: 'transparent',
+  cursor: 'pointer',
+  selectors: {
+    '&:focus-visible': {
+      outline: `3px solid ${color.positive}`,
+      outlineOffset: '2px',
+    },
+  },
+})
+
+export const daoSelectorCardAvatar = style({
+  position: 'relative',
+  zIndex: 1,
+  display: 'flex',
+  flexShrink: 0,
+  pointerEvents: 'none',
+})
+
+export const daoSelectorNameLink = style({
+  position: 'relative',
+  zIndex: 2,
+  minWidth: 0,
+  flex: 1,
+  color: 'inherit',
+  textDecoration: 'none',
+  selectors: {
+    '&:hover': { textDecoration: 'underline' },
+    '&:focus-visible': {
+      outline: `2px solid ${color.positive}`,
+      outlineOffset: '2px',
+      borderRadius: '2px',
+    },
+  },
+})
+
+export const daoSelectorCardActive = style({
+  borderColor: color.text1,
+  boxShadow: `0 0 0 2px ${color.text1}`,
+  backgroundColor: color.neutralHover,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.text1,
+      boxShadow: `0 0 0 2px ${vars.color.text1}`,
+      backgroundColor: vars.color.neutralHover,
+    },
+  },
+})
+
+export const daoSelectorCheck = style({
+  position: 'absolute',
+  top: '-6px',
+  right: '-6px',
+  zIndex: 1,
+  width: '20px',
+  height: '20px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '50%',
+  backgroundColor: color.text1,
+  color: color.background1,
+  pointerEvents: 'none',
+})
+
+export const daoSelectorChainBadge = style({
+  position: 'relative',
+  zIndex: 1,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0,
+  marginLeft: 'auto',
+  pointerEvents: 'none',
+})
+
+export const daoSelectorHeaderActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+})
+
+export const daoSelectorInfo = style({
+  position: 'relative',
+  display: 'inline-flex',
+})
+
+export const daoSelectorInfoButton = style({
+  width: '28px',
+  height: '28px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: `1px solid ${color.border}`,
+  borderRadius: '50%',
+  backgroundColor: color.background2,
+  color: color.text2,
+  cursor: 'help',
+  fontSize: '14px',
+  fontWeight: 700,
+  selectors: {
+    '&:focus-visible': {
+      outline: `3px solid ${color.positive}`,
+      outlineOffset: '2px',
+    },
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.border,
+      backgroundColor: vars.color.background2,
+      color: vars.color.text2,
+    },
+  },
+})
+
+export const daoSelectorInfoTooltip = style({
+  position: 'absolute',
+  top: 'calc(100% + 8px)',
+  right: 0,
+  zIndex: 20,
+  width: '280px',
+  padding: '10px 12px',
+  border: `1px solid ${color.border}`,
+  borderRadius: '8px',
+  backgroundColor: color.background1,
+  color: color.text2,
+  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.18)',
+  fontSize: '13px',
+  lineHeight: 1.4,
+  opacity: 0,
+  visibility: 'hidden',
+  pointerEvents: 'none',
+  transform: 'translateY(-4px)',
+  transition: 'opacity 0.12s ease, transform 0.12s ease, visibility 0.12s ease',
+  selectors: {
+    [`${daoSelectorInfo}:hover &`]: {
+      opacity: 1,
+      visibility: 'visible',
+      transform: 'translateY(0)',
+    },
+    [`${daoSelectorInfo}:focus-within &`]: {
+      opacity: 1,
+      visibility: 'visible',
+      transform: 'translateY(0)',
+    },
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.border,
+      backgroundColor: vars.color.background1,
+      color: vars.color.text2,
+    },
+  },
+})
+
+export const profileChainIcon = style({
+  display: 'block',
+  width: '18px',
+  height: '18px',
+})
+
+export const profileChainFallback = style({
+  width: '18px',
+  height: '18px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  border: `1px solid ${color.border}`,
+  borderRadius: '50%',
+  color: color.text3,
+  fontSize: '11px',
+  fontWeight: 700,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.border,
+      color: vars.color.text3,
+    },
+  },
+})
+
+export const activityGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr)',
+  gap: '24px',
+  '@media': {
+    '(min-width: 1024px)': {
+      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    },
+  },
+})
+
+export const activityViewport = style({
+  maxHeight: '548px',
+  overflowY: 'auto',
+  paddingRight: '6px',
+})
+
+export const activityHeaderControls = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  flexWrap: 'wrap',
+  gap: '8px',
+})
+
+export const activityFilterSelect = style({
+  minWidth: '112px',
+  height: '36px',
+  padding: '0 32px 0 10px',
+  border: `1px solid ${color.border}`,
+  borderRadius: '8px',
+  backgroundColor: color.background1,
+  color: color.text1,
+  fontSize: '14px',
+  cursor: 'pointer',
+  selectors: {
+    '&:focus-visible': {
+      outline: `3px solid ${color.positive}`,
+      outlineOffset: '2px',
+    },
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.border,
+      backgroundColor: vars.color.background1,
+      color: vars.color.text1,
+    },
+  },
+})
+
+export const activityList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+})
+
+export const activityRow = style({
+  minHeight: '100px',
+  padding: '14px',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '12px',
+  border: `1px solid ${color.border}`,
+  borderRadius: '8px',
+  color: color.text1,
+  textDecoration: 'none',
+  backgroundColor: color.background2,
+  selectors: {
+    '&:hover': { borderColor: color.text3 },
+    '&:focus-visible': { outline: `3px solid ${color.positive}`, outlineOffset: '2px' },
+    'html[data-theme-mode="dark"] &': {
+      color: vars.color.text1,
+      borderColor: vars.color.border,
+      backgroundColor: vars.color.background2,
+    },
+  },
+})
+
+export const activityRowContent = style({
+  minWidth: 0,
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
+})
+
+export const activityBadge = style({
+  width: 'fit-content',
+  padding: '3px 7px',
+  borderRadius: '999px',
+  backgroundColor: color.background1,
+  color: color.text2,
+  fontSize: '11px',
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background1,
+      color: vars.color.text2,
+    },
+  },
+})
+
+export const activityBadgeRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: '6px',
+})
+
+export const activityVoteSupport = style({
+  fontSize: '12px',
+  fontWeight: 700,
+})
+
+export const activityVoteFor = style({
+  color: color.positiveActive,
+  selectors: {
+    'html[data-theme-mode="dark"] &': { color: vars.color.positive },
+  },
+})
+
+export const activityVoteAgainst = style({
+  color: color.negativeActive,
+  selectors: {
+    'html[data-theme-mode="dark"] &': { color: vars.color.negative },
+  },
+})
+
+export const activityVoteAbstain = style({
+  color: color.warningStrong,
+  selectors: {
+    'html[data-theme-mode="dark"] &': { color: vars.color.warning },
+  },
+})
+
+export const activityMeta = style({
+  display: 'flex',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  gap: '6px',
+  color: color.text3,
+  fontSize: '12px',
+  selectors: {
+    'html[data-theme-mode="dark"] &': { color: vars.color.text3 },
+  },
+})
+
+export const profileNotice = style({
+  padding: '12px',
+  marginBottom: '12px',
+  borderRadius: '8px',
+  backgroundColor: color.background2,
+  color: color.text2,
+  fontSize: '13px',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background2,
+      color: vars.color.text2,
+    },
+  },
+})
+
+export const profileEmptyState = style({
+  minHeight: '180px',
+  padding: '24px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '8px',
+  textAlign: 'center',
+  border: `1px dashed ${color.border}`,
+  borderRadius: '8px',
+  selectors: {
+    'html[data-theme-mode="dark"] &': { borderColor: vars.color.border },
+  },
+})
+
+export const tokenGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+  gap: '16px',
+  '@media': {
+    '(min-width: 640px)': { gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' },
+    '(min-width: 1024px)': { gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' },
+    '(min-width: 1280px)': { gridTemplateColumns: 'repeat(6, minmax(0, 1fr))' },
+    '(min-width: 1440px)': { gridTemplateColumns: 'repeat(8, minmax(0, 1fr))' },
+  },
+})
+
+export const tokenGridViewport = style({
+  width: '100%',
+})
+
+export const tokenGridViewportLocked = style({
+  overflowX: 'hidden',
+  overflowY: 'auto',
+  overscrollBehavior: 'contain',
+  paddingRight: '6px',
+  scrollbarGutter: 'stable',
+  selectors: {
+    '&:focus-visible': {
+      outline: `3px solid ${color.positive}`,
+      outlineOffset: '3px',
+    },
+  },
+})
+
+export const tokenCard = style({
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+  border: `1px solid ${color.border}`,
+  borderRadius: '8px',
+  color: color.text1,
+  textDecoration: 'none',
+  backgroundColor: color.background2,
+  transition: 'border-color 0.12s ease, transform 0.12s ease',
+  selectors: {
+    '&:hover': { borderColor: color.text3, transform: 'translateY(-2px)' },
+    '&:focus-visible': { outline: `3px solid ${color.positive}`, outlineOffset: '2px' },
+    'html[data-theme-mode="dark"] &': {
+      color: vars.color.text1,
+      borderColor: vars.color.border,
+      backgroundColor: vars.color.background2,
+    },
+  },
+})
+
+export const tokenCardBody = style({
+  flex: 1,
+  padding: '12px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
+})
+
+export const tokenCardMeta = style({
+  minWidth: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: '8px',
+  marginTop: 'auto',
 })
 
 export const profileStatBadge = style({

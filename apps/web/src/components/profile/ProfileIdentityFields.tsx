@@ -14,20 +14,6 @@ export const ProfileIdentityFields: React.FC<ProfileIdentityFieldsProps> = ({
 
   return (
     <Flex mt="x4" direction="column" gap="x3" align="flex-start">
-      {identity.bio ? (
-        <Text
-          color="text2"
-          style={{
-            lineHeight: 1.5,
-            maxWidth: '320px',
-            whiteSpace: 'pre-line',
-            wordBreak: 'break-word',
-          }}
-        >
-          {identity.bio}
-        </Text>
-      ) : null}
-
       {(identity.website || identity.x || identity.farcaster) && (
         <Flex gap="x2" wrap>
           {identity.website ? (
@@ -82,6 +68,20 @@ export const ProfileIdentityFields: React.FC<ProfileIdentityFieldsProps> = ({
           ) : null}
         </Flex>
       )}
+
+      {identity.bio ? (
+        <Text
+          color="text2"
+          style={{
+            lineHeight: 1.5,
+            maxWidth: '320px',
+            whiteSpace: 'pre-line',
+            wordBreak: 'break-word',
+          }}
+        >
+          {identity.bio}
+        </Text>
+      ) : null}
     </Flex>
   )
 }

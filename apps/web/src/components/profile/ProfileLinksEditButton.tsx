@@ -1,8 +1,8 @@
 import type { AddressType } from '@buildeross/types'
 import { Button } from '@buildeross/zord'
 import React from 'react'
+import { isOwnProfileAddress } from 'src/utils/profileDashboard'
 import type { ProfileIdentity } from 'src/utils/profileIdentity'
-import { isAddressEqual } from 'viem'
 import { useAccount } from 'wagmi'
 
 import { ProfileLinksEditModal } from './ProfileLinksEditModal'
@@ -20,7 +20,7 @@ export const ProfileLinksEditButton: React.FC<ProfileLinksEditButtonProps> = ({
 }) => {
   const { address } = useAccount()
   const [isOpen, setIsOpen] = React.useState(false)
-  const isOwnProfile = !!address && isAddressEqual(address, profileAddress)
+  const isOwnProfile = isOwnProfileAddress(address, profileAddress)
 
   if (!isOwnProfile) return null
 
