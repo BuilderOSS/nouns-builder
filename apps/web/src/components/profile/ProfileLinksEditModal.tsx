@@ -1,10 +1,10 @@
 import {
   EAS_CONTRACT_ADDRESS,
   EAS_SCHEMA_REGISTRY_ADDRESS,
+  easAbi,
   PROFILE_LINK_EAS_CHAIN_ID,
   PROFILE_LINK_SCHEMA,
   PROFILE_LINK_SCHEMA_UID,
-  easAbi,
 } from '@buildeross/constants'
 import type { AddressType } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
@@ -18,8 +18,8 @@ import {
 import {
   normalizeFarcasterHandle,
   normalizeXHandle,
-  validateWebsiteUrl,
   type ProfileIdentity,
+  validateWebsiteUrl,
 } from 'src/utils/profileIdentity'
 import { encodeAbiParameters, zeroAddress, zeroHash } from 'viem'
 import { useAccount, useConfig, useSwitchChain } from 'wagmi'
@@ -135,7 +135,9 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
 
     const registryAddress = EAS_SCHEMA_REGISTRY_ADDRESS[PROFILE_LINK_EAS_CHAIN_ID]
     if (!registryAddress) {
-      throw new Error('Profile link schema registration is not supported on this network.')
+      throw new Error(
+        'Profile link schema registration is not supported on this network.'
+      )
     }
 
     try {
@@ -294,8 +296,8 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
           lowerMessage.includes('failed to fetch')
           ? 'Base RPC is rate limiting requests. Please wait a minute and try again, or switch to a wallet/RPC that is not rate-limited.'
           : isMissingSchemaError(message)
-          ? 'The Builder profile link schema is not registered on this network yet. Please try saving again and approve the schema registration transaction first.'
-          : message ||
+            ? 'The Builder profile link schema is not registered on this network yet. Please try saving again and approve the schema registration transaction first.'
+            : message ||
               'Profile links update failed. Please check your wallet and try again.'
       )
     } finally {
@@ -309,8 +311,8 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
         <Flex direction="column" gap="x2">
           <Text variant="heading-sm">Edit links</Text>
           <Text color="text3">
-            ENS links are used by default. Saving creates Builder-only profile
-            overrides on Base.
+            ENS links are used by default. Saving creates Builder-only profile overrides
+            on Base.
           </Text>
         </Flex>
 
@@ -350,9 +352,9 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
 
         <Box className={delegateModalSection}>
           <Text color="text3" fontSize="14">
-            This attests the fields you changed with the {PROFILE_LINK_SCHEMA} EAS
-            schema. If this is the first profile link update on this network, your
-            wallet may ask to register the schema first.
+            This attests the fields you changed with the {PROFILE_LINK_SCHEMA} EAS schema.
+            If this is the first profile link update on this network, your wallet may ask
+            to register the schema first.
           </Text>
         </Box>
 

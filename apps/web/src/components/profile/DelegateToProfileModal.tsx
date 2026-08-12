@@ -1,5 +1,5 @@
-import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useUserDaos } from '@buildeross/hooks/useUserDaos'
 import { tokenAbi } from '@buildeross/sdk/contract'
 import { daoMembershipRequest } from '@buildeross/sdk/subgraph'

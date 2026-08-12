@@ -4,9 +4,9 @@ import React from 'react'
 import {
   activeDaoFilterChip,
   activeDaoFilterHelp,
-  filterDropdownIcon,
   filterBar,
   filterControl,
+  filterDropdownIcon,
   filterHeader,
   filterLabel,
   filterRightControls,

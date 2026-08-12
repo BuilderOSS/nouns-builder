@@ -24,9 +24,9 @@ import {
   daoEditorSpacer,
   daoEditorSpacerActive,
   daoEditorSpacerLabel,
+  profileDaoFilterButton,
   profileDaoLink,
   profileDaoLinkActive,
-  profileDaoFilterButton,
   profileHiddenDaoLink,
   profileStatBadge,
 } from 'src/styles/profile.css'
