@@ -43,6 +43,7 @@ describe('ProfileDaoList', () => {
             auctionAddress: '0xAuction',
           },
         ]}
+        activeDaoKeys={['1:0xdao']}
         isOwnProfile={false}
         onDaoClick={onDaoClick}
         userAddress="0xProfile"
@@ -57,7 +58,11 @@ describe('ProfileDaoList', () => {
     fireEvent.click(daoLink)
     expect(onDaoClick).not.toHaveBeenCalled()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Filter activity by Test DAO' }))
+    const filterButton = screen.getByRole('button', {
+      name: 'Filter activity by Test DAO',
+    })
+    expect(filterButton).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(filterButton)
     expect(onDaoClick).toHaveBeenCalledTimes(1)
 
     expect(screen.getByRole('heading', { name: 'DAOs', level: 2 })).toBeVisible()

@@ -115,7 +115,7 @@ describe('profile identity helpers', () => {
     })
   })
 
-  it('lets blank Builder overrides suppress ENS fallbacks', () => {
+  it('falls back to ENS after empty Builder overrides are filtered as removals', () => {
     expect(
       getProfileIdentity({
         ensRecords: {
@@ -124,9 +124,19 @@ describe('profile identity helpers', () => {
         },
         overrides: [
           { key: 'website', value: '' },
-          { key: 'x', value: '' },
+          { key: 'x', value: '  ' },
         ],
       })
-    ).toEqual({})
+    ).toEqual({
+      website: {
+        href: 'https://ens.example/',
+        label: 'ens.example',
+      },
+      x: {
+        handle: 'ens_handle',
+        label: '@ens_handle',
+        url: 'https://x.com/ens_handle',
+      },
+    })
   })
 })

@@ -1,4 +1,4 @@
-import { CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
+import { BASE_URL, CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useUserDaos } from '@buildeross/hooks/useUserDaos'
@@ -8,6 +8,7 @@ import { Avatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
 import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
+import { withTimeout } from '@buildeross/utils/withTimeout'
 import { Flex, Text } from '@buildeross/zord'
 import type { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
@@ -65,19 +66,6 @@ type ProfileDashboardResponse = {
   }>
 }
 
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string) {
-  let timeout: ReturnType<typeof setTimeout>
-  return Promise.race([
-    promise.finally(() => clearTimeout(timeout)),
-    new Promise<T>((_, reject) => {
-      timeout = setTimeout(
-        () => reject(new Error(`${label} timed out after ${timeoutMs}ms`)),
-        timeoutMs
-      )
-    }),
-  ])
-}
-
 async function getProfileDaosForOg(userAddress: AddressType) {
   try {
     return await withTimeout(myDaosRequest(userAddress), 5000, 'Profile DAO lookup')
@@ -104,9 +92,17 @@ async function getProfileEnsName(userAddress: AddressType) {
 
 const dashboardFetcher = async (url: string): Promise<ProfileDashboardResponse> => {
   const response = await fetch(url, { headers: { Accept: 'application/json' } })
-  const body = await response.json()
-  if (!response.ok) throw new Error(body?.error || 'Unable to load profile dashboard')
-  return body as ProfileDashboardResponse
+  if (!response.ok) {
+    let message = 'Unable to load profile dashboard'
+    try {
+      const body = (await response.json()) as { error?: unknown }
+      if (typeof body.error === 'string' && body.error) message = body.error
+    } catch {
+      // Preserve the stable fallback message for non-JSON error responses.
+    }
+    throw new Error(message)
+  }
+  return (await response.json()) as ProfileDashboardResponse
 }
 
 const ProfilePage: NextPageWithLayout<ProfileProps> = ({
@@ -182,6 +178,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
     const tokens: ProfileToken[] = []
     const auctionWins: FeedItem[] = []
     const failedChainNames: string[] = []
+    const truncatedChainNames: string[] = []
     let proposalVotes = 0
     let proposalsSubmitted = 0
     let bidsPlaced = 0
@@ -194,7 +191,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
         return
       }
       if (!chain.result.isComplete) {
-        failedChainNames.push(chain.chainName)
+        truncatedChainNames.push(chain.chainName)
         isComplete = false
       }
       tokens.push(
@@ -227,6 +224,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
       tokens: dedupeProfileTokens(tokens),
       auctionWins,
       failedChainNames: Array.from(new Set(failedChainNames)),
+      truncatedChainNames: Array.from(new Set(truncatedChainNames)),
       counts: { proposalVotes, proposalsSubmitted, bidsPlaced },
       isComplete,
     }
@@ -237,6 +235,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   ).size
   const displayName = ensName || userName
   const pageTitle = `${displayName}'s Profile`
+  const isDashboardPending = isLoadingDashboard && !dashboard
   const stats: Array<{ label: string; value: number | string; isPartial?: boolean }> = [
     {
       label: 'DAOs',
@@ -246,22 +245,22 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
     {
       label: 'Tokens held',
       value: dashboardData.isComplete ? dashboardData.tokens.length : '—',
-      isPartial: !dashboardData.isComplete,
+      isPartial: !isDashboardPending && !dashboardData.isComplete,
     },
     {
       label: 'Proposal votes',
       value: dashboardData.isComplete ? dashboardData.counts.proposalVotes : '—',
-      isPartial: !dashboardData.isComplete,
+      isPartial: !isDashboardPending && !dashboardData.isComplete,
     },
     {
       label: 'Proposals submitted',
       value: dashboardData.isComplete ? dashboardData.counts.proposalsSubmitted : '—',
-      isPartial: !dashboardData.isComplete,
+      isPartial: !isDashboardPending && !dashboardData.isComplete,
     },
     {
       label: 'Bids placed',
       value: dashboardData.isComplete ? dashboardData.counts.bidsPlaced : '—',
-      isPartial: !dashboardData.isComplete,
+      isPartial: !isDashboardPending && !dashboardData.isComplete,
     },
   ]
 
@@ -338,7 +337,8 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
             profileAddress={userAddress as AddressType}
             selectedDaoKeys={selectedDaoKeys}
             extraItems={dashboardData.auctionWins}
-            partialChainNames={dashboardData.failedChainNames}
+            failedChainNames={dashboardData.failedChainNames}
+            truncatedChainNames={dashboardData.truncatedChainNames}
           />
         </div>
 
@@ -350,7 +350,8 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
           onSortChange={(sort) =>
             updateQuery({ tokenSort: sort === 'newest' ? undefined : sort })
           }
-          partialChainNames={dashboardData.failedChainNames}
+          failedChainNames={dashboardData.failedChainNames}
+          truncatedChainNames={dashboardData.truncatedChainNames}
           onRetry={() => mutateDashboard()}
         />
       </main>
@@ -362,10 +363,8 @@ ProfilePage.getLayout = getProfileLayout
 
 export default ProfilePage
 
-export const getServerSideProps: GetServerSideProps = async ({ params, res, req }) => {
+export const getServerSideProps: GetServerSideProps = async ({ params, res }) => {
   const user = params?.user as string
-  const env = process.env.VERCEL_ENV || 'development'
-  const protocol = env === 'development' ? 'http' : 'https'
   const { maxAge, swr } = CACHE_TIMES.PROFILE
   res.setHeader(
     'Cache-Control',
@@ -392,7 +391,7 @@ export const getServerSideProps: GetServerSideProps = async ({ params, res, req 
       contractImage: dao.contractImage,
     })),
   }
-  const ogImageURL = `${protocol}://${req.headers.host}/api/og/profile?address=${userAddress}&data=${encodeURIComponent(JSON.stringify(data))}`
+  const ogImageURL = `${BASE_URL}/api/og/profile?address=${userAddress}&data=${encodeURIComponent(JSON.stringify(data))}`
   const fallback = {
     [unstable_serialize([SWR_KEYS.MY_DAOS, userAddress.toLowerCase()])]: sortedDaos,
   }

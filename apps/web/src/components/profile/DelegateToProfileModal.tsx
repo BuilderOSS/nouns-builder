@@ -10,6 +10,7 @@ import { AnimatedModal } from '@buildeross/ui/Modal'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import React from 'react'
+import { useDropdownDismiss } from 'src/hooks/useDropdownDismiss'
 import {
   delegateDaoButton,
   delegateDaoButtonActive,
@@ -60,6 +61,16 @@ export const DelegateToProfileModal: React.FC<DelegateToProfileModalProps> = ({
   const [error, setError] = React.useState<string | null>(null)
   const [isDelegating, setIsDelegating] = React.useState(false)
   const [isDaoMenuOpen, setIsDaoMenuOpen] = React.useState(false)
+  const daoDropdownRef = React.useRef<HTMLDivElement>(null)
+  const daoDropdownButtonRef = React.useRef<HTMLButtonElement>(null)
+
+  const closeDaoMenu = React.useCallback(() => setIsDaoMenuOpen(false), [])
+  useDropdownDismiss({
+    isOpen: isDaoMenuOpen,
+    onDismiss: closeDaoMenu,
+    rootRef: daoDropdownRef,
+    triggerRef: daoDropdownButtonRef,
+  })
 
   const { data: delegatableDaos, isLoading: isLoadingMemberships } = useSWR(
     open && address && daos.length > 0
@@ -70,7 +81,7 @@ export const DelegateToProfileModal: React.FC<DelegateToProfileModalProps> = ({
         ] as const)
       : null,
     async () => {
-      const results: Array<DelegatableDao | null> = await Promise.all(
+      const results = await Promise.allSettled(
         daos.map(async (dao) => {
           const membership = await daoMembershipRequest(
             dao.chainId,
@@ -93,7 +104,13 @@ export const DelegateToProfileModal: React.FC<DelegateToProfileModalProps> = ({
         })
       )
 
-      return results.filter((dao): dao is DelegatableDao => dao !== null)
+      return results
+        .map((result) => {
+          if (result.status === 'fulfilled') return result.value
+          console.warn('Failed to load DAO membership:', result.reason)
+          return null
+        })
+        .filter((dao): dao is DelegatableDao => dao !== null)
     },
     {
       revalidateOnFocus: false,
@@ -225,8 +242,9 @@ export const DelegateToProfileModal: React.FC<DelegateToProfileModalProps> = ({
           <>
             <Flex direction="column" gap="x2">
               <Text className={filterLabel}>Choose DAO</Text>
-              <div className={delegateDaoDropdown}>
+              <div ref={daoDropdownRef} className={delegateDaoDropdown}>
                 <button
+                  ref={daoDropdownButtonRef}
                   type="button"
                   className={delegateDaoDropdownButton}
                   onClick={() => setIsDaoMenuOpen((current) => !current)}

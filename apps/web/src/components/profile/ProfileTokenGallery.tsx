@@ -16,6 +16,7 @@ import {
   tokenCardBody,
   tokenCardMeta,
   tokenGrid,
+  tokenGridItem,
   tokenGridViewport,
   tokenGridViewportLocked,
 } from 'src/styles/profile.css'
@@ -34,7 +35,8 @@ type ProfileTokenGalleryProps = {
   selectedDaoKeys: string[]
   sort: TokenSortOption
   onSortChange: (sort: TokenSortOption) => void
-  partialChainNames: string[]
+  failedChainNames: string[]
+  truncatedChainNames: string[]
   onRetry: () => void
 }
 
@@ -53,7 +55,8 @@ export const ProfileTokenGallery: React.FC<ProfileTokenGalleryProps> = ({
   selectedDaoKeys,
   sort,
   onSortChange,
-  partialChainNames,
+  failedChainNames,
+  truncatedChainNames,
   onRetry,
 }) => {
   const filteredTokens = React.useMemo(
@@ -66,7 +69,7 @@ export const ProfileTokenGallery: React.FC<ProfileTokenGalleryProps> = ({
   const [isViewportLocked, setIsViewportLocked] = React.useState(false)
   const [viewportHeight, setViewportHeight] = React.useState<number | null>(null)
   const viewportRef = React.useRef<HTMLDivElement>(null)
-  const gridRef = React.useRef<HTMLDivElement>(null)
+  const gridRef = React.useRef<HTMLUListElement>(null)
   const initialBoundaryRef = React.useRef<HTMLAnchorElement>(null)
   const initialVisibleCount = getInitialProfileTokenVisibleCount(filteredTokens.length)
   const daoFilterKey = selectedDaoKeys.join(',')
@@ -145,13 +148,20 @@ export const ProfileTokenGallery: React.FC<ProfileTokenGalleryProps> = ({
           </label>
         </div>
 
-        {partialChainNames.length ? (
+        {failedChainNames.length ? (
           <div className={profileNotice} role="status">
-            Some chains are unavailable ({partialChainNames.join(', ')}). Successful chain
+            Some chains are unavailable ({failedChainNames.join(', ')}). Successful chain
             results are still shown.{' '}
             <button type="button" onClick={onRetry}>
               Retry
             </button>
+          </div>
+        ) : null}
+
+        {truncatedChainNames.length ? (
+          <div className={profileNotice} role="status">
+            Some chains reached the dashboard result limit (
+            {truncatedChainNames.join(', ')}). Results shown may be incomplete.
           </div>
         ) : null}
 
@@ -194,32 +204,35 @@ export const ProfileTokenGallery: React.FC<ProfileTokenGalleryProps> = ({
                   : undefined
               }
             >
-              <div ref={gridRef} className={tokenGrid} role="list">
+              <ul ref={gridRef} className={tokenGrid}>
                 {filteredTokens.slice(0, visibleCount).map((token, index) => (
-                  <Link
+                  <li
                     key={`${token.chainId}:${token.tokenContract}:${token.tokenId}`}
-                    ref={
-                      index === initialVisibleCount - 1 ? initialBoundaryRef : undefined
-                    }
-                    href={`/dao/${token.chainSlug}/${token.tokenContract}/${token.tokenId}`}
-                    className={tokenCard}
-                    role="listitem"
+                    className={tokenGridItem}
                   >
-                    <div style={{ aspectRatio: '1 / 1', position: 'relative' }}>
-                      <FallbackImage src={token.image} alt={token.name} sizes="25vw" />
-                    </div>
-                    <div className={tokenCardBody}>
-                      <Text fontWeight="display">{token.name}</Text>
-                      <span className={tokenCardMeta}>
-                        <Text color="text3" fontSize="12">
-                          {token.daoName}
-                        </Text>
-                        <ProfileChainIcon chainId={token.chainId} />
-                      </span>
-                    </div>
-                  </Link>
+                    <Link
+                      ref={
+                        index === initialVisibleCount - 1 ? initialBoundaryRef : undefined
+                      }
+                      href={`/dao/${token.chainSlug}/${token.tokenContract}/${token.tokenId}`}
+                      className={tokenCard}
+                    >
+                      <div style={{ aspectRatio: '1 / 1', position: 'relative' }}>
+                        <FallbackImage src={token.image} alt={token.name} sizes="25vw" />
+                      </div>
+                      <div className={tokenCardBody}>
+                        <Text fontWeight="display">{token.name}</Text>
+                        <span className={tokenCardMeta}>
+                          <Text color="text3" fontSize="12">
+                            {token.daoName}
+                          </Text>
+                          <ProfileChainIcon chainId={token.chainId} />
+                        </span>
+                      </div>
+                    </Link>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
             {visibleCount < filteredTokens.length ? (
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>

@@ -1,6 +1,6 @@
 import { Button } from '@buildeross/zord'
 import React from 'react'
-import { isAddressEqual } from 'viem'
+import { isOwnProfileAddress } from 'src/utils/profileDashboard'
 import { useAccount } from 'wagmi'
 
 import { DelegateToProfileModal } from './DelegateToProfileModal'
@@ -16,7 +16,7 @@ export const DelegateToProfileButton: React.FC<DelegateToProfileButtonProps> = (
 }) => {
   const { address } = useAccount()
   const [isOpen, setIsOpen] = React.useState(false)
-  const isOwnProfile = !!address && isAddressEqual(address, profileAddress)
+  const isOwnProfile = isOwnProfileAddress(address, profileAddress)
 
   if (isOwnProfile) return null
 

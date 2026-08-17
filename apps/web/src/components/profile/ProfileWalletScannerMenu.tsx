@@ -3,6 +3,7 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import type { AddressType } from '@buildeross/types'
 import { Icon, Text } from '@buildeross/zord'
 import React from 'react'
+import { useDropdownDismiss } from 'src/hooks/useDropdownDismiss'
 import {
   walletScannerMenu,
   walletScannerMenuButton,
@@ -48,25 +49,13 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
     [address]
   )
 
-  React.useEffect(() => {
-    if (!isOpen) return
-
-    const closeOnOutsidePointer = (event: PointerEvent) => {
-      if (!menuRootRef.current?.contains(event.target as Node)) setIsOpen(false)
-    }
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return
-      setIsOpen(false)
-      menuButtonRef.current?.focus()
-    }
-
-    document.addEventListener('pointerdown', closeOnOutsidePointer)
-    document.addEventListener('keydown', closeOnEscape)
-    return () => {
-      document.removeEventListener('pointerdown', closeOnOutsidePointer)
-      document.removeEventListener('keydown', closeOnEscape)
-    }
-  }, [isOpen])
+  const closeMenu = React.useCallback(() => setIsOpen(false), [])
+  useDropdownDismiss({
+    isOpen,
+    onDismiss: closeMenu,
+    rootRef: menuRootRef,
+    triggerRef: menuButtonRef,
+  })
 
   if (!scannerLinks.length) return null
 
@@ -77,7 +66,6 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
         type="button"
         className={walletScannerMenuButton}
         aria-label="Open wallet scanner links"
-        aria-haspopup="menu"
         aria-controls={menuId}
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
@@ -86,7 +74,7 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
       </button>
 
       {isOpen ? (
-        <div id={menuId} className={walletScannerMenu} role="menu">
+        <div id={menuId} className={walletScannerMenu}>
           {scannerLinks.map((link) => (
             <a
               key={link.chainId}
@@ -94,11 +82,12 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
               target="_blank"
               rel="noopener noreferrer"
               className={walletScannerMenuItem}
-              role="menuitem"
             >
               <span>
-                <Text fontWeight="display">{link.chainName}</Text>
-                <Text color="text3" fontSize="12">
+                <Text as="span" fontWeight="display">
+                  {link.chainName}
+                </Text>
+                <Text as="span" color="text3" fontSize="12">
                   {link.label}
                 </Text>
               </span>

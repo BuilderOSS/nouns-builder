@@ -4,7 +4,7 @@ import {
 } from '@buildeross/constants/eas'
 import { CHAIN_ID } from '@buildeross/types'
 import { isChainIdSupportedByEAS } from '@buildeross/utils'
-import { GraphQLClient, gql } from 'graphql-request'
+import { gql, GraphQLClient } from 'graphql-request'
 import { Hex, isAddress } from 'viem'
 
 export type ProfileLinkKey = 'website' | 'x' | 'farcaster'
@@ -37,6 +37,7 @@ type ProfileLinkAttestationResponse = {
 }
 
 const PROFILE_LINK_KEYS = new Set<ProfileLinkKey>(['website', 'x', 'farcaster'])
+const PROFILE_LINK_REQUEST_TIMEOUT_MS = 10_000
 
 const PROFILE_LINK_EAS_GRAPHQL_URL: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.BASE]: 'https://base.easscan.org/graphql',
@@ -98,6 +99,7 @@ export async function getProfileLinkOverrides(
     const profile = profileAddress.toLowerCase()
     const client = new GraphQLClient(graphqlUrl, {
       headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(PROFILE_LINK_REQUEST_TIMEOUT_MS),
     })
     const response = await client.request<ProfileLinkAttestationResponse>(
       PROFILE_LINK_ATTESTATIONS_QUERY,
@@ -109,6 +111,7 @@ export async function getProfileLinkOverrides(
       }
     )
     const latestByKey = new Map<ProfileLinkKey, ProfileLinkOverride>()
+    const seenKeys = new Set<ProfileLinkKey>()
 
     for (const attestation of response.attestations ?? []) {
       if (attestation.revoked) continue
@@ -116,7 +119,13 @@ export async function getProfileLinkOverrides(
       if (attestation.recipient.toLowerCase() !== profile) continue
 
       const link = decodeProfileLinkAttestation(attestation.decodedDataJson)
-      if (!link || latestByKey.has(link.key)) continue
+      if (!link || seenKeys.has(link.key)) continue
+
+      // The newest empty attestation removes the Builder override for this key.
+      // Mark it as seen so an older value cannot become active again, while
+      // omitting it from the returned override list so ENS can be used normally.
+      seenKeys.add(link.key)
+      if (!link.value.trim()) continue
 
       latestByKey.set(link.key, {
         id: attestation.id as Hex,

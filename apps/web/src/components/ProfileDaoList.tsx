@@ -867,6 +867,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
                     type="button"
                     className={profileDaoFilterButton}
                     aria-label={`Filter activity by ${dao.name}`}
+                    aria-pressed={activeDaoKeySet.has(daoKey.toLowerCase())}
                     onClick={() => onDaoClick(dao)}
                   />
                   {row}
@@ -947,6 +948,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
                           type="button"
                           className={profileDaoFilterButton}
                           aria-label={`Filter activity by ${dao.name}`}
+                          aria-pressed={activeDaoKeySet.has(daoKey.toLowerCase())}
                           onClick={() => onDaoClick(dao)}
                         />
                         {row}

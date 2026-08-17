@@ -6,6 +6,7 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { AddressType, BytesType } from '@buildeross/types'
 import { executeConcurrently } from '@buildeross/utils/concurrent'
+import { withTimeout } from '@buildeross/utils/withTimeout'
 import { keccak256 } from 'viem'
 
 import { getRedisConnection } from './redisConnection'
@@ -53,24 +54,6 @@ function generateCacheKey(address: AddressType): string {
   return `${CACHE_CONFIG.DASHBOARD_PREFIX}:${hash}`
 }
 
-async function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  label: string
-): Promise<T> {
-  let timeout: ReturnType<typeof setTimeout>
-
-  return Promise.race([
-    promise.finally(() => clearTimeout(timeout)),
-    new Promise<T>((_, reject) => {
-      timeout = setTimeout(
-        () => reject(new Error(`${label} timed out after ${timeoutMs}ms`)),
-        timeoutMs
-      )
-    }),
-  ])
-}
-
 /**
  * Fetch proposal state with retry logic
  */
@@ -78,7 +61,7 @@ async function fetchProposalStateWithRetry(
   chainId: number,
   governorAddress: AddressType,
   proposalId: BytesType,
-  retries = 2
+  retries = 1
 ): Promise<ProposalState> {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -87,7 +70,7 @@ async function fetchProposalStateWithRetry(
       if (attempt === retries) {
         throw error
       }
-      // Exponential backoff: 100ms, 200ms
+      // Exponential backoff between the initial attempt and the single retry.
       await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)))
     }
   }
@@ -114,15 +97,14 @@ function emptyProposalStateDao(dao: DashboardDaoBase): DashboardDaoWithState {
  */
 async function fetchDaoProposalState(
   dao: DashboardDaoBase
-): Promise<DashboardDaoWithState> {
+): Promise<{ dao: DashboardDaoWithState; degraded: boolean }> {
   // Use serial proposal-state reads per DAO to avoid overwhelming public RPCs.
   const proposalTasks = dao.proposals.map((proposal) => async () => {
     try {
       const state = await fetchProposalStateWithRetry(
         dao.chainId,
         proposal.dao.governorAddress,
-        proposal.proposalId,
-        0
+        proposal.proposalId
       )
 
       return { ...proposal, state }
@@ -141,40 +123,50 @@ async function fetchDaoProposalState(
   const proposals = await executeConcurrently(proposalTasks, 1)
 
   return {
-    ...dao,
-    proposals: proposals.filter(
-      (proposal): proposal is NonNullable<(typeof proposals)[number]> =>
-        !!proposal && ACTIVE_PROPOSAL_STATES.includes(proposal.state)
-    ),
+    dao: {
+      ...dao,
+      proposals: proposals.filter(
+        (proposal): proposal is NonNullable<(typeof proposals)[number]> =>
+          !!proposal && ACTIVE_PROPOSAL_STATES.includes(proposal.state)
+      ),
+    },
+    degraded: proposals.some((proposal) => proposal === null),
   }
+}
+
+type DashboardFetchResult = {
+  data: DashboardDaoWithState[]
+  degraded: boolean
 }
 
 /**
  * Fetch dashboard data (main logic)
  */
-async function fetchDashboardData(
-  address: AddressType
-): Promise<DashboardDaoWithState[]> {
+async function fetchDashboardData(address: AddressType): Promise<DashboardFetchResult> {
   try {
     const userDaos = await dashboardRequest(address)
     if (!userDaos) throw new Error('Dashboard DAO query returned undefined')
 
-    // Use controlled concurrency for DAO proposal state fetching
-    const daoTasks = userDaos.map((dao) => () => fetchDaoProposalState(dao))
-    const resolved = await withTimeout(
-      executeConcurrently(daoTasks),
-      8000,
-      'Dashboard proposal state enrichment'
-    ).catch((error) => {
-      console.warn('Dashboard proposal state enrichment unavailable:', {
-        address,
-        error: formatErrorMessage(error),
+    // Bound each DAO independently so a slow RPC does not discard successful DAOs.
+    const daoTasks = userDaos.map((dao) => async () => {
+      const label = `Dashboard proposal state enrichment for DAO ${dao.tokenAddress}`
+      return withTimeout(fetchDaoProposalState(dao), 8_000, label).catch((error) => {
+        console.warn('Dashboard proposal state enrichment unavailable:', {
+          address,
+          chainId: dao.chainId,
+          dao: dao.tokenAddress,
+          error: formatErrorMessage(error),
+        })
+
+        return { dao: emptyProposalStateDao(dao), degraded: true }
       })
-
-      return userDaos.map(emptyProposalStateDao)
     })
+    const resolved = await executeConcurrently(daoTasks)
 
-    return resolved
+    return {
+      data: resolved.map((result) => result.dao),
+      degraded: resolved.some((result) => result.degraded),
+    }
   } catch (error: any) {
     throw new Error(error?.message || 'Error fetching dashboard data')
   }
@@ -236,17 +228,21 @@ export async function fetchDashboardDataService(
 
   // Fetch fresh data
   log('Dashboard cache miss, fetching', { address })
-  const data = await fetchDashboardData(address)
+  const { data, degraded } = await fetchDashboardData(address)
 
   // Store in cache
   if (redis) {
     try {
-      await redis.setex(cacheKey, CACHE_CONFIG.USER_DASHBOARD_TTL, JSON.stringify(data))
-      log('Dashboard cached', {
-        address,
-        daoCount: data.length,
-        ttl: CACHE_CONFIG.USER_DASHBOARD_TTL,
-      })
+      if (degraded) {
+        log('Dashboard cache skipped for degraded enrichment', { address })
+      } else {
+        await redis.setex(cacheKey, CACHE_CONFIG.USER_DASHBOARD_TTL, JSON.stringify(data))
+        log('Dashboard cached', {
+          address,
+          daoCount: data.length,
+          ttl: CACHE_CONFIG.USER_DASHBOARD_TTL,
+        })
+      }
     } catch (err) {
       console.warn('Redis cache write error:', err)
     } finally {

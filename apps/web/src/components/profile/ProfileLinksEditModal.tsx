@@ -23,7 +23,7 @@ import {
 } from 'src/utils/profileIdentity'
 import { encodeAbiParameters, zeroAddress, zeroHash } from 'viem'
 import { useAccount, useConfig, useSwitchChain } from 'wagmi'
-import { waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { readContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 type ProfileLinkKey = 'website' | 'x' | 'farcaster'
 
@@ -33,6 +33,29 @@ type ProfileLinkUpdate = {
 }
 
 const schemaRegistryAbi = [
+  {
+    inputs: [{ internalType: 'bytes32', name: 'uid', type: 'bytes32' }],
+    name: 'getSchema',
+    outputs: [
+      {
+        components: [
+          { internalType: 'bytes32', name: 'uid', type: 'bytes32' },
+          {
+            internalType: 'contract ISchemaResolver',
+            name: 'resolver',
+            type: 'address',
+          },
+          { internalType: 'bool', name: 'revocable', type: 'bool' },
+          { internalType: 'string', name: 'schema', type: 'string' },
+        ],
+        internalType: 'struct ISchemaRegistry.SchemaRecord',
+        name: '',
+        type: 'tuple',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
   {
     inputs: [
       { internalType: 'string', name: 'schema', type: 'string' },
@@ -45,8 +68,6 @@ const schemaRegistryAbi = [
     type: 'function',
   },
 ] as const
-
-const PROFILE_LINK_SCHEMA_REGISTERED_KEY = `builder-profile-link-schema-registered:${PROFILE_LINK_EAS_CHAIN_ID}:${PROFILE_LINK_SCHEMA_UID}`
 
 type ProfileLinksEditModalProps = {
   identity?: ProfileIdentity
@@ -129,16 +150,26 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
   }
 
   const ensureProfileLinkSchema = async (): Promise<`0x${string}` | null> => {
-    if (window.localStorage.getItem(PROFILE_LINK_SCHEMA_REGISTERED_KEY) === 'true') {
-      return null
-    }
-
     const registryAddress = EAS_SCHEMA_REGISTRY_ADDRESS[PROFILE_LINK_EAS_CHAIN_ID]
     if (!registryAddress) {
       throw new Error(
         'Profile link schema registration is not supported on this network.'
       )
     }
+
+    const isRegistered = async () => {
+      const record = await readContract(config, {
+        abi: schemaRegistryAbi,
+        address: registryAddress,
+        chainId: PROFILE_LINK_EAS_CHAIN_ID,
+        functionName: 'getSchema',
+        args: [PROFILE_LINK_SCHEMA_UID],
+      })
+
+      return record.uid.toLowerCase() === PROFILE_LINK_SCHEMA_UID.toLowerCase()
+    }
+
+    if (await isRegistered()) return null
 
     try {
       const hash = await writeContract(config, {
@@ -153,51 +184,45 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
         chainId: PROFILE_LINK_EAS_CHAIN_ID,
       })
 
-      window.localStorage.setItem(PROFILE_LINK_SCHEMA_REGISTERED_KEY, 'true')
       return hash
     } catch (err) {
-      const message = err instanceof Error ? err.message : ''
-      if (
-        message.toLowerCase().includes('already') ||
-        message.toLowerCase().includes('exist')
-      ) {
-        window.localStorage.setItem(PROFILE_LINK_SCHEMA_REGISTERED_KEY, 'true')
-        return null
-      }
+      // A concurrent registration can make our transaction revert. Confirm the
+      // onchain record rather than relying on provider-specific error strings.
+      if (await isRegistered()) return null
 
       throw err
     }
   }
 
-  const attestProfileLink = async (
+  const attestProfileLinks = async (
     easAddress: `0x${string}`,
-    update: ProfileLinkUpdate
+    updates: ProfileLinkUpdate[]
   ): Promise<`0x${string}`> => {
-    const data = encodeAbiParameters(
-      [
-        { name: 'key', type: 'string' },
-        { name: 'value', type: 'string' },
-      ],
-      [update.key, update.value]
-    )
-
     const hash = await writeContract(config, {
       abi: easAbi,
       address: easAddress,
       chainId: PROFILE_LINK_EAS_CHAIN_ID,
-      functionName: 'attest',
+      functionName: 'multiAttest',
       args: [
-        {
-          schema: PROFILE_LINK_SCHEMA_UID,
-          data: {
-            recipient: profileAddress,
-            expirationTime: 0n,
-            revocable: true,
-            refUID: zeroHash,
-            data,
-            value: 0n,
+        [
+          {
+            schema: PROFILE_LINK_SCHEMA_UID,
+            data: updates.map((update) => ({
+              recipient: profileAddress,
+              expirationTime: 0n,
+              revocable: true,
+              refUID: zeroHash,
+              data: encodeAbiParameters(
+                [
+                  { name: 'key', type: 'string' },
+                  { name: 'value', type: 'string' },
+                ],
+                [update.key, update.value]
+              ),
+              value: 0n,
+            })),
           },
-        },
+        ],
       ],
     })
     await waitForTransactionReceipt(config, {
@@ -208,48 +233,17 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
     return hash
   }
 
-  const registerSchemaAndRetry = async (): Promise<`0x${string}`[]> => {
-    window.localStorage.removeItem(PROFILE_LINK_SCHEMA_REGISTERED_KEY)
-    const schemaHash = await ensureProfileLinkSchema()
-    return schemaHash ? [schemaHash] : []
-  }
-
-  const isMissingSchemaError = (message: string) =>
-    message.includes('0xbf37b20e') ||
-    (message.toLowerCase().includes('schema') &&
-      (message.toLowerCase().includes('not found') ||
-        message.toLowerCase().includes('invalid') ||
-        message.toLowerCase().includes('unregistered')))
-
   const saveProfileLinks = async (
     easAddress: `0x${string}`,
     updates: ProfileLinkUpdate[]
   ): Promise<`0x${string}`[]> => {
     const hashes: `0x${string}`[] = []
 
-    try {
-      const schemaHash = await ensureProfileLinkSchema()
-      if (schemaHash) hashes.push(schemaHash)
+    const schemaHash = await ensureProfileLinkSchema()
+    if (schemaHash) hashes.push(schemaHash)
 
-      for (const update of updates) {
-        hashes.push(await attestProfileLink(easAddress, update))
-      }
-
-      return hashes
-    } catch (err) {
-      const message = err instanceof Error ? err.message : ''
-      if (!isMissingSchemaError(message)) {
-        throw err
-      }
-
-      hashes.push(...(await registerSchemaAndRetry()))
-
-      for (const update of updates) {
-        hashes.push(await attestProfileLink(easAddress, update))
-      }
-
-      return hashes
-    }
+    hashes.push(await attestProfileLinks(easAddress, updates))
+    return hashes
   }
 
   const handleSave = async () => {
@@ -295,9 +289,7 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
           lowerMessage.includes('cors') ||
           lowerMessage.includes('failed to fetch')
           ? 'Base RPC is rate limiting requests. Please wait a minute and try again, or switch to a wallet/RPC that is not rate-limited.'
-          : isMissingSchemaError(message)
-            ? 'The Builder profile link schema is not registered on this network yet. Please try saving again and approve the schema registration transaction first.'
-            : message ||
+          : message ||
               'Profile links update failed. Please check your wallet and try again.'
       )
     } finally {

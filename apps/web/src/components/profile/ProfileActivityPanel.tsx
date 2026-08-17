@@ -47,7 +47,8 @@ type ProfileActivityPanelProps = {
   profileAddress: AddressType
   selectedDaoKeys: string[]
   extraItems?: FeedItem[]
-  partialChainNames?: string[]
+  failedChainNames?: string[]
+  truncatedChainNames?: string[]
 }
 
 const amountLabel = (item: FeedItem) => {
@@ -82,7 +83,8 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
   profileAddress,
   selectedDaoKeys,
   extraItems = [],
-  partialChainNames = [],
+  failedChainNames = [],
+  truncatedChainNames = [],
 }) => {
   const { getAuctionLink, getProposalLink } = useLinks()
   const [selectedKinds, setSelectedKinds] = React.useState<ProfileActivityKind[]>([])
@@ -144,9 +146,16 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
           </div>
         </div>
 
-        {partialChainNames.length ? (
+        {failedChainNames.length ? (
           <div className={profileNotice} role="status">
-            Partial data: {partialChainNames.join(', ')} could not be loaded.
+            Partial data: {failedChainNames.join(', ')} could not be loaded.
+          </div>
+        ) : null}
+
+        {truncatedChainNames.length ? (
+          <div className={profileNotice} role="status">
+            Partial data: {truncatedChainNames.join(', ')} reached the dashboard result
+            limit.
           </div>
         ) : null}
 
@@ -189,10 +198,20 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
             ) : null}
           </div>
         ) : (
-          <div className={activityViewport} tabIndex={0} aria-label="Activity list">
+          <div
+            className={activityViewport}
+            role="region"
+            tabIndex={0}
+            aria-label="Activity list"
+          >
             <div className={activityList}>
               {displayedItems.map((item) => {
                 const classification = classifyProfileActivity(item, profileAddress)
+                const classificationLabel = classification
+                  ? PROFILE_ACTIVITY_FILTER_OPTIONS.find(
+                      (option) => option.value === classification.kind
+                    )?.label
+                  : undefined
                 const vote = voteSupport(item)
                 const chain = getProfileChainMetadata(item.chainId)
                 const amount = amountLabel(item)
@@ -234,7 +253,9 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
                     </span>
                     <span className={activityRowContent}>
                       <span className={activityBadgeRow}>
-                        <span className={activityBadge}>{classification?.kind}</span>
+                        {classificationLabel ? (
+                          <span className={activityBadge}>{classificationLabel}</span>
+                        ) : null}
                         {vote ? (
                           <span
                             className={[activityVoteSupport, vote.className].join(' ')}

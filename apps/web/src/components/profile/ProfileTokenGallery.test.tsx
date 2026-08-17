@@ -47,7 +47,8 @@ const props = {
   selectedDaoKeys: [],
   sort: 'newest' as const,
   onSortChange: vi.fn(),
-  partialChainNames: [],
+  failedChainNames: [],
+  truncatedChainNames: [],
   onRetry: vi.fn(),
 }
 
@@ -106,6 +107,8 @@ describe('ProfileTokenGallery', () => {
     expect(cardBody).toContainElement(chainLogo)
     expect(cardBody?.lastElementChild).toContainElement(chainLogo)
     expect(cardBody).not.toHaveTextContent('Ethereum')
+    expect(screen.getByRole('link', { name: /Token 1/ })).toBeVisible()
+    expect(screen.getByRole('link', { name: /Token 1/ }).closest('li')).not.toBeNull()
   })
 
   it('locks the initial gallery height while appending tokens and resets on sort', () => {

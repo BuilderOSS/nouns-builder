@@ -2,6 +2,7 @@ import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { CHAIN_ID } from '@buildeross/types'
 import { Button, Flex, Icon, Text } from '@buildeross/zord'
 import React from 'react'
+import { useDropdownDismiss } from 'src/hooks/useDropdownDismiss'
 import {
   activeDaoFilterChip,
   activeDaoFilterHelp,
@@ -15,6 +16,7 @@ import {
   filterLabel,
   filterRightControls,
 } from 'src/styles/profile.css'
+import { createDaoKey } from 'src/utils/profileDashboard'
 
 export type ProfileActivityFiltersValue = {
   eventTypes: FeedEventType[]
@@ -53,6 +55,8 @@ export const ProfileActivityFilters: React.FC<ProfileActivityFiltersProps> = ({
 }) => {
   const [isActivityTypeMenuOpen, setIsActivityTypeMenuOpen] = React.useState(false)
   const dropdownRef = React.useRef<HTMLDivElement | null>(null)
+  const dropdownButtonRef = React.useRef<HTMLButtonElement | null>(null)
+  const daoFilterHelpId = React.useId()
   const activeFilterCount =
     Number(value.eventTypes.length > 0) + Number(value.daoKeys.length > 0)
   const selectedEventTypeValues = React.useMemo(
@@ -70,9 +74,7 @@ export const ProfileActivityFilters: React.FC<ProfileActivityFiltersProps> = ({
     () =>
       value.daoKeys
         .map((daoKey) =>
-          daos.find(
-            (dao) => `${dao.chainId}:${dao.collectionAddress}`.toLowerCase() === daoKey
-          )
+          daos.find((dao) => createDaoKey(dao.chainId, dao.collectionAddress) === daoKey)
         )
         .filter((dao): dao is (typeof daos)[number] => !!dao),
     [daos, value.daoKeys]
@@ -82,21 +84,16 @@ export const ProfileActivityFilters: React.FC<ProfileActivityFiltersProps> = ({
       ? 'All DAOs'
       : selectedDaos.map((dao) => dao.name).join(', ')
 
-  React.useEffect(() => {
-    if (!isActivityTypeMenuOpen) return
-
-    const handleDocumentPointerDown = (event: PointerEvent) => {
-      if (!dropdownRef.current?.contains(event.target as Node)) {
-        setIsActivityTypeMenuOpen(false)
-      }
-    }
-
-    document.addEventListener('pointerdown', handleDocumentPointerDown)
-
-    return () => {
-      document.removeEventListener('pointerdown', handleDocumentPointerDown)
-    }
-  }, [isActivityTypeMenuOpen])
+  const closeActivityTypeMenu = React.useCallback(
+    () => setIsActivityTypeMenuOpen(false),
+    []
+  )
+  useDropdownDismiss({
+    isOpen: isActivityTypeMenuOpen,
+    onDismiss: closeActivityTypeMenu,
+    rootRef: dropdownRef,
+    triggerRef: dropdownButtonRef,
+  })
 
   const handleActivityTypeToggle = React.useCallback(
     (eventType: FeedEventType) => {
@@ -116,12 +113,18 @@ export const ProfileActivityFilters: React.FC<ProfileActivityFiltersProps> = ({
     <div className={filterBar}>
       <div className={filterHeader}>
         <Flex align="center" gap="x2" wrap>
-          <span
-            className={activeDaoFilterHelp}
-            tabIndex={0}
-            aria-label="Select DAOs from the sidebar to filter this profile activity by DAO."
-          >
-            <Text className={activeDaoFilterChip}>{daoFilterLabel}</Text>
+          <span className={activeDaoFilterHelp}>
+            <Text
+              as="span"
+              className={activeDaoFilterChip}
+              tabIndex={0}
+              aria-describedby={daoFilterHelpId}
+            >
+              {daoFilterLabel}
+            </Text>
+            <span id={daoFilterHelpId} hidden>
+              Select DAOs from the sidebar to filter this profile activity by DAO.
+            </span>
           </span>
         </Flex>
 
@@ -130,9 +133,9 @@ export const ProfileActivityFilters: React.FC<ProfileActivityFiltersProps> = ({
             <Text className={filterLabel}>Activity type</Text>
             <div className={activityTypeDropdown} ref={dropdownRef}>
               <button
+                ref={dropdownButtonRef}
                 type="button"
                 aria-label="Filter profile activity by type"
-                aria-haspopup="listbox"
                 aria-expanded={isActivityTypeMenuOpen}
                 className={activityTypeDropdownButton}
                 onClick={() => setIsActivityTypeMenuOpen((current) => !current)}
@@ -141,7 +144,11 @@ export const ProfileActivityFilters: React.FC<ProfileActivityFiltersProps> = ({
                 <Icon id="chevron-down" fill="tertiary" pointerEvents="none" />
               </button>
               {isActivityTypeMenuOpen ? (
-                <div className={activityTypeDropdownMenu} role="listbox">
+                <div
+                  className={activityTypeDropdownMenu}
+                  role="group"
+                  aria-label="Activity types"
+                >
                   {EVENT_TYPE_OPTIONS.map((option) => {
                     const isSelected = selectedEventTypeValues.has(option.value)
 

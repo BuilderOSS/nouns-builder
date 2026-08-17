@@ -1,6 +1,6 @@
 import { skeletonAnimation } from '@buildeross/ui/styles'
 import { color, vars } from '@buildeross/zord'
-import { globalStyle, style } from '@vanilla-extract/css'
+import { style } from '@vanilla-extract/css'
 
 export const loadingSkeleton = style({
   animation: skeletonAnimation,
@@ -71,18 +71,18 @@ export const profileDaoLink = style({
 })
 
 export const profileDaoLinkActive = style({
-  borderColor: '#000',
-  boxShadow: '0 0 0 1px #000',
+  borderColor: color.text1,
+  boxShadow: `0 0 0 1px ${color.text1}`,
   selectors: {
     '&:hover': {
-      borderColor: '#000',
+      borderColor: color.text1,
     },
     'html[data-theme-mode="dark"] &': {
-      borderColor: '#fff',
-      boxShadow: '0 0 0 1px #fff',
+      borderColor: vars.color.text1,
+      boxShadow: `0 0 0 1px ${vars.color.text1}`,
     },
     'html[data-theme-mode="dark"] &:hover': {
-      borderColor: '#fff',
+      borderColor: vars.color.text1,
     },
   },
 })
@@ -366,39 +366,6 @@ export const activityKindDropdownMenu = style({
   minWidth: '190px',
 })
 
-export const filterSummaryChip = style({
-  padding: '6px 10px',
-  borderRadius: '999px',
-  backgroundColor: color.background2,
-  color: color.text2,
-  fontSize: '12px',
-  fontWeight: 700,
-  whiteSpace: 'nowrap',
-})
-
-export const filterCheckboxGrid = style({
-  display: 'grid',
-  gridTemplateColumns: '1fr',
-  gap: '8px',
-  '@media': {
-    '(min-width: 768px)': {
-      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-    },
-  },
-})
-
-export const filterCheckboxItem = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  minHeight: '36px',
-  padding: '8px 10px',
-  border: `1px solid ${color.border}`,
-  borderRadius: '8px',
-  backgroundColor: color.background2,
-  cursor: 'pointer',
-})
-
 export const filterHeader = style({
   display: 'flex',
   alignItems: 'flex-end',
@@ -482,19 +449,15 @@ export const delegateModalSection = style({
   padding: '16px',
   border: `1px solid ${color.border}`,
   borderRadius: '10px',
-  backgroundColor: '#f2f2f2',
-  color: '#000',
+  backgroundColor: color.background2,
+  color: color.text1,
   selectors: {
     'html[data-theme-mode="dark"] &': {
-      backgroundColor: '#f2f2f2',
-      borderColor: '#d8d8d8',
-      color: '#000',
+      backgroundColor: vars.color.background2,
+      borderColor: vars.color.border,
+      color: vars.color.text1,
     },
   },
-})
-
-globalStyle(`${delegateModalSection} *`, {
-  color: '#000',
 })
 
 export const profileLinkEditInput = style({
@@ -1218,29 +1181,6 @@ export const activityHeaderControls = style({
   gap: '8px',
 })
 
-export const activityFilterSelect = style({
-  minWidth: '112px',
-  height: '36px',
-  padding: '0 32px 0 10px',
-  border: `1px solid ${color.border}`,
-  borderRadius: '8px',
-  backgroundColor: color.background1,
-  color: color.text1,
-  fontSize: '14px',
-  cursor: 'pointer',
-  selectors: {
-    '&:focus-visible': {
-      outline: `3px solid ${color.positive}`,
-      outlineOffset: '2px',
-    },
-    'html[data-theme-mode="dark"] &': {
-      borderColor: vars.color.border,
-      backgroundColor: vars.color.background1,
-      color: vars.color.text1,
-    },
-  },
-})
-
 export const activityList = style({
   display: 'flex',
   flexDirection: 'column',
@@ -1421,6 +1361,11 @@ export const tokenGrid = style({
     '(min-width: 1280px)': { gridTemplateColumns: 'repeat(6, minmax(0, 1fr))' },
     '(min-width: 1440px)': { gridTemplateColumns: 'repeat(8, minmax(0, 1fr))' },
   },
+})
+
+export const tokenGridItem = style({
+  display: 'flex',
+  minWidth: 0,
 })
 
 export const tokenGridViewport = style({

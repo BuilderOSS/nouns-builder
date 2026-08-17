@@ -1,20 +1,26 @@
 /**
  * Runs an async function with a timeout.
  *
- * @param fn - A function returning a Promise<T>
+ * @param operation - A Promise or function returning a Promise to bound
  * @param timeoutMs - Timeout in milliseconds
+ * @param label - Human-readable operation name for timeout errors
  * @returns A Promise that resolves with the function result or rejects on timeout
  */
 export async function withTimeout<T>(
-  fn: () => Promise<T>,
-  timeoutMs: number
+  operation: Promise<T> | (() => Promise<T>),
+  timeoutMs: number,
+  label = 'Operation'
 ): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => {
-      reject(new Error(`Operation timed out after ${timeoutMs} ms`))
+      reject(new Error(`${label} timed out after ${timeoutMs}ms`))
     }, timeoutMs)
 
-    fn()
+    const promise = Promise.resolve().then(() =>
+      typeof operation === 'function' ? operation() : operation
+    )
+
+    promise
       .then((result) => {
         clearTimeout(timer)
         resolve(result)

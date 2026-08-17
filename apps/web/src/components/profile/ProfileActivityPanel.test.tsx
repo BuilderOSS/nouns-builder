@@ -152,6 +152,9 @@ describe('ProfileActivityPanel', () => {
     )
     expect(screen.getByRole('link', { name: /Bid on Token 1/ })).toBeVisible()
     expect(screen.getByRole('link', { name: /FOR proposal/ })).toBeVisible()
+    expect(screen.getByText('Bids')).toBeVisible()
+    expect(screen.queryByText('bid')).not.toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Activity list' })).toBeVisible()
 
     fireEvent.click(screen.getByRole('button', { name: 'Filter activity' }))
     expect(
@@ -168,5 +171,19 @@ describe('ProfileActivityPanel', () => {
     ].forEach((label) =>
       expect(screen.getByRole('checkbox', { name: label })).toBeVisible()
     )
+  })
+
+  it('distinguishes unavailable chains from truncated chain results', () => {
+    render(
+      <ProfileActivityPanel
+        profileAddress={profileAddress}
+        selectedDaoKeys={[]}
+        failedChainNames={['Base']}
+        truncatedChainNames={['Ethereum']}
+      />
+    )
+
+    expect(screen.getByText(/Base could not be loaded/)).toBeVisible()
+    expect(screen.getByText(/Ethereum reached the dashboard result limit/)).toBeVisible()
   })
 })

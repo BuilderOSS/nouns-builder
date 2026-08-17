@@ -12,23 +12,23 @@ import { normalize } from 'viem/ens'
 
 const provider = getProvider(CHAIN_ID.ETHEREUM)
 
-const fetchEnsIdentityRecords = async (
+export const fetchEnsIdentityRecords = async (
   ensName?: string
 ): Promise<ProfileIdentityRecords> => {
   if (!ensName) return {}
 
   try {
     const name = normalize(ensName)
-    const [description, url, twitter] = await Promise.all([
+    const [description, url, twitter] = await Promise.allSettled([
       provider.getEnsText({ name, key: 'description' }),
       provider.getEnsText({ name, key: 'url' }),
       provider.getEnsText({ name, key: 'com.twitter' }),
     ])
 
     return {
-      description,
-      url,
-      twitter,
+      description: description.status === 'fulfilled' ? description.value : undefined,
+      url: url.status === 'fulfilled' ? url.value : undefined,
+      twitter: twitter.status === 'fulfilled' ? twitter.value : undefined,
     }
   } catch (error) {
     console.warn('Profile ENS text records unavailable:', {

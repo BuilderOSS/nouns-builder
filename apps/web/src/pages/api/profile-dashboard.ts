@@ -4,6 +4,7 @@ import {
   profileDashboardQuery,
 } from '@buildeross/sdk/subgraph'
 import type { CHAIN_ID } from '@buildeross/types'
+import { withTimeout } from '@buildeross/utils/withTimeout'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { isAddress } from 'viem'
 
@@ -15,20 +16,6 @@ export type ProfileDashboardApiResponse = {
     result?: ProfileDashboardChainResult
     error?: string
   }>
-}
-
-const withTimeout = <T>(promise: Promise<T>, timeoutMs: number) => {
-  let timeout: ReturnType<typeof setTimeout>
-  return Promise.race([
-    promise.finally(() => clearTimeout(timeout)),
-    new Promise<T>((_, reject) => {
-      timeout = setTimeout(
-        () =>
-          reject(new Error(`Profile dashboard request timed out after ${timeoutMs}ms`)),
-        timeoutMs
-      )
-    }),
-  ])
 }
 
 export default async function handler(
@@ -50,7 +37,11 @@ export default async function handler(
       chainId: chain.id,
       chainName: chain.name,
       chainSlug: chain.slug,
-      result: await withTimeout(profileDashboardQuery(chain.id, address), 12_000),
+      result: await withTimeout(
+        profileDashboardQuery(chain.id, address),
+        12_000,
+        `Profile dashboard request for chain ${chain.id}`
+      ),
     }))
   )
 

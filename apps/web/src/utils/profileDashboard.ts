@@ -69,8 +69,7 @@ export const PROFILE_ACTIVITY_FILTER_OPTIONS: ProfileActivityFilterOption[] = [
 ]
 
 export const AUCTION_ACTIVITY_FILTER_OPTIONS = PROFILE_ACTIVITY_FILTER_OPTIONS.slice(0, 3)
-export const GOVERNANCE_ACTIVITY_FILTER_OPTIONS =
-  PROFILE_ACTIVITY_FILTER_OPTIONS.slice(3)
+export const GOVERNANCE_ACTIVITY_FILTER_OPTIONS = PROFILE_ACTIVITY_FILTER_OPTIONS.slice(3)
 
 export const getInitialProfileTokenVisibleCount = (total: number) =>
   total <= 16 ? total : Math.min(total, 32)

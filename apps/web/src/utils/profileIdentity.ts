@@ -125,18 +125,19 @@ export const getProfileIdentity = ({
   overrides?: ProfileLinkOverrideRecord[]
 }): ProfileIdentity => {
   const bio = cleanText(ensRecords.description)
-  const overrideByKey = new Map(overrides.map((override) => [override.key, override]))
+  const overrideByKey = new Map(
+    overrides
+      .filter((override) => override.value.trim())
+      .map((override) => [override.key, override])
+  )
   const websiteOverride = overrideByKey.get('website')
   const xOverride = overrideByKey.get('x')
   const farcasterOverride = overrideByKey.get('farcaster')
 
   const websiteSource = websiteOverride ? websiteOverride.value : ensRecords.url
   const xSource = xOverride ? xOverride.value : ensRecords.twitter
-  const websiteHref =
-    websiteOverride && !websiteOverride.value.trim()
-      ? null
-      : validateWebsiteUrl(websiteSource)
-  const x = xOverride && !xOverride.value.trim() ? null : normalizeXHandle(xSource)
+  const websiteHref = validateWebsiteUrl(websiteSource)
+  const x = normalizeXHandle(xSource)
   const farcaster =
     farcasterOverride && farcasterOverride.value.trim()
       ? normalizeFarcasterHandle(farcasterOverride.value)
