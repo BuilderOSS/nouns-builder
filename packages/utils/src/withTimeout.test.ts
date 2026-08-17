@@ -27,4 +27,22 @@ describe('withTimeout', () => {
     expect(onTimeout).toHaveBeenCalledOnce()
     vi.useRealTimers()
   })
+
+  it('rejects with an error thrown by the timeout handler', async () => {
+    vi.useFakeTimers()
+    const cleanupError = new Error('Cleanup failed')
+    const result = withTimeout(
+      new Promise<never>(() => undefined),
+      1,
+      'Slow operation',
+      () => {
+        throw cleanupError
+      }
+    )
+    const assertion = expect(result).rejects.toBe(cleanupError)
+
+    await vi.advanceTimersByTimeAsync(1)
+    await assertion
+    vi.useRealTimers()
+  })
 })

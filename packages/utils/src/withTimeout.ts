@@ -14,7 +14,12 @@ export async function withTimeout<T>(
 ): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => {
-      onTimeout?.()
+      try {
+        onTimeout?.()
+      } catch (error) {
+        reject(error)
+        return
+      }
       reject(new Error(`${label} timed out after ${timeoutMs}ms`))
     }, timeoutMs)
 
