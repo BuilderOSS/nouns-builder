@@ -104,9 +104,11 @@ describe('ProfileActivityPanel', () => {
     const daoMetadata = row.querySelector<HTMLElement>(`.${activityDaoMeta}`)
     expect(activityDetails).not.toBeNull()
     expect(daoMetadata).not.toBeNull()
+    if (!activityDetails || !daoMetadata)
+      throw new Error('Expected activity row metadata')
 
-    const daoName = within(daoMetadata!).getByText('Test DAO')
-    const chainLogo = within(daoMetadata!).getByRole('img', {
+    const daoName = within(daoMetadata).getByText('Test DAO')
+    const chainLogo = within(daoMetadata).getByRole('img', {
       name: 'Ethereum network',
     })
 
