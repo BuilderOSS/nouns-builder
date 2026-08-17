@@ -648,8 +648,16 @@ export const profileDaoFilterButton = style({
   zIndex: 0,
   padding: 0,
   border: 'none',
+  borderRadius: '8px',
   background: 'transparent',
   cursor: 'pointer',
+  selectors: {
+    '&:focus-visible': {
+      zIndex: 3,
+      outline: `3px solid ${color.positive}`,
+      outlineOffset: '2px',
+    },
+  },
 })
 
 export const profileDaoFilterContainer = style({

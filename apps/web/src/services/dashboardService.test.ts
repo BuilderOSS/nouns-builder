@@ -71,13 +71,29 @@ describe('fetchDashboardDataService', () => {
 
   it('times out enrichment per DAO without discarding successful DAO results', async () => {
     vi.useFakeTimers()
+    let slowRequestAborted = false
     vi.mocked(dashboardRequest).mockResolvedValue([
       makeDao('0xslow'),
       makeDao('0xhealthy'),
     ])
     vi.mocked(getProposalState)
-      .mockImplementationOnce(() => new Promise(() => undefined))
-      .mockResolvedValueOnce(ProposalState.Active)
+      .mockImplementationOnce(
+        (_chainId, _governorAddress, _proposalId, signal) =>
+          new Promise((_, reject) => {
+            signal?.addEventListener(
+              'abort',
+              () => {
+                slowRequestAborted = true
+                reject(signal.reason)
+              },
+              { once: true }
+            )
+          })
+      )
+      .mockImplementationOnce(async () => {
+        expect(slowRequestAborted).toBe(true)
+        return ProposalState.Active
+      })
 
     const resultPromise = fetchDashboardDataService(address)
     await vi.advanceTimersByTimeAsync(8_000)
@@ -86,6 +102,7 @@ describe('fetchDashboardDataService', () => {
     expect(result).toHaveLength(2)
     expect(result[0].proposals).toEqual([])
     expect(result[1].proposals).toHaveLength(1)
+    expect(slowRequestAborted).toBe(true)
     expect(redis.setex).not.toHaveBeenCalled()
   })
 })

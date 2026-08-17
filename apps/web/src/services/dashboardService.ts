@@ -61,17 +61,33 @@ async function fetchProposalStateWithRetry(
   chainId: number,
   governorAddress: AddressType,
   proposalId: BytesType,
+  signal: AbortSignal,
   retries = 1
 ): Promise<ProposalState> {
   for (let attempt = 0; attempt <= retries; attempt++) {
+    signal.throwIfAborted()
     try {
-      return await getProposalState(chainId, governorAddress, proposalId)
+      return await getProposalState(chainId, governorAddress, proposalId, signal)
     } catch (error: any) {
+      if (signal.aborted) throw error
       if (attempt === retries) {
         throw error
       }
       // Exponential backoff between the initial attempt and the single retry.
-      await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)))
+      await new Promise<void>((resolve, reject) => {
+        const handleAbort = () => {
+          clearTimeout(timer)
+          reject(signal.reason)
+        }
+        const timer = setTimeout(
+          () => {
+            signal.removeEventListener('abort', handleAbort)
+            resolve()
+          },
+          100 * Math.pow(2, attempt)
+        )
+        signal.addEventListener('abort', handleAbort, { once: true })
+      })
     }
   }
   throw new Error('Failed to fetch proposal state')
@@ -96,7 +112,8 @@ function emptyProposalStateDao(dao: DashboardDaoBase): DashboardDaoWithState {
  * Fetch DAO proposal states with controlled concurrency
  */
 async function fetchDaoProposalState(
-  dao: DashboardDaoBase
+  dao: DashboardDaoBase,
+  signal: AbortSignal
 ): Promise<{ dao: DashboardDaoWithState; degraded: boolean }> {
   // Use serial proposal-state reads per DAO to avoid overwhelming public RPCs.
   const proposalTasks = dao.proposals.map((proposal) => async () => {
@@ -104,11 +121,13 @@ async function fetchDaoProposalState(
       const state = await fetchProposalStateWithRetry(
         dao.chainId,
         proposal.dao.governorAddress,
-        proposal.proposalId
+        proposal.proposalId,
+        signal
       )
 
       return { ...proposal, state }
     } catch (error) {
+      if (signal.aborted) throw error
       console.warn('Dashboard proposal state unavailable:', {
         chainId: dao.chainId,
         dao: dao.tokenAddress,
@@ -150,7 +169,13 @@ async function fetchDashboardData(address: AddressType): Promise<DashboardFetchR
     // Bound each DAO independently so a slow RPC does not discard successful DAOs.
     const daoTasks = userDaos.map((dao) => async () => {
       const label = `Dashboard proposal state enrichment for DAO ${dao.tokenAddress}`
-      return withTimeout(fetchDaoProposalState(dao), 8_000, label).catch((error) => {
+      const controller = new AbortController()
+      return withTimeout(
+        () => fetchDaoProposalState(dao, controller.signal),
+        8_000,
+        label,
+        () => controller.abort(new Error(`${label} aborted`))
+      ).catch((error) => {
         console.warn('Dashboard proposal state enrichment unavailable:', {
           address,
           chainId: dao.chainId,
@@ -161,7 +186,7 @@ async function fetchDashboardData(address: AddressType): Promise<DashboardFetchR
         return { dao: emptyProposalStateDao(dao), degraded: true }
       })
     })
-    const resolved = await executeConcurrently(daoTasks)
+    const resolved = await executeConcurrently(daoTasks, 1)
 
     return {
       data: resolved.map((result) => result.dao),

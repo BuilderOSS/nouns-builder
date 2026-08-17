@@ -16,13 +16,15 @@ describe('withTimeout', () => {
   it('rejects with the operation label after the deadline', async () => {
     vi.useFakeTimers()
     const pending = new Promise<never>(() => undefined)
-    const result = withTimeout(pending, 8_000, 'DAO proposal enrichment')
+    const onTimeout = vi.fn()
+    const result = withTimeout(pending, 8_000, 'DAO proposal enrichment', onTimeout)
     const assertion = expect(result).rejects.toThrow(
       'DAO proposal enrichment timed out after 8000ms'
     )
 
     await vi.advanceTimersByTimeAsync(8_000)
     await assertion
+    expect(onTimeout).toHaveBeenCalledOnce()
     vi.useRealTimers()
   })
 })

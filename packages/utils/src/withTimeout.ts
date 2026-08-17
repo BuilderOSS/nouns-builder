@@ -9,10 +9,12 @@
 export async function withTimeout<T>(
   operation: Promise<T> | (() => Promise<T>),
   timeoutMs: number,
-  label = 'Operation'
+  label = 'Operation',
+  onTimeout?: () => void
 ): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(() => {
+      onTimeout?.()
       reject(new Error(`${label} timed out after ${timeoutMs}ms`))
     }, timeoutMs)
 

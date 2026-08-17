@@ -17,7 +17,10 @@ export const useDropdownDismiss = ({
     if (!isOpen) return
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) onDismiss()
+      const target = event.target as Node
+      if (!rootRef.current?.contains(target) && !triggerRef?.current?.contains(target)) {
+        onDismiss()
+      }
     }
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
