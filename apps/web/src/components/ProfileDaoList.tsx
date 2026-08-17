@@ -24,10 +24,21 @@ import {
   daoEditorSpacer,
   daoEditorSpacerActive,
   daoEditorSpacerLabel,
+  daoSelectorHeaderActions,
+  daoSelectorInfo,
+  daoSelectorInfoButton,
+  daoSelectorInfoTooltip,
   profileDaoFilterButton,
+  profileDaoFilterContainer,
+  profileDaoFilterContent,
   profileDaoLink,
   profileDaoLinkActive,
+  profileDaoListFooter,
+  profileDaoListRoot,
+  profileDaoListViewport,
+  profileDaoNameLink,
   profileHiddenDaoLink,
+  profileSectionHeader,
   profileStatBadge,
 } from 'src/styles/profile.css'
 
@@ -68,6 +79,7 @@ type ProfileDaoListProps = {
 type ProfileDaoListRowProps = {
   chainIcon?: string
   dao: ProfileDaoListItem
+  daoHref?: string
   daoKey: string
   isDragInProgress: boolean
   isDragging: boolean
@@ -88,6 +100,7 @@ const ProfileDaoListRow = React.memo(
   ({
     chainIcon,
     dao,
+    daoHref,
     daoKey,
     isDragInProgress,
     isDragging,
@@ -167,6 +180,7 @@ const ProfileDaoListRow = React.memo(
           }}
           className={[
             !isEditing ? profileDaoLink : undefined,
+            daoHref ? profileDaoFilterContent : undefined,
             isSelected ? profileDaoLinkActive : undefined,
             isHidden ? profileHiddenDaoLink : undefined,
             isDragging ? daoEditorDragging : undefined,
@@ -186,7 +200,13 @@ const ProfileDaoListRow = React.memo(
               gap="x2"
               style={{ minWidth: 0 }}
             >
-              <Text fontWeight="display">{dao.name}</Text>
+              {daoHref ? (
+                <Link className={profileDaoNameLink} href={daoHref}>
+                  <Text fontWeight="display">{dao.name}</Text>
+                </Link>
+              ) : (
+                <Text fontWeight="display">{dao.name}</Text>
+              )}
               <Flex align="center" gap="x1" style={{ minWidth: 0 }}>
                 {isTestnet ? (
                   <StatBadge variant="default" className={profileStatBadge}>
@@ -287,7 +307,6 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
 
   const { isDaoHidden, persistOrderedDaos, sortDaos, updateDaoVisibilityAndOrder } =
     useDaoListPreferences(userAddress)
-
   const overlayRef = React.useRef<HTMLDivElement | null>(null)
   const listRef = React.useRef<HTMLDivElement | null>(null)
   const rowRefs = React.useRef<Record<string, HTMLDivElement | null>>({})
@@ -770,155 +789,200 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
   )
 
   return (
-    <Flex ref={listRef} direction="column" gap="x3" w="100%">
-      <Flex mb="x4" w="100%" align="center" justify="space-between" gap="x2">
-        <Text fontWeight="display">DAOs</Text>
+    <div className={profileDaoListRoot}>
+      <div className={profileSectionHeader}>
         <Flex align="center" gap="x2">
-          {headerAction}
-          {isOwnProfile && daos.length > 0 ? (
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={activeDragKey !== null}
-              onClick={() => setIsEditingDaos((current) => !current)}
-            >
-              <Icon id={isEditingDaos ? 'check' : 'pencil'} size="sm" />
-              {isEditingDaos ? 'Done' : 'Edit'}
-            </Button>
-          ) : null}
-        </Flex>
-      </Flex>
-
-      {daosForDisplay.map((dao, index) => {
-        const daoKey = getDaoKey(dao.chainId, dao.collectionAddress)
-        const isHidden = isDaoHidden(dao.chainId, dao.collectionAddress)
-        const isDragging = activeDragKey === daoKey
-        const row = (
-          <ProfileDaoListRow
-            chainIcon={chainIconsById.get(dao.chainId)}
-            dao={dao}
-            daoKey={daoKey}
-            isDragInProgress={activeDragKey !== null}
-            isDragging={isDragging}
-            isEditing={isEditingDaos}
-            isHidden={isHidden}
-            isSelected={!isEditingDaos && activeDaoKeySet.has(daoKey.toLowerCase())}
-            isReorderable={isEditingDaos}
-            onMoveUp={isEditingDaos ? () => moveDaoToIndex(index, index - 1) : undefined}
-            onMoveDown={
-              isEditingDaos ? () => moveDaoToIndex(index, index + 1) : undefined
-            }
-            insertGapLabel={isEditingDaos ? getDropPositionLabel(index) : undefined}
-            isInsertGapActive={dragInsertIndex === index && activeDragKey !== null}
-            onToggleHidden={handleToggleHidden}
-            onPointerDown={handlePointerDown}
-            setRowRef={setRowRef}
-          />
-        )
-
-        return (
-          <Box key={daoKey}>
-            {isEditingDaos ? (
-              row
-            ) : onDaoClick ? (
+          <Text as="h2" id="profile-daos-heading" variant="heading-md">
+            DAOs
+          </Text>
+          {onDaoClick ? (
+            <span className={daoSelectorInfo}>
               <button
                 type="button"
-                className={profileDaoFilterButton}
-                onClick={() => onDaoClick(dao)}
+                className={daoSelectorInfoButton}
+                aria-label="How DAO cards work"
+                aria-describedby="profile-dao-info-tooltip"
               >
-                {row}
+                i
               </button>
-            ) : (
-              <Link
-                href={`/dao/${chainSlugsById.get(dao.chainId)}/${dao.collectionAddress}`}
-                style={{
-                  color: 'inherit',
-                  textDecoration: 'none',
-                  width: '100%',
-                }}
+              <span
+                id="profile-dao-info-tooltip"
+                role="tooltip"
+                className={daoSelectorInfoTooltip}
               >
-                {row}
-              </Link>
-            )}
-          </Box>
-        )
-      })}
-
-      {isEditingDaos ? (
-        <Box
-          className={[
-            daoEditorSpacer,
-            dragInsertIndex === daosForDisplay.length &&
-              activeDragKey !== null &&
-              daoEditorSpacerActive,
-          ]}
-        >
-          {dragInsertIndex === daosForDisplay.length && activeDragKey !== null ? (
-            <Text className={daoEditorSpacerLabel}>
-              {getDropPositionLabel(daosForDisplay.length)}
-            </Text>
+                Click a card to filter Activity. Click the DAO name to open its DAO page.
+              </span>
+            </span>
           ) : null}
-        </Box>
-      ) : null}
+        </Flex>
+        <div className={daoSelectorHeaderActions}>{headerAction}</div>
+      </div>
 
-      {hiddenDaosCount > 0 ? (
-        <HiddenDaoDisclosure
-          count={hiddenDaosCount}
-          isOpen={isHiddenDaosOpen}
-          onToggle={() => setIsHiddenDaosOpen((current) => !current)}
-        >
-          <Flex direction="column" gap="x3" w="100%">
-            {hiddenDaos.map((dao) => {
-              const daoKey = getDaoKey(dao.chainId, dao.collectionAddress)
-              const row = (
-                <ProfileDaoListRow
-                  chainIcon={chainIconsById.get(dao.chainId)}
-                  dao={dao}
-                  daoKey={daoKey}
-                  isDragInProgress={activeDragKey !== null}
-                  isDragging={false}
-                  isEditing={isEditingDaos}
-                  isHidden={true}
-                  isSelected={!isEditingDaos && activeDaoKeySet.has(daoKey.toLowerCase())}
-                  isReorderable={false}
-                  onMoveUp={undefined}
-                  onMoveDown={undefined}
-                  insertGapLabel={undefined}
-                  isInsertGapActive={false}
-                  onToggleHidden={handleToggleHidden}
-                  onPointerDown={handlePointerDown}
-                />
-              )
+      <Flex
+        ref={listRef}
+        className={profileDaoListViewport}
+        data-testid="profile-dao-list-viewport"
+        direction="column"
+        gap="x3"
+        w="100%"
+      >
+        {daosForDisplay.map((dao, index) => {
+          const daoKey = getDaoKey(dao.chainId, dao.collectionAddress)
+          const isHidden = isDaoHidden(dao.chainId, dao.collectionAddress)
+          const isDragging = activeDragKey === daoKey
+          const daoHref = `/dao/${chainSlugsById.get(dao.chainId)}/${dao.collectionAddress}`
+          const row = (
+            <ProfileDaoListRow
+              chainIcon={chainIconsById.get(dao.chainId)}
+              dao={dao}
+              daoHref={!isEditingDaos && onDaoClick ? daoHref : undefined}
+              daoKey={daoKey}
+              isDragInProgress={activeDragKey !== null}
+              isDragging={isDragging}
+              isEditing={isEditingDaos}
+              isHidden={isHidden}
+              isSelected={!isEditingDaos && activeDaoKeySet.has(daoKey.toLowerCase())}
+              isReorderable={isEditingDaos}
+              onMoveUp={
+                isEditingDaos ? () => moveDaoToIndex(index, index - 1) : undefined
+              }
+              onMoveDown={
+                isEditingDaos ? () => moveDaoToIndex(index, index + 1) : undefined
+              }
+              insertGapLabel={isEditingDaos ? getDropPositionLabel(index) : undefined}
+              isInsertGapActive={dragInsertIndex === index && activeDragKey !== null}
+              onToggleHidden={handleToggleHidden}
+              onPointerDown={handlePointerDown}
+              setRowRef={setRowRef}
+            />
+          )
 
-              return (
-                <Box key={daoKey}>
-                  {isEditingDaos ? (
-                    row
-                  ) : onDaoClick ? (
-                    <button
-                      type="button"
-                      className={profileDaoFilterButton}
-                      onClick={() => onDaoClick(dao)}
-                    >
-                      {row}
-                    </button>
-                  ) : (
-                    <Link
-                      href={`/dao/${chainSlugsById.get(dao.chainId)}/${dao.collectionAddress}`}
-                      style={{
-                        color: 'inherit',
-                        textDecoration: 'none',
-                        width: '100%',
-                      }}
-                    >
-                      {row}
-                    </Link>
-                  )}
+          return (
+            <Box key={daoKey}>
+              {isEditingDaos ? (
+                row
+              ) : onDaoClick ? (
+                <Box className={profileDaoFilterContainer}>
+                  <button
+                    type="button"
+                    className={profileDaoFilterButton}
+                    aria-label={`Filter activity by ${dao.name}`}
+                    onClick={() => onDaoClick(dao)}
+                  />
+                  {row}
                 </Box>
-              )
-            })}
-          </Flex>
-        </HiddenDaoDisclosure>
+              ) : (
+                <Link
+                  href={daoHref}
+                  style={{
+                    color: 'inherit',
+                    textDecoration: 'none',
+                    width: '100%',
+                  }}
+                >
+                  {row}
+                </Link>
+              )}
+            </Box>
+          )
+        })}
+
+        {isEditingDaos ? (
+          <Box
+            className={[
+              daoEditorSpacer,
+              dragInsertIndex === daosForDisplay.length &&
+                activeDragKey !== null &&
+                daoEditorSpacerActive,
+            ]}
+          >
+            {dragInsertIndex === daosForDisplay.length && activeDragKey !== null ? (
+              <Text className={daoEditorSpacerLabel}>
+                {getDropPositionLabel(daosForDisplay.length)}
+              </Text>
+            ) : null}
+          </Box>
+        ) : null}
+
+        {hiddenDaosCount > 0 ? (
+          <HiddenDaoDisclosure
+            count={hiddenDaosCount}
+            isOpen={isHiddenDaosOpen}
+            onToggle={() => setIsHiddenDaosOpen((current) => !current)}
+          >
+            <Flex direction="column" gap="x3" w="100%">
+              {hiddenDaos.map((dao) => {
+                const daoKey = getDaoKey(dao.chainId, dao.collectionAddress)
+                const daoHref = `/dao/${chainSlugsById.get(dao.chainId)}/${dao.collectionAddress}`
+                const row = (
+                  <ProfileDaoListRow
+                    chainIcon={chainIconsById.get(dao.chainId)}
+                    dao={dao}
+                    daoHref={!isEditingDaos && onDaoClick ? daoHref : undefined}
+                    daoKey={daoKey}
+                    isDragInProgress={activeDragKey !== null}
+                    isDragging={false}
+                    isEditing={isEditingDaos}
+                    isHidden={true}
+                    isSelected={
+                      !isEditingDaos && activeDaoKeySet.has(daoKey.toLowerCase())
+                    }
+                    isReorderable={false}
+                    onMoveUp={undefined}
+                    onMoveDown={undefined}
+                    insertGapLabel={undefined}
+                    isInsertGapActive={false}
+                    onToggleHidden={handleToggleHidden}
+                    onPointerDown={handlePointerDown}
+                  />
+                )
+
+                return (
+                  <Box key={daoKey}>
+                    {isEditingDaos ? (
+                      row
+                    ) : onDaoClick ? (
+                      <Box className={profileDaoFilterContainer}>
+                        <button
+                          type="button"
+                          className={profileDaoFilterButton}
+                          aria-label={`Filter activity by ${dao.name}`}
+                          onClick={() => onDaoClick(dao)}
+                        />
+                        {row}
+                      </Box>
+                    ) : (
+                      <Link
+                        href={daoHref}
+                        style={{
+                          color: 'inherit',
+                          textDecoration: 'none',
+                          width: '100%',
+                        }}
+                      >
+                        {row}
+                      </Link>
+                    )}
+                  </Box>
+                )
+              })}
+            </Flex>
+          </HiddenDaoDisclosure>
+        ) : null}
+      </Flex>
+
+      {isOwnProfile && daos.length > 0 ? (
+        <div className={profileDaoListFooter}>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={activeDragKey !== null}
+            onClick={() => setIsEditingDaos((current) => !current)}
+          >
+            <Icon id={isEditingDaos ? 'check' : 'pencil'} size="sm" />
+            {isEditingDaos ? 'Done' : 'Edit'}
+          </Button>
+        </div>
       ) : null}
 
       {dragOverlay && draggedDao
@@ -964,6 +1028,6 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
             )
           : null
         : null}
-    </Flex>
+    </div>
   )
 }

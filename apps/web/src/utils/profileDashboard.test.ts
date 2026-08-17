@@ -10,6 +10,7 @@ import {
   filterProfileActivityByKinds,
   filterProfileTokens,
   getInitialProfileTokenVisibleCount,
+  getUnifiedProfileActivity,
   GOVERNANCE_ACTIVITY_FILTER_OPTIONS,
   isOwnProfileAddress,
   parseDaoKeys,
@@ -171,6 +172,36 @@ describe('profile dashboard helpers', () => {
     ])
     expect(filterProfileActivityByKinds(daoFiltered, address, ['settled'])).toEqual([])
     expect(filterProfileActivityByKinds(daoFiltered, address, [])).toEqual([bid, win])
+  })
+
+  it('deduplicates, filters, and reverse-sorts unified activity across both groups', () => {
+    const bid = { ...makeBid('shared'), timestamp: 2 } as FeedItem
+    const duplicateBid = { ...bid, timestamp: 1 } as FeedItem
+    const proposal = {
+      ...baseItem,
+      id: 'proposal',
+      timestamp: 3,
+      type: 'PROPOSAL_CREATED',
+      proposalId: '0x02',
+      proposalNumber: '2',
+      proposalTitle: 'Proposal',
+      proposalDescription: '',
+      proposalTimeCreated: '1',
+      proposer: address,
+    } as FeedItem
+
+    expect(
+      getUnifiedProfileActivity(
+        [duplicateBid, proposal],
+        [bid],
+        address,
+        [createDaoKey(1, baseItem.daoId)],
+        []
+      )
+    ).toEqual([proposal, bid])
+    expect(getUnifiedProfileActivity([proposal, bid], [], address, [], ['bid'])).toEqual([
+      bid,
+    ])
   })
 
   it('exposes every indexed governance activity kind in the filter', () => {

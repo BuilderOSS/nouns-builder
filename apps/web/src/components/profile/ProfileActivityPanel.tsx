@@ -1,4 +1,3 @@
-import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useFeed } from '@buildeross/hooks'
 import type { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID, FeedItem } from '@buildeross/types'
@@ -11,6 +10,8 @@ import React from 'react'
 import {
   activityBadge,
   activityBadgeRow,
+  activityDaoMeta,
+  activityDaoNameRow,
   activityHeaderControls,
   activityList,
   activityMeta,
@@ -22,6 +23,8 @@ import {
   activityVoteFor,
   activityVoteSupport,
   loadingSkeleton,
+  profileDashboardSection,
+  profileDashboardSurface,
   profileEmptyState,
   profileNotice,
   profileSection,
@@ -29,29 +32,23 @@ import {
   profileSurface,
 } from 'src/styles/profile.css'
 import {
-  AUCTION_ACTIVITY_FILTER_OPTIONS,
   classifyProfileActivity,
-  filterProfileActivity,
-  filterProfileActivityByKinds,
-  GOVERNANCE_ACTIVITY_FILTER_OPTIONS,
-  type ProfileActivityGroup,
+  getUnifiedProfileActivity,
+  PROFILE_ACTIVITY_EVENT_TYPES,
+  PROFILE_ACTIVITY_FILTER_OPTIONS,
   type ProfileActivityKind,
 } from 'src/utils/profileDashboard'
 import { formatEther } from 'viem'
 
 import { ProfileActivityKindMenu } from './ProfileActivityKindMenu'
+import { getProfileChainMetadata, ProfileChainIcon } from './ProfileChainIcon'
 
 type ProfileActivityPanelProps = {
-  title: string
-  group: ProfileActivityGroup
   profileAddress: AddressType
-  eventTypes: FeedEventType[]
   selectedDaoKeys: string[]
   extraItems?: FeedItem[]
   partialChainNames?: string[]
 }
-
-const chainById = new Map(PUBLIC_DEFAULT_CHAINS.map((chain) => [chain.id, chain]))
 
 const amountLabel = (item: FeedItem) => {
   if (item.type !== 'AUCTION_BID_PLACED' && item.type !== 'AUCTION_SETTLED') return null
@@ -82,23 +79,18 @@ const voteSupport = (item: FeedItem) => {
 }
 
 export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
-  title,
-  group,
   profileAddress,
-  eventTypes,
   selectedDaoKeys,
   extraItems = [],
   partialChainNames = [],
 }) => {
   const { getAuctionLink, getProposalLink } = useLinks()
   const [selectedKinds, setSelectedKinds] = React.useState<ProfileActivityKind[]>([])
-  const filterOptions =
-    group === 'auction'
-      ? AUCTION_ACTIVITY_FILTER_OPTIONS
-      : GOVERNANCE_ACTIVITY_FILTER_OPTIONS
   const selectedFilterLabel =
     selectedKinds.length === 1
-      ? filterOptions.find((option) => option.value === selectedKinds[0])?.label
+      ? PROFILE_ACTIVITY_FILTER_OPTIONS.find(
+          (option) => option.value === selectedKinds[0]
+        )?.label
       : undefined
   const selectedFilters = selectedDaoKeys.map((key) => {
     const [chainId, address] = key.split(':')
@@ -107,7 +99,7 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
   const { items, hasMore, isLoading, isLoadingMore, error, fetchNextPage, refresh } =
     useFeed({
       actor: profileAddress,
-      eventTypes,
+      eventTypes: [...PROFILE_ACTIVITY_EVENT_TYPES] as FeedEventType[],
       daos: selectedFilters.length
         ? selectedFilters.map((filter) => filter.address)
         : undefined,
@@ -118,30 +110,29 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
     })
 
   const displayedItems = React.useMemo(() => {
-    const unique = new Map<string, FeedItem>()
-    ;[...items, ...extraItems].forEach((item) =>
-      unique.set(`${item.chainId}:${item.id}`, item)
-    )
-    const daoFilteredItems = filterProfileActivity(
-      Array.from(unique.values()).sort((a, b) => b.timestamp - a.timestamp),
+    return getUnifiedProfileActivity(
+      items,
+      extraItems,
       profileAddress,
-      group,
-      selectedDaoKeys
+      selectedDaoKeys,
+      selectedKinds
     )
-    return filterProfileActivityByKinds(daoFilteredItems, profileAddress, selectedKinds)
-  }, [extraItems, group, items, profileAddress, selectedDaoKeys, selectedKinds])
+  }, [extraItems, items, profileAddress, selectedDaoKeys, selectedKinds])
 
   return (
-    <section className={profileSurface} aria-labelledby={`profile-${group}-heading`}>
-      <div className={profileSection}>
+    <section
+      className={[profileSurface, profileDashboardSurface].join(' ')}
+      aria-labelledby="profile-activity-heading"
+    >
+      <div className={[profileSection, profileDashboardSection].join(' ')}>
         <div className={profileSectionHeader}>
-          <Text as="h3" id={`profile-${group}-heading`} variant="heading-md">
-            {title}
+          <Text as="h2" id="profile-activity-heading" variant="heading-md">
+            Activity
           </Text>
           <div className={activityHeaderControls}>
             <ProfileActivityKindMenu
-              label={`Filter ${title.toLowerCase()}`}
-              options={filterOptions}
+              label="Filter activity"
+              options={PROFILE_ACTIVITY_FILTER_OPTIONS}
               selectedKinds={selectedKinds}
               onChange={setSelectedKinds}
             />
@@ -160,21 +151,21 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
         ) : null}
 
         {isLoading && !displayedItems.length ? (
-          <div className={activityList} aria-busy="true" aria-label={`Loading ${title}`}>
+          <div className={activityList} aria-busy="true" aria-label="Loading activity">
             {Array.from({ length: 5 }, (_, index) => (
               <div key={index} className={[activityRow, loadingSkeleton].join(' ')} />
             ))}
           </div>
         ) : error && !displayedItems.length ? (
           <div className={profileEmptyState} role="alert">
-            <Text fontWeight="display">Unable to load {title.toLowerCase()}</Text>
+            <Text fontWeight="display">Unable to load activity</Text>
             <Text color="text3">Try again in a moment.</Text>
           </div>
         ) : !displayedItems.length ? (
           <div className={profileEmptyState} role="status">
             <Text fontWeight="display">
               {selectedKinds.length === 0
-                ? `No ${title.toLowerCase()} found`
+                ? 'No activity found'
                 : selectedFilterLabel
                   ? `No ${selectedFilterLabel.toLowerCase()} found`
                   : 'No selected activity found'}
@@ -198,12 +189,13 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
             ) : null}
           </div>
         ) : (
-          <div className={activityViewport} tabIndex={0} aria-label={`${title} list`}>
+          <div className={activityViewport} tabIndex={0} aria-label="Activity list">
             <div className={activityList}>
               {displayedItems.map((item) => {
                 const classification = classifyProfileActivity(item, profileAddress)
                 const vote = voteSupport(item)
-                const chain = chainById.get(item.chainId)
+                const chain = getProfileChainMetadata(item.chainId)
+                const amount = amountLabel(item)
                 const href =
                   'proposalNumber' in item
                     ? getProposalLink(
@@ -254,17 +246,14 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
                       <Text fontWeight="display" style={{ overflowWrap: 'anywhere' }}>
                         {itemTitle(item, classification?.kind)}
                       </Text>
-                      <span className={activityMeta}>
+                      {amount ? <span className={activityMeta}>{amount}</span> : null}
+                    </span>
+                    <span className={activityDaoMeta}>
+                      <span className={activityDaoNameRow}>
                         <span>{item.daoName}</span>
-                        <span aria-hidden="true">·</span>
-                        <span>{formatTimeAgo(item.timestamp)}</span>
-                        {amountLabel(item) ? (
-                          <>
-                            <span aria-hidden="true">·</span>
-                            <span>{amountLabel(item)}</span>
-                          </>
-                        ) : null}
+                        <ProfileChainIcon chainId={item.chainId} />
                       </span>
+                      <span>{formatTimeAgo(item.timestamp)}</span>
                     </span>
                   </Link>
                 )

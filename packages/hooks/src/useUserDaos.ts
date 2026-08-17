@@ -1,4 +1,3 @@
-import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { type MyDaosResponse } from '@buildeross/sdk/subgraph'
@@ -23,7 +22,7 @@ const daosFetcher = async (
   [, address]: [string, string],
   { signal }: { signal?: AbortSignal } = {}
 ): Promise<MyDaosResponse> => {
-  const url = `${BASE_URL}/api/daos/${address}`
+  const url = `/api/daos/${address}`
 
   const response = await fetch(url, {
     signal,

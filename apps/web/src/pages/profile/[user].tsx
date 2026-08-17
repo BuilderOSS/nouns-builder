@@ -2,11 +2,7 @@ import { CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useUserDaos } from '@buildeross/hooks/useUserDaos'
-import {
-  FeedEventType,
-  myDaosRequest,
-  type ProfileDashboardChainResult,
-} from '@buildeross/sdk/subgraph'
+import { myDaosRequest, type ProfileDashboardChainResult } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID, FeedItem } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { CopyButton } from '@buildeross/ui/CopyButton'
@@ -28,7 +24,7 @@ import { useProfileIdentity } from 'src/hooks/useProfileIdentity'
 import { getProfileLayout } from 'src/layouts/ProfileLayout'
 import type { NextPageWithLayout } from 'src/pages/_app'
 import {
-  activityGrid,
+  profileDashboardGrid,
   profileHeaderActions,
   profileHeaderCopyRow,
   profileHeaderIdentity,
@@ -43,10 +39,8 @@ import {
   profileWalletAddress,
 } from 'src/styles/profile.css'
 import {
-  AUCTION_EVENT_TYPES,
   createDaoKey,
   dedupeProfileTokens,
-  GOVERNANCE_EVENT_TYPES,
   parseDaoKeys,
   type ProfileToken,
   toggleDaoSelection,
@@ -246,7 +240,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   const stats: Array<{ label: string; value: number | string; isPartial?: boolean }> = [
     {
       label: 'DAOs',
-      value: isLoadingDaos || daosError ? '—' : daoCount,
+      value: daosError || (isLoadingDaos && !daos.length) ? '—' : daoCount,
       isPartial: !!daosError,
     },
     {
@@ -331,30 +325,19 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
           </div>
         </section>
 
-        <ProfileDaoSelector
-          daos={daos}
-          isLoading={isLoadingDaos}
-          selectedKeys={selectedDaoKeys}
-          onToggle={(daoKey) => setDaoKeys(toggleDaoSelection(selectedDaoKeys, daoKey))}
-          onClear={() => setDaoKeys([])}
-        />
-
-        <div className={activityGrid}>
-          <ProfileActivityPanel
-            title="Auction activity"
-            group="auction"
-            profileAddress={userAddress as AddressType}
-            eventTypes={[...AUCTION_EVENT_TYPES] as FeedEventType[]}
-            selectedDaoKeys={selectedDaoKeys}
-            extraItems={dashboardData.auctionWins}
-            partialChainNames={dashboardData.failedChainNames}
+        <div className={profileDashboardGrid}>
+          <ProfileDaoSelector
+            daos={daos}
+            isLoading={isLoadingDaos}
+            profileAddress={userAddress}
+            selectedKeys={selectedDaoKeys}
+            onToggle={(daoKey) => setDaoKeys(toggleDaoSelection(selectedDaoKeys, daoKey))}
+            onClear={() => setDaoKeys([])}
           />
           <ProfileActivityPanel
-            title="Governance activity"
-            group="governance"
             profileAddress={userAddress as AddressType}
-            eventTypes={[...GOVERNANCE_EVENT_TYPES] as FeedEventType[]}
             selectedDaoKeys={selectedDaoKeys}
+            extraItems={dashboardData.auctionWins}
             partialChainNames={dashboardData.failedChainNames}
           />
         </div>

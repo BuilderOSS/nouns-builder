@@ -1,7 +1,13 @@
-import { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { FeedItem } from '@buildeross/types'
-import { render, screen, within } from '@testing-library/react'
-import { activityVoteAgainst, activityVoteFor } from 'src/styles/profile.css'
+import { fireEvent, render, screen, within } from '@testing-library/react'
+import {
+  activityDaoMeta,
+  activityDaoNameRow,
+  activityRowContent,
+  activityVoteAgainst,
+  activityVoteFor,
+  profileDashboardSurface,
+} from 'src/styles/profile.css'
 
 import { ProfileActivityPanel } from './ProfileActivityPanel'
 
@@ -90,31 +96,33 @@ vi.mock('next/link', () => ({
 }))
 
 describe('ProfileActivityPanel', () => {
-  it('omits chain name and its adjacent separator from visible metadata', () => {
-    render(
-      <ProfileActivityPanel
-        title="Auction activity"
-        group="auction"
-        profileAddress={profileAddress}
-        eventTypes={[FeedEventType.AuctionBidPlaced]}
-        selectedDaoKeys={[]}
-      />
-    )
+  it('renders DAO and chain logo above the date on the right side of the card', () => {
+    render(<ProfileActivityPanel profileAddress={profileAddress} selectedDaoKeys={[]} />)
 
     const row = screen.getByRole('link', { name: /Bid on Token 1/ })
-    expect(within(row).getByText('Test DAO')).toBeVisible()
+    const activityDetails = row.querySelector<HTMLElement>(`.${activityRowContent}`)
+    const daoMetadata = row.querySelector<HTMLElement>(`.${activityDaoMeta}`)
+    expect(activityDetails).not.toBeNull()
+    expect(daoMetadata).not.toBeNull()
+
+    const daoName = within(daoMetadata!).getByText('Test DAO')
+    const chainLogo = within(daoMetadata!).getByRole('img', {
+      name: 'Ethereum network',
+    })
+
+    expect(daoMetadata).toBeVisible()
+    expect(daoName.parentElement).toHaveClass(activityDaoNameRow)
+    expect(daoName.parentElement).toContainElement(chainLogo)
+    expect(daoMetadata.lastElementChild).not.toBe(daoName.parentElement)
+    expect(activityDetails).toHaveTextContent('1 ETH')
+    expect(daoMetadata).not.toHaveTextContent('1 ETH')
     expect(within(row).queryByText('Ethereum')).not.toBeInTheDocument()
-    expect(row).toHaveTextContent(/Test DAO.*1 ETH/)
-    expect(row).not.toHaveTextContent(/Test DAO.*Ethereum/)
   })
 
   it('labels proposal votes as for or against with semantic colors', () => {
     render(
       <ProfileActivityPanel
-        title="Governance activity"
-        group="governance"
         profileAddress={profileAddress}
-        eventTypes={[FeedEventType.ProposalVoted]}
         selectedDaoKeys={[]}
         extraItems={[vote('FOR', '1'), vote('AGAINST', '2')]}
       />
@@ -125,5 +133,38 @@ describe('ProfileActivityPanel', () => {
 
     expect(within(forRow).getByText('For')).toHaveClass(activityVoteFor)
     expect(within(againstRow).getByText('Against')).toHaveClass(activityVoteAgainst)
+  })
+
+  it('renders one unified activity region and offers all seven activity kinds', () => {
+    render(
+      <ProfileActivityPanel
+        profileAddress={profileAddress}
+        selectedDaoKeys={[]}
+        extraItems={[vote('FOR', '1')]}
+      />
+    )
+
+    expect(screen.getByRole('heading', { name: 'Activity' })).toBeVisible()
+    expect(screen.getByRole('region', { name: 'Activity' })).toHaveClass(
+      profileDashboardSurface
+    )
+    expect(screen.getByRole('link', { name: /Bid on Token 1/ })).toBeVisible()
+    expect(screen.getByRole('link', { name: /FOR proposal/ })).toBeVisible()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter activity' }))
+    expect(
+      screen.getAllByRole('checkbox').map((checkbox) => checkbox.getAttribute('name'))
+    ).toHaveLength(7)
+    ;[
+      'Bids',
+      'Wins',
+      'Settles',
+      'Proposal creation',
+      'Votes',
+      'Proposal updates',
+      'Executions',
+    ].forEach((label) =>
+      expect(screen.getByRole('checkbox', { name: label })).toBeVisible()
+    )
   })
 })

@@ -40,6 +40,15 @@ export type ClassifiedProfileActivity = {
   kind: ProfileActivityKind
 }
 
+export const PROFILE_ACTIVITY_EVENT_TYPES = [
+  'AUCTION_BID_PLACED',
+  'AUCTION_SETTLED',
+  'PROPOSAL_CREATED',
+  'PROPOSAL_VOTED',
+  'PROPOSAL_UPDATED',
+  'PROPOSAL_EXECUTED',
+] as const
+
 export const AUCTION_EVENT_TYPES = ['AUCTION_BID_PLACED', 'AUCTION_SETTLED'] as const
 
 export const GOVERNANCE_EVENT_TYPES = [
@@ -49,18 +58,19 @@ export const GOVERNANCE_EVENT_TYPES = [
   'PROPOSAL_EXECUTED',
 ] as const
 
-export const AUCTION_ACTIVITY_FILTER_OPTIONS: ProfileActivityFilterOption[] = [
+export const PROFILE_ACTIVITY_FILTER_OPTIONS: ProfileActivityFilterOption[] = [
   { value: 'bid', label: 'Bids' },
   { value: 'win', label: 'Wins' },
   { value: 'settled', label: 'Settles' },
-]
-
-export const GOVERNANCE_ACTIVITY_FILTER_OPTIONS: ProfileActivityFilterOption[] = [
   { value: 'proposal', label: 'Proposal creation' },
   { value: 'vote', label: 'Votes' },
   { value: 'update', label: 'Proposal updates' },
   { value: 'execution', label: 'Executions' },
 ]
+
+export const AUCTION_ACTIVITY_FILTER_OPTIONS = PROFILE_ACTIVITY_FILTER_OPTIONS.slice(0, 3)
+export const GOVERNANCE_ACTIVITY_FILTER_OPTIONS =
+  PROFILE_ACTIVITY_FILTER_OPTIONS.slice(3)
 
 export const getInitialProfileTokenVisibleCount = (total: number) =>
   total <= 16 ? total : Math.min(total, 32)
@@ -201,6 +211,30 @@ export const filterProfileActivityByKinds = (
         const kind = classifyProfileActivity(item, profileAddress)?.kind
         return !!kind && selectedKinds.includes(kind)
       })
+
+export const getUnifiedProfileActivity = (
+  items: FeedItem[],
+  extraItems: FeedItem[],
+  profileAddress: string,
+  selectedKeys: string[],
+  selectedKinds: ProfileActivityKind[]
+) => {
+  const unique = new Map<string, FeedItem>()
+
+  ;[...extraItems, ...items].forEach((item) => {
+    if (!classifyProfileActivity(item, profileAddress)) return
+    if (!matchesDaoSelection(item.chainId, item.daoId, selectedKeys)) return
+    const key = `${item.chainId}:${item.id}`
+    const existing = unique.get(key)
+    if (!existing || item.timestamp > existing.timestamp) unique.set(key, item)
+  })
+
+  return filterProfileActivityByKinds(
+    Array.from(unique.values()).sort((left, right) => right.timestamp - left.timestamp),
+    profileAddress,
+    selectedKinds
+  )
+}
 
 export type ProfileStats = {
   daos: number

@@ -680,14 +680,37 @@ export const delegateDaoMeta = style({
 })
 
 export const profileDaoFilterButton = style({
-  display: 'block',
-  width: '100%',
+  position: 'absolute',
+  inset: 0,
+  zIndex: 0,
   padding: 0,
   border: 'none',
   background: 'transparent',
-  color: 'inherit',
-  textAlign: 'inherit',
   cursor: 'pointer',
+})
+
+export const profileDaoFilterContainer = style({
+  position: 'relative',
+  width: '100%',
+})
+
+export const profileDaoFilterContent = style({
+  position: 'relative',
+  zIndex: 1,
+  pointerEvents: 'none',
+})
+
+export const profileDaoNameLink = style({
+  position: 'relative',
+  zIndex: 2,
+  minWidth: 0,
+  color: 'inherit',
+  textDecoration: 'none',
+  pointerEvents: 'auto',
+  selectors: {
+    '&:hover': { textDecoration: 'underline' },
+    '&:focus-visible': { outline: `3px solid ${color.positive}`, outlineOffset: '2px' },
+  },
 })
 
 export const profilePage = style({
@@ -1034,9 +1057,9 @@ export const daoSelectorInfoButton = style({
 export const daoSelectorInfoTooltip = style({
   position: 'absolute',
   top: 'calc(100% + 8px)',
-  right: 0,
-  zIndex: 20,
-  width: '280px',
+  left: '-72px',
+  zIndex: 100,
+  width: 'min(280px, calc(100vw - 48px))',
   padding: '10px 12px',
   border: `1px solid ${color.border}`,
   borderRadius: '8px',
@@ -1069,6 +1092,32 @@ export const daoSelectorInfoTooltip = style({
   },
 })
 
+export const profileDaoListRoot = style({
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
+  '@media': {
+    '(min-width: 768px)': {
+      flex: 1,
+      minHeight: 0,
+    },
+  },
+})
+
+export const profileDaoListFooter = style({
+  display: 'flex',
+  justifyContent: 'center',
+  flexShrink: 0,
+  marginTop: '16px',
+  paddingTop: '16px',
+  borderTop: `1px solid ${color.border}`,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.border,
+    },
+  },
+})
+
 export const profileChainIcon = style({
   display: 'block',
   width: '18px',
@@ -1094,13 +1143,56 @@ export const profileChainFallback = style({
   },
 })
 
-export const activityGrid = style({
+export const profileDashboardGrid = style({
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr)',
   gap: '24px',
   '@media': {
-    '(min-width: 1024px)': {
-      gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    '(min-width: 768px)': {
+      gridTemplateColumns: 'minmax(240px, 340px) minmax(0, 1fr)',
+      alignItems: 'stretch',
+    },
+  },
+})
+
+export const activityGrid = profileDashboardGrid
+
+export const profileDashboardSurface = style({
+  '@media': {
+    '(min-width: 768px)': {
+      height: '652px',
+    },
+  },
+})
+
+export const profileDaoSurface = style({
+  position: 'relative',
+  zIndex: 2,
+  overflow: 'visible',
+})
+
+export const profileDashboardSection = style({
+  '@media': {
+    '(min-width: 768px)': {
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100%',
+      minHeight: 0,
+    },
+  },
+})
+
+export const profileDaoListViewport = style({
+  boxSizing: 'border-box',
+  width: '100%',
+  overflow: 'visible',
+  padding: '2px',
+  '@media': {
+    '(min-width: 768px)': {
+      flex: 1,
+      minHeight: 0,
+      overflowY: 'auto',
+      paddingRight: '6px',
     },
   },
 })
@@ -1109,6 +1201,13 @@ export const activityViewport = style({
   maxHeight: '548px',
   overflowY: 'auto',
   paddingRight: '6px',
+  '@media': {
+    '(min-width: 768px)': {
+      flex: 1,
+      minHeight: 0,
+      maxHeight: 'none',
+    },
+  },
 })
 
 export const activityHeaderControls = style({
@@ -1151,7 +1250,8 @@ export const activityList = style({
 export const activityRow = style({
   minHeight: '100px',
   padding: '14px',
-  display: 'flex',
+  display: 'grid',
+  gridTemplateColumns: '48px minmax(0, 1fr)',
   alignItems: 'center',
   gap: '12px',
   border: `1px solid ${color.border}`,
@@ -1166,6 +1266,11 @@ export const activityRow = style({
       color: vars.color.text1,
       borderColor: vars.color.border,
       backgroundColor: vars.color.background2,
+    },
+  },
+  '@media': {
+    '(min-width: 640px)': {
+      gridTemplateColumns: '48px minmax(0, 1fr) minmax(112px, 32%)',
     },
   },
 })
@@ -1237,6 +1342,41 @@ export const activityMeta = style({
   fontSize: '12px',
   selectors: {
     'html[data-theme-mode="dark"] &': { color: vars.color.text3 },
+  },
+})
+
+export const activityDaoMeta = style({
+  gridColumn: '2',
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: '4px',
+  color: color.text3,
+  fontSize: '12px',
+  textAlign: 'left',
+  selectors: {
+    'html[data-theme-mode="dark"] &': { color: vars.color.text3 },
+  },
+  '@media': {
+    '(min-width: 640px)': {
+      gridColumn: '3',
+      alignItems: 'flex-end',
+      textAlign: 'right',
+    },
+  },
+})
+
+export const activityDaoNameRow = style({
+  minWidth: 0,
+  display: 'flex',
+  alignItems: 'center',
+  gap: '6px',
+  color: color.text2,
+  fontWeight: 600,
+  overflowWrap: 'anywhere',
+  selectors: {
+    'html[data-theme-mode="dark"] &': { color: vars.color.text2 },
   },
 })
 

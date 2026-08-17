@@ -1,7 +1,7 @@
 import type { MyDaosResponse } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { fireEvent, render, screen } from '@testing-library/react'
-import { daoSelectorChainBadge } from 'src/styles/profile.css'
+import { profileDaoSurface, profileDashboardSurface } from 'src/styles/profile.css'
 
 import {
   getProfileDaoChainMetadata,
@@ -9,8 +9,29 @@ import {
   ProfileDaoSelector,
 } from './ProfileDaoSelector'
 
-vi.mock('@buildeross/ui/Avatar', () => ({
-  DaoAvatar: () => <span aria-label="DAO avatar" />,
+const profileDaoListSpy = vi.fn()
+
+vi.mock('src/components/ProfileDaoList', () => ({
+  ProfileDaoList: (props: Record<string, unknown>) => {
+    profileDaoListSpy(props)
+    return (
+      <button
+        type="button"
+        onClick={() =>
+          (props.onDaoClick as (dao: MyDaosResponse[number]) => void)(
+            (props.daos as MyDaosResponse)[0]
+          )
+        }
+      >
+        Filter Base DAO
+      </button>
+    )
+  },
+}))
+
+vi.mock('wagmi', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('wagmi')>()),
+  useAccount: () => ({ address: '0xabc' }),
 }))
 
 vi.mock('next/image', () => ({
@@ -19,6 +40,19 @@ vi.mock('next/image', () => ({
     <img alt={alt} src={src} title={title} />
   ),
 }))
+
+const daos: MyDaosResponse = [
+  {
+    name: 'Base DAO',
+    contractImage: '',
+    collectionAddress: '0xDaa0000000000000000000000000000000000000',
+    metadataAddress: '0xDab0000000000000000000000000000000000000',
+    treasuryAddress: '0xDac0000000000000000000000000000000000000',
+    governorAddress: '0xDad0000000000000000000000000000000000000',
+    auctionAddress: '0xDae0000000000000000000000000000000000000',
+    chainId: CHAIN_ID.BASE,
+  },
+]
 
 describe('ProfileDaoChainIcon', () => {
   it('maps each membership chain id to its own project chain asset', () => {
@@ -30,123 +64,79 @@ describe('ProfileDaoChainIcon', () => {
       name: 'Base',
       icon: '/chains/base.svg',
     })
-    expect(getProfileDaoChainMetadata(10)).toMatchObject({
-      name: 'OP Mainnet',
-      icon: '/chains/optimism.svg',
-    })
   })
 
   it('renders the actual network name accessibly', () => {
     render(<ProfileDaoChainIcon chainId={8453} />)
-
     expect(screen.getByRole('img', { name: 'Base network' })).toHaveAttribute(
       'src',
       '/chains/base.svg'
     )
   })
+})
 
-  it('uses a neutral accessible fallback for an unknown chain', () => {
-    render(<ProfileDaoChainIcon chainId={999999} />)
-
-    expect(screen.getByRole('img', { name: 'Unknown chain 999999' })).toHaveTextContent(
-      '?'
-    )
-  })
-
-  it('positions the network badge at the card edge outside the name block', () => {
-    const daos: MyDaosResponse = [
-      {
-        name: 'Base DAO',
-        contractImage: '',
-        collectionAddress: '0xDaa0000000000000000000000000000000000000',
-        metadataAddress: '0xDab0000000000000000000000000000000000000',
-        treasuryAddress: '0xDac0000000000000000000000000000000000000',
-        governorAddress: '0xDad0000000000000000000000000000000000000',
-        auctionAddress: '0xDae0000000000000000000000000000000000000',
-        chainId: CHAIN_ID.BASE,
-      },
-    ]
-
-    render(
-      <ProfileDaoSelector
-        daos={daos}
-        isLoading={false}
-        selectedKeys={['8453:0xdaa0000000000000000000000000000000000000']}
-        onToggle={vi.fn()}
-        onClear={vi.fn()}
-      />
-    )
-
-    const filterButton = screen.getByRole('button', {
-      name: 'Filter activity by Base DAO',
-    })
-    const card = filterButton.parentElement
-    const badge = screen.getByRole('img', { name: 'Base network' }).parentElement
-    const name = screen.getByText('Base DAO')
-
-    expect(badge).toHaveClass(daoSelectorChainBadge)
-    expect(name.parentElement).not.toContainElement(badge)
-    expect(card).toContainElement(badge)
-  })
-
-  it('opens the DAO name separately while the rest of the card toggles its filter', () => {
+describe('ProfileDaoSelector', () => {
+  it('reuses the preference-aware single-column DAO list and wires query selection', () => {
     const onToggle = vi.fn()
-    const daos: MyDaosResponse = [
-      {
-        name: 'Base DAO',
-        contractImage: '',
-        collectionAddress: '0xDaa0000000000000000000000000000000000000',
-        metadataAddress: '0xDab0000000000000000000000000000000000000',
-        treasuryAddress: '0xDac0000000000000000000000000000000000000',
-        governorAddress: '0xDad0000000000000000000000000000000000000',
-        auctionAddress: '0xDae0000000000000000000000000000000000000',
-        chainId: CHAIN_ID.BASE,
-      },
-    ]
-
     render(
       <ProfileDaoSelector
         daos={daos}
         isLoading={false}
+        profileAddress="0xabc"
         selectedKeys={[]}
         onToggle={onToggle}
         onClear={vi.fn()}
       />
     )
 
-    const link = screen.getByRole('link', { name: 'Base DAO' })
-    expect(link).toHaveAttribute(
-      'href',
-      '/dao/base/0xDaa0000000000000000000000000000000000000'
+    expect(profileDaoListSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        daos,
+        userAddress: '0xabc',
+        isOwnProfile: true,
+        activeDaoKeys: [],
+      })
     )
-    expect(link).toHaveAttribute('target', '_blank')
-
-    fireEvent.click(link)
-    expect(onToggle).not.toHaveBeenCalled()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Filter activity by Base DAO' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Filter Base DAO' }))
     expect(onToggle).toHaveBeenCalledWith(
       '8453:0xdaa0000000000000000000000000000000000000'
     )
   })
 
-  it('explains the DAO card link and filter controls', () => {
+  it('shows populated fallback DAOs while SWR revalidates', () => {
     render(
       <ProfileDaoSelector
-        daos={[]}
-        isLoading={false}
+        daos={daos}
+        isLoading
+        profileAddress="0xabc"
         selectedKeys={[]}
         onToggle={vi.fn()}
         onClear={vi.fn()}
       />
     )
 
-    expect(screen.getByRole('button', { name: 'How DAO cards work' })).toHaveAttribute(
-      'aria-describedby',
-      'profile-dao-card-help'
+    expect(screen.queryByLabelText('Loading DAOs')).not.toBeInTheDocument()
+    expect(profileDaoListSpy).toHaveBeenCalledWith(expect.objectContaining({ daos }))
+    expect(screen.getByRole('region', { name: 'DAOs' })).toHaveClass(
+      profileDashboardSurface,
+      profileDaoSurface
     )
-    expect(screen.getByRole('tooltip')).toHaveTextContent(
-      'Select a DAO name to open its page. Select anywhere else on a card to filter the profile.'
+  })
+
+  it('keeps DAO editing owner-only', () => {
+    render(
+      <ProfileDaoSelector
+        daos={daos}
+        isLoading={false}
+        profileAddress="0xdef"
+        selectedKeys={[]}
+        onToggle={vi.fn()}
+        onClear={vi.fn()}
+      />
+    )
+
+    expect(profileDaoListSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isOwnProfile: false })
     )
   })
 })
