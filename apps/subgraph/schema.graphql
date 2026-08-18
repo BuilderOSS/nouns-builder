@@ -302,6 +302,31 @@ type TreasuryAssetPin @entity {
   revokedTxHash: Bytes
 }
 
+type ProfileLinkOverride @entity {
+  # Composite ID: profile-key (ensures uniqueness per profile+key)
+  id: ID!
+
+  # Make profile queryable with index
+  profile: Bytes! @index
+
+  # Allow any string key (flexible for future additions)
+  key: String!
+
+  value: String!
+
+  # Attestation metadata
+  attestationUID: Bytes!
+  transactionHash: Bytes!
+  timestamp: BigInt!
+  creator: Bytes!
+
+  # Revocation tracking
+  revoked: Boolean!
+  revokedAt: BigInt
+  revokedBy: Bytes
+  revokedTxHash: Bytes
+}
+
 enum ProposalVoteSupport {
   FOR
   AGAINST
