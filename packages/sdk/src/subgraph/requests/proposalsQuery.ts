@@ -1,5 +1,4 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { isProposalReplaced } from '@buildeross/utils/proposalState'
 
 import { getProposalState } from '../../contract/requests/getProposalState'
 import { SDK } from '../client'
@@ -54,13 +53,12 @@ export const getProposals = async (
       })
     )
 
-    // Filter out replaced proposals
-    const filteredProposals = allProposals.filter(
-      (proposal) => !isProposalReplaced(proposal.state)
-    )
+    // Show all proposals including replaced versions
+    // Proposals are already sorted by timeCreated desc from GraphQL query
+    // Newer replacements will appear before older replaced proposals
 
     return {
-      proposals: filteredProposals,
+      proposals: allProposals,
       pageInfo: {
         hasNextPage: data.proposals.reverse()[0].proposalNumber !== 1,
       },
