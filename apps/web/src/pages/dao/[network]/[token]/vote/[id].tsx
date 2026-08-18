@@ -2,6 +2,7 @@ import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { SectionHandler } from '@buildeross/dao-ui'
+import { useProposal } from '@buildeross/hooks'
 import {
   PropDates,
   ProposalActions,
@@ -12,7 +13,7 @@ import {
   ProposalVotes,
 } from '@buildeross/proposal-ui'
 import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
-import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { formatAndFetchState, SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { type DaoContractAddresses, useChainStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ProposalState } from '@buildeross/types'
@@ -29,7 +30,7 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import type { NextPageWithLayout } from 'src/pages/_app'
 import type { ProposalOgMetadata } from 'src/pages/api/og/proposal'
 import { votePageWrapper } from 'src/styles/vote.css'
-import useSWR, { unstable_serialize } from 'swr'
+import { unstable_serialize } from 'swr'
 import { getAddress, isAddress } from 'viem'
 import { useBalance } from 'wagmi'
 
@@ -58,12 +59,18 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     chainId: chainId,
   })
 
-  const { data: proposal } = useSWR(
-    chainId && proposalId
-      ? ([SWR_KEYS.PROPOSAL, chainId, proposalId.toLowerCase()] as const)
-      : null,
-    ([, _chainId, _proposalId]) => getProposal(_chainId, _proposalId)
-  )
+  const { proposal } = useProposal({
+    chainId,
+    proposalId,
+  })
+
+  // Client-side redirect if proposal has been replaced
+  React.useEffect(() => {
+    if (proposal?.state === ProposalState.Replaced && proposal.replacedBy) {
+      const latestProposalNumber = proposal.replacedBy.proposalNumber
+      push(`/dao/${chain.slug}/${addresses.token}/vote/${latestProposalNumber}`)
+    }
+  }, [proposal, chain.slug, addresses.token, push])
 
   const openProposalReviewPage = React.useCallback(async () => {
     await push({
