@@ -13,7 +13,6 @@ import {
   ProposalReplacementBanner,
   ProposalVotes,
 } from '@buildeross/proposal-ui'
-import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
 import { formatAndFetchState, SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { type DaoContractAddresses, useChainStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
@@ -273,6 +272,56 @@ VotePage.getLayout = getDaoLayout
 
 export default VotePage
 
+/**
+ * Build GraphQL query parameters based on proposal identifier type
+ */
+function buildProposalQuery(proposalIdOrNumber: string, dao: string) {
+  if (proposalIdOrNumber.startsWith('0x')) {
+    return {
+      where: { proposalId: proposalIdOrNumber.toLowerCase() },
+      first: 1, // Hex ID is unique, only one result
+    }
+  }
+
+  return {
+    where: {
+      proposalNumber: Number.parseInt(proposalIdOrNumber),
+      dao: dao.toLowerCase(),
+    },
+    first: 100, // Fetch all proposals with this number (original + all replacements)
+  }
+}
+
+/**
+ * Find the latest active proposal from query results
+ * For hex ID queries, returns the single result
+ * For number queries, finds the proposal without replacedBy (the active version)
+ *
+ * TODO: Once subgraph re-indexes with updatedAt field, replace this client-side
+ * logic with orderBy: updatedAt in the GraphQL query for better performance
+ */
+function findLatestProposal(
+  proposals: any[],
+  isHexQuery: boolean
+): (typeof proposals)[0] | undefined {
+  if (proposals.length === 0) return undefined
+
+  if (isHexQuery) {
+    // Hex ID query - use the single result
+    return proposals[0]
+  }
+
+  // Number query - find the latest non-replaced proposal
+  const latestProposal = proposals.find((p) => !p.replacedBy)
+
+  if (!latestProposal) {
+    // All proposals are replaced - shouldn't happen, but fallback to first
+    return proposals[0]
+  }
+
+  return latestProposal
+}
+
 export const getServerSideProps: GetServerSideProps = async ({ params, req, res }) => {
   const collection = params?.token as AddressType
   const proposalIdOrNumber = params?.id as string
@@ -289,23 +338,21 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
   const env = process.env.VERCEL_ENV || 'development'
   const protocol = env === 'development' ? 'http' : 'https'
 
-  let where: Proposal_Filter
+  const isHexQuery = proposalIdOrNumber.startsWith('0x')
+  const { where, first } = buildProposalQuery(proposalIdOrNumber, collection)
 
-  where = proposalIdOrNumber.startsWith('0x')
-    ? {
-        proposalId: proposalIdOrNumber.toLowerCase(),
-      }
-    : {
-        proposalNumber: Number.parseInt(proposalIdOrNumber),
-        dao: collection.toLowerCase(),
-      }
+  const queryResult = await SubgraphSDK.connect(chain.id).proposalOGMetadata({
+    where,
+    first,
+  })
 
-  const data = await SubgraphSDK.connect(chain.id)
-    .proposalOGMetadata({
-      where,
-      first: 1,
-    })
-    .then((x) => (x.proposals.length > 0 ? x.proposals[0] : undefined))
+  if (!queryResult.proposals || queryResult.proposals.length === 0) {
+    return {
+      notFound: true,
+    }
+  }
+
+  const data = findLatestProposal(queryResult.proposals, isHexQuery)
 
   if (!data) {
     return {
