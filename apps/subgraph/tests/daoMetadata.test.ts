@@ -61,6 +61,11 @@ function seedDao(initialDescription: string): void {
   dao.candidateCount = 0
   dao.totalAuctionSales = BigInt.fromI32(0)
   dao.auctionConfig = auctionConfigId
+  dao.createdAt = BigInt.fromI32(1)
+  dao.createdAtBlock = BigInt.fromI32(1)
+  dao.transactionHash = Bytes.fromHexString(
+    '0x1111111111111111111111111111111111111111111111111111111111111111'
+  )
   dao.save()
 }
 

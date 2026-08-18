@@ -76,6 +76,11 @@ function seedDao(): void {
   dao.candidateCount = 0
   dao.totalAuctionSales = BigInt.fromI32(0)
   dao.auctionConfig = auctionConfig.id
+  dao.createdAt = BigInt.fromI32(1)
+  dao.createdAtBlock = BigInt.fromI32(1)
+  dao.transactionHash = Bytes.fromHexString(
+    '0x1111111111111111111111111111111111111111111111111111111111111111'
+  )
   dao.save()
 }
 
@@ -99,6 +104,9 @@ function seedCandidateGroup(
   group.currentForCount = BigInt.fromI32(0)
   group.currentAgainstCount = BigInt.fromI32(0)
   group.currentAbstainCount = BigInt.fromI32(0)
+  group.transactionHash = Bytes.fromHexString(
+    '0x1111111111111111111111111111111111111111111111111111111111111111'
+  )
   group.save()
 
   // Use composite ID: candidateId-proposalHash
@@ -125,6 +133,9 @@ function seedCandidateGroup(
   version.signatureCount = BigInt.fromI32(0)
   version.totalVoteWeight = BigInt.fromI32(0)
   version.revoked = false
+  version.transactionHash = Bytes.fromHexString(
+    '0x2222222222222222222222222222222222222222222222222222222222222222'
+  )
   if (linkedProposalId.length > 0) {
     version.proposal = linkedProposalId
   }
