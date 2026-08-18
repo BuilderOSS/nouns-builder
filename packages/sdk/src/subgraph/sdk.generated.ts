@@ -14959,7 +14959,7 @@ export const ProposalByExecutionTxHashDocument = gql`
 `
 export const ProposalOgMetadataDocument = gql`
   query proposalOGMetadata($where: Proposal_filter!, $first: Int!) {
-    proposals(where: $where, first: $first) {
+    proposals(where: $where, first: $first, orderBy: timeCreated, orderDirection: desc) {
       ...ProposalDetail
       votes {
         ...ProposalVote
