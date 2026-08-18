@@ -22,7 +22,8 @@ export const ProposalCard: React.FC<ProposalCardProps> = ({
   ...proposal
 }) => {
   const { getProposalLink } = useLinks()
-  const { title, proposalNumber, proposalId, timeCreated, state, proposer, values } = proposal
+  const { title, proposalNumber, proposalId, timeCreated, state, proposer, values } =
+    proposal
   const isMounted = useIsMounted()
   const { token } = useDaoStore((state) => state.addresses)
   const { id: chainId } = useChainStore((state) => state.chain)

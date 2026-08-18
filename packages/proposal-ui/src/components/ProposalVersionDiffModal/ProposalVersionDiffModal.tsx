@@ -2,7 +2,7 @@ import { type ProposalVersion } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { AnimatedModal } from '@buildeross/ui/Modal'
-import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { createInlineDiff, type DiffLine } from '../../utils/textDiff'
@@ -195,14 +195,14 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
             {isOriginal ? 'Original Proposal' : `${versionLabel} ${versionIndex}`}
           </Text>
           <Flex gap="x2" align="center">
-            {versionProposalId && (
+            {addresses.token && versionProposalId && getProposalLink && (
               <Button
                 as="a"
-                href={getProposalLink?.(chain.id, addresses.token, versionProposalId).href}
+                href={getProposalLink(chain.id, addresses.token, versionProposalId).href}
                 variant="secondary"
                 size="sm"
               >
-                View this version →
+                View this version <Icon id="arrow-right" size="sm" />
               </Button>
             )}
             <Button variant="ghost" size="sm" onClick={onClose}>
