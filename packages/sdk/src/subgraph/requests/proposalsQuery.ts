@@ -38,7 +38,7 @@ export const getProposals = async (
             proposal.dao.governorAddress,
             proposal.proposalId
           ),
-          updatePeriodEnd: updatePeriodEnd ? Number(updatePeriodEnd) : undefined,
+          ...(updatePeriodEnd ? { updatePeriodEnd: Number(updatePeriodEnd) } : {}),
         }
 
         // executableFrom and expiresAt will always either be both defined, or neither defined
