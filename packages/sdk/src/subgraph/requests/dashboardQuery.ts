@@ -35,6 +35,18 @@ export const dashboardRequest = async (
       .filter((result) => result.status === 'fulfilled')
       .map((result) => result.value)
 
+    // If all requests failed, throw an error instead of returning empty results
+    if (data.length === 0 && results.length > 0) {
+      const rejectedReasons = results
+        .filter((result) => result.status === 'rejected')
+        .map((result) => result.reason)
+
+      const firstError = rejectedReasons[0]
+      throw new Error(
+        firstError?.message || 'All dashboard queries failed across default chains'
+      )
+    }
+
     return data
       .map((queries) =>
         queries.daos.map((dao) => ({
