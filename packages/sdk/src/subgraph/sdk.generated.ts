@@ -10959,7 +10959,26 @@ export type ProposalFragment = {
   executionTransactionHash?: any | null
   vetoTransactionHash?: any | null
   cancelTransactionHash?: any | null
+  updatePeriodEnd?: any | null
+  updateMessage?: string | null
+  updateCount: number
   dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+  candidateVersion?: {
+    __typename?: 'ProposalCandidateVersion'
+    candidateId: any
+    proposalHash: any
+    attestationUID: any
+    versionNumber: any
+    proposal?: {
+      __typename?: 'Proposal'
+      id: string
+      proposalId: any
+      proposalNumber: number
+    } | null
+    group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+  } | null
+  replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
+  replacedBy?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
 }
 
 export type ProposalDetailFragment = {
@@ -10992,42 +11011,10 @@ export type ProposalDetailFragment = {
   executionTransactionHash?: any | null
   vetoTransactionHash?: any | null
   cancelTransactionHash?: any | null
-  dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
-}
-
-export type ProposalDetailUpdatableFragment = {
-  __typename?: 'Proposal'
-  metadata?: string | null
   updatePeriodEnd?: any | null
   updateMessage?: string | null
   updateCount: number
-  abstainVotes: number
-  againstVotes: number
-  calldatas?: string | null
-  description?: string | null
-  representedAddress?: string | null
-  discussionUrl?: string | null
-  descriptionHash: any
-  executableFrom?: any | null
-  expiresAt?: any | null
-  forVotes: number
-  proposalId: any
-  proposalNumber: number
-  proposalThreshold: any
-  proposer: any
-  quorumVotes: any
-  targets: Array<any>
-  timeCreated: any
-  title?: string | null
-  values: Array<any>
-  voteEnd: any
-  voteStart: any
-  snapshotBlockNumber: any
-  transactionHash: any
-  executedAt?: any | null
-  executionTransactionHash?: any | null
-  vetoTransactionHash?: any | null
-  cancelTransactionHash?: any | null
+  dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
   candidateVersion?: {
     __typename?: 'ProposalCandidateVersion'
     candidateId: any
@@ -11044,58 +11031,6 @@ export type ProposalDetailUpdatableFragment = {
   } | null
   replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
   replacedBy?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
-  dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
-}
-
-export type ProposalUpdatableFragment = {
-  __typename?: 'Proposal'
-  updatePeriodEnd?: any | null
-  updateMessage?: string | null
-  updateCount: number
-  abstainVotes: number
-  againstVotes: number
-  calldatas?: string | null
-  description?: string | null
-  representedAddress?: string | null
-  discussionUrl?: string | null
-  descriptionHash: any
-  executableFrom?: any | null
-  expiresAt?: any | null
-  forVotes: number
-  proposalId: any
-  proposalNumber: number
-  proposalThreshold: any
-  proposer: any
-  quorumVotes: any
-  targets: Array<any>
-  timeCreated: any
-  title?: string | null
-  values: Array<any>
-  voteEnd: any
-  voteStart: any
-  snapshotBlockNumber: any
-  transactionHash: any
-  executedAt?: any | null
-  executionTransactionHash?: any | null
-  vetoTransactionHash?: any | null
-  cancelTransactionHash?: any | null
-  candidateVersion?: {
-    __typename?: 'ProposalCandidateVersion'
-    candidateId: any
-    proposalHash: any
-    attestationUID: any
-    versionNumber: any
-    proposal?: {
-      __typename?: 'Proposal'
-      id: string
-      proposalId: any
-      proposalNumber: number
-    } | null
-    group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
-  } | null
-  replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
-  replacedBy?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
-  dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
 }
 
 export type ProposalVoteFragment = {
@@ -12337,74 +12272,11 @@ export type DaosForDashboardQuery = {
       executionTransactionHash?: any | null
       vetoTransactionHash?: any | null
       cancelTransactionHash?: any | null
-      votes: Array<{ __typename?: 'ProposalVote'; voter: any }>
-      dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
-    }>
-    currentAuction?: {
-      __typename?: 'Auction'
-      endTime: any
-      highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
-      token: { __typename?: 'Token'; name: string; image?: string | null; tokenId: any }
-    } | null
-    links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
-  }>
-}
-
-export type DaosForDashboardUpdatableQueryVariables = Exact<{
-  user: Scalars['Bytes']['input']
-  first?: InputMaybe<Scalars['Int']['input']>
-  skip?: InputMaybe<Scalars['Int']['input']>
-}>
-
-export type DaosForDashboardUpdatableQuery = {
-  __typename?: 'Query'
-  daos: Array<{
-    __typename?: 'DAO'
-    contractImage: string
-    name: string
-    tokenAddress: any
-    metadataAddress: any
-    treasuryAddress: any
-    auctionAddress: any
-    governorAddress: any
-    auctionConfig: {
-      __typename?: 'AuctionConfig'
-      minimumBidIncrement: any
-      reservePrice: any
-    }
-    proposals: Array<{
-      __typename?: 'Proposal'
-      voteEnd: any
-      voteStart: any
-      expiresAt?: any | null
       updatePeriodEnd?: any | null
       updateMessage?: string | null
       updateCount: number
-      abstainVotes: number
-      againstVotes: number
-      calldatas?: string | null
-      description?: string | null
-      representedAddress?: string | null
-      discussionUrl?: string | null
-      descriptionHash: any
-      executableFrom?: any | null
-      forVotes: number
-      proposalId: any
-      proposalNumber: number
-      proposalThreshold: any
-      proposer: any
-      quorumVotes: any
-      targets: Array<any>
-      timeCreated: any
-      title?: string | null
-      values: Array<any>
-      snapshotBlockNumber: any
-      transactionHash: any
-      executedAt?: any | null
-      executionTransactionHash?: any | null
-      vetoTransactionHash?: any | null
-      cancelTransactionHash?: any | null
       votes: Array<{ __typename?: 'ProposalVote'; voter: any }>
+      dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
       candidateVersion?: {
         __typename?: 'ProposalCandidateVersion'
         candidateId: any
@@ -12429,7 +12301,6 @@ export type DaosForDashboardUpdatableQuery = {
         proposalId: any
         proposalNumber: number
       } | null
-      dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
     }>
     currentAuction?: {
       __typename?: 'Auction'
@@ -13068,6 +12939,9 @@ export type ProposalQuery = {
     executionTransactionHash?: any | null
     vetoTransactionHash?: any | null
     cancelTransactionHash?: any | null
+    updatePeriodEnd?: any | null
+    updateMessage?: string | null
+    updateCount: number
     votes: Array<{
       __typename?: 'ProposalVote'
       voter: any
@@ -13077,6 +12951,26 @@ export type ProposalQuery = {
       timestamp: any
     }>
     dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+    candidateVersion?: {
+      __typename?: 'ProposalCandidateVersion'
+      candidateId: any
+      proposalHash: any
+      attestationUID: any
+      versionNumber: any
+      proposal?: {
+        __typename?: 'Proposal'
+        id: string
+        proposalId: any
+        proposalNumber: number
+      } | null
+      group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+    } | null
+    replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
+    replacedBy?: {
+      __typename?: 'Proposal'
+      proposalId: any
+      proposalNumber: number
+    } | null
   } | null
 }
 
@@ -13133,67 +13027,9 @@ export type ProposalOgMetadataQuery = {
     executionTransactionHash?: any | null
     vetoTransactionHash?: any | null
     cancelTransactionHash?: any | null
-    votes: Array<{
-      __typename?: 'ProposalVote'
-      voter: any
-      support: ProposalVoteSupport
-      weight: number
-      reason?: string | null
-      timestamp: any
-    }>
-    dao: {
-      __typename?: 'DAO'
-      name: string
-      contractImage: string
-      tokenAddress: any
-      metadataAddress: any
-      auctionAddress: any
-      treasuryAddress: any
-      governorAddress: any
-    }
-  }>
-}
-
-export type ProposalOgMetadataUpdatableQueryVariables = Exact<{
-  where: Proposal_Filter
-  first: Scalars['Int']['input']
-}>
-
-export type ProposalOgMetadataUpdatableQuery = {
-  __typename?: 'Query'
-  proposals: Array<{
-    __typename?: 'Proposal'
-    metadata?: string | null
     updatePeriodEnd?: any | null
     updateMessage?: string | null
     updateCount: number
-    abstainVotes: number
-    againstVotes: number
-    calldatas?: string | null
-    description?: string | null
-    representedAddress?: string | null
-    discussionUrl?: string | null
-    descriptionHash: any
-    executableFrom?: any | null
-    expiresAt?: any | null
-    forVotes: number
-    proposalId: any
-    proposalNumber: number
-    proposalThreshold: any
-    proposer: any
-    quorumVotes: any
-    targets: Array<any>
-    timeCreated: any
-    title?: string | null
-    values: Array<any>
-    voteEnd: any
-    voteStart: any
-    snapshotBlockNumber: any
-    transactionHash: any
-    executedAt?: any | null
-    executionTransactionHash?: any | null
-    vetoTransactionHash?: any | null
-    cancelTransactionHash?: any | null
     votes: Array<{
       __typename?: 'ProposalVote'
       voter: any
@@ -13233,77 +13069,6 @@ export type ProposalOgMetadataUpdatableQuery = {
       proposalNumber: number
     } | null
   }>
-}
-
-export type ProposalUpdatableQueryVariables = Exact<{
-  proposalId: Scalars['ID']['input']
-}>
-
-export type ProposalUpdatableQuery = {
-  __typename?: 'Query'
-  proposal?: {
-    __typename?: 'Proposal'
-    metadata?: string | null
-    updatePeriodEnd?: any | null
-    updateMessage?: string | null
-    updateCount: number
-    abstainVotes: number
-    againstVotes: number
-    calldatas?: string | null
-    description?: string | null
-    representedAddress?: string | null
-    discussionUrl?: string | null
-    descriptionHash: any
-    executableFrom?: any | null
-    expiresAt?: any | null
-    forVotes: number
-    proposalId: any
-    proposalNumber: number
-    proposalThreshold: any
-    proposer: any
-    quorumVotes: any
-    targets: Array<any>
-    timeCreated: any
-    title?: string | null
-    values: Array<any>
-    voteEnd: any
-    voteStart: any
-    snapshotBlockNumber: any
-    transactionHash: any
-    executedAt?: any | null
-    executionTransactionHash?: any | null
-    vetoTransactionHash?: any | null
-    cancelTransactionHash?: any | null
-    votes: Array<{
-      __typename?: 'ProposalVote'
-      voter: any
-      support: ProposalVoteSupport
-      weight: number
-      reason?: string | null
-      timestamp: any
-    }>
-    candidateVersion?: {
-      __typename?: 'ProposalCandidateVersion'
-      candidateId: any
-      proposalHash: any
-      attestationUID: any
-      versionNumber: any
-      proposal?: {
-        __typename?: 'Proposal'
-        id: string
-        proposalId: any
-        proposalNumber: number
-      } | null
-      group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
-    } | null
-    replaces?: { __typename?: 'Proposal'; proposalId: any; proposalNumber: number } | null
-    replacedBy?: {
-      __typename?: 'Proposal'
-      proposalId: any
-      proposalNumber: number
-    } | null
-    dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
-  } | null
 }
 
 export type ProposalVersionsQueryVariables = Exact<{
@@ -13341,48 +13106,10 @@ export type ProposalVersionsQuery = {
     executionTransactionHash?: any | null
     vetoTransactionHash?: any | null
     cancelTransactionHash?: any | null
-    dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
-  }>
-}
-
-export type ProposalVersionsUpdatableQueryVariables = Exact<{
-  where?: InputMaybe<Proposal_Filter>
-}>
-
-export type ProposalVersionsUpdatableQuery = {
-  __typename?: 'Query'
-  proposals: Array<{
-    __typename?: 'Proposal'
     updatePeriodEnd?: any | null
     updateMessage?: string | null
     updateCount: number
-    abstainVotes: number
-    againstVotes: number
-    calldatas?: string | null
-    description?: string | null
-    representedAddress?: string | null
-    discussionUrl?: string | null
-    descriptionHash: any
-    executableFrom?: any | null
-    expiresAt?: any | null
-    forVotes: number
-    proposalId: any
-    proposalNumber: number
-    proposalThreshold: any
-    proposer: any
-    quorumVotes: any
-    targets: Array<any>
-    timeCreated: any
-    title?: string | null
-    values: Array<any>
-    voteEnd: any
-    voteStart: any
-    snapshotBlockNumber: any
-    transactionHash: any
-    executedAt?: any | null
-    executionTransactionHash?: any | null
-    vetoTransactionHash?: any | null
-    cancelTransactionHash?: any | null
+    dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
     candidateVersion?: {
       __typename?: 'ProposalCandidateVersion'
       candidateId: any
@@ -13403,7 +13130,6 @@ export type ProposalVersionsUpdatableQuery = {
       proposalId: any
       proposalNumber: number
     } | null
-    dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
   }>
 }
 
@@ -13444,6 +13170,9 @@ export type ProposalsQuery = {
     executionTransactionHash?: any | null
     vetoTransactionHash?: any | null
     cancelTransactionHash?: any | null
+    updatePeriodEnd?: any | null
+    updateMessage?: string | null
+    updateCount: number
     votes: Array<{
       __typename?: 'ProposalVote'
       voter: any
@@ -13453,57 +13182,6 @@ export type ProposalsQuery = {
       timestamp: any
     }>
     dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
-  }>
-}
-
-export type ProposalsUpdatableQueryVariables = Exact<{
-  where?: InputMaybe<Proposal_Filter>
-  first: Scalars['Int']['input']
-  skip?: InputMaybe<Scalars['Int']['input']>
-}>
-
-export type ProposalsUpdatableQuery = {
-  __typename?: 'Query'
-  proposals: Array<{
-    __typename?: 'Proposal'
-    updatePeriodEnd?: any | null
-    updateMessage?: string | null
-    updateCount: number
-    abstainVotes: number
-    againstVotes: number
-    calldatas?: string | null
-    description?: string | null
-    representedAddress?: string | null
-    discussionUrl?: string | null
-    descriptionHash: any
-    executableFrom?: any | null
-    expiresAt?: any | null
-    forVotes: number
-    proposalId: any
-    proposalNumber: number
-    proposalThreshold: any
-    proposer: any
-    quorumVotes: any
-    targets: Array<any>
-    timeCreated: any
-    title?: string | null
-    values: Array<any>
-    voteEnd: any
-    voteStart: any
-    snapshotBlockNumber: any
-    transactionHash: any
-    executedAt?: any | null
-    executionTransactionHash?: any | null
-    vetoTransactionHash?: any | null
-    cancelTransactionHash?: any | null
-    votes: Array<{
-      __typename?: 'ProposalVote'
-      voter: any
-      support: ProposalVoteSupport
-      weight: number
-      reason?: string | null
-      timestamp: any
-    }>
     candidateVersion?: {
       __typename?: 'ProposalCandidateVersion'
       candidateId: any
@@ -13524,7 +13202,6 @@ export type ProposalsUpdatableQuery = {
       proposalId: any
       proposalNumber: number
     } | null
-    dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
   }>
 }
 
@@ -14078,25 +13755,13 @@ export const ProposalFragmentDoc = gql`
     executionTransactionHash
     vetoTransactionHash
     cancelTransactionHash
+    updatePeriodEnd
+    updateMessage
+    updateCount
     dao {
       governorAddress
       tokenAddress
     }
-  }
-`
-export const ProposalDetailFragmentDoc = gql`
-  fragment ProposalDetail on Proposal {
-    ...Proposal
-    metadata
-  }
-  ${ProposalFragmentDoc}
-`
-export const ProposalUpdatableFragmentDoc = gql`
-  fragment ProposalUpdatable on Proposal {
-    ...Proposal
-    updatePeriodEnd
-    updateMessage
-    updateCount
     candidateVersion {
       candidateId
       proposalHash
@@ -14120,14 +13785,13 @@ export const ProposalUpdatableFragmentDoc = gql`
       proposalNumber
     }
   }
-  ${ProposalFragmentDoc}
 `
-export const ProposalDetailUpdatableFragmentDoc = gql`
-  fragment ProposalDetailUpdatable on Proposal {
-    ...ProposalUpdatable
+export const ProposalDetailFragmentDoc = gql`
+  fragment ProposalDetail on Proposal {
+    ...Proposal
     metadata
   }
-  ${ProposalUpdatableFragmentDoc}
+  ${ProposalFragmentDoc}
 `
 export const ProposalVoteFragmentDoc = gql`
   fragment ProposalVote on ProposalVote {
@@ -15015,48 +14679,6 @@ export const DaosForDashboardDocument = gql`
   ${ProposalFragmentDoc}
   ${CurrentAuctionFragmentDoc}
 `
-export const DaosForDashboardUpdatableDocument = gql`
-  query daosForDashboardUpdatable($user: Bytes!, $first: Int, $skip: Int) {
-    daos(
-      where: { or: [{ voters_: { voter: $user } }, { owners_: { owner: $user } }] }
-      first: $first
-      skip: $skip
-    ) {
-      ...DAO
-      contractImage
-      auctionConfig {
-        minimumBidIncrement
-        reservePrice
-      }
-      proposals(
-        where: {
-          executed_not: true
-          canceled_not: true
-          vetoed_not: true
-          replacedBy: null
-        }
-        first: 10
-        skip: 0
-        orderBy: proposalNumber
-        orderDirection: desc
-      ) {
-        ...ProposalUpdatable
-        voteEnd
-        voteStart
-        expiresAt
-        votes {
-          voter
-        }
-      }
-      currentAuction {
-        ...CurrentAuction
-      }
-    }
-  }
-  ${DaoFragmentDoc}
-  ${ProposalUpdatableFragmentDoc}
-  ${CurrentAuctionFragmentDoc}
-`
 export const DaosForUserDocument = gql`
   query daosForUser($user: Bytes!, $first: Int, $skip: Int) {
     daos(
@@ -15356,54 +14978,13 @@ export const ProposalOgMetadataDocument = gql`
   ${ProposalDetailFragmentDoc}
   ${ProposalVoteFragmentDoc}
 `
-export const ProposalOgMetadataUpdatableDocument = gql`
-  query proposalOGMetadataUpdatable($where: Proposal_filter!, $first: Int!) {
-    proposals(where: $where, first: $first) {
-      ...ProposalDetailUpdatable
-      votes {
-        ...ProposalVote
-      }
-      dao {
-        name
-        contractImage
-        tokenAddress
-        metadataAddress
-        auctionAddress
-        treasuryAddress
-        governorAddress
-      }
-    }
-  }
-  ${ProposalDetailUpdatableFragmentDoc}
-  ${ProposalVoteFragmentDoc}
-`
-export const ProposalUpdatableDocument = gql`
-  query proposalUpdatable($proposalId: ID!) {
-    proposal(id: $proposalId) {
-      ...ProposalDetailUpdatable
-      votes {
-        ...ProposalVote
-      }
-    }
-  }
-  ${ProposalDetailUpdatableFragmentDoc}
-  ${ProposalVoteFragmentDoc}
-`
 export const ProposalVersionsDocument = gql`
   query proposalVersions($where: Proposal_filter) {
-    proposals(where: $where, orderBy: proposalNumber, orderDirection: asc) {
+    proposals(where: $where, orderBy: updateCount, orderDirection: asc) {
       ...Proposal
     }
   }
   ${ProposalFragmentDoc}
-`
-export const ProposalVersionsUpdatableDocument = gql`
-  query proposalVersionsUpdatable($where: Proposal_filter) {
-    proposals(where: $where, orderBy: updateCount, orderDirection: asc) {
-      ...ProposalUpdatable
-    }
-  }
-  ${ProposalUpdatableFragmentDoc}
 `
 export const ProposalsDocument = gql`
   query proposals($where: Proposal_filter, $first: Int!, $skip: Int) {
@@ -15421,24 +15002,6 @@ export const ProposalsDocument = gql`
     }
   }
   ${ProposalFragmentDoc}
-  ${ProposalVoteFragmentDoc}
-`
-export const ProposalsUpdatableDocument = gql`
-  query proposalsUpdatable($where: Proposal_filter, $first: Int!, $skip: Int) {
-    proposals(
-      where: $where
-      first: $first
-      skip: $skip
-      orderBy: timeCreated
-      orderDirection: desc
-    ) {
-      ...ProposalUpdatable
-      votes {
-        ...ProposalVote
-      }
-    }
-  }
-  ${ProposalUpdatableFragmentDoc}
   ${ProposalVoteFragmentDoc}
 `
 export const SnapshotsDocument = gql`
@@ -16172,24 +15735,6 @@ export function getSdk(
         variables
       )
     },
-    daosForDashboardUpdatable(
-      variables: DaosForDashboardUpdatableQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
-      signal?: RequestInit['signal']
-    ): Promise<DaosForDashboardUpdatableQuery> {
-      return withWrapper(
-        (wrappedRequestHeaders) =>
-          client.request<DaosForDashboardUpdatableQuery>({
-            document: DaosForDashboardUpdatableDocument,
-            variables,
-            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
-            signal,
-          }),
-        'daosForDashboardUpdatable',
-        'query',
-        variables
-      )
-    },
     daosForUser(
       variables: DaosForUserQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -16370,42 +15915,6 @@ export function getSdk(
         variables
       )
     },
-    proposalOGMetadataUpdatable(
-      variables: ProposalOgMetadataUpdatableQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
-      signal?: RequestInit['signal']
-    ): Promise<ProposalOgMetadataUpdatableQuery> {
-      return withWrapper(
-        (wrappedRequestHeaders) =>
-          client.request<ProposalOgMetadataUpdatableQuery>({
-            document: ProposalOgMetadataUpdatableDocument,
-            variables,
-            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
-            signal,
-          }),
-        'proposalOGMetadataUpdatable',
-        'query',
-        variables
-      )
-    },
-    proposalUpdatable(
-      variables: ProposalUpdatableQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
-      signal?: RequestInit['signal']
-    ): Promise<ProposalUpdatableQuery> {
-      return withWrapper(
-        (wrappedRequestHeaders) =>
-          client.request<ProposalUpdatableQuery>({
-            document: ProposalUpdatableDocument,
-            variables,
-            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
-            signal,
-          }),
-        'proposalUpdatable',
-        'query',
-        variables
-      )
-    },
     proposalVersions(
       variables?: ProposalVersionsQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -16424,24 +15933,6 @@ export function getSdk(
         variables
       )
     },
-    proposalVersionsUpdatable(
-      variables?: ProposalVersionsUpdatableQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
-      signal?: RequestInit['signal']
-    ): Promise<ProposalVersionsUpdatableQuery> {
-      return withWrapper(
-        (wrappedRequestHeaders) =>
-          client.request<ProposalVersionsUpdatableQuery>({
-            document: ProposalVersionsUpdatableDocument,
-            variables,
-            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
-            signal,
-          }),
-        'proposalVersionsUpdatable',
-        'query',
-        variables
-      )
-    },
     proposals(
       variables: ProposalsQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -16456,24 +15947,6 @@ export function getSdk(
             signal,
           }),
         'proposals',
-        'query',
-        variables
-      )
-    },
-    proposalsUpdatable(
-      variables: ProposalsUpdatableQueryVariables,
-      requestHeaders?: GraphQLClientRequestHeaders,
-      signal?: RequestInit['signal']
-    ): Promise<ProposalsUpdatableQuery> {
-      return withWrapper(
-        (wrappedRequestHeaders) =>
-          client.request<ProposalsUpdatableQuery>({
-            document: ProposalsUpdatableDocument,
-            variables,
-            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
-            signal,
-          }),
-        'proposalsUpdatable',
         'query',
         variables
       )

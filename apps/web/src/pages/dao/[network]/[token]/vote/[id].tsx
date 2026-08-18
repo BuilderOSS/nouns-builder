@@ -1,6 +1,5 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { supportsUpdatableProposals } from '@buildeross/constants/subgraph'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { SectionHandler } from '@buildeross/dao-ui'
 import {
@@ -277,20 +276,12 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
         dao: collection.toLowerCase(),
       }
 
-  const sdk = SubgraphSDK.connect(chain.id)
-  const data = supportsUpdatableProposals(chain.id)
-    ? await sdk
-        .proposalOGMetadataUpdatable({
-          where,
-          first: 1,
-        })
-        .then((x) => (x.proposals.length > 0 ? x.proposals[0] : undefined))
-    : await sdk
-        .proposalOGMetadata({
-          where,
-          first: 1,
-        })
-        .then((x) => (x.proposals.length > 0 ? x.proposals[0] : undefined))
+  const data = await SubgraphSDK.connect(chain.id)
+    .proposalOGMetadata({
+      where,
+      first: 1,
+    })
+    .then((x) => (x.proposals.length > 0 ? x.proposals[0] : undefined))
 
   if (!data) {
     return {
@@ -322,13 +313,8 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
   }
 
   // Redirect to latest version if this proposal has been replaced
-  if (
-    proposal.state === ProposalState.Replaced &&
-    'replacedBy' in data &&
-    data.replacedBy
-  ) {
-    const latestProposalNumber = (data.replacedBy as { proposalNumber: number })
-      .proposalNumber
+  if (proposal.state === ProposalState.Replaced && data.replacedBy) {
+    const latestProposalNumber = data.replacedBy.proposalNumber
 
     return {
       redirect: {
