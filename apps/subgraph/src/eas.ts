@@ -1,4 +1,4 @@
-import { Address, BigInt, ByteArray, Bytes, crypto } from '@graphprotocol/graph-ts'
+import { Address, BigInt, ByteArray, Bytes, crypto, log, store } from '@graphprotocol/graph-ts'
 
 import {
   Attested as AttestedEvent,
@@ -254,7 +254,7 @@ function handleProfileLinkAttestation(event: AttestedEvent): void {
   // Basic key validation (prevent empty/whitespace-only keys)
   const trimmedKey = link.key.trim()
   if (trimmedKey.length == 0) {
-    log.warning('Profile link key is empty', [])
+    log.debug('Profile link key is empty', [])
     return
   }
 
@@ -265,7 +265,7 @@ function handleProfileLinkAttestation(event: AttestedEvent): void {
   let override = ProfileLinkOverride.load(compositeId)
   if (override && override.timestamp.gt(event.block.timestamp)) {
     // Existing attestation is newer, ignore this one (out-of-order event)
-    log.warning('Ignoring older attestation for {}-{}', [profile, trimmedKey])
+    log.debug('Ignoring older attestation for {}-{}', [profile, trimmedKey])
     return
   }
 
