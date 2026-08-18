@@ -265,6 +265,7 @@ export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
       ? BigInt.fromI32(0)
       : votingPowerResult.value
     proposalSigner.timestamp = event.block.timestamp
+    proposalSigner.transactionHash = event.transaction.hash
     proposalSigner.save()
   }
 

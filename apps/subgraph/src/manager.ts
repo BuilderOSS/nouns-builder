@@ -39,6 +39,9 @@ export function handleDAODeployed(event: DAODeployedEvent): void {
   dao.auctionAddress = event.params.auction
   dao.treasuryAddress = event.params.treasury
   dao.governorAddress = event.params.governor
+  dao.createdAt = event.block.timestamp
+  dao.createdAtBlock = event.block.number
+  dao.transactionHash = event.transaction.hash
   dao.name = tokenContract.name()
   dao.symbol = tokenContract.symbol()
   let daoMetadata = metadataContract.description()

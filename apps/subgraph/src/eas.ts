@@ -237,7 +237,8 @@ function loadOrCreateCandidateGroup(
   dao: DAO,
   proposer: Address,
   salt: Bytes,
-  timestamp: BigInt
+  timestamp: BigInt,
+  transactionHash: Bytes
 ): ProposalCandidateGroup {
   let groupId = candidateId.toHexString()
   let group = ProposalCandidateGroup.load(groupId)
@@ -247,6 +248,7 @@ function loadOrCreateCandidateGroup(
     group.proposer = proposer
     group.salt = salt
     group.createdAt = timestamp
+    group.transactionHash = transactionHash
     group.candidateNumber = dao.candidateCount + 1
     group.versionCount = BigInt.fromI32(0)
     group.commentCount = BigInt.fromI32(0)
@@ -458,7 +460,8 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
     dao,
     event.params.attester,
     decoded.salt,
-    event.block.timestamp
+    event.block.timestamp,
+    event.transaction.hash
   )
 
   // Validate: only the original proposer can create new versions
@@ -506,6 +509,7 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   version.proposalHash = proposalHash
   version.proposal = null
   version.createdAt = event.block.timestamp
+  version.transactionHash = event.transaction.hash
   let parsedDescription = parseDescriptionFields(decoded.description)
   version.title = parsedDescription[0].length > 0 ? parsedDescription[0] : null
   version.description = parsedDescription[1].length > 0 ? parsedDescription[1] : null
@@ -564,6 +568,7 @@ function handleCandidateCommentAttestation(event: AttestedEvent): void {
   let parentId = decoded.parentCommentUID.toHexString()
   comment.parentComment = parentId == ZERO_BYTES32 ? null : parentId
   comment.createdAt = event.block.timestamp
+  comment.transactionHash = event.transaction.hash
   comment.revoked = false
   comment.save()
 
@@ -663,6 +668,7 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
   signature.signature = decoded.signature
   signature.revoked = false
   signature.createdAt = event.block.timestamp
+  signature.transactionHash = event.transaction.hash
 
   let tokenContract = TokenContract.bind(Address.fromBytes(dao.tokenAddress))
   let votes = tokenContract.try_getVotes(event.params.attester)
