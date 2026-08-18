@@ -10,6 +10,7 @@ import {
   ProposalDetailsGrid,
   ProposalEditedBanner,
   ProposalHeader,
+  ProposalReplacementBanner,
   ProposalVotes,
 } from '@buildeross/proposal-ui'
 import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
@@ -205,7 +206,14 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
                 <Box fontWeight={'heading'}>{displayWarning}</Box>
               </Flex>
             )}
-            <ProposalEditedBanner key="edited-banner" proposal={proposal} />
+            {proposal.state === ProposalState.Replaced && proposal.replacedBy ? (
+              <ProposalReplacementBanner
+                proposalId={proposal.proposalId}
+                replacedByProposalId={proposal.replacedBy.proposalId}
+              />
+            ) : proposal.replaces ? (
+              <ProposalEditedBanner key="edited-banner" proposal={proposal} />
+            ) : null}
 
             {displayActions && (
               <ProposalActions
