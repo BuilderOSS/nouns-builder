@@ -202,7 +202,9 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
                 variant="secondary"
                 size="sm"
               >
-                View this version <Icon id="arrow-right" size="sm" />
+                <Flex align="center" gap="x2">
+                  View this version <Icon id="arrow-right" size="sm" />
+                </Flex>
               </Button>
             )}
             <Button variant="ghost" size="sm" onClick={onClose}>
