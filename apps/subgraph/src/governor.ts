@@ -6,6 +6,7 @@ import {
   crypto,
   dataSource,
   log,
+  store,
 } from '@graphprotocol/graph-ts'
 
 import {
@@ -242,8 +243,6 @@ export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
     return
   }
 
-  proposal.isSigned = true
-
   let governorContract = GovernorContract.bind(event.address)
   let tokenResult = governorContract.try_token()
   if (tokenResult.reverted) {
@@ -254,6 +253,13 @@ export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
   }
 
   let tokenContract = TokenContract.bind(tokenResult.value)
+  proposal.isSigned = true
+
+  let existingSigners = proposal.signers.load()
+  for (let i = 0; i < existingSigners.length; i++) {
+    store.remove('ProposalSigner', existingSigners[i].id)
+  }
+
   for (let i = 0; i < event.params.signers.length; i++) {
     let signer = event.params.signers[i]
     let signerId = proposal.id + '-' + signer.toHexString()

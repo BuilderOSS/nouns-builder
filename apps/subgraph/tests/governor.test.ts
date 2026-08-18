@@ -15,7 +15,7 @@ import {
   test,
 } from 'matchstick-as'
 
-import { AuctionConfig, DAO } from '../generated/schema'
+import { AuctionConfig, DAO, ProposalSigner } from '../generated/schema'
 import {
   ProposalCreated,
   ProposalSignersSet,
@@ -332,5 +332,33 @@ describe('Governor ProposalCreated parsing', () => {
     assert.fieldEquals('Proposal', newId, 'isSigned', 'true')
     assert.fieldEquals('ProposalSigner', newId + '-' + signerOne, 'voteWeight', '42')
     assert.fieldEquals('ProposalSigner', newId + '-' + signerTwo, 'voteWeight', '55')
+  })
+
+  test('removes stale proposal signers when the signer set shrinks', () => {
+    clearStore()
+    setupDataSourceContext()
+    seedDao()
+    mockGovernorProposalUpdatablePeriod()
+
+    handleProposalCreated(createProposalCreatedEvent('Original&&Body'))
+    mockGovernorGetProposal(Bytes.fromHexString(NEW_PROPOSAL_ID))
+    handleProposalUpdated(
+      createProposalUpdatedEvent('{"title":"Updated","description":"Body"}', 'update')
+    )
+
+    const signerOne = '0x0000000000000000000000000000000000000011'
+    const signerTwo = '0x0000000000000000000000000000000000000022'
+    mockGovernorTokenAddress()
+    mockTokenVotes(signerOne, 42)
+    mockTokenVotes(signerTwo, 55)
+    handleProposalSignersSet(createProposalSignersSetEvent([signerOne, signerTwo]))
+
+    mockTokenVotes(signerTwo, 55)
+    handleProposalSignersSet(createProposalSignersSetEvent([signerTwo]))
+
+    const oldSignerId = NEW_PROPOSAL_ID + '-' + signerOne
+    const newSignerId = NEW_PROPOSAL_ID + '-' + signerTwo
+    assert.assertTrue(ProposalSigner.load(oldSignerId) == null)
+    assert.fieldEquals('ProposalSigner', newSignerId, 'voteWeight', '55')
   })
 })

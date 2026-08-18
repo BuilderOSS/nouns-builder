@@ -1,19 +1,30 @@
-import { Address, BigInt, DataSourceContext, ethereum } from '@graphprotocol/graph-ts'
+import {
+  Address,
+  BigInt,
+  Bytes,
+  DataSourceContext,
+  ethereum,
+} from '@graphprotocol/graph-ts'
 import {
   assert,
   clearStore,
+  createMockedFunction,
   dataSourceMock,
   describe,
   newTypedMockEvent,
   test,
 } from 'matchstick-as'
 
-import { AuctionConfig, DAO } from '../generated/schema'
-import { DescriptionUpdated } from '../generated/templates/MetadataRendererBase/MetadataRendererBase'
-import { handleDescriptionUpdated } from '../src/metadata'
+import { AuctionConfig, DAO, DAOTokenOwner, DAOVoter, Token } from '../generated/schema'
+import {
+  BatchMetadataUpdate,
+  DescriptionUpdated,
+} from '../generated/templates/MetadataRendererBase/MetadataRendererBase'
+import { handleBatchMetadataUpdate, handleDescriptionUpdated } from '../src/metadata'
 
 const TOKEN_ADDRESS = '0x00000000000000000000000000000000000000aa'
 const METADATA_ADDRESS = '0x00000000000000000000000000000000000000ab'
+const OWNER_ADDRESS = '0x00000000000000000000000000000000000000ac'
 
 function setupDataSourceContext(): void {
   const context = new DataSourceContext()
@@ -53,6 +64,49 @@ function seedDao(initialDescription: string): void {
   dao.save()
 }
 
+function seedToken(): void {
+  const ownerId = TOKEN_ADDRESS + ':' + OWNER_ADDRESS
+
+  const owner = new DAOTokenOwner(ownerId)
+  owner.dao = TOKEN_ADDRESS
+  owner.owner = Address.fromString(OWNER_ADDRESS)
+  owner.delegate = Address.fromString(OWNER_ADDRESS)
+  owner.daoTokenCount = 1
+  owner.save()
+
+  const voter = new DAOVoter(ownerId)
+  voter.dao = TOKEN_ADDRESS
+  voter.voter = Address.fromString(OWNER_ADDRESS)
+  voter.daoTokenCount = 1
+  voter.save()
+
+  const token = new Token(TOKEN_ADDRESS + ':1')
+  token.name = 'Old token'
+  token.image = null
+  token.content = null
+  token.tokenContract = Address.fromString(TOKEN_ADDRESS)
+  token.tokenId = BigInt.fromI32(1)
+  token.owner = Address.fromString(OWNER_ADDRESS)
+  token.ownerInfo = ownerId
+  token.voterInfo = ownerId
+  token.mintedAt = BigInt.fromI32(1)
+  token.mintTransactionHash = Bytes.fromHexString(
+    '0x1111111111111111111111111111111111111111111111111111111111111111'
+  )
+  token.dao = TOKEN_ADDRESS
+  token.save()
+}
+
+function mockTokenURI(tokenId: i32, uri: string): void {
+  createMockedFunction(
+    Address.fromString(TOKEN_ADDRESS),
+    'tokenURI',
+    'tokenURI(uint256):(string)'
+  )
+    .withArgs([ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(tokenId))])
+    .returns([ethereum.Value.fromString(uri)])
+}
+
 function createDescriptionUpdatedEvent(newDescription: string): DescriptionUpdated {
   const event = newTypedMockEvent<DescriptionUpdated>()
   event.address = Address.fromString(METADATA_ADDRESS)
@@ -62,6 +116,26 @@ function createDescriptionUpdatedEvent(newDescription: string): DescriptionUpdat
       ethereum.Value.fromString('old description')
     ),
     new ethereum.EventParam('newDescription', ethereum.Value.fromString(newDescription)),
+  ]
+
+  return event
+}
+
+function createBatchMetadataUpdateEvent(
+  fromTokenId: i32,
+  toTokenId: i32
+): BatchMetadataUpdate {
+  const event = newTypedMockEvent<BatchMetadataUpdate>()
+  event.address = Address.fromString(METADATA_ADDRESS)
+  event.parameters = [
+    new ethereum.EventParam(
+      '_fromTokenId',
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(fromTokenId))
+    ),
+    new ethereum.EventParam(
+      '_toTokenId',
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(toTokenId))
+    ),
   ]
 
   return event
@@ -126,6 +200,16 @@ describe('Metadata description parsing', () => {
       'url',
       'https://github.com/nouns'
     )
+  })
+
+  test('updates token metadata for the full batch range', () => {
+    initializeTestWithDao()
+    seedToken()
+    mockTokenURI(1, 'data:application/json;base64,eyJuYW1lIjoiVXBkYXRlZCB0b2tlbiJ9')
+
+    handleBatchMetadataUpdate(createBatchMetadataUpdateEvent(1, 1))
+
+    assert.fieldEquals('Token', TOKEN_ADDRESS + ':1', 'name', 'Updated token')
   })
 
   test('replaces previous links on metadata update', () => {

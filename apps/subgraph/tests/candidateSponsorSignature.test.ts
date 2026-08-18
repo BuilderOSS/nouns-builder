@@ -13,17 +13,30 @@ import {
   AuctionConfig,
   CandidateSponsorSignature,
   DAO,
+  Proposal,
   ProposalCandidateGroup,
   ProposalCandidateVersion,
 } from '../generated/schema'
 import { handleAttested } from '../src/eas'
-import { CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID } from '../src/utils/eas'
+import {
+  CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID,
+  PROPOSAL_CANDIDATE_SCHEMA_UID,
+} from '../src/utils/eas'
 
 const TOKEN_ADDRESS = '0x00000000000000000000000000000000000000aa'
 const GOVERNOR_ADDRESS = '0x00000000000000000000000000000000000000bb'
 const EAS_ADDRESS = '0x00000000000000000000000000000000000000cc'
 const PROPOSER = '0x00000000000000000000000000000000000000dd'
 const SIGNER = '0x00000000000000000000000000000000000000ee'
+const CANDIDATE_ATTESTATION_UID =
+  '0x5555555555555555555555555555555555555555555555555555555555555555'
+const CANDIDATE_ID = '0x4de19644aad2210f27759bfca422f383a66425039fddb8d40abcb407caa18568'
+const CANDIDATE_PROPOSAL_HASH =
+  '0x7777777777777777777777777777777777777777777777777777777777777777'
+const EXISTING_PROPOSAL_ID =
+  '0x8888888888888888888888888888888888888888888888888888888888888888'
+const CANDIDATE_DESCRIPTION =
+  '{"version":1,"title":"Test candidate","description":"Candidate description","transactionBundles":[]}'
 const GROUP_ID = '0x1111111111111111111111111111111111111111111111111111111111111111'
 const VERSION_ID = '0x2222222222222222222222222222222222222222222222222222222222222222'
 const PROPOSAL_ID = '0x3333333333333333333333333333333333333333333333333333333333333333'
@@ -67,10 +80,12 @@ function seedDao(): void {
 }
 
 function seedCandidateGroup(
+  candidateId: string = GROUP_ID,
   proposalHash: string = PROPOSAL_ID,
-  attestationUID: string = VERSION_ID
+  attestationUID: string = VERSION_ID,
+  linkedProposalId: string = ''
 ): void {
-  const group = new ProposalCandidateGroup(GROUP_ID)
+  const group = new ProposalCandidateGroup(candidateId)
   group.dao = TOKEN_ADDRESS
   group.proposer = Address.fromString(PROPOSER)
   group.salt = Bytes.fromHexString(
@@ -87,11 +102,11 @@ function seedCandidateGroup(
   group.save()
 
   // Use composite ID: candidateId-proposalHash
-  const versionId = GROUP_ID + '-' + PROPOSAL_ID
+  const versionId = candidateId + '-' + proposalHash
 
   const version = new ProposalCandidateVersion(versionId)
-  version.group = GROUP_ID
-  version.candidateId = Bytes.fromHexString(GROUP_ID)
+  version.group = candidateId
+  version.candidateId = Bytes.fromHexString(candidateId)
   version.salt = Bytes.fromHexString(
     '0x5555555555555555555555555555555555555555555555555555555555555555'
   )
@@ -110,7 +125,55 @@ function seedCandidateGroup(
   version.signatureCount = BigInt.fromI32(0)
   version.totalVoteWeight = BigInt.fromI32(0)
   version.revoked = false
+  if (linkedProposalId.length > 0) {
+    version.proposal = linkedProposalId
+  }
   version.save()
+}
+
+function seedProposal(proposalId: string): void {
+  const proposal = new Proposal(proposalId)
+  proposal.proposalId = Bytes.fromHexString(proposalId)
+  proposal.proposalNumber = 1
+  proposal.dao = TOKEN_ADDRESS
+  proposal.targets = [Bytes.fromHexString(TOKEN_ADDRESS)]
+  proposal.values = [BigInt.fromI32(0)]
+  proposal.calldatas = '0x1234'
+  proposal.title = 'Existing proposal'
+  proposal.description = 'Existing proposal description'
+  proposal.metadata = CANDIDATE_DESCRIPTION
+  proposal.representedAddress = ''
+  proposal.discussionUrl = ''
+  proposal.descriptionHash = Bytes.fromHexString(
+    '0x1086d4f633d0291e07eb8e6ef5d51179974ae18fe827b00cb10b4bc8d6f56bf9'
+  )
+  proposal.proposer = Address.fromString(PROPOSER)
+  proposal.timeCreated = BigInt.fromI32(1)
+  proposal.updatedAt = BigInt.fromI32(1)
+  proposal.againstVotes = 0
+  proposal.forVotes = 0
+  proposal.abstainVotes = 0
+  proposal.voteStart = BigInt.fromI32(1)
+  proposal.voteEnd = BigInt.fromI32(2)
+  proposal.proposalThreshold = BigInt.fromI32(0)
+  proposal.quorumVotes = BigInt.fromI32(0)
+  proposal.executed = false
+  proposal.canceled = false
+  proposal.vetoed = false
+  proposal.queued = false
+  proposal.voteCount = 0
+  proposal.snapshotBlockNumber = BigInt.fromI32(1)
+  proposal.updatePeriodEnd = null
+  proposal.replacedBy = null
+  proposal.replaces = null
+  proposal.updateMessage = null
+  proposal.updateCount = 0
+  proposal.isSigned = false
+  proposal.candidateVersion = null
+  proposal.transactionHash = Bytes.fromHexString(
+    '0x9999999999999999999999999999999999999999999999999999999999999999'
+  )
+  proposal.save()
 }
 
 function mockHashProposal(returnValue: string): void {
@@ -271,5 +334,106 @@ describe('Candidate sponsor signature indexing', () => {
     // Composite ID is proposalHash-signerAddress
     const compositeId = PROPOSAL_ID + '-' + SIGNER.toLowerCase()
     assert.assertTrue(CandidateSponsorSignature.load(compositeId) == null)
+  })
+})
+
+describe('Candidate proposal attestation linking', () => {
+  test('keeps an existing proposal link on duplicate attestation', () => {
+    clearStore()
+    seedDao()
+    seedProposal(EXISTING_PROPOSAL_ID)
+    seedCandidateGroup(
+      CANDIDATE_ID,
+      CANDIDATE_PROPOSAL_HASH,
+      CANDIDATE_ATTESTATION_UID,
+      EXISTING_PROPOSAL_ID
+    )
+
+    const attestationDataTuple = new ethereum.Tuple()
+    attestationDataTuple.push(
+      ethereum.Value.fromFixedBytes(Bytes.fromHexString(CANDIDATE_ID))
+    )
+    attestationDataTuple.push(
+      ethereum.Value.fromFixedBytes(
+        Bytes.fromHexString(
+          '0x5555555555555555555555555555555555555555555555555555555555555555'
+        )
+      )
+    )
+    attestationDataTuple.push(
+      ethereum.Value.fromAddressArray([Address.fromString(TOKEN_ADDRESS)])
+    )
+    attestationDataTuple.push(ethereum.Value.fromUnsignedBigIntArray([BigInt.fromI32(0)]))
+    attestationDataTuple.push(
+      ethereum.Value.fromBytesArray([Bytes.fromHexString('0x1234')])
+    )
+    attestationDataTuple.push(ethereum.Value.fromString(CANDIDATE_DESCRIPTION))
+
+    const attestationData = changetype<Bytes>(
+      ethereum.encode(ethereum.Value.fromTuple(attestationDataTuple))
+    )
+
+    const attestationTuple = new ethereum.Tuple()
+    attestationTuple.push(
+      ethereum.Value.fromFixedBytes(Bytes.fromHexString(CANDIDATE_ATTESTATION_UID))
+    )
+    attestationTuple.push(ethereum.Value.fromFixedBytes(PROPOSAL_CANDIDATE_SCHEMA_UID))
+    attestationTuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(1)))
+    attestationTuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(0)))
+    attestationTuple.push(ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(0)))
+    attestationTuple.push(
+      ethereum.Value.fromFixedBytes(
+        Bytes.fromHexString(
+          '0x0000000000000000000000000000000000000000000000000000000000000000'
+        )
+      )
+    )
+    attestationTuple.push(ethereum.Value.fromAddress(Address.fromString(TOKEN_ADDRESS)))
+    attestationTuple.push(ethereum.Value.fromAddress(Address.fromString(PROPOSER)))
+    attestationTuple.push(ethereum.Value.fromBoolean(true))
+    attestationTuple.push(ethereum.Value.fromBytes(attestationData))
+
+    createMockedFunction(
+      Address.fromString(EAS_ADDRESS),
+      'getAttestation',
+      'getAttestation(bytes32):((bytes32,bytes32,uint64,uint64,uint64,bytes32,address,address,bool,bytes))'
+    )
+      .withArgs([
+        ethereum.Value.fromFixedBytes(Bytes.fromHexString(CANDIDATE_ATTESTATION_UID)),
+      ])
+      .returns([ethereum.Value.fromTuple(attestationTuple)])
+
+    mockHashProposal(CANDIDATE_PROPOSAL_HASH)
+
+    const event = newTypedMockEvent<Attested>()
+    event.address = Address.fromString(EAS_ADDRESS)
+    event.parameters = [
+      new ethereum.EventParam(
+        'recipient',
+        ethereum.Value.fromAddress(Address.fromString(TOKEN_ADDRESS))
+      ),
+      new ethereum.EventParam(
+        'attester',
+        ethereum.Value.fromAddress(Address.fromString(PROPOSER))
+      ),
+      new ethereum.EventParam(
+        'uid',
+        ethereum.Value.fromFixedBytes(Bytes.fromHexString(CANDIDATE_ATTESTATION_UID))
+      ),
+      new ethereum.EventParam(
+        'schema',
+        ethereum.Value.fromFixedBytes(PROPOSAL_CANDIDATE_SCHEMA_UID)
+      ),
+    ]
+
+    handleAttested(event)
+
+    const versionId = CANDIDATE_ID + '-' + CANDIDATE_PROPOSAL_HASH
+    assert.fieldEquals(
+      'ProposalCandidateVersion',
+      versionId,
+      'proposal',
+      EXISTING_PROPOSAL_ID
+    )
   })
 })

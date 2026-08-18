@@ -496,6 +496,7 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
     version.signatureCount = BigInt.fromI32(0)
     version.totalVoteWeight = BigInt.fromI32(0)
     version.revoked = false
+    version.proposal = null
   }
 
   version.candidateId = candidateId
@@ -507,7 +508,6 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   version.metadata = decoded.description
   version.attestationUID = event.params.uid
   version.proposalHash = proposalHash
-  version.proposal = null
   version.createdAt = event.block.timestamp
   version.transactionHash = event.transaction.hash
   let parsedDescription = parseDescriptionFields(decoded.description)
