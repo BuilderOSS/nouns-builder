@@ -130,6 +130,7 @@ type Proposal implements ProposalMetadataEntity @entity {
   descriptionHash: Bytes!
   proposer: Bytes!
   timeCreated: BigInt!
+  updatedAt: BigInt!
   executableFrom: BigInt
   expiresAt: BigInt
   againstVotes: Int!

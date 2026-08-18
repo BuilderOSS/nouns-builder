@@ -86,6 +86,7 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   proposal.descriptionHash = event.params.descriptionHash
   proposal.proposer = event.params.proposal.proposer
   proposal.timeCreated = event.params.proposal.timeCreated
+  proposal.updatedAt = event.block.timestamp
   proposal.againstVotes = event.params.proposal.againstVotes.toI32()
   proposal.forVotes = event.params.proposal.forVotes.toI32()
   proposal.abstainVotes = event.params.proposal.abstainVotes.toI32()
@@ -175,6 +176,7 @@ export function handleProposalUpdated(event: ProposalUpdatedEvent): void {
 
   let proposalData = proposalResult.value
   proposal.timeCreated = proposalData.timeCreated
+  proposal.updatedAt = event.block.timestamp
   proposal.againstVotes = proposalData.againstVotes.toI32()
   proposal.forVotes = proposalData.forVotes.toI32()
   proposal.abstainVotes = proposalData.abstainVotes.toI32()
