@@ -184,8 +184,8 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
     )
   }
 
-  const versionProposalId =
-    activeTab === 'diff' ? currentVersionProposalId : previousVersionProposalId
+  // Always link to the previous version (the one being compared/viewed)
+  const versionProposalId = previousVersionProposalId
 
   return (
     <AnimatedModal open={open} close={onClose} size="large">
