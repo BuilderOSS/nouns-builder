@@ -19,7 +19,6 @@ NETWORKS=(
   "base-sepolia"
   "optimism-mainnet"
   "optimism-sepolia"
-  "zora-mainnet"
 )
 
 echo "🚀 Starting deployment of version '$VERSION' to all networks..."

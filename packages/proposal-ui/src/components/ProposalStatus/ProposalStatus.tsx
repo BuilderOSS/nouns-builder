@@ -17,6 +17,7 @@ export type ProposalForStatus = Pick<
   | 'executedAt'
   | 'title'
   | 'proposalNumber'
+  | 'proposalId'
   | 'timeCreated'
   | 'candidateVersion'
 >

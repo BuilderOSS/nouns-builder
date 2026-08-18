@@ -1,5 +1,4 @@
 import { CHAIN_ID } from '@buildeross/types'
-import { isProposalReplaced } from '@buildeross/utils/proposalState'
 
 import { getProposalState } from '../../contract/requests/getProposalState'
 import { SDK } from '../client'
@@ -10,6 +9,62 @@ export interface ProposalsResponse {
   pageInfo?: {
     hasNextPage: boolean
   }
+}
+
+/**
+ * Sort proposals with replacement-aware logic.
+ * Primary sort: timeCreated descending (newest first)
+ * Tie-breaker: For proposals with same timeCreated, newer replacements come before older versions
+ *
+ * TODO: Once subgraph re-indexes with updatedAt field, replace this client-side sorting
+ * with GraphQL orderBy: updatedAt for better performance and simpler logic.
+ */
+function sortProposalsWithReplacements(proposals: Proposal[]): Proposal[] {
+  // Build lookup map for O(1) access
+  const proposalMap = new Map<string, Proposal>()
+  proposals.forEach((p) => proposalMap.set(p.proposalId.toString(), p))
+
+  // Check if proposalA replaces proposalB (with cycle detection for safety)
+  function replacesTransitive(
+    aId: string,
+    bId: string,
+    visited = new Set<string>()
+  ): boolean {
+    if (visited.has(aId)) return false // Cycle detected
+    visited.add(aId)
+
+    const a = proposalMap.get(aId)
+    if (!a?.replaces?.proposalId) return false
+
+    const replacedId = a.replaces.proposalId.toString()
+    if (replacedId === bId) return true
+
+    return replacesTransitive(replacedId, bId, visited)
+  }
+
+  return [...proposals].sort((a, b) => {
+    // Primary sort: timeCreated descending
+    const aTime = Number(a.timeCreated)
+    const bTime = Number(b.timeCreated)
+    if (aTime !== bTime) {
+      return bTime - aTime
+    }
+
+    // Tie-breaker: Check replacement relationships
+    const aId = a.proposalId.toString()
+    const bId = b.proposalId.toString()
+
+    // Direct replacement check
+    if (a.replaces?.proposalId?.toString() === bId) return -1 // a replaces b, so a comes first
+    if (b.replaces?.proposalId?.toString() === aId) return 1 // b replaces a, so b comes first
+
+    // Transitive replacement check (for chains A → B → C)
+    if (replacesTransitive(aId, bId)) return -1
+    if (replacesTransitive(bId, aId)) return 1
+
+    // Fallback: sort by proposalNumber descending
+    return b.proposalNumber - a.proposalNumber
+  })
 }
 
 export const getProposals = async (
@@ -39,7 +94,7 @@ export const getProposals = async (
             proposal.dao.governorAddress,
             proposal.proposalId
           ),
-          updatePeriodEnd: updatePeriodEnd ? Number(updatePeriodEnd) : undefined,
+          ...(updatePeriodEnd ? { updatePeriodEnd: Number(updatePeriodEnd) } : {}),
         }
 
         // executableFrom and expiresAt will always either be both defined, or neither defined
@@ -54,13 +109,12 @@ export const getProposals = async (
       })
     )
 
-    // Filter out replaced proposals
-    const filteredProposals = allProposals.filter(
-      (proposal) => !isProposalReplaced(proposal.state)
-    )
+    // Show all proposals including replaced versions
+    // Sort with replacement-aware logic to handle proposals with same timeCreated
+    const sortedProposals = sortProposalsWithReplacements(allProposals)
 
     return {
-      proposals: filteredProposals,
+      proposals: sortedProposals,
       pageInfo: {
         hasNextPage: data.proposals.reverse()[0].proposalNumber !== 1,
       },

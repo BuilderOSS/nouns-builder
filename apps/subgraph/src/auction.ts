@@ -31,6 +31,7 @@ export function handleAuctionCreated(event: AuctionCreatedEvent): void {
   auction.endTime = event.params.endTime
   auction.extended = false
   auction.settled = false
+  auction.createdTransactionHash = event.transaction.hash
   auction.bidCount = 0
   auction.token = `${tokenAddress}:${event.params.tokenId.toString()}`
   auction.save()
@@ -62,6 +63,8 @@ export function handleAuctionSettled(event: AuctionSettledEvent): void {
   if (auction == null) return
 
   auction.settled = true
+  auction.settledAt = event.block.timestamp
+  auction.settledTransactionHash = event.transaction.hash
   auction.winningBid = auction.highestBid
   auction.save()
 
@@ -145,6 +148,8 @@ export function handleDurationUpdated(event: DurationUpdatedEvent): void {
   if (auctionConfig == null) return
 
   auctionConfig.duration = event.params.duration
+  auctionConfig.lastUpdatedAt = event.block.timestamp
+  auctionConfig.lastUpdatedTransactionHash = event.transaction.hash
   auctionConfig.save()
 }
 
@@ -156,6 +161,8 @@ export function handleReservePriceUpdated(event: ReservePriceUpdatedEvent): void
   if (auctionConfig == null) return
 
   auctionConfig.reservePrice = event.params.reservePrice
+  auctionConfig.lastUpdatedAt = event.block.timestamp
+  auctionConfig.lastUpdatedTransactionHash = event.transaction.hash
   auctionConfig.save()
 }
 
@@ -167,6 +174,8 @@ export function handleTimeBufferUpdated(event: TimeBufferUpdatedEvent): void {
   if (auctionConfig == null) return
 
   auctionConfig.timeBuffer = event.params.timeBuffer
+  auctionConfig.lastUpdatedAt = event.block.timestamp
+  auctionConfig.lastUpdatedTransactionHash = event.transaction.hash
   auctionConfig.save()
 }
 
@@ -180,5 +189,7 @@ export function handleMinBidIncrementPercentageUpdated(
   if (auctionConfig == null) return
 
   auctionConfig.minimumBidIncrement = event.params.minBidIncrementPercentage
+  auctionConfig.lastUpdatedAt = event.block.timestamp
+  auctionConfig.lastUpdatedTransactionHash = event.transaction.hash
   auctionConfig.save()
 }

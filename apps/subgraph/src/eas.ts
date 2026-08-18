@@ -1,4 +1,4 @@
-import { Address, BigInt, ByteArray, Bytes, crypto } from '@graphprotocol/graph-ts'
+import { Address, BigInt, ByteArray, Bytes, crypto, log, store } from '@graphprotocol/graph-ts'
 
 import {
   Attested as AttestedEvent,
@@ -14,6 +14,7 @@ import {
   CandidateVersionCreatedEvent,
   DAO,
   DaoMultisigUpdate,
+  ProfileLinkOverride,
   Proposal,
   ProposalCandidateGroup,
   ProposalCandidateVersion,
@@ -29,9 +30,11 @@ import {
   decodeCandidateComment,
   decodeCandidateSponsorSignature,
   decodeDaoMultisig,
+  decodeProfileLink,
   decodePropdate,
   decodeProposalCandidate,
   decodeTreasuryAssetPin,
+  PROFILE_LINK_SCHEMA_UID,
   PROPDATE_SCHEMA_UID,
   PROPOSAL_CANDIDATE_SCHEMA_UID,
   TREASURY_ASSET_PIN_SCHEMA_UID,
@@ -232,12 +235,115 @@ function handleTreasuryAssetPinRevoked(event: RevokedEvent): void {
   pin.save()
 }
 
+function handleProfileLinkAttestation(event: AttestedEvent): void {
+  // Self-attestation check
+  if (event.params.attester != event.params.recipient) {
+    return
+  }
+
+  const data = getAttestation(event.address, event.params.uid)
+  if (!data) {
+    return
+  }
+
+  const link = decodeProfileLink(data)
+  if (!link) {
+    return
+  }
+
+  // Basic key validation (prevent empty/whitespace-only keys)
+  const trimmedKey = link.key.trim()
+  if (trimmedKey.length == 0) {
+    log.debug('Profile link key is empty', [])
+    return
+  }
+
+  const profile = event.params.recipient.toHexString()
+  const compositeId = profile + '-' + trimmedKey
+
+  // Check if newer attestation already exists for this key
+  let override = ProfileLinkOverride.load(compositeId)
+  if (override && override.timestamp.gt(event.block.timestamp)) {
+    // Existing attestation is newer, ignore this one (out-of-order event)
+    log.debug('Ignoring older attestation for {}-{}', [profile, trimmedKey])
+    return
+  }
+
+  // Handle empty value as deletion (user wants to remove this link)
+  const trimmedValue = link.value.trim()
+  if (trimmedValue.length == 0) {
+    if (override) {
+      store.remove('ProfileLinkOverride', compositeId)
+    }
+    return
+  }
+
+  // Create new or update existing
+  if (!override) {
+    override = new ProfileLinkOverride(compositeId)
+  }
+
+  override.profile = event.params.recipient
+  override.key = trimmedKey
+  override.value = trimmedValue
+  override.attestationUID = event.params.uid
+  override.transactionHash = event.transaction.hash
+  override.timestamp = event.block.timestamp
+  override.creator = event.params.attester
+  override.revoked = false
+  override.revokedAt = null
+  override.revokedBy = null
+  override.revokedTxHash = null
+  override.save()
+}
+
+function handleProfileLinkRevoked(event: RevokedEvent): void {
+  // Self-revocation check
+  if (event.params.attester != event.params.recipient) {
+    return
+  }
+
+  const data = getAttestation(event.address, event.params.uid)
+  if (!data) {
+    return
+  }
+
+  const link = decodeProfileLink(data)
+  if (!link) {
+    return
+  }
+
+  const trimmedKey = link.key.trim()
+  if (trimmedKey.length == 0) {
+    return
+  }
+
+  const profile = event.params.recipient.toHexString()
+  const compositeId = profile + '-' + trimmedKey
+
+  const override = ProfileLinkOverride.load(compositeId)
+  if (!override) {
+    return
+  }
+
+  // Only mark as revoked if this is the current active attestation
+  if (override.attestationUID.toHexString() == event.params.uid.toHexString()) {
+    override.revoked = true
+    override.revokedAt = event.block.timestamp
+    override.revokedBy = event.params.attester
+    override.revokedTxHash = event.transaction.hash
+    override.save()
+  }
+  // If UIDs don't match, this is revoking an old attestation - ignore it
+}
+
 function loadOrCreateCandidateGroup(
   candidateId: Bytes,
   dao: DAO,
   proposer: Address,
   salt: Bytes,
-  timestamp: BigInt
+  timestamp: BigInt,
+  transactionHash: Bytes
 ): ProposalCandidateGroup {
   let groupId = candidateId.toHexString()
   let group = ProposalCandidateGroup.load(groupId)
@@ -247,6 +353,7 @@ function loadOrCreateCandidateGroup(
     group.proposer = proposer
     group.salt = salt
     group.createdAt = timestamp
+    group.transactionHash = transactionHash
     group.candidateNumber = dao.candidateCount + 1
     group.versionCount = BigInt.fromI32(0)
     group.commentCount = BigInt.fromI32(0)
@@ -458,7 +565,8 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
     dao,
     event.params.attester,
     decoded.salt,
-    event.block.timestamp
+    event.block.timestamp,
+    event.transaction.hash
   )
 
   // Validate: only the original proposer can create new versions
@@ -493,6 +601,7 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
     version.signatureCount = BigInt.fromI32(0)
     version.totalVoteWeight = BigInt.fromI32(0)
     version.revoked = false
+    version.proposal = null
   }
 
   version.candidateId = candidateId
@@ -504,8 +613,8 @@ function handleProposalCandidateAttestation(event: AttestedEvent): void {
   version.metadata = decoded.description
   version.attestationUID = event.params.uid
   version.proposalHash = proposalHash
-  version.proposal = null
   version.createdAt = event.block.timestamp
+  version.transactionHash = event.transaction.hash
   let parsedDescription = parseDescriptionFields(decoded.description)
   version.title = parsedDescription[0].length > 0 ? parsedDescription[0] : null
   version.description = parsedDescription[1].length > 0 ? parsedDescription[1] : null
@@ -564,6 +673,7 @@ function handleCandidateCommentAttestation(event: AttestedEvent): void {
   let parentId = decoded.parentCommentUID.toHexString()
   comment.parentComment = parentId == ZERO_BYTES32 ? null : parentId
   comment.createdAt = event.block.timestamp
+  comment.transactionHash = event.transaction.hash
   comment.revoked = false
   comment.save()
 
@@ -663,6 +773,7 @@ function handleCandidateSponsorSignatureAttestation(event: AttestedEvent): void 
   signature.signature = decoded.signature
   signature.revoked = false
   signature.createdAt = event.block.timestamp
+  signature.transactionHash = event.transaction.hash
 
   let tokenContract = TokenContract.bind(Address.fromBytes(dao.tokenAddress))
   let votes = tokenContract.try_getVotes(event.params.attester)
@@ -785,6 +896,11 @@ function handleCandidateSponsorSignatureRevoked(event: RevokedEvent): void {
 }
 
 export function handleAttested(event: AttestedEvent): void {
+  if (event.params.schema == PROFILE_LINK_SCHEMA_UID) {
+    handleProfileLinkAttestation(event)
+    return
+  }
+
   const dao = DAO.load(event.params.recipient.toHexString())
   if (!dao) return
 
@@ -804,6 +920,11 @@ export function handleAttested(event: AttestedEvent): void {
 }
 
 export function handleRevoked(event: RevokedEvent): void {
+  if (event.params.schema == PROFILE_LINK_SCHEMA_UID) {
+    handleProfileLinkRevoked(event)
+    return
+  }
+
   const dao = DAO.load(event.params.recipient.toHexString())
   if (!dao) return
 

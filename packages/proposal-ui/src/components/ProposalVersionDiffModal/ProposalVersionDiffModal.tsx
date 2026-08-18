@@ -1,7 +1,8 @@
 import { type ProposalVersion } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useLinks } from '@buildeross/ui/LinksProvider'
 import { AnimatedModal } from '@buildeross/ui/Modal'
-import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
 import { createInlineDiff, type DiffLine } from '../../utils/textDiff'
@@ -17,6 +18,8 @@ type ProposalVersionDiffModalProps = {
   versionIndex: number
   isOriginal: boolean
   versionLabel?: string
+  currentVersionProposalId?: string
+  previousVersionProposalId?: string
 }
 
 type TabType = 'diff' | 'full'
@@ -29,9 +32,12 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
   versionIndex,
   isOriginal,
   versionLabel = 'Update',
+  currentVersionProposalId,
+  previousVersionProposalId,
 }) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
+  const { getProposalLink } = useLinks()
   const [activeTab, setActiveTab] = React.useState<TabType>('diff')
 
   // Reset to diff tab when modal opens
@@ -178,6 +184,9 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
     )
   }
 
+  // Always link to the previous version (the one being compared/viewed)
+  const versionProposalId = previousVersionProposalId
+
   return (
     <AnimatedModal open={open} close={onClose} size="large">
       <Flex direction="column" gap="x6" p="x6">
@@ -185,9 +194,23 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
           <Text fontSize={28} fontWeight="display">
             {isOriginal ? 'Original Proposal' : `${versionLabel} ${versionIndex}`}
           </Text>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            Close
-          </Button>
+          <Flex gap="x2" align="center">
+            {addresses.token && versionProposalId && getProposalLink && (
+              <Button
+                as="a"
+                href={getProposalLink(chain.id, addresses.token, versionProposalId).href}
+                variant="secondary"
+                size="sm"
+              >
+                <Flex align="center" gap="x2">
+                  View this version <Icon id="arrow-right" size="sm" />
+                </Flex>
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={onClose}>
+              Close
+            </Button>
+          </Flex>
         </Flex>
 
         {/* Tabs */}
