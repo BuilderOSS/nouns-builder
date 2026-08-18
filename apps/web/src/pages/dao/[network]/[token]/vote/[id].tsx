@@ -52,7 +52,8 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   addresses,
 }) => {
   const chain = useChainStore((state) => state.chain)
-  const { query, push, pathname } = useRouter()
+  const router = useRouter()
+  const { query, push, pathname } = router
 
   const { data: balance } = useBalance({
     address: addresses.treasury,
@@ -64,13 +65,21 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
     proposalId,
   })
 
-  // Client-side redirect if proposal has been replaced
+  // Smart URL rewrite: hex → number (only for latest versions)
   React.useEffect(() => {
-    if (proposal?.state === ProposalState.Replaced && proposal.replacedBy) {
-      const latestProposalNumber = proposal.replacedBy.proposalNumber
-      push(`/dao/${chain.slug}/${addresses.token}/vote/${latestProposalNumber}`)
+    const urlId = router.query.id as string
+
+    if (!proposal || !urlId) return
+
+    // Only rewrite if URL has hex ID AND proposal is latest version
+    if (urlId.startsWith('0x') && proposal.state !== ProposalState.Replaced) {
+      router.replace(
+        `/dao/${chain.slug}/${addresses.token}/vote/${proposal.proposalNumber}`,
+        undefined,
+        { shallow: true }
+      )
     }
-  }, [proposal, chain.slug, addresses.token, push])
+  }, [proposal, router, chain.slug, addresses.token])
 
   const openProposalReviewPage = React.useCallback(async () => {
     await push({
@@ -307,27 +316,6 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
   if (getAddress(proposal.dao.tokenAddress) !== getAddress(collection)) {
     return {
       notFound: true,
-    }
-  }
-
-  if (proposalIdOrNumber.startsWith('0x')) {
-    return {
-      redirect: {
-        destination: `/dao/${network}/${collection}/vote/${proposal.proposalNumber}`,
-        permanent: false,
-      },
-    }
-  }
-
-  // Redirect to latest version if this proposal has been replaced
-  if (proposal.state === ProposalState.Replaced && data.replacedBy) {
-    const latestProposalNumber = data.replacedBy.proposalNumber
-
-    return {
-      redirect: {
-        destination: `/dao/${network}/${collection}/vote/${latestProposalNumber}`,
-        permanent: false, // Use temporary redirect since proposals could be updated again
-      },
     }
   }
 
