@@ -4,7 +4,7 @@ import {
   TREASURY_ASSET_PIN_SCHEMA,
   TREASURY_ASSET_PIN_SCHEMA_UID,
 } from '@buildeross/constants/eas'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box } from '@buildeross/zord'
@@ -14,14 +14,14 @@ import { Formik } from 'formik'
 import { useCallback } from 'react'
 import { encodeFunctionData, getAddress, type Hex, zeroHash } from 'viem'
 
+import { useTransactionComposer } from '../../shared'
 import { pinTreasuryAssetSchema, PinTreasuryAssetValues } from './PinTreasuryAsset.schema'
 import { PinTreasuryAssetForm } from './PinTreasuryAssetForm'
 
 const schemaEncoder = new SchemaEncoder(TREASURY_ASSET_PIN_SCHEMA)
 
 export const PinTreasuryAsset: React.FC = () => {
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
 

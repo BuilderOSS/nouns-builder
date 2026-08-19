@@ -22,6 +22,7 @@ type MobileProposalActionBarProps = {
   continueDisabled?: boolean
   continueLoading?: boolean
   continueLabel?: string
+  queueCount?: number
 }
 
 export const MobileProposalActionBar: React.FC<MobileProposalActionBarProps> = ({
@@ -36,10 +37,12 @@ export const MobileProposalActionBar: React.FC<MobileProposalActionBarProps> = (
   continueDisabled = false,
   continueLoading = false,
   continueLabel = 'Continue',
+  queueCount,
 }) => {
   const transactions = useProposalStore((state) => state.transactions)
   const [queueModalOpen, setQueueModalOpen] = useState(false)
   const [resetModalOpen, setResetModalOpen] = useState(false)
+  const resolvedQueueCount = queueCount ?? transactions.length
 
   return (
     <>
@@ -55,14 +58,14 @@ export const MobileProposalActionBar: React.FC<MobileProposalActionBarProps> = (
           </Button>
         )}
 
-        {showQueue && transactions.length > 0 && (
+        {showQueue && resolvedQueueCount > 0 && (
           <Button
             variant="secondary"
-            aria-label={`Open queue with ${transactions.length} transactions`}
+            aria-label={`Open queue with ${resolvedQueueCount} transactions`}
             onClick={() => setQueueModalOpen(true)}
           >
             <Icon id="queue" />
-            <Text ml={'x1'}>{transactions.length}</Text>
+            <Text ml={'x1'}>{resolvedQueueCount}</Text>
           </Button>
         )}
 

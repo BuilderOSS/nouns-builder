@@ -1,5 +1,5 @@
 import { useDecodedTransactionSingle } from '@buildeross/hooks/useDecodedTransactions'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID, TransactionType } from '@buildeross/types'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
@@ -15,6 +15,7 @@ import {
   WCParams,
   WCPayload,
 } from '../../../hooks/useWalletConnect'
+import { useTransactionComposer } from '../../shared'
 import * as styles from './WalletConnect.css'
 import walletConnectSchema, { WalletConnectValues } from './WalletConnect.schema'
 
@@ -254,8 +255,7 @@ const TransactionPreview = ({ txPayload }: { txPayload: WCPayload }) => {
 }
 
 export const WalletConnect: React.FC = () => {
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const [currentClientData, setCurrentClientData] = useState<WCClientData | null>(null)
   const [currentTxPayload, setCurrentTxPayload] = useState<WCPayload | null>(null)
 

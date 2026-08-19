@@ -1,7 +1,7 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useAvailableUpgrade } from '@buildeross/hooks/useAvailableUpgrade'
 import { getPropertyItems, metadataAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { getLayerName } from '@buildeross/ui/Artwork'
 import { defaultHelperTextStyle } from '@buildeross/ui/styles'
@@ -12,6 +12,7 @@ import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 
 import { useArtworkStore } from '../../../stores/useArtworkStore'
+import { useTransactionComposer } from '../../shared'
 import { UpgradeInProgress, UpgradeRequired } from '../Upgrade'
 import { ReplaceArtworkForm } from './ReplaceArtworkForm'
 
@@ -20,9 +21,11 @@ const REPLACE_ARTWORK_CONTRACT_VERSION = '1.2.0'
 export const ReplaceArtwork: React.FC = () => {
   const { orderedLayers, ipfsUpload, isUploadingToIPFS, resetForm } = useArtworkStore()
   const addresses = useDaoStore((x) => x.addresses)
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
-  const currentTransactions = useProposalStore((state) => state.transactions)
+  const {
+    addTransaction,
+    resetTransactionType,
+    transactions: currentTransactions,
+  } = useTransactionComposer()
   const chain = useChainStore((x) => x.chain)
 
   const {

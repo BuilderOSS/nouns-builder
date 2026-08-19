@@ -8,7 +8,11 @@ import { ProfileMenu } from './ProfileMenu'
 import { ThemeToggle } from './ThemeToggle'
 import { MenuType } from './types'
 
-export const NavMenu = () => {
+interface NavMenuProps {
+  hideChainMenu?: boolean
+}
+
+export const NavMenu = ({ hideChainMenu = false }: NavMenuProps) => {
   const [activeDropdown, setActiveDropdown] = React.useState<MenuType>()
 
   const { address } = useAccount()
@@ -29,11 +33,13 @@ export const NavMenu = () => {
   return (
     <Flex align={'center'} direction={'row'} gap={'x4'}>
       <ThemeToggle />
-      <ChainMenu
-        activeDropdown={activeDropdown}
-        onOpenMenu={onOpenMenu}
-        onSetActiveDropdown={setActiveDropdown}
-      />
+      {!hideChainMenu && (
+        <ChainMenu
+          activeDropdown={activeDropdown}
+          onOpenMenu={onOpenMenu}
+          onSetActiveDropdown={setActiveDropdown}
+        />
+      )}
       <ProfileMenu
         activeDropdown={activeDropdown}
         onOpenMenu={onOpenMenu}

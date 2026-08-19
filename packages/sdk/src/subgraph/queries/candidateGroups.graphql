@@ -1,0 +1,5 @@
+query CandidateGroups($where: ProposalCandidateGroup_filter, $first: Int, $skip: Int, $orderBy: ProposalCandidateGroup_orderBy, $orderDirection: OrderDirection) {
+  proposalCandidateGroups(where: $where, first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection) {
+    ...CandidateGroupFragment
+  }
+}

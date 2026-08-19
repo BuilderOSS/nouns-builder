@@ -15,7 +15,11 @@ import {
 } from './Nav.styles.css'
 import { NavMenu } from './NavMenu'
 
-export const Nav = () => {
+interface NavProps {
+  hideChainMenu?: boolean
+}
+
+export const Nav = ({ hideChainMenu = false }: NavProps) => {
   const scrollDirection = useScrollDirection()
 
   return (
@@ -76,7 +80,7 @@ export const Nav = () => {
           </Flex>
         </Flex>
 
-        <NavMenu />
+        <NavMenu hideChainMenu={hideChainMenu} />
       </Flex>
     </Flex>
   )

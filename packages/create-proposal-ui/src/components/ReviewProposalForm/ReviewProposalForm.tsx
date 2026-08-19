@@ -1,3 +1,4 @@
+import { useProposalState, useProposalTimeline } from '@buildeross/hooks'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import {
   normalizeTextForCompare,
@@ -7,19 +8,22 @@ import {
 import { governorAbi, treasuryAbi } from '@buildeross/sdk/contract'
 import { type Proposal } from '@buildeross/sdk/subgraph'
 import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
+import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import {
+  ProposalState,
+  type SimulationOutput,
   TransactionBundle,
-  useChainStore,
-  useDaoStore,
-  useProposalStore,
-} from '@buildeross/stores'
-import { type SimulationOutput } from '@buildeross/types'
+} from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
+import { TextArea } from '@buildeross/ui/Fields'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { defaultInputLabelStyle } from '@buildeross/ui/styles'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { handleGMTOffset, unpackOptionalArray } from '@buildeross/utils/helpers'
-import { getProvider } from '@buildeross/utils/provider'
+import {
+  buildProposalMetadata,
+  generateProposalSalt,
+} from '@buildeross/utils/proposalMetadata'
 import { Box, Button, Flex, Icon, Stack, Text, vars } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import { Formik, type FormikProps } from 'formik'
@@ -35,7 +39,8 @@ import {
 } from '../../utils/tenderlySimulation'
 import { MobileProposalActionBar } from '../MobileProposalActionBar'
 import { ProposalDraftForm } from '../ProposalDraftForm'
-import { ERROR_CODE, FormValues, validationSchema } from './fields'
+import { UpdateDeadlinePassedModal } from '../UpdateDeadlinePassedModal'
+import { createValidationSchema, ERROR_CODE, FormValues } from './fields'
 import {
   checkboxHelperText,
   checkboxLabel,
@@ -102,12 +107,16 @@ export const ReviewProposalForm = ({
   const config = useConfig()
   const { address } = useAccount()
   const {
+    updateProposalId,
     clearProposal,
     setTitle,
     setSummary,
     setRepresentedAddress,
     setDiscussionUrl,
     setRepresentedAddressEnabled,
+    setUpdateProposalId,
+    proposalSalt,
+    setProposalSalt,
   } = useProposalStore()
 
   const [error, setError] = useState<string | undefined>()
@@ -118,9 +127,26 @@ export const ReviewProposalForm = ({
   )
   const [failedSimulations, setFailedSimulations] = useState<Array<SimulationOutput>>([])
   const [proposing, setProposing] = useState<boolean>(false)
+  const [submissionStep, setSubmissionStep] = useState<
+    'cancelling' | 'submitting' | null
+  >(null)
   const [skipSimulation, setSkipSimulation] = useState<boolean>(SKIP_SIMULATION)
   const [isEditingMetadata, setIsEditingMetadata] = useState<boolean>(false)
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState<boolean>(false)
+  const [showDeadlineModal, setShowDeadlineModal] = useState<boolean>(false)
+  const formikRef = React.useRef<FormikProps<FormValues> | null>(null)
+  const effectiveProposalSaltRef = React.useRef<string | undefined>(proposalSalt)
+
+  React.useEffect(() => {
+    if (proposalSalt) {
+      effectiveProposalSaltRef.current = proposalSalt
+      return
+    }
+
+    const nextSalt = generateProposalSalt()
+    effectiveProposalSaltRef.current = nextSalt
+    setProposalSalt(nextSalt)
+  }, [proposalSalt, setProposalSalt])
 
   const { votes, hasThreshold, proposalVotesRequired, isLoading } = useVotes({
     chainId: chain.id,
@@ -129,8 +155,43 @@ export const ReviewProposalForm = ({
     signerAddress: address,
   })
 
+  // Check if proposal is still updatable (only when updating)
+  const {
+    isUpdatable,
+    state: proposalState,
+    isLoading: isLoadingState,
+  } = useProposalState({
+    chainId: chain.id,
+    governorAddress: addresses.governor as any,
+    proposalId: updateProposalId as any,
+  })
+
+  const {
+    isInUpdatablePeriod,
+    updateDeadline,
+    isLoading: isLoadingTimeline,
+  } = useProposalTimeline({
+    chainId: chain.id,
+    governorAddress: addresses.governor as any,
+    proposalId: updateProposalId as any,
+  })
+
+  const canStillUpdate =
+    !updateProposalId ||
+    (isUpdatable && isInUpdatablePeriod && !isLoadingState && !isLoadingTimeline)
+
+  // Check if the old proposal can be cancelled
+  const canCancelOldProposal =
+    !!updateProposalId &&
+    proposalState !== undefined &&
+    proposalState !== ProposalState.Executed &&
+    proposalState !== ProposalState.Canceled &&
+    proposalState !== ProposalState.Replaced &&
+    proposalState !== ProposalState.Vetoed &&
+    proposalState !== ProposalState.Defeated
+
   const { data: governanceConfigData } = useReadContracts({
-    allowFailure: false,
+    allowFailure: true,
     query: {
       enabled: !!addresses.governor && !!addresses.treasury,
     },
@@ -153,13 +214,40 @@ export const ReviewProposalForm = ({
         chainId: chain.id,
         functionName: 'delay',
       },
+      {
+        abi: governorAbi,
+        address: addresses.governor,
+        chainId: chain.id,
+        functionName: 'proposalUpdatablePeriod',
+      },
     ] as const,
   })
 
-  const [votingDelay, votingPeriod, timelockDelay] = unpackOptionalArray(
-    governanceConfigData,
-    3
-  )
+  const [
+    votingDelayResult,
+    votingPeriodResult,
+    timelockDelayResult,
+    updatablePeriodResult,
+  ] = unpackOptionalArray(governanceConfigData, 4)
+
+  // Extract values from results
+  const votingDelay =
+    votingDelayResult && 'result' in votingDelayResult
+      ? votingDelayResult.result
+      : undefined
+  const votingPeriod =
+    votingPeriodResult && 'result' in votingPeriodResult
+      ? votingPeriodResult.result
+      : undefined
+  const timelockDelay =
+    timelockDelayResult && 'result' in timelockDelayResult
+      ? timelockDelayResult.result
+      : undefined
+  // Extract updatable period (will be undefined/error for v2.x Governors)
+  const updatablePeriod =
+    updatablePeriodResult && 'result' in updatablePeriodResult
+      ? updatablePeriodResult.result
+      : undefined
 
   const onSubmit = React.useCallback(
     async (values: FormValues) => {
@@ -227,14 +315,21 @@ export const ReviewProposalForm = ({
 
       try {
         setProposing(true)
+        setSubmissionStep('submitting')
+        const proposalSaltForSubmission =
+          effectiveProposalSaltRef.current || generateProposalSalt()
+        effectiveProposalSaltRef.current = proposalSaltForSubmission
+        if (proposalSalt !== proposalSaltForSubmission) {
+          setProposalSalt(proposalSaltForSubmission)
+        }
+
         const params = {
           targets: targets,
           values: transactionValues,
           calldatas: calldata as Hex[],
-          description: JSON.stringify({
-            version: 1,
-            title: values.title?.trim() || '',
-            description: values.summary?.trim() || '',
+          description: buildProposalMetadata({
+            title: values.title,
+            description: values.summary,
             transactionBundles: values.transactions.map((transaction) => ({
               type: transaction.type,
               summary: dedupeBundleSummary(
@@ -243,24 +338,51 @@ export const ReviewProposalForm = ({
               ),
               callCount: transaction.transactions.length,
             })),
-            ...(values.representedAddressEnabled && values.representedAddress?.trim()
-              ? { representedAddress: values.representedAddress.trim() }
-              : {}),
-            ...(values.discussionUrl?.trim()
-              ? { discussionUrl: values.discussionUrl.trim() }
-              : {}),
+            representedAddress: values.representedAddressEnabled
+              ? values.representedAddress
+              : undefined,
+            discussionUrl: values.discussionUrl,
+            proposalSalt: proposalSaltForSubmission,
+            proposer: address,
           }),
         }
 
-        const data = await simulateContract(config, {
-          abi: governorAbi,
-          functionName: 'propose',
-          address: addresses.governor,
-          chainId: chain.id,
-          args: [params.targets, params.values, params.calldatas, params.description],
-        })
+        // Check if we're updating an existing proposal or creating a new one
+        const isUpdate = !!updateProposalId
 
-        const hash = await writeContract(config, data.request)
+        // If updating, check if the proposal is still updatable
+        if (isUpdate && !canStillUpdate) {
+          setShowDeadlineModal(true)
+          return
+        }
+
+        let hash: Hex
+        if (isUpdate) {
+          const data = await simulateContract(config, {
+            abi: governorAbi,
+            functionName: 'updateProposal',
+            address: addresses.governor,
+            chainId: chain.id,
+            args: [
+              updateProposalId as Hex,
+              params.targets,
+              params.values,
+              params.calldatas,
+              params.description,
+              '', // updateMessage - optional message about what changed
+            ],
+          })
+          hash = await writeContract(config, data.request)
+        } else {
+          const data = await simulateContract(config, {
+            abi: governorAbi,
+            functionName: 'propose',
+            address: addresses.governor,
+            chainId: chain.id,
+            args: [params.targets, params.values, params.calldatas, params.description],
+          })
+          hash = await writeContract(config, data.request)
+        }
 
         const receipt = await waitForTransactionReceipt(config, {
           hash,
@@ -274,17 +396,18 @@ export const ReviewProposalForm = ({
 
         for (const log of receipt.logs) {
           try {
-            // Decode the log using the coinFactory ABI
+            // Decode the log using the governor ABI
             const decodedLog = decodeEventLog({
               abi: governorAbi,
               data: log.data,
               topics: log.topics,
             })
 
-            // Check if this is the ProposalCreated event
-            if (decodedLog.eventName === 'ProposalCreated') {
-              // Extract the coin address from the event args
-              // The event structure should have the coin address in args
+            // Check if this is the ProposalCreated or ProposalUpdated event
+            if (
+              decodedLog.eventName === 'ProposalCreated' ||
+              decodedLog.eventName === 'ProposalUpdated'
+            ) {
               const args = decodedLog.args as any
               if (args.proposalId) {
                 proposalId = args.proposalId as string
@@ -313,6 +436,7 @@ export const ReviewProposalForm = ({
         setError(err.message)
       } finally {
         setProposing(false)
+        setSubmissionStep(null)
       }
     },
     [
@@ -323,8 +447,94 @@ export const ReviewProposalForm = ({
       config,
       skipSimulation,
       onProposalCreated,
+      updateProposalId,
+      proposalSalt,
+      address,
+      setProposalSalt,
+      canStillUpdate,
     ]
   )
+
+  // Handle modal actions for when update deadline has passed
+  const handleSubmitAsNew = React.useCallback(() => {
+    setShowDeadlineModal(false)
+    // Clear the updateProposalId so it submits as a new proposal
+    setUpdateProposalId(undefined)
+    const nextSalt = generateProposalSalt()
+    effectiveProposalSaltRef.current = nextSalt
+    setProposalSalt(nextSalt)
+    // Re-trigger submission
+    if (formikRef.current) {
+      formikRef.current.submitForm()
+    }
+  }, [setProposalSalt, setUpdateProposalId])
+
+  const handleSubmitAsNewAndCancel = React.useCallback(async () => {
+    setShowDeadlineModal(false)
+    if (!updateProposalId || !addresses.governor) return
+
+    try {
+      setProposing(true)
+
+      // Only cancel the old proposal if it's cancellable
+      if (canCancelOldProposal) {
+        setSubmissionStep('cancelling')
+        const cancelData = await simulateContract(config, {
+          abi: governorAbi,
+          functionName: 'cancel',
+          address: addresses.governor,
+          chainId: chain.id,
+          args: [updateProposalId as Hex],
+        })
+        const cancelHash = await writeContract(config, cancelData.request)
+
+        await waitForTransactionReceipt(config, {
+          hash: cancelHash,
+          chainId: chain.id,
+        })
+      }
+
+      // Clear the updateProposalId so the form submits as a new proposal
+      setUpdateProposalId(undefined)
+      const nextSalt = generateProposalSalt()
+      effectiveProposalSaltRef.current = nextSalt
+      setProposalSalt(nextSalt)
+
+      // Now submitting the new proposal
+      setSubmissionStep('submitting')
+
+      // Trigger submission
+      if (formikRef.current) {
+        formikRef.current.submitForm()
+      }
+    } catch (err: any) {
+      setProposing(false)
+      setSubmissionStep(null)
+      if (
+        err?.code === 'ACTION_REJECTED' ||
+        err?.message?.includes('rejected') ||
+        err?.message?.includes('denied')
+      ) {
+        setError(ERROR_CODE.REJECTED)
+        return
+      }
+      logError(err)
+      setError(err.message)
+    }
+  }, [
+    updateProposalId,
+    addresses.governor,
+    chain.id,
+    config,
+    canCancelOldProposal,
+    setProposalSalt,
+    setUpdateProposalId,
+  ])
+
+  const handleCloseDeadlineModal = React.useCallback(() => {
+    setShowDeadlineModal(false)
+    setProposing(false)
+  }, [])
 
   const resolveAndStoreRepresentedAddress = React.useCallback(
     async (formik: FormikProps<FormValues>) => {
@@ -341,7 +551,7 @@ export const ReviewProposalForm = ({
       }
 
       try {
-        const resolved = await getEnsAddress(rawValue, getProvider(chain.id))
+        const resolved = await getEnsAddress(rawValue)
         const currentValue =
           (
             formik.getFieldMeta('representedAddress').value as string | undefined
@@ -372,7 +582,7 @@ export const ReviewProposalForm = ({
         return false
       }
     },
-    [chain.id, setRepresentedAddress]
+    [setRepresentedAddress]
   )
 
   if (isLoading) return null
@@ -382,7 +592,12 @@ export const ReviewProposalForm = ({
   const hasVotingDelay = votingDelay !== undefined && votingDelay !== null
   const hasVotingPeriod = votingPeriod !== undefined && votingPeriod !== null
   const hasTimelockDelay = timelockDelay !== undefined && timelockDelay !== null
+  const hasUpdatablePeriod =
+    updatablePeriod !== undefined && updatablePeriod !== null && updatablePeriod > 0n
 
+  const estimatedUpdateDeadline = hasUpdatablePeriod
+    ? nowTimestamp + Number(updatablePeriod)
+    : undefined
   const estimatedVotingStartsAt = hasVotingDelay
     ? nowTimestamp + Number(votingDelay)
     : undefined
@@ -398,8 +613,8 @@ export const ReviewProposalForm = ({
   return (
     <Flex direction={'column'} width={'100%'} pb={'x24'}>
       <Flex direction={'column'} width={'100%'}>
-        <Formik
-          validationSchema={validationSchema}
+        <Formik<FormValues>
+          validationSchema={createValidationSchema(!!updateProposalId)}
           initialValues={{
             summary: summary || '',
             title: title || '',
@@ -407,6 +622,7 @@ export const ReviewProposalForm = ({
             discussionUrl: discussionUrl || '',
             representedAddressEnabled,
             transactions,
+            updateMessage: undefined,
           }}
           validateOnMount={false}
           validateOnChange={false}
@@ -415,6 +631,9 @@ export const ReviewProposalForm = ({
         >
           {(formik) =>
             (() => {
+              // Store formik ref for use in modal handlers
+              formikRef.current = formik
+
               const flattenErrorMessages = (value: unknown): string[] => {
                 if (!value) return []
                 if (typeof value === 'string') return [value]
@@ -571,6 +790,12 @@ export const ReviewProposalForm = ({
                       <Text color={'text3'}>Submitted:</Text>
                       <Text>{formatTimestamp(nowTimestamp)}</Text>
                     </Flex>
+                    {hasUpdatablePeriod && (
+                      <Flex justify={'space-between'} align={'center'}>
+                        <Text color={'text3'}>Update deadline:</Text>
+                        <Text>{formatTimestamp(estimatedUpdateDeadline)}</Text>
+                      </Flex>
+                    )}
                     <Flex justify={'space-between'} align={'center'}>
                       <Text color={'text3'}>Voting starts: </Text>
                       <Text>{formatTimestamp(estimatedVotingStartsAt)}</Text>
@@ -624,6 +849,26 @@ export const ReviewProposalForm = ({
                     </Stack>
                   )}
 
+                  {updateProposalId && (
+                    <Box mb={'x6'}>
+                      <TextArea
+                        id="updateMessage"
+                        value={formik.values.updateMessage || ''}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        inputLabel="Update Message"
+                        helperText="Explain what changed in this update"
+                        placeholder="e.g., Updated transaction amounts based on community feedback"
+                        rows={2}
+                        minHeight={80}
+                        formik={formik}
+                        errorMessage={
+                          formik.touched.updateMessage && formik.errors.updateMessage
+                        }
+                      />
+                    </Box>
+                  )}
+
                   {hasAttemptedSubmit && validationMessages.length > 0 && (
                     <Stack mb={'x4'} gap={'x1'}>
                       {validationMessages.map((message, index) => (
@@ -645,7 +890,9 @@ export const ReviewProposalForm = ({
                     h={'x15'}
                     display={{ '@initial': 'none', '@768': 'flex' }}
                   >
-                    <Box>{'Submit Proposal'}</Box>
+                    <Box>
+                      {updateProposalId ? 'Submit Updated Proposal' : 'Submit Proposal'}
+                    </Box>
                     {!!votes && (
                       <Box
                         position={'absolute'}
@@ -674,7 +921,9 @@ export const ReviewProposalForm = ({
                     }}
                     continueDisabled={simulating || proposing || formik.isSubmitting}
                     continueLoading={simulating}
-                    continueLabel={'Submit Proposal'}
+                    continueLabel={
+                      updateProposalId ? 'Submit Updated Proposal' : 'Submit Proposal'
+                    }
                   />
                 </form>
               )
@@ -696,11 +945,29 @@ export const ReviewProposalForm = ({
 
       <AnimatedModal open={proposing}>
         <SuccessModalContent
-          title={'Proposal submitting'}
-          subtitle={'Your Proposal is being submitted'}
+          title={
+            submissionStep === 'cancelling'
+              ? 'Cancelling Old Proposal'
+              : 'Proposal submitting'
+          }
+          subtitle={
+            submissionStep === 'cancelling'
+              ? 'Cancelling the original proposal...'
+              : 'Your Proposal is being submitted'
+          }
           pending
         />
       </AnimatedModal>
+
+      <UpdateDeadlinePassedModal
+        isOpen={showDeadlineModal}
+        onClose={handleCloseDeadlineModal}
+        onSubmitAsNew={handleSubmitAsNew}
+        onSubmitAsNewAndCancel={handleSubmitAsNewAndCancel}
+        updateDeadline={updateDeadline}
+        canCancelOldProposal={canCancelOldProposal}
+        oldProposalState={proposalState}
+      />
     </Flex>
   )
 }

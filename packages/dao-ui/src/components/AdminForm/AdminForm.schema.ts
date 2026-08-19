@@ -22,6 +22,7 @@ export interface AdminFormValues {
   votingPeriod: Duration
   votingDelay: Duration
   timelockDelay: Duration
+  proposalUpdatablePeriod?: Duration
   founderAllocation: TokenAllocation[]
   vetoPower: boolean
   vetoer: string
@@ -61,7 +62,7 @@ const twentyFourWeeks = 60 * 60 * 24 * 7 * 24
 const tenMinutes = 60 * 10
 const fiveMinutes = 60 * 5
 
-export const adminValidationSchema = () =>
+export const adminValidationSchema = (supportsUpdatablePeriod: boolean = false) =>
   Yup.object().shape({
     auctionDuration: durationValidationSchema(),
     auctionReservePrice: priceValidationSchema,
@@ -91,6 +92,12 @@ export const adminValidationSchema = () =>
       { value: fiveMinutes, description: '5 minutes' },
       { value: twentyFourWeeks, description: '24 weeks' }
     ),
+    ...(supportsUpdatablePeriod && {
+      proposalUpdatablePeriod: durationValidationSchema(
+        { value: 0, description: '0 seconds' },
+        { value: twentyFourWeeks, description: '24 weeks' }
+      ),
+    }),
     daoAvatar: Yup.string(),
     projectDescription: Yup.string().required('*').max(5000, '< 5000 characters'),
     daoLinks: Yup.array()

@@ -1,0 +1,17 @@
+query CandidateSponsorSignatures(
+  $where: CandidateSponsorSignature_filter
+  $first: Int
+  $skip: Int
+  $orderBy: CandidateSponsorSignature_orderBy
+  $orderDirection: OrderDirection
+) {
+  candidateSponsorSignatures(
+    where: $where
+    first: $first
+    skip: $skip
+    orderBy: $orderBy
+    orderDirection: $orderDirection
+  ) {
+    ...CandidateSponsorSignatureFragment
+  }
+}

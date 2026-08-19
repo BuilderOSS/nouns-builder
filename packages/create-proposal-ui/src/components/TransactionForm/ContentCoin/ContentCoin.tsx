@@ -4,7 +4,7 @@ import {
   ZORA_COIN_FACTORY_ADDRESS,
 } from '@buildeross/constants'
 import { useClankerTokenPrice, useClankerTokens } from '@buildeross/hooks'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import {
   CoinFormFields,
@@ -31,6 +31,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { type Address, encodeFunctionData, zeroAddress, zeroHash } from 'viem'
 import { useReadContract } from 'wagmi'
 
+import { useTransactionComposer } from '../../shared'
 import { ContentCoinPreviewDisplay } from './ContentCoinPreviewDisplay'
 import { IPFSUploader } from './ipfsUploader'
 
@@ -178,8 +179,7 @@ const ContentCoinEconomicsPreview: React.FC<ContentCoinEconomicsPreviewProps> = 
 
 export const ContentCoin: React.FC = () => {
   const { treasury, token } = useDaoStore((state) => state.addresses)
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const { chain } = useChainStore()
 
   const [submitError, setSubmitError] = useState<string | undefined>()

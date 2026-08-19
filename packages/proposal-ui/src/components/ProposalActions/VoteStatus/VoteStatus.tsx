@@ -12,6 +12,7 @@ import { useAccount, useWatchContractEvent } from 'wagmi'
 
 import { proposalActionButtonVariants } from '../ProposalActions.css'
 import Pending from './Pending'
+import Updatable from './Updatable'
 import Vote from './Vote'
 import { VoteModal } from './VoteModal'
 import { VotingPowerExplainer } from './VotingPowerExplainer'
@@ -33,6 +34,8 @@ interface VoteStatusProps {
   title: string
   daoName?: string
   signerVote?: ProposalVote
+  updateDeadline?: number
+  candidateVersion?: unknown | null
 }
 
 export const VoteStatus: React.FC<VoteStatusProps> = ({
@@ -44,6 +47,8 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
   state,
   daoName,
   title,
+  updateDeadline,
+  candidateVersion,
 }) => {
   const chain = useChainStore((x) => x.chain)
   const { address: userAddress } = useAccount()
@@ -89,6 +94,9 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
           support: valueToSupport[Number(support) as SupportValue],
           weight: Number(weight),
           reason,
+          timestamp: logs[0].blockTimestamp
+            ? Number(logs[0].blockTimestamp)
+            : Math.floor(Date.now() / 1000),
         }
 
         setVote(eventVote)
@@ -106,9 +114,12 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
       w={{ '@initial': '100%', '@768': 'auto' }}
       justify={'flex-start'}
       align={'center'}
+      style={{ minWidth: 0 }}
     >
       {/* Voting for proposal has not yet started (proposal is Pending) */}
-      {state === ProposalState.Pending ? (
+      {/* Also show Pending for promoted proposals in Updatable state */}
+      {state === ProposalState.Pending ||
+      (state === ProposalState.Updatable && candidateVersion) ? (
         <Pending voteStart={voteStart} proposalId={proposalId} />
       ) : null}
 
@@ -119,10 +130,12 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
           align={'center'}
           gap={'x3'}
           textAlign={{ '@initial': 'center', '@768': 'left' }}
+          style={{ minWidth: 0 }}
         >
           <Flex
             className={proposalActionButtonVariants['voteDisabled']}
             w={{ '@initial': '100%', '@768': 'auto' }}
+            style={{ flexShrink: 0 }}
           >
             Submit Vote
           </Flex>
@@ -142,6 +155,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
             w={{ '@initial': '100%', '@768': 'auto' }}
             pb={{ '@initial': 'x2', '@768': 'x0' }}
             align={'center'}
+            style={{ flexShrink: 0 }}
           >
             <ContractButton
               chainId={chain.id}
@@ -152,7 +166,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
               {votesAvailable === 1 ? 'Submit Vote' : 'Submit Votes'}
             </ContractButton>
           </Flex>
-          <Flex pl={'x3'} mt={{ '@initial': 'x1', '@768': 'x0' }}>
+          <Flex pl={'x3'} mt={{ '@initial': 'x1', '@768': 'x0' }} style={{ minWidth: 0 }}>
             <VotingPowerExplainer
               snapshotVotes={votesAvailable}
               timeCreated={timeCreated}
@@ -165,8 +179,16 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
       {/* User has voted */}
       {vote ? <Vote support={vote.support} weight={vote.weight} /> : null}
 
+      {/* Proposal is in updatable period (but not promoted proposals) */}
+      {state === ProposalState.Updatable && updateDeadline && !candidateVersion ? (
+        <Updatable updateDeadline={updateDeadline} proposalId={proposalId} />
+      ) : null}
+
       {/* Proposal ended and the user did not vote */}
-      {state !== ProposalState.Active && state !== ProposalState.Pending && !vote ? (
+      {state !== ProposalState.Active &&
+      state !== ProposalState.Pending &&
+      state !== ProposalState.Updatable &&
+      !vote ? (
         <Flex direction={'row'} align={'center'}>
           <Text color={'text3'} ml={'x3'}>
             You did not participate in voting on this proposal

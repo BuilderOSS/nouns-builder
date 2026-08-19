@@ -1,0 +1,116 @@
+fragment CandidateGroupFragment on ProposalCandidateGroup {
+  id
+  dao {
+    id
+    tokenAddress
+    governorAddress
+  }
+  proposer
+  salt
+  createdAt
+  candidateNumber
+  versionCount
+  commentCount
+  latestVersionNumber
+  currentForCount
+  currentAgainstCount
+  currentAbstainCount
+  versions(first: 1, orderBy: versionNumber, orderDirection: desc) {
+    title
+    proposal {
+      id
+    }
+  }
+}
+
+fragment CandidateGroupDetailFragment on ProposalCandidateGroup {
+  id
+  dao {
+    id
+    tokenAddress
+    governorAddress
+  }
+  proposer
+  salt
+  createdAt
+  candidateNumber
+  versionCount
+  commentCount
+  latestVersionNumber
+  currentForCount
+  currentAgainstCount
+  currentAbstainCount
+  leadingVersion {
+    ...CandidateVersionFragment
+  }
+  versions {
+    ...CandidateVersionFragment
+  }
+}
+
+fragment CandidateVersionFragment on ProposalCandidateVersion {
+  id
+  candidateId
+  proposalHash
+  salt
+  attester
+  versionNumber
+  targets
+  values
+  calldatas
+  group {
+    candidateNumber
+  }
+  title
+  description
+  metadata
+  representedAddress
+  attestationUID
+  proposal {
+    id
+    proposalId
+    proposalNumber
+  }
+  createdAt
+  discussionUrl
+  signatureCount
+  totalVoteWeight
+  revoked
+}
+
+fragment CandidateCommentFragment on CandidateComment {
+  id
+  candidateId
+  proposalHash
+  commenter
+  voteWeight
+  support
+  comment
+  parentComment {
+    id
+  }
+  createdAt
+  revoked
+}
+
+fragment CandidateSponsorSignatureFragment on CandidateSponsorSignature {
+  id
+  candidateId
+  proposalHash
+  signer
+  nonce
+  deadline
+  signature
+  revoked
+  createdAt
+  voteWeight
+}
+
+query CandidateGroupByNumber($candidateNumber: Int!, $dao: String) {
+  proposalCandidateGroups(
+    first: 1
+    where: { candidateNumber: $candidateNumber, dao: $dao }
+  ) {
+    ...CandidateGroupDetailFragment
+  }
+}

@@ -332,7 +332,6 @@ const COINGECKO_PLATFORMS: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.ETHEREUM]: 'ethereum',
   [CHAIN_ID.OPTIMISM]: 'optimistic-ethereum',
   [CHAIN_ID.BASE]: 'base',
-  [CHAIN_ID.ZORA]: 'zora-network',
 }
 
 // Fetch token logo from Coingecko API

@@ -10,7 +10,7 @@ import {
 } from './basename'
 import { getProvider } from './provider'
 
-const defaultProvider = getProvider(CHAIN_ID.ETHEREUM)
+const getDefaultProvider = () => getProvider(CHAIN_ID.ETHEREUM)
 
 export type IsValidAddressResult = {
   data: boolean
@@ -22,7 +22,7 @@ export type IsValidAddressResult = {
  */
 export async function isValidAddress(
   input: string,
-  provider: PublicClient | undefined = defaultProvider,
+  provider?: PublicClient,
   errorMessage = 'Must be a valid Ethereum address or resolvable ENS name'
 ): Promise<IsValidAddressResult> {
   try {
@@ -50,9 +50,11 @@ const ensAddressCache = new Map<string, string | null>()
 
 export async function getEnsAddress(
   nameOrAddress: string,
-  provider: PublicClient | undefined = defaultProvider
+  provider?: PublicClient
 ): Promise<Address> {
   if (!nameOrAddress) return nameOrAddress as Address
+
+  const resolvedProvider = provider ?? getDefaultProvider()
 
   if (isAddress(nameOrAddress, { strict: false })) return getAddress(nameOrAddress)
 
@@ -65,7 +67,7 @@ export async function getEnsAddress(
 
   try {
     // Priority 1: Check for ENS resolution on given chain
-    const resolved = await provider.getEnsAddress({ name: normalizedName })
+    const resolved = await resolvedProvider.getEnsAddress({ name: normalizedName })
     if (isValidNonZeroAddress(resolved)) {
       ensAddressCache.set(normalizedName, resolved)
       return resolved as Address
@@ -97,7 +99,7 @@ const ensNameCache = new Map<Address, string | null>()
 async function verifyNameForAddress(
   name: string | null,
   expectedAddress: Address,
-  provider: PublicClient | undefined
+  provider?: PublicClient
 ): Promise<boolean> {
   if (!name) return false
 
@@ -114,9 +116,11 @@ async function verifyNameForAddress(
 
 export async function getEnsName(
   address: Address,
-  provider: PublicClient | undefined = defaultProvider
+  provider?: PublicClient
 ): Promise<string> {
   if (!address || !isAddress(address, { strict: false })) return address
+
+  const resolvedProvider = provider ?? getDefaultProvider()
 
   const checksummedAddress = getAddress(address)
 
@@ -127,22 +131,24 @@ export async function getEnsName(
 
   try {
     // Priority 1: Try ENS resolution on given chain
-    const ensName = await provider.getEnsName({ address: checksummedAddress })
-    if (await verifyNameForAddress(ensName, checksummedAddress, provider)) {
+    const ensName = await resolvedProvider.getEnsName({ address: checksummedAddress })
+    if (await verifyNameForAddress(ensName, checksummedAddress, resolvedProvider)) {
       ensNameCache.set(checksummedAddress, ensName!)
       return ensName!
     }
 
     // Priority 2: Try reverse name from base L2 resolver
     const basename = await getBasename(checksummedAddress)
-    if (await verifyNameForAddress(basename, checksummedAddress, provider)) {
+    if (await verifyNameForAddress(basename, checksummedAddress, resolvedProvider)) {
       ensNameCache.set(checksummedAddress, basename!)
       return basename!
     }
 
     // Priority 3: Try reverse name from base L2 reverse registrar
     const reverseBasename = await getReverseBasename(checksummedAddress)
-    if (await verifyNameForAddress(reverseBasename, checksummedAddress, provider)) {
+    if (
+      await verifyNameForAddress(reverseBasename, checksummedAddress, resolvedProvider)
+    ) {
       ensNameCache.set(checksummedAddress, reverseBasename!)
       return reverseBasename!
     }
@@ -162,9 +168,11 @@ const avatarCache = new Map<string, string | null>()
 
 export async function getEnsAvatar(
   name: string,
-  provider: PublicClient | undefined = defaultProvider
+  provider?: PublicClient
 ): Promise<string | null> {
   if (!name) return null
+
+  const resolvedProvider = provider ?? getDefaultProvider()
 
   // Check cache
   if (avatarCache.has(name)) {
@@ -173,7 +181,7 @@ export async function getEnsAvatar(
 
   try {
     // Priority 1: Check for avatar on given chain
-    const ensAvatar = await provider.getEnsAvatar({ name })
+    const ensAvatar = await resolvedProvider.getEnsAvatar({ name })
     if (ensAvatar) {
       avatarCache.set(name, ensAvatar)
       return ensAvatar

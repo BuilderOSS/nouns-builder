@@ -1,0 +1,1 @@
+export { ProposalEditedBanner } from './ProposalEditedBanner'

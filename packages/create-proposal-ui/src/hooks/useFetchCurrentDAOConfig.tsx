@@ -13,11 +13,11 @@ import {
 import { DaoContractAddresses } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
-import useSWRImmutable from 'swr/immutable'
 import { encodeAbiParameters, parseAbiParameters, zeroAddress } from 'viem'
 import { useReadContracts } from 'wagmi'
 
-import { applyL1ToL2Alias } from '../utils/applyL1ToL2Alias'
+// NOTE: Address aliasing removed for L2-to-L2 migrations
+// import { applyL1ToL2Alias } from '../utils/applyL1ToL2Alias'
 
 export const useFetchCurrentDAOConfig = ({
   chainId,
@@ -79,23 +79,25 @@ export const useFetchCurrentDAOConfig = ({
 
   const [tokenId] = unpackOptionalArray(auction, 6)
 
-  const { data: foundersAliased, error: foundersError } = useSWRImmutable(
-    existingFounders && existingFounders.length > 0
-      ? ['founder-allias', existingFounders]
-      : undefined,
-    ([_key, founders]) => {
-      return Promise.all(
-        founders.map(async (x) => {
-          return {
-            ...x,
-            wallet: await applyL1ToL2Alias({ l1ChainId: chainId, address: x.wallet }),
-          }
-        })
-      )
-    }
-  )
+  // NOTE: Address aliasing disabled for L2-to-L2 migrations
+  // Founders use their original addresses without transformation
+  // const { data: foundersAliased, error: foundersError } = useSWRImmutable(
+  //   existingFounders && existingFounders.length > 0
+  //     ? ['founder-allias', existingFounders]
+  //     : undefined,
+  //   ([_key, founders]) => {
+  //     return Promise.all(
+  //       founders.map(async (x) => {
+  //         return {
+  //           ...x,
+  //           wallet: await applyL1ToL2Alias({ l1ChainId: chainId, address: x.wallet }),
+  //         }
+  //       })
+  //     )
+  //   }
+  // )
 
-  if (!data || foundersError) return undefined
+  if (!data) return undefined
 
   // We need to add the migration helper config as a founder so it can handle setting up metadata on L2
   const L2MigrationDeployerFounderConfig = {
@@ -104,16 +106,17 @@ export const useFetchCurrentDAOConfig = ({
     vestExpiry: 0n,
   }
 
-  const founderParams = foundersAliased
-    ? [
-        L2MigrationDeployerFounderConfig,
-        ...foundersAliased.map((x) => ({
-          wallet: x.wallet,
-          ownershipPct: BigInt(x.ownershipPct),
-          vestExpiry: BigInt(x.vestExpiry),
-        })),
-      ]
-    : [L2MigrationDeployerFounderConfig]
+  const founderParams =
+    existingFounders && existingFounders.length > 0
+      ? [
+          L2MigrationDeployerFounderConfig,
+          ...existingFounders.map((x) => ({
+            wallet: x.wallet,
+            ownershipPct: BigInt(x.ownershipPct),
+            vestExpiry: BigInt(x.vestExpiry),
+          })),
+        ]
+      : [L2MigrationDeployerFounderConfig]
 
   const tokenInitStrings = encodeAbiParameters(
     parseAbiParameters(

@@ -78,7 +78,7 @@ export async function simulate({
   values,
 }: SimulationRequestBody): Promise<SimulationResult> {
   // Validate inputs
-  if (targets?.length !== calldatas?.length && targets?.length !== values?.length) {
+  if (targets?.length !== calldatas?.length || targets?.length !== values?.length) {
     throw new InvalidRequestError('Array length mismatch')
   }
   if (!isAddress(treasuryAddress)) {

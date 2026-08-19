@@ -13,6 +13,14 @@ export type ProposalDescriptionMetadataV1 = {
   representedAddress?: string
   discussionUrl?: string
   transactionBundles?: ProposalTransactionBundle[]
+  candidate?: {
+    salt: string
+    proposer: `0x${string}`
+  }
+  proposal?: {
+    salt: string
+    proposer: `0x${string}`
+  }
 }
 
 export type ProposalTransactionBundleContext = {

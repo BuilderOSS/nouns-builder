@@ -37,6 +37,7 @@ const basicConfig = {
     '@buildeross/stores',
     '@buildeross/auction-ui',
     '@buildeross/proposal-ui',
+    '@buildeross/candidate-ui',
     '@buildeross/dao-ui',
     '@buildeross/feed-ui',
     '@buildeross/create-proposal-ui',

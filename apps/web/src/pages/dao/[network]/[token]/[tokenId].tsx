@@ -1,16 +1,18 @@
 import { DaoAuctionSection, type TokenWithDao } from '@buildeross/auction-ui'
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   About,
   Activity,
   Admin,
+  Candidates,
   Gallery,
   SectionHandler,
   SmartContracts,
   Treasury,
 } from '@buildeross/dao-ui'
 import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
+import { useGovernorVersion } from '@buildeross/hooks/useContractVersion'
 import { useGalleryItems } from '@buildeross/hooks/useGalleryItems'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
@@ -52,7 +54,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
 
   const { address } = useAccount()
 
-  const chain = PUBLIC_ALL_CHAINS.find((x) => x.id === chainId) as Chain
+  const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId) as Chain
 
   const { hasThreshold } = useVotes({
     chainId: chainId,
@@ -95,6 +97,11 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     () => hasGalleryItems || hasCreatorCoin,
     [hasGalleryItems, hasCreatorCoin]
   )
+
+  const { supportsCandidates } = useGovernorVersion({
+    chainId,
+    governorAddress: addresses.governor,
+  })
 
   const openTab = React.useCallback(
     async (tab: string, scroll?: boolean) => {
@@ -147,6 +154,30 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     })
   }, [push, chain.slug, addresses.token])
 
+  const openCandidateCreatePage = React.useCallback(async () => {
+    await push({
+      pathname: `/dao/[network]/[token]/candidate/create`,
+      query: {
+        network: chain.slug,
+        token: addresses.token,
+      },
+    })
+  }, [push, chain.slug, addresses.token])
+
+  const openCandidateDetailPage = React.useCallback(
+    async (candidateId: string) => {
+      await push({
+        pathname: `/dao/[network]/[token]/candidate/[candidateId]`,
+        query: {
+          network: chain.slug,
+          token: addresses.token,
+          candidateId,
+        },
+      })
+    },
+    [push, chain.slug, addresses.token]
+  )
+
   const sections = React.useMemo(() => {
     const aboutSection = {
       title: 'About',
@@ -157,15 +188,29 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       component: [<Treasury key={'treasury'} />],
     }
     const proposalsSection = {
-      title: 'Activity',
+      title: supportsCandidates ? 'Proposals' : 'Activity',
       component: [
         <Activity
           key={'proposals'}
+          daoName={name}
           onOpenProposalCreate={openProposalCreatePage}
           onOpenProposalReview={openProposalReviewPage}
+          onOpenCandidateCreate={openCandidateCreatePage}
         />,
       ],
     }
+    const candidatesSection = supportsCandidates
+      ? {
+          title: 'Candidates',
+          component: [
+            <Candidates
+              key={'candidates'}
+              onOpenCandidateCreate={openCandidateCreatePage}
+              onSelectCandidate={openCandidateDetailPage}
+            />,
+          ],
+        }
+      : null
     const adminSection = {
       title: 'Admin',
       component: [<Admin key={'admin'} onOpenProposalReview={openProposalReviewPage} />],
@@ -198,6 +243,7 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
       daoFeed,
       treasurySection,
       proposalsSection,
+      ...(candidatesSection ? [candidatesSection] : []),
       ...(gallerySection ? [gallerySection] : []),
       smartContractsSection,
     ]
@@ -206,10 +252,14 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
   }, [
     shouldShowGallery,
     hasThreshold,
+    supportsCandidates,
+    name,
     openTab,
     openCoinCreatePage,
     openProposalCreatePage,
     openProposalReviewPage,
+    openCandidateCreatePage,
+    openCandidateDetailPage,
   ])
 
   const ogDescription = useMemo(() => {
@@ -218,7 +268,15 @@ const TokenPage: NextPageWithLayout<TokenPageProps> = ({
     } was created on Nouns Builder. Please click the link to see more.`
   }, [name])
 
-  const activeTab = query.tab ? (query.tab as string) : 'about'
+  const requestedTab = (query.tab as string) ?? 'about'
+
+  const activeTab =
+    requestedTab === 'activity'
+      ? supportsCandidates
+        ? 'proposals'
+        : 'activity'
+      : requestedTab
+
   const path = `/dao/${chain.slug}/${addresses.token}/${token.tokenId}?tab=${activeTab}`
 
   const onAuctionCreated = React.useCallback(
