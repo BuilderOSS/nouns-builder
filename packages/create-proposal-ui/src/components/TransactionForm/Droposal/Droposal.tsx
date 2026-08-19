@@ -1,6 +1,6 @@
 import { PUBLIC_ZORA_NFT_CREATOR } from '@buildeross/constants/addresses'
 import { zoraNFTCreatorAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { Stack } from '@buildeross/zord'
@@ -14,6 +14,7 @@ import {
   zeroHash,
 } from 'viem'
 
+import { useTransactionComposer } from '../../shared'
 import { DroposalForm } from './DroposalForm'
 import { DroposalFormValues } from './DroposalForm.schema'
 
@@ -22,8 +23,7 @@ const UINT_32_MAX = maxUint32
 const HASH_ZERO = zeroHash
 
 export const Droposal: React.FC = () => {
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const chain = useChainStore((x) => x.chain)
 
   const handleDroposalTransaction = async (

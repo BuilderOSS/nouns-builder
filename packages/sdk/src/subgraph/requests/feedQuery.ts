@@ -45,7 +45,7 @@ function mapProposalVoteSupport(support: ProposalVoteSupport): ProposalVoteSuppo
   }
 }
 
-function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
+function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem | null {
   const baseItem = {
     id: event.id,
     daoId: event.dao.tokenAddress,
@@ -215,9 +215,24 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem {
       }
     }
 
+    case 'CandidateCommentCreatedEvent': {
+      return null
+    }
+
+    case 'CandidateSponsorSignatureCreatedEvent': {
+      return null
+    }
+
+    case 'CandidateSubmittedAsProposalEvent': {
+      return null
+    }
+
+    case 'CandidateVersionCreatedEvent': {
+      return null
+    }
+
     default: {
-      const _exhaustive: never = event
-      throw new Error(`Unknown event type: ${(_exhaustive as any).__typename}`)
+      return null
     }
   }
 }
@@ -299,7 +314,9 @@ export const getFeedData = async ({
     const limitedEvents = events.slice(0, limit)
 
     // Transform to typed FeedItem format
-    const feedItems = limitedEvents.map((event) => transformFeedEvent(event, chainId))
+    const feedItems = limitedEvents
+      .map((event) => transformFeedEvent(event, chainId))
+      .filter((item): item is FeedItem => item !== null)
 
     // Build response
     if (hasMore && feedItems.length > 0) {

@@ -1,0 +1,1 @@
+export { UpdateDeadlinePassedModal } from './UpdateDeadlinePassedModal'

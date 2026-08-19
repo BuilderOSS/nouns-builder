@@ -14,6 +14,7 @@ type DefaultLayoutProps = {
   chain?: Chain
   addresses?: DaoContractAddresses
   hideFooterOnMobile?: boolean
+  hideChainMenu?: boolean
 } & BoxProps
 
 export function DefaultLayout({
@@ -21,12 +22,14 @@ export function DefaultLayout({
   chain,
   addresses,
   hideFooterOnMobile = false,
+  hideChainMenu = false,
   ...props
 }: DefaultLayoutProps) {
   return (
     <BaseLayout
       chain={chain}
       addresses={addresses}
+      hideChainMenu={hideChainMenu}
       px={'x4'}
       pt={'x20'}
       footer={<Footer hideOnMobile={hideFooterOnMobile} />}

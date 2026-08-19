@@ -63,8 +63,14 @@ function seedDaoAndAuction(): void {
   dao.voterCount = 0
   dao.tokensCount = 0
   dao.proposalCount = 0
+  dao.candidateCount = 0
   dao.totalAuctionSales = BigInt.fromI32(0)
   dao.auctionConfig = auctionConfig.id
+  dao.createdAt = BigInt.fromI32(1)
+  dao.createdAtBlock = BigInt.fromI32(1)
+  dao.transactionHash = Bytes.fromHexString(
+    '0x1111111111111111111111111111111111111111111111111111111111111111'
+  )
   dao.save()
 
   const auction = new Auction(TOKEN_ADDRESS + ':1')

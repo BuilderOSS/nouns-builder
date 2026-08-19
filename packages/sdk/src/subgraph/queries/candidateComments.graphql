@@ -1,0 +1,5 @@
+query CandidateComments($where: CandidateComment_filter, $first: Int, $skip: Int, $orderBy: CandidateComment_orderBy, $orderDirection: OrderDirection) {
+  candidateComments(where: $where, first: $first, skip: $skip, orderBy: $orderBy, orderDirection: $orderDirection) {
+    ...CandidateCommentFragment
+  }
+}

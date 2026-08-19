@@ -6,3 +6,8 @@ export type {
   TokenSelectionFormValues,
 } from './TokenSelectionForm'
 export { TokenSelectionForm } from './TokenSelectionForm'
+export {
+  TransactionComposerProvider,
+  type TransactionComposerValue,
+  useTransactionComposer,
+} from './TransactionComposer'

@@ -26,8 +26,33 @@ fragment Proposal on Proposal {
   executionTransactionHash
   vetoTransactionHash
   cancelTransactionHash
+  updatePeriodEnd
+  updateMessage
+  updateCount
   dao {
     governorAddress
     tokenAddress
+  }
+  candidateVersion {
+    candidateId
+    proposalHash
+    attestationUID
+    proposal {
+      id
+      proposalId
+      proposalNumber
+    }
+    versionNumber
+    group {
+      candidateNumber
+    }
+  }
+  replaces {
+    proposalId
+    proposalNumber
+  }
+  replacedBy {
+    proposalId
+    proposalNumber
   }
 }

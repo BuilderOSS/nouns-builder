@@ -1,5 +1,5 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import { PUBLIC_ALL_CHAINS, PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { fetchIpfsMetadata, type IpfsMetadata } from '@buildeross/ipfs-service'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import {
@@ -144,7 +144,7 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
   const network = params?.network as string
 
   // Validate chain
-  const chain = PUBLIC_ALL_CHAINS.find((x) => x.slug === network)
+  const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.slug === network)
   if (!chain) {
     return { notFound: true }
   }

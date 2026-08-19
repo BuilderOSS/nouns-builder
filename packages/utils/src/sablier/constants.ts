@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { CHAIN_ID } from '@buildeross/types'
 import type { Sablier } from 'sablier'
 import { sablier } from 'sablier'
@@ -10,7 +10,7 @@ const SABLIER_CHAIN_IDS = new Set(
 )
 
 // Whitelist of chains we support that are also supported by Sablier
-export const SUPPORTED_SABLIER_CHAINS: CHAIN_ID[] = PUBLIC_ALL_CHAINS.map(
+export const SUPPORTED_SABLIER_CHAINS: CHAIN_ID[] = PUBLIC_DEFAULT_CHAINS.map(
   (chain) => chain.id
 ).filter((chainId: CHAIN_ID) => SABLIER_CHAIN_IDS.has(chainId))
 

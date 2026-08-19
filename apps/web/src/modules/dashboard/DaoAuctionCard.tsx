@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
 import { auctionAbi } from '@buildeross/sdk/contract'
@@ -42,7 +42,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   } = props
 
   const { getAuctionLink } = useLinks()
-  const chain = PUBLIC_ALL_CHAINS.find((chain) => chain.id === chainId)
+  const chain = PUBLIC_DEFAULT_CHAINS.find((chain) => chain.id === chainId)
   const { endTime } = currentAuction ?? {}
 
   const [isEnded, setIsEnded] = useState(false)
@@ -82,7 +82,7 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
   const isOver = !!endTime ? dayjs.unix(Date.now() / 1000) >= dayjs.unix(endTime) : true
 
   if (!chain) {
-    console.error(`Chain with ID ${chainId} not found in PUBLIC_ALL_CHAINS`)
+    console.error(`Chain with ID ${chainId} not found in PUBLIC_DEFAULT_CHAINS`)
     return null
   }
 

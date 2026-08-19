@@ -100,6 +100,7 @@ export const icons = {
   heart: Heart,
   'heart-filled': HeartFilled,
   migrate: Migrate,
+  minus: Dash, // Alias for dash
   move: Move,
   'new-window': NewWindow,
   nft: Nft,

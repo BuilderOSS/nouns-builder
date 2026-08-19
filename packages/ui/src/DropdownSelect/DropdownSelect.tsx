@@ -372,7 +372,7 @@ export function DropdownSelect<T extends React.Key>({
           >
             <Flex
               flex={1}
-              minWidth={0}
+              style={{ minWidth: 0 }}
               pl={'x4'}
               direction={'row'}
               align={'center'}

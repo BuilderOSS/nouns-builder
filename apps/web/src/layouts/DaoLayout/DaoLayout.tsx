@@ -11,6 +11,7 @@ type DaoPageProps = {
 
 type DaoLayoutOptions = {
   hideFooterOnMobile?: boolean
+  hideChainMenu?: boolean
 }
 
 export function getDaoLayout(
@@ -27,6 +28,7 @@ export function getDaoLayout(
       chain={chain}
       addresses={addresses}
       hideFooterOnMobile={options?.hideFooterOnMobile}
+      hideChainMenu={options?.hideChainMenu}
     >
       {page}
     </DefaultLayout>

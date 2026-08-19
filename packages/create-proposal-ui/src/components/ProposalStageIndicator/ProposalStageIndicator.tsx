@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
+import { Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import { useAccount } from 'wagmi'
 
@@ -134,16 +134,18 @@ export const ProposalStageIndicator: React.FC<ProposalStageIndicatorProps> = ({
             >
               <Flex align={'center'} justify={'space-between'}>
                 <Flex align={'center'} gap={'x2'}>
-                  <Box
+                  <Flex
+                    align={'center'}
+                    justify={'center'}
                     borderRadius={'round'}
-                    px={'x2'}
-                    py={'x1'}
+                    minW={'x8'}
+                    minH={'x8'}
                     borderColor={isCompleted || isActive ? 'text1' : 'border'}
                     borderStyle={'solid'}
                     borderWidth={'normal'}
                   >
                     {index + 1}
-                  </Box>
+                  </Flex>
                   <Text fontWeight={'display'}>{stage.title}</Text>
                 </Flex>
               </Flex>

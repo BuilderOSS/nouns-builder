@@ -24,7 +24,6 @@ The Nouns Builder subgraph supports the following networks:
 - `optimism-mainnet`
 - `optimism-sepolia`
 - `zora-mainnet`
-- `zora-sepolia`
 
 ### Step 1 - Install Dependencies
 
@@ -119,7 +118,6 @@ The subgraph is currently deployed to the following networks:
 - [Optimism](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-optimism-mainnet/latest/gn)
 - [Optimism Sepolia](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-optimism-sepolia/latest/gn)
 - [Zora](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-zora-mainnet/latest/gn)
-- [Zora Sepolia](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-zora-sepolia/latest/gn)
 
 ## (DEPRECATED) Local Development with Docker Compose (TODO: fix - pnpm create:local step not working)
 

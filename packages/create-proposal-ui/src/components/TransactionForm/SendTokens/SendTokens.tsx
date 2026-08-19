@@ -1,11 +1,9 @@
 import { erc20Abi } from '@buildeross/sdk/contract'
-import { useChainStore, useProposalStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { getProvider } from '@buildeross/utils/provider'
 import { isNativeEth } from '@buildeross/utils/sablier'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import type { FormikHelpers, FormikProps } from 'formik'
@@ -21,7 +19,12 @@ import {
   parseUnits,
 } from 'viem'
 
-import { CsvRecord, CsvUpload, TokenSelectionForm } from '../../shared'
+import {
+  CsvRecord,
+  CsvUpload,
+  TokenSelectionForm,
+  useTransactionComposer,
+} from '../../shared'
 import sendTokensSchema, {
   RecipientFormValues,
   SendTokensValues,
@@ -31,9 +34,7 @@ import { SendTokensDetailsDisplay } from './SendTokensDetailsDisplay'
 const DECIMAL_REGEX = /^(\d+\.?\d*|\.\d+)$/
 
 export const SendTokens: React.FC = () => {
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
-  const chain = useChainStore((x) => x.chain)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const [csvError, setCsvError] = useState<string>('')
 
   const initialValues: SendTokensValues = {
@@ -98,10 +99,7 @@ export const SendTokens: React.FC = () => {
         // Resolve recipient ENS name
         let recipientAddress: string
         try {
-          const resolved = await getEnsAddress(
-            recipient.recipientAddress,
-            getProvider(chain.id)
-          )
+          const resolved = await getEnsAddress(recipient.recipientAddress)
           // Validate that the resolved value is actually a valid address
           if (!resolved || !isAddress(resolved, { strict: false })) {
             actions.setErrors({

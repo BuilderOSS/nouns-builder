@@ -44,6 +44,14 @@ export const proposalStateColorStyles: Record<ProposalState, ProposalStateColorS
     borderColor: theme.colors.background2,
     color: theme.colors.text4,
   },
+  [ProposalState.Updatable]: {
+    borderColor: theme.colors.warningDisabled,
+    color: theme.colors.warning,
+  },
+  [ProposalState.Replaced]: {
+    borderColor: theme.colors.background2,
+    color: theme.colors.text4,
+  },
 }
 
 export const getProposalStateColorStyle = (
@@ -101,6 +109,10 @@ export function parseState(state: ProposalState) {
       return 'Executed'
     case ProposalState.Vetoed:
       return 'Vetoed'
+    case ProposalState.Updatable:
+      return 'Updatable'
+    case ProposalState.Replaced:
+      return 'Replaced'
     default:
       return 'Loading'
   }

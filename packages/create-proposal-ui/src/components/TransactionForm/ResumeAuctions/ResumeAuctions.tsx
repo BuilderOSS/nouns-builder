@@ -1,15 +1,16 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { Box, Button, Paragraph } from '@buildeross/zord'
 import { useState } from 'react'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
+import { useTransactionComposer } from '../../shared'
+
 export const ResumeAuctions: React.FC = () => {
   const { auction } = useDaoStore((state) => state.addresses)
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const chain = useChainStore((x) => x.chain)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { data: paused } = useReadContract({

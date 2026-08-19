@@ -1,16 +1,16 @@
 {
   "network": "sepolia",
   "manager": {
-    "address": "0x0ca90a96ac58f19b1f69f67103245c9263bc4bfc",
-    "startBlock": 5074430
+    "address": "0xe5a7373d53ac4454996a9673b4a7a455b40f1150",
+    "startBlock": 11317762
   },
   "eas": {
     "address": "0xC2679fBD37d54388Ce493F1DB75320D236e1815e",
-    "startBlock": 6927101
+    "startBlock": 11317762
   },
   "zoraNFTCreator": {
     "address": "0x87cfd516c5ea86e50b950678CA970a8a28de27ac",
-    "startBlock": 5074430
+    "startBlock": 11317762
   },
   "callHandlers": false
 }

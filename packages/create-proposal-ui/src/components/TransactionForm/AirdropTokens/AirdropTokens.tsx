@@ -1,7 +1,7 @@
 import { useEscrowDelegate } from '@buildeross/hooks/useEscrowDelegate'
 import { uploadJson } from '@buildeross/ipfs-service/upload'
 import { erc20Abi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { DatePicker, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
@@ -33,7 +33,12 @@ import {
   parseUnits,
 } from 'viem'
 
-import { CsvRecord, CsvUpload, TokenSelectionForm } from '../../shared'
+import {
+  CsvRecord,
+  CsvUpload,
+  TokenSelectionForm,
+  useTransactionComposer,
+} from '../../shared'
 import airdropTokensSchema, {
   AirdropRecipientFormValues,
   AirdropTokensValues,
@@ -85,8 +90,7 @@ const SyncAdminAddressFromEscrowDelegate = ({
 }
 
 export const AirdropTokens: React.FC = () => {
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
 
@@ -156,10 +160,7 @@ export const AirdropTokens: React.FC = () => {
 
       let resolvedAddress: string
       try {
-        const resolved = await getEnsAddress(
-          recipient.recipientAddress,
-          getProvider(chain.id)
-        )
+        const resolved = await getEnsAddress(recipient.recipientAddress)
         if (!resolved || !isAddress(resolved, { strict: false })) {
           actions.setErrors({
             recipients: `Recipient #${i + 1}: Could not resolve address. Please enter a valid address or ENS name.`,
@@ -239,7 +240,7 @@ export const AirdropTokens: React.FC = () => {
 
     let normalizedAdminAddress: Address
     try {
-      const resolved = await getEnsAddress(values.adminAddress, getProvider(chain.id))
+      const resolved = await getEnsAddress(values.adminAddress)
       if (!resolved || !isAddress(resolved, { strict: false })) {
         actions.setFieldError('adminAddress', 'Could not resolve a valid admin address.')
         return
