@@ -48,7 +48,7 @@ describe('simulationService', () => {
     }
 
     it('fails with mismatched input array lengths', async () => {
-      expect(() =>
+      await expect(
         simulate({
           treasuryAddress,
           chainId: CHAIN_ID.ETHEREUM,
@@ -58,7 +58,7 @@ describe('simulationService', () => {
         })
       ).rejects.toThrow(InvalidRequestError)
 
-      expect(() =>
+      await expect(
         simulate({
           treasuryAddress,
           chainId: CHAIN_ID.ETHEREUM,
@@ -68,7 +68,7 @@ describe('simulationService', () => {
         })
       ).rejects.toThrow(InvalidRequestError)
 
-      expect(() =>
+      await expect(
         simulate({
           treasuryAddress,
           chainId: CHAIN_ID.ETHEREUM,
@@ -80,7 +80,7 @@ describe('simulationService', () => {
     })
 
     it('fails with invalid treasury address', async () => {
-      expect(() =>
+      await expect(
         simulate({
           ...request,
           treasuryAddress: '0xnonsense' as Address,
@@ -89,7 +89,7 @@ describe('simulationService', () => {
     })
 
     it('fails with invalid target address', async () => {
-      expect(() =>
+      await expect(
         simulate({
           ...request,
           targets: ['0xnonsense1', '0xa7c8f84ec8cbed6e8fb793904cd1ec9ddfc9c35d'],
