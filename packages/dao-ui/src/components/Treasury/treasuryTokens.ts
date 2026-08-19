@@ -103,18 +103,4 @@ export const COMMON_TREASURY_TOKENS: Partial<Record<CHAIN_ID, TreasuryToken[]>> 
       kind: 'weth',
     },
   ],
-  [CHAIN_ID.ZORA]: [
-    {
-      symbol: 'USDC',
-      address: '0xcccccccc7021b32ebb4e8c08314bd62f7c653ec4',
-      decimals: 6,
-      kind: 'stable',
-    },
-    {
-      symbol: 'WETH',
-      address: '0x4200000000000000000000000000000000000006',
-      decimals: 18,
-      kind: 'weth',
-    },
-  ],
 }
