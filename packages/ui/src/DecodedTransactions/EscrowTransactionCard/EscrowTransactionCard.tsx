@@ -9,6 +9,7 @@ import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
 import { type Address, formatUnits } from 'viem'
 
+import { TransactionPanel } from '../TransactionDisplay/TransactionDisplayShared'
 import { parseEscrowDeploy } from './escrowDeploy'
 import * as styles from './EscrowTransactionCard.css'
 
@@ -25,6 +26,9 @@ const Party: React.FC<{ label: string; address?: string }> = ({ label, address }
     </Flex>
   )
 }
+
+const sameAddress = (a?: string, b?: string) =>
+  !!a && !!b && a.toLowerCase() === b.toLowerCase()
 
 interface EscrowTransactionCardProps {
   chainId: CHAIN_ID
@@ -76,12 +80,13 @@ export const EscrowTransactionCard: React.FC<EscrowTransactionCardProps> = ({
         })} ${symbol}`.trim()
 
   const { milestoneAmounts, totalAmount, escrow, version, provider } = parsed
+  const displayProvider = provider ?? escrow.providerAddress
   const isLegacy = escrow.escrowType
     ? escrow.escrowType.toLowerCase() === ESCROW_TYPE_V1.toLowerCase()
     : version === 'legacy'
 
   return (
-    <Box className={styles.card}>
+    <TransactionPanel>
       <Flex justify="space-between" align="center" gap="x2" className={styles.header}>
         <Flex align="center" gap="x2" style={{ minWidth: 0 }}>
           <Text className={styles.title}>Smart Invoice Escrow</Text>
@@ -132,8 +137,13 @@ export const EscrowTransactionCard: React.FC<EscrowTransactionCardProps> = ({
 
       <Box className={styles.section}>
         <Party label="Client" address={escrow.clientAddress} />
-        <Party label="Provider" address={provider} />
-        <Party label="Provider payout" address={escrow.providerRecipientAddress} />
+        {!sameAddress(escrow.clientRecipientAddress, escrow.clientAddress) ? (
+          <Party label="Client payout" address={escrow.clientRecipientAddress} />
+        ) : null}
+        <Party label="Provider" address={displayProvider} />
+        {!sameAddress(escrow.providerRecipientAddress, displayProvider) ? (
+          <Party label="Provider payout" address={escrow.providerRecipientAddress} />
+        ) : null}
         <Party label="Resolver" address={escrow.resolverAddress} />
         {escrow.terminationTime ? (
           <Flex
@@ -149,6 +159,6 @@ export const EscrowTransactionCard: React.FC<EscrowTransactionCardProps> = ({
           </Flex>
         ) : null}
       </Box>
-    </Box>
+    </TransactionPanel>
   )
 }
