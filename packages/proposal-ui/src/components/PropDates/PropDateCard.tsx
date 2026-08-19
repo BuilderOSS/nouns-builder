@@ -4,7 +4,7 @@ import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { MarkdownDisplay } from '@buildeross/ui/MarkdownDisplay'
 import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { InvoiceMetadata } from '@smartinvoicexyz/types'
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 
@@ -160,7 +160,14 @@ export const PropDateCard = ({
                 aria-expanded={isExpanded}
                 aria-controls={messageId}
               >
-                {isExpanded ? 'Show less' : 'Read full update →'}
+                {isExpanded ? (
+                  'Show less'
+                ) : (
+                  <Flex align="center" gap="x1">
+                    <Text as="span">Read full update</Text>
+                    <Icon id="arrow-right" size="sm" />
+                  </Flex>
+                )}
               </Button>
             </Flex>
           )}
