@@ -48,39 +48,43 @@ describe('simulationService', () => {
     }
 
     it('fails with mismatched input array lengths', async () => {
-      expect(() =>
+      await expect(
         simulate({
           treasuryAddress,
           chainId: CHAIN_ID.ETHEREUM,
-          targets: ['0xt1', '0xt2', '0xt3'],
+          targets: [
+            '0x1111111111111111111111111111111111111111',
+            '0x2222222222222222222222222222222222222222',
+            '0x3333333333333333333333333333333333333333',
+          ],
           calldatas: ['0xc1', '0xc2'],
-          values: ['v1, v2'],
+          values: ['1'],
         })
-      ).rejects.toThrow(InvalidRequestError)
+      ).rejects.toThrow('Array length mismatch')
 
-      expect(() =>
+      await expect(
         simulate({
           treasuryAddress,
           chainId: CHAIN_ID.ETHEREUM,
-          targets: ['0xt1'],
+          targets: ['0x1111111111111111111111111111111111111111'],
           calldatas: ['0xc1'],
-          values: ['v1, v2'],
+          values: ['1', '2'],
         })
-      ).rejects.toThrow(InvalidRequestError)
+      ).rejects.toThrow('Array length mismatch')
 
-      expect(() =>
+      await expect(
         simulate({
           treasuryAddress,
           chainId: CHAIN_ID.ETHEREUM,
-          targets: ['0xt1'],
+          targets: ['0x1111111111111111111111111111111111111111'],
           calldatas: ['0xc1', '0xc2'],
-          values: ['v1, v2'],
+          values: ['1'],
         })
-      ).rejects.toThrow(InvalidRequestError)
+      ).rejects.toThrow('Array length mismatch')
     })
 
     it('fails with invalid treasury address', async () => {
-      expect(() =>
+      await expect(
         simulate({
           ...request,
           treasuryAddress: '0xnonsense' as Address,
@@ -89,7 +93,7 @@ describe('simulationService', () => {
     })
 
     it('fails with invalid target address', async () => {
-      expect(() =>
+      await expect(
         simulate({
           ...request,
           targets: ['0xnonsense1', '0xa7c8f84ec8cbed6e8fb793904cd1ec9ddfc9c35d'],

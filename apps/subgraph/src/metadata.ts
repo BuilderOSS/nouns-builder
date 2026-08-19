@@ -75,11 +75,12 @@ export function handleBatchMetadataUpdate(event: BatchMetadataUpdateEvent): void
 
   let tokenAddress = context.getString('tokenAddress')
   let tokenContract = TokenContract.bind(Address.fromString(tokenAddress))
+  let endTokenId = event.params._toTokenId.plus(BigInt.fromI32(1))
 
   for (
-    let i = event.params._toTokenId;
-    i < event.params._toTokenId;
-    i.plus(BigInt.fromI32(1))
+    let i = event.params._fromTokenId;
+    i.lt(endTokenId);
+    i = i.plus(BigInt.fromI32(1))
   ) {
     let tokenId = `${tokenAddress}:${i.toString()}`
     let token = Token.load(tokenId)

@@ -34,7 +34,7 @@ interface VoteStatusProps {
   title: string
   daoName?: string
   signerVote?: ProposalVote
-  updateDeadline?: number | null
+  updateDeadline?: number
   candidateVersion?: unknown | null
 }
 
@@ -94,7 +94,9 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
           support: valueToSupport[Number(support) as SupportValue],
           weight: Number(weight),
           reason,
-          timestamp: Math.floor(Date.now() / 1000),
+          timestamp: logs[0].blockTimestamp
+            ? Number(logs[0].blockTimestamp)
+            : Math.floor(Date.now() / 1000),
         }
 
         setVote(eventVote)

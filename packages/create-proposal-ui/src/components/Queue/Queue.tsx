@@ -6,6 +6,7 @@ import React from 'react'
 import { useTransactionComposer } from '../shared'
 import { TransactionCard } from '../TransactionCard'
 import { ConfirmRemove } from './ConfirmRemove'
+import { queueInfoBox, queueInfoIcon, queueInfoText } from './Queue.css'
 
 interface QueueProps {
   setQueueModalOpen?: (value: boolean) => void
@@ -15,6 +16,12 @@ interface QueueProps {
 export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = false }) => {
   const { transactions, removeTransaction, removeAllTransactions } =
     useTransactionComposer()
+
+  const isRemovableTransaction = (transaction: (typeof transactions)[number]) =>
+    transaction.type !== TransactionType.UPGRADE &&
+    transaction.type !== TransactionType.UPDATE_MINTER
+
+  const hasRemovableTransactions = transactions.some(isRemovableTransaction)
 
   const [openConfirm, setOpenConfirm] = React.useState<boolean>(false)
   const [removeIndex, setRemoveIndex] = React.useState<number | null>(null)
@@ -82,10 +89,7 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = fals
             <TransactionCard
               key={`${transaction.type}-${i}`}
               handleRemove={() => confirmRemoveTransaction(i)}
-              disabled={
-                transaction.type === TransactionType.UPGRADE ||
-                transaction.type === TransactionType.UPDATE_MINTER
-              }
+              disabled={!isRemovableTransaction(transaction)}
               transaction={transaction}
             />
           ))
@@ -102,6 +106,15 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = fals
         mt={'x6'}
         mb={'x8'}
       />
+      {hasRemovableTransactions && (
+        <Flex className={queueInfoBox} align="center" gap="x2">
+          <Icon id="question" size="sm" fill="text3" className={queueInfoIcon} />
+          <Text color="text3" className={queueInfoText}>
+            Queued transactions can&apos;t be edited. Remove one and add a replacement
+            instead.
+          </Text>
+        </Flex>
+      )}
       <Button
         variant="outline"
         onClick={handleClearAll}

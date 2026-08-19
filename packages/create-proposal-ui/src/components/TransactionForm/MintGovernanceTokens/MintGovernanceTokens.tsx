@@ -4,7 +4,7 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
-import { Stack, Text } from '@buildeross/zord'
+import { Spinner, Stack, Text } from '@buildeross/zord'
 import { FormikHelpers } from 'formik'
 import gte from 'lodash/gte'
 import { Address, encodeFunctionData, isAddress } from 'viem'
@@ -36,7 +36,7 @@ export const MintGovernanceTokens: React.FC = () => {
     contractVersion: CONTRACT_VERSION,
   })
 
-  const { data: auctionOwner } = useReadContract({
+  const { data: auctionOwner, isLoading } = useReadContract({
     abi: auctionAbi,
     address: addresses.auction,
     functionName: 'owner',
@@ -131,6 +131,13 @@ export const MintGovernanceTokens: React.FC = () => {
 
     resetTransactionType()
   }
+
+  if (isLoading)
+    return (
+      <Stack role="status" aria-live="polite" aria-label="Loading mint governance tokens">
+        <Spinner />{' '}
+      </Stack>
+    )
 
   const isTreasuryContractOwner = auctionOwner === addresses.treasury
   if (!isTreasuryContractOwner) {

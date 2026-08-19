@@ -16,11 +16,7 @@ import { ProposalNavigation } from '@buildeross/proposal-ui'
 import type { CandidateGroup } from '@buildeross/sdk'
 import { getCandidateGroup } from '@buildeross/sdk'
 import { getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
-import {
-  CandidateVoteSupport,
-  getCandidateComments,
-  getUserCandidateSignal,
-} from '@buildeross/sdk/subgraph'
+import { CandidateVoteSupport, getUserCandidateSignal } from '@buildeross/sdk/subgraph'
 import {
   type DaoContractAddresses,
   useCandidateStore,
@@ -47,7 +43,7 @@ import React, { useEffect, useRef } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { votePageWrapper } from 'src/styles/vote.css'
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import { isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
 
@@ -159,6 +155,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const startCandidateDraft = useCandidateStore((state) => state.startCandidateDraft)
+  const { mutate: mutateSWR } = useSWRConfig()
   const [composerOpen, setComposerOpen] = React.useState(false)
   const [isSuccess, setIsSuccess] = React.useState(false)
   const [submissionType, setSubmissionType] = React.useState<
@@ -201,16 +198,6 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
     }
   )
 
-  const {
-    data: candidateComments,
-    error: candidateCommentsError,
-    mutate: mutateComments,
-  } = useSWR(
-    candidate?.id ? ['candidate-comments', chain.id, candidate.id] : null,
-    () => getCandidateComments(chain.id, candidate!.id, 100),
-    { revalidateOnFocus: false }
-  )
-
   const latestVersion = React.useMemo(() => {
     const versions = candidate?.versions || []
 
@@ -222,6 +209,12 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
 
     return candidate?.leadingVersion
   }, [candidate?.leadingVersion, candidate?.versions])
+
+  const candidateCommentsKey = React.useMemo(
+    () =>
+      candidate?.id ? (['candidate-comments', chain.id, candidate.id] as const) : null,
+    [candidate?.id, chain.id]
+  )
 
   const safeDiscussionUrl = getSafeDiscussionUrl(latestVersion?.discussionUrl)
   const createdAtLabel = candidate?.createdAt
@@ -333,7 +326,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
       // Refetch data immediately after submission
       // The SDK functions already wait for subgraph sync, so data should be ready
       void mutateCandidate()
-      void mutateComments()
+      void mutateSWR(candidateCommentsKey)
 
       // Auto-close after 2 seconds
       successTimerRef.current = setTimeout(() => {
@@ -341,7 +334,7 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
         setIsSuccess(false)
       }, 2000)
     },
-    [mutateCandidate, mutateComments]
+    [candidateCommentsKey, mutateCandidate, mutateSWR]
   )
 
   const handleClose = React.useCallback(() => {
@@ -416,8 +409,6 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
     { revalidateOnFocus: false }
   )
 
-  const comments = candidateComments?.comments || []
-
   if (error) {
     return (
       <Box py="x8">
@@ -447,22 +438,16 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
       proposalMetadata={proposalMetadata}
       chainId={chain.id as CHAIN_ID}
       addresses={addresses}
-      versions={candidate.versions}
     />
   )
 
   const discussionContent = (
     <CandidateDiscussionSection
-      candidate={candidate}
-      latestVersion={latestVersion}
+      candidateProposer={candidate.proposer as `0x${string}`}
+      candidateVersion={latestVersion}
       tokenSymbol={tokenSymbol ? String(tokenSymbol) : undefined}
-      comments={comments}
-      commentCount={candidate.commentCount}
-      commentsLoading={!candidateComments && !!candidate}
-      commentsError={candidateCommentsError}
       governorAddress={addresses.governor as `0x${string}`}
       onReplyClick={handleReplyClick}
-      replyingToId={replyingToComment?.id}
     />
   )
 

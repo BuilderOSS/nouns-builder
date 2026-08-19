@@ -1,34 +1,75 @@
-import { supportsUpdatableProposals } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 
 import { getProposalState, ProposalState } from '../../contract/requests/getProposalState'
 import { SDK } from '../client'
-import { ProposalFragment, ProposalUpdatableFragment } from '../sdk.generated'
+import { ProposalFragment } from '../sdk.generated'
 
 export type ProposalVersion = Omit<
-  ProposalFragment | ProposalUpdatableFragment,
-  | 'calldatas'
-  | 'values'
-  | 'proposer'
-  | 'transactionHash'
-  | 'updatePeriodEnd'
-  | 'updateMessage'
-  | 'updateCount'
-  | 'candidateVersion'
-  | 'replaces'
-  | 'replacedBy'
+  ProposalFragment,
+  'calldatas' | 'values' | 'proposer' | 'transactionHash' | 'updatePeriodEnd'
 > & {
   proposer: string
   values: string[]
   calldatas: string[]
   transactionHash: string
-  updatePeriodEnd?: number | null
-  updateMessage?: string | null
-  updateCount?: number | null
-  candidateVersion?: ProposalUpdatableFragment['candidateVersion'] | null
-  replaces?: ProposalUpdatableFragment['replaces'] | null
-  replacedBy?: ProposalUpdatableFragment['replacedBy'] | null
+  updatePeriodEnd?: number
   state: ProposalState
+}
+
+/**
+ * Sort proposal versions with replacement-aware logic.
+ * Primary sort: timeCreated ascending (oldest first for version history)
+ * Tie-breaker: For versions with same timeCreated, older versions come before newer replacements
+ *
+ * TODO: Once subgraph re-indexes with updatedAt field, replace this client-side sorting
+ * with GraphQL orderBy: updatedAt for better performance and simpler logic.
+ */
+function sortProposalVersions(versions: ProposalVersion[]): ProposalVersion[] {
+  // Build lookup map for O(1) access
+  const versionMap = new Map<string, ProposalVersion>()
+  versions.forEach((v) => versionMap.set(v.proposalId.toString(), v))
+
+  // Check if versionA replaces versionB (with cycle detection for safety)
+  function replacesTransitive(
+    aId: string,
+    bId: string,
+    visited = new Set<string>()
+  ): boolean {
+    if (visited.has(aId)) return false // Cycle detected
+    visited.add(aId)
+
+    const a = versionMap.get(aId)
+    if (!a?.replaces?.proposalId) return false
+
+    const replacedId = a.replaces.proposalId.toString()
+    if (replacedId === bId) return true
+
+    return replacesTransitive(replacedId, bId, visited)
+  }
+
+  return [...versions].sort((a, b) => {
+    // Primary sort: timeCreated ascending (oldest first for version history)
+    const aTime = Number(a.timeCreated)
+    const bTime = Number(b.timeCreated)
+    if (aTime !== bTime) {
+      return aTime - bTime
+    }
+
+    // Tie-breaker: Check replacement relationships
+    const aId = a.proposalId.toString()
+    const bId = b.proposalId.toString()
+
+    // Direct replacement check
+    if (a.replaces?.proposalId?.toString() === bId) return 1 // a replaces b, so b comes first
+    if (b.replaces?.proposalId?.toString() === aId) return -1 // b replaces a, so a comes first
+
+    // Transitive replacement check (for chains A → B → C)
+    if (replacesTransitive(aId, bId)) return 1
+    if (replacesTransitive(bId, aId)) return -1
+
+    // Fallback: sort by proposalNumber ascending
+    return a.proposalNumber - b.proposalNumber
+  })
 }
 
 export const getProposalVersions = async (
@@ -37,24 +78,16 @@ export const getProposalVersions = async (
   proposalNumber: number
 ): Promise<ProposalVersion[]> => {
   try {
-    const sdk = SDK.connect(chainId)
-    const data = supportsUpdatableProposals(chainId)
-      ? await sdk.proposalVersionsUpdatable({
-          where: {
-            dao: daoAddress.toLowerCase(),
-            proposalNumber: proposalNumber,
-          },
-        })
-      : await sdk.proposalVersions({
-          where: {
-            dao: daoAddress.toLowerCase(),
-            proposalNumber: proposalNumber,
-          },
-        })
+    const data = await SDK.connect(chainId).proposalVersions({
+      where: {
+        dao: daoAddress.toLowerCase(),
+        proposalNumber: proposalNumber,
+      },
+    })
 
     const versions = await Promise.all(
       data?.proposals.map(async (p) => {
-        const { calldatas, ...proposal } = p
+        const { calldatas, updatePeriodEnd, ...proposal } = p
 
         // Get state for each version
         const state = await getProposalState(
@@ -63,27 +96,19 @@ export const getProposalVersions = async (
           proposal.proposalId
         )
 
-        const version: any = {
+        return {
           ...proposal,
           calldatas: calldatas ? calldatas.split(':') : [],
+          updatePeriodEnd: updatePeriodEnd ? Number(updatePeriodEnd) : undefined,
           state,
         }
-
-        // Add updatable proposal fields (v0.1.17+) with explicit defaults (null, not undefined)
-        version.updatePeriodEnd =
-          'updatePeriodEnd' in p && p.updatePeriodEnd ? Number(p.updatePeriodEnd) : null
-        version.updateMessage = 'updateMessage' in p ? (p.updateMessage ?? null) : null
-        version.updateCount = 'updateCount' in p ? (p.updateCount ?? null) : null
-        version.candidateVersion =
-          'candidateVersion' in p ? (p.candidateVersion ?? null) : null
-        version.replaces = 'replaces' in p ? (p.replaces ?? null) : null
-        version.replacedBy = 'replacedBy' in p ? (p.replacedBy ?? null) : null
-
-        return version
       }) || []
     )
 
-    return versions
+    // Sort versions chronologically with replacement-aware logic
+    const sortedVersions = sortProposalVersions(versions)
+
+    return sortedVersions
   } catch (e) {
     console.error('Error fetching proposal versions', e)
     try {

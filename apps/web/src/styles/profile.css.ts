@@ -141,3 +141,9 @@ export const daoEditorSpacerLabel = style({
   fontWeight: 700,
   color: color.positiveActive,
 })
+
+export const profileStatBadge = style({
+  fontSize: '12px',
+  lineHeight: 1,
+  padding: '3px 6px',
+})

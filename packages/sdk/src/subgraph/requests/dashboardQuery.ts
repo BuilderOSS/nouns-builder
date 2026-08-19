@@ -1,17 +1,11 @@
-import { PUBLIC_DEFAULT_CHAINS, supportsUpdatableProposals } from '@buildeross/constants'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
 import { isAddress } from 'viem'
 
 import { SDK } from '../client'
-import type {
-  DaosForDashboardQuery,
-  DaosForDashboardUpdatableQuery,
-} from '../sdk.generated'
+import type { DaosForDashboardQuery } from '../sdk.generated'
 
-export type DashboardDao = (
-  | DaosForDashboardQuery['daos'][number]
-  | DaosForDashboardUpdatableQuery['daos'][number]
-) & {
+export type DashboardDao = DaosForDashboardQuery['daos'][number] & {
   chainId: CHAIN_ID
 }
 
@@ -26,24 +20,32 @@ export const dashboardRequest = async (
     if (memberAddress.toLowerCase() === '0x0000000000000000000000000000000000000000')
       throw new Error('Zero address not allowed')
 
-    const data = await Promise.all(
-      PUBLIC_DEFAULT_CHAINS.map((chain) => {
-        const sdk = SDK.connect(chain.id)
-        return supportsUpdatableProposals(chain.id)
-          ? sdk
-              .daosForDashboardUpdatable({
-                user: memberAddress.toLowerCase(),
-                first: 30,
-              })
-              .then((x) => ({ ...x, chainId: chain.id }))
-          : sdk
-              .daosForDashboard({
-                user: memberAddress.toLowerCase(),
-                first: 30,
-              })
-              .then((x) => ({ ...x, chainId: chain.id }))
-      })
+    const results = await Promise.allSettled(
+      PUBLIC_DEFAULT_CHAINS.map((chain) =>
+        SDK.connect(chain.id)
+          .daosForDashboard({
+            user: memberAddress.toLowerCase(),
+            first: 30,
+          })
+          .then((x) => ({ ...x, chainId: chain.id }))
+      )
     )
+
+    const data = results
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => result.value)
+
+    // If all requests failed, throw an error instead of returning empty results
+    if (data.length === 0 && results.length > 0) {
+      const rejectedReasons = results
+        .filter((result) => result.status === 'rejected')
+        .map((result) => result.reason)
+
+      const firstError = rejectedReasons[0]
+      throw new Error(
+        firstError?.message || 'All dashboard queries failed across default chains'
+      )
+    }
 
     return data
       .map((queries) =>

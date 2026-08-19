@@ -219,6 +219,7 @@ describe('implementationService', () => {
     })
 
     it('handles errors gracefully and continues to next detection method', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
       mockRedis.get.mockResolvedValue(null)
 
       // First storage slot throws error
@@ -234,12 +235,14 @@ describe('implementationService', () => {
         implementation: testImplementation,
         source: 'implementation',
       })
+
+      warnSpy.mockRestore()
     })
 
     it('validates address format correctly', async () => {
       const invalidAddress = 'invalid-address'
 
-      await expect(() =>
+      await expect(
         getImplementationAddress(testChainId, invalidAddress as Address)
       ).rejects.toThrow()
     })
