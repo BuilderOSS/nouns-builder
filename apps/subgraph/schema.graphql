@@ -12,6 +12,9 @@ type DAO @entity {
   auctionAddress: Bytes!
   treasuryAddress: Bytes!
   governorAddress: Bytes!
+  createdAt: BigInt!
+  createdAtBlock: BigInt!
+  transactionHash: Bytes!
   ownerCount: Int!
   voterCount: Int!
   tokensCount: Int!
@@ -89,6 +92,7 @@ type Token @entity {
   ownerInfo: DAOTokenOwner!
   voterInfo: DAOVoter!
   mintedAt: BigInt!
+  mintTransactionHash: Bytes!
   dao: DAO!
   auction: Auction @derivedFrom(field: "token")
 }
@@ -130,6 +134,7 @@ type Proposal implements ProposalMetadataEntity @entity {
   descriptionHash: Bytes!
   proposer: Bytes!
   timeCreated: BigInt!
+  updatedAt: BigInt!
   executableFrom: BigInt
   expiresAt: BigInt
   againstVotes: Int!
@@ -172,6 +177,7 @@ type ProposalSigner @entity {
   signer: Bytes!
   voteWeight: BigInt!
   timestamp: BigInt!
+  transactionHash: Bytes!
 }
 
 type ProposalUpdate @entity {
@@ -192,6 +198,7 @@ type ProposalCandidateGroup @entity {
   proposer: Bytes!
   salt: Bytes!
   createdAt: BigInt!
+  transactionHash: Bytes!
   candidateNumber: Int!
   versions: [ProposalCandidateVersion!]! @derivedFrom(field: "group")
   comments: [CandidateComment!]! @derivedFrom(field: "group")
@@ -223,6 +230,7 @@ type ProposalCandidateVersion implements ProposalMetadataEntity @entity {
   attestationUID: Bytes! # Original EAS attestation UID
   proposal: Proposal
   createdAt: BigInt!
+  transactionHash: Bytes!
   signatures: [CandidateSponsorSignature!]! @derivedFrom(field: "version")
   signatureCount: BigInt!
   totalVoteWeight: BigInt!
@@ -247,6 +255,7 @@ type CandidateComment @entity {
   comment: String!
   parentComment: CandidateComment
   createdAt: BigInt!
+  transactionHash: Bytes!
   replies: [CandidateComment!]! @derivedFrom(field: "parentComment")
   revoked: Boolean!
 }
@@ -263,6 +272,7 @@ type CandidateSponsorSignature @entity {
   signature: Bytes!
   revoked: Boolean!
   createdAt: BigInt!
+  transactionHash: Bytes!
   voteWeight: BigInt!
 }
 
@@ -292,6 +302,31 @@ type TreasuryAssetPin @entity {
   revokedTxHash: Bytes
 }
 
+type ProfileLinkOverride @entity {
+  # Composite ID: profile-key (ensures uniqueness per profile+key)
+  id: ID!
+
+  # Make profile queryable with index
+  profile: Bytes! @index
+
+  # Allow any string key (flexible for future additions)
+  key: String!
+
+  value: String!
+
+  # Attestation metadata
+  attestationUID: Bytes!
+  transactionHash: Bytes!
+  timestamp: BigInt!
+  creator: Bytes!
+
+  # Revocation tracking
+  revoked: Boolean!
+  revokedAt: BigInt
+  revokedBy: Bytes
+  revokedTxHash: Bytes
+}
+
 enum ProposalVoteSupport {
   FOR
   AGAINST
@@ -315,6 +350,8 @@ type AuctionConfig @entity {
   reservePrice: BigInt!
   timeBuffer: BigInt!
   minimumBidIncrement: BigInt!
+  lastUpdatedAt: BigInt
+  lastUpdatedTransactionHash: Bytes
 }
 
 type Auction @entity {
@@ -327,6 +364,9 @@ type Auction @entity {
   winningBid: AuctionBid
   firstBidTime: BigInt
   settled: Boolean!
+  settledAt: BigInt
+  settledTransactionHash: Bytes
+  createdTransactionHash: Bytes
   bidCount: Int!
   token: Token!
   bids: [AuctionBid!] @derivedFrom(field: "auction")

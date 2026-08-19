@@ -56,6 +56,8 @@ export const ProposalDetailsGrid: React.FC<ProposalDetailsGridProps> = ({ propos
     ]
   }, [forVotes, abstainVotes, againstVotes, calculateProgress])
 
+  const totalVotes = forVotes + againstVotes + abstainVotes
+
   return (
     <>
       <Grid columns={'1fr 1fr 1fr'} gap={{ '@initial': 'x2', '@768': 'x4' }}>
@@ -85,7 +87,9 @@ export const ProposalDetailsGrid: React.FC<ProposalDetailsGridProps> = ({ propos
           )
         })}
       </Grid>
-      <QuorumProgress forVotes={forVotes} quorumVotes={Number(quorumVotes)} />
+      {totalVotes > 0 && (
+        <QuorumProgress forVotes={forVotes} quorumVotes={Number(quorumVotes)} />
+      )}
       <Grid className={propDataGrid}>
         <Tile
           title={'Threshold'}

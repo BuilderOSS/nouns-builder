@@ -6,6 +6,7 @@ import {
   crypto,
   dataSource,
   log,
+  store,
 } from '@graphprotocol/graph-ts'
 
 import {
@@ -86,6 +87,7 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   proposal.descriptionHash = event.params.descriptionHash
   proposal.proposer = event.params.proposal.proposer
   proposal.timeCreated = event.params.proposal.timeCreated
+  proposal.updatedAt = event.block.timestamp
   proposal.againstVotes = event.params.proposal.againstVotes.toI32()
   proposal.forVotes = event.params.proposal.forVotes.toI32()
   proposal.abstainVotes = event.params.proposal.abstainVotes.toI32()
@@ -175,6 +177,7 @@ export function handleProposalUpdated(event: ProposalUpdatedEvent): void {
 
   let proposalData = proposalResult.value
   proposal.timeCreated = proposalData.timeCreated
+  proposal.updatedAt = event.block.timestamp
   proposal.againstVotes = proposalData.againstVotes.toI32()
   proposal.forVotes = proposalData.forVotes.toI32()
   proposal.abstainVotes = proposalData.abstainVotes.toI32()
@@ -240,8 +243,6 @@ export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
     return
   }
 
-  proposal.isSigned = true
-
   let governorContract = GovernorContract.bind(event.address)
   let tokenResult = governorContract.try_token()
   if (tokenResult.reverted) {
@@ -252,6 +253,13 @@ export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
   }
 
   let tokenContract = TokenContract.bind(tokenResult.value)
+  proposal.isSigned = true
+
+  let existingSigners = proposal.signers.load()
+  for (let i = 0; i < existingSigners.length; i++) {
+    store.remove('ProposalSigner', existingSigners[i].id)
+  }
+
   for (let i = 0; i < event.params.signers.length; i++) {
     let signer = event.params.signers[i]
     let signerId = proposal.id + '-' + signer.toHexString()
@@ -263,6 +271,7 @@ export function handleProposalSignersSet(event: ProposalSignersSetEvent): void {
       ? BigInt.fromI32(0)
       : votingPowerResult.value
     proposalSigner.timestamp = event.block.timestamp
+    proposalSigner.transactionHash = event.transaction.hash
     proposalSigner.save()
   }
 

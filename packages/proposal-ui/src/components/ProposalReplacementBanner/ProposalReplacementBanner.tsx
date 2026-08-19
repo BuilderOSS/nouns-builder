@@ -3,9 +3,9 @@ import { useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType, BytesType } from '@buildeross/types'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
-import { Box, Button, Flex, Heading, Icon, Stack, Text } from '@buildeross/zord'
+import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 
-import * as styles from './ProposalReplacementBanner.css'
+import * as styles from '../ProposalEditedBanner/ProposalEditedBanner.css'
 
 export interface ProposalReplacementBannerProps {
   proposalId: BytesType
@@ -39,29 +39,34 @@ export function ProposalReplacementBanner({
   )
 
   return (
-    <Box className={styles.banner}>
-      <Flex align="center" gap="x4" wrap="wrap">
-        <Flex align="center" gap="x3" flex={1}>
-          <Icon id="refresh" size="md" color="warning" />
-          <Stack gap="x1">
-            <Heading size="xs">This proposal has been updated</Heading>
-            <Text size="sm" color="text3">
-              The proposer created a new version of this proposal.
-            </Text>
-          </Stack>
-        </Flex>
-
-        <Flex align="center" gap="x3">
-          <Link link={replacementLink}>
-            <Button variant="primary" size="sm">
-              <Flex align="center" gap="x2">
-                View Latest Version
-                <Icon id="arrow-right" size="sm" />
-              </Flex>
-            </Button>
-          </Link>
-        </Flex>
+    <Flex
+      align="center"
+      justify="space-between"
+      gap="x4"
+      p="x4"
+      borderRadius="curved"
+      borderWidth="thin"
+      borderColor="warning"
+      backgroundColor="background2"
+      wrap
+    >
+      <Flex align="center" gap="x3" className={styles.contentWrapper}>
+        <Icon id="refresh" size="md" color="warning" className={styles.iconWrapper} />
+        <Stack gap="x1" className={styles.textWrapper}>
+          <Text fontWeight="label" color="text1">
+            This proposal has been replaced
+          </Text>
+        </Stack>
       </Flex>
-    </Box>
+
+      <Link link={replacementLink}>
+        <Button variant="secondary" size="sm">
+          <Flex align="center" gap="x2">
+            View Latest Version
+            <Icon id="arrow-right" size="sm" />
+          </Flex>
+        </Button>
+      </Link>
+    </Flex>
   )
 }

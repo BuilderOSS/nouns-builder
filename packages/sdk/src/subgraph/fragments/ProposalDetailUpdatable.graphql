@@ -1,4 +1,0 @@
-fragment ProposalDetailUpdatable on Proposal {
-  ...ProposalUpdatable
-  metadata
-}

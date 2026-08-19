@@ -5,6 +5,7 @@ import {
   decodeCandidateComment,
   decodeCandidateSponsorSignature,
   decodeDaoMultisig,
+  decodeProfileLink,
   decodePropdate,
 } from '../src/utils/eas'
 
@@ -152,6 +153,22 @@ describe('Eas Decode Tests', () => {
       decoded,
       Address.fromString('0x19a8eb80c1483ceaa1278b16c5d5ef0104f85905')
     )
+  })
+
+  test('decode profile link', () => {
+    const data = Bytes.fromHexString(
+      '0x0000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000077765627369746500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001768747470733a2f2f6275696c6465726f73732e636f6d2f000000000000000000'
+    )
+    const decoded = decodeProfileLink(data)
+    assert.assertNotNull(decoded)
+
+    if (!decoded) {
+      assert.assertTrue(false, 'decoded should not be null')
+      return
+    }
+
+    assert.stringEquals(decoded.key, 'website')
+    assert.stringEquals(decoded.value, 'https://buildeross.com/')
   })
 
   test('decode candidate comment', () => {

@@ -1,6 +1,4 @@
-import { supportsUpdatableProposals } from '@buildeross/constants'
 import { CHAIN_ID } from '@buildeross/types'
-import { isProposalReplaced } from '@buildeross/utils/proposalState'
 
 import { getProposalState } from '../../contract/requests/getProposalState'
 import { SDK } from '../client'
@@ -13,6 +11,62 @@ export interface ProposalsResponse {
   }
 }
 
+/**
+ * Sort proposals with replacement-aware logic.
+ * Primary sort: timeCreated descending (newest first)
+ * Tie-breaker: For proposals with same timeCreated, newer replacements come before older versions
+ *
+ * TODO: Once subgraph re-indexes with updatedAt field, replace this client-side sorting
+ * with GraphQL orderBy: updatedAt for better performance and simpler logic.
+ */
+function sortProposalsWithReplacements(proposals: Proposal[]): Proposal[] {
+  // Build lookup map for O(1) access
+  const proposalMap = new Map<string, Proposal>()
+  proposals.forEach((p) => proposalMap.set(p.proposalId.toString(), p))
+
+  // Check if proposalA replaces proposalB (with cycle detection for safety)
+  function replacesTransitive(
+    aId: string,
+    bId: string,
+    visited = new Set<string>()
+  ): boolean {
+    if (visited.has(aId)) return false // Cycle detected
+    visited.add(aId)
+
+    const a = proposalMap.get(aId)
+    if (!a?.replaces?.proposalId) return false
+
+    const replacedId = a.replaces.proposalId.toString()
+    if (replacedId === bId) return true
+
+    return replacesTransitive(replacedId, bId, visited)
+  }
+
+  return [...proposals].sort((a, b) => {
+    // Primary sort: timeCreated descending
+    const aTime = Number(a.timeCreated)
+    const bTime = Number(b.timeCreated)
+    if (aTime !== bTime) {
+      return bTime - aTime
+    }
+
+    // Tie-breaker: Check replacement relationships
+    const aId = a.proposalId.toString()
+    const bId = b.proposalId.toString()
+
+    // Direct replacement check
+    if (a.replaces?.proposalId?.toString() === bId) return -1 // a replaces b, so a comes first
+    if (b.replaces?.proposalId?.toString() === aId) return 1 // b replaces a, so b comes first
+
+    // Transitive replacement check (for chains A → B → C)
+    if (replacesTransitive(aId, bId)) return -1
+    if (replacesTransitive(bId, aId)) return 1
+
+    // Fallback: sort by proposalNumber descending
+    return b.proposalNumber - a.proposalNumber
+  })
+}
+
 export const getProposals = async (
   chainId: CHAIN_ID,
   token: string,
@@ -20,28 +74,19 @@ export const getProposals = async (
   page?: number
 ): Promise<ProposalsResponse> => {
   try {
-    const sdk = SDK.connect(chainId)
-    const data = supportsUpdatableProposals(chainId)
-      ? await sdk.proposalsUpdatable({
-          where: {
-            dao: token.toLowerCase(),
-          },
-          first: limit,
-          skip: page ? (page - 1) * limit : 0,
-        })
-      : await sdk.proposals({
-          where: {
-            dao: token.toLowerCase(),
-          },
-          first: limit,
-          skip: page ? (page - 1) * limit : 0,
-        })
+    const data = await SDK.connect(chainId).proposals({
+      where: {
+        dao: token.toLowerCase(),
+      },
+      first: limit,
+      skip: page ? (page - 1) * limit : 0,
+    })
 
     const allProposals = await Promise.all(
       data?.proposals.map(async (p) => {
-        const { executableFrom, expiresAt, calldatas, ...proposal } = p
+        const { executableFrom, expiresAt, calldatas, updatePeriodEnd, ...proposal } = p
 
-        const baseProposal: any = {
+        const baseProposal = {
           ...proposal,
           calldatas: calldatas ? calldatas.split(':') : [],
           state: await getProposalState(
@@ -49,18 +94,8 @@ export const getProposals = async (
             proposal.dao.governorAddress,
             proposal.proposalId
           ),
+          ...(updatePeriodEnd ? { updatePeriodEnd: Number(updatePeriodEnd) } : {}),
         }
-
-        // Add updatable proposal fields (v0.1.17+) with explicit defaults (null, not undefined)
-        baseProposal.updatePeriodEnd =
-          'updatePeriodEnd' in p && p.updatePeriodEnd ? Number(p.updatePeriodEnd) : null
-        baseProposal.updateMessage =
-          'updateMessage' in p ? (p.updateMessage ?? null) : null
-        baseProposal.updateCount = 'updateCount' in p ? (p.updateCount ?? null) : null
-        baseProposal.candidateVersion =
-          'candidateVersion' in p ? (p.candidateVersion ?? null) : null
-        baseProposal.replaces = 'replaces' in p ? (p.replaces ?? null) : null
-        baseProposal.replacedBy = 'replacedBy' in p ? (p.replacedBy ?? null) : null
 
         // executableFrom and expiresAt will always either be both defined, or neither defined
         if (executableFrom && expiresAt) {
@@ -74,13 +109,12 @@ export const getProposals = async (
       })
     )
 
-    // Filter out replaced proposals
-    const filteredProposals = allProposals.filter(
-      (proposal) => !isProposalReplaced(proposal.state)
-    )
+    // Show all proposals including replaced versions
+    // Sort with replacement-aware logic to handle proposals with same timeCreated
+    const sortedProposals = sortProposalsWithReplacements(allProposals)
 
     return {
-      proposals: filteredProposals,
+      proposals: sortedProposals,
       pageInfo: {
         hasNextPage: data.proposals.reverse()[0].proposalNumber !== 1,
       },

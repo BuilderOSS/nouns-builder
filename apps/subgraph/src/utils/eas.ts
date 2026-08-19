@@ -83,6 +83,10 @@ export const TREASURY_ASSET_PIN_SCHEMA_UID = Bytes.fromHexString(
   '0xc384fd4fdacb670667c07759423132a193053742b58d5a056b61d72ba1a09e26'
 )
 
+export const PROFILE_LINK_SCHEMA_UID = Bytes.fromHexString(
+  '0xa784c12c8d2e33ae2c50cc797a04f8852aea77d51a1a37ff117c3b4de0159593'
+)
+
 export const PROPOSAL_CANDIDATE_SCHEMA_UID = Bytes.fromHexString(
   '0xc3315fb5b910e904d24f56c5b37dd5a5d06392bb040ba8ad669a9f7b3bbe2e4f'
 )
@@ -162,6 +166,61 @@ export function decodeDaoMultisig(data: Bytes): Address | null {
     return null
   }
   return value.toTuple()[0].toAddress()
+}
+
+export class ProfileLink extends ethereum.Tuple {
+  get key(): string {
+    return this[0].toString()
+  }
+  get value(): string {
+    return this[1].toString()
+  }
+}
+
+function decodeStringAt(data: Bytes, offset: i32): string | null {
+  const totalLen = data.length
+  if (offset < 0 || offset + 32 > totalLen) {
+    return null
+  }
+
+  const stringBytes = changetype<Bytes>(data.subarray(offset))
+  const stringHead = ethereum.decode('(uint256)', stringBytes)
+  if (stringHead == null) return null
+
+  const stringLength = stringHead.toTuple()[0].toI32()
+  if (stringLength < 0 || offset + 32 + stringLength > totalLen) {
+    return null
+  }
+
+  const valueBytes = changetype<Bytes>(
+    data.subarray(offset + 32, offset + 32 + stringLength)
+  )
+
+  return valueBytes.toString()
+}
+
+// const PROFILE_LINK_SCHEMA = `string key,string value`
+export function decodeProfileLink(data: Bytes): ProfileLink | null {
+  const head = ethereum.decode('(uint256,uint256)', data)
+  if (head == null) return null
+
+  const tuple = head.toTuple()
+  const keyOffset = tuple[0].toI32()
+  const valueOffset = tuple[1].toI32()
+
+  const key = decodeStringAt(data, keyOffset)
+  const value = decodeStringAt(data, valueOffset)
+
+  if (key == null || value == null) {
+    return null
+  }
+
+  const tupleVals: Array<ethereum.Value> = [
+    ethereum.Value.fromString(key!),
+    ethereum.Value.fromString(value!),
+  ]
+
+  return changetype<ProfileLink>(tupleVals)
 }
 
 export class TreasuryAssetPin extends ethereum.Tuple {

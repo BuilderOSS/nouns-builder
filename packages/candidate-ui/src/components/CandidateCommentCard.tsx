@@ -21,7 +21,6 @@ interface CandidateCommentCardProps {
   comment: CandidateComment
   depth?: number
   isLatestSignalForUser?: boolean
-  isReplying?: boolean
   onReplyClick?: (comment: CandidateComment) => void
 }
 
@@ -29,7 +28,6 @@ export const CandidateCommentCard: React.FC<CandidateCommentCardProps> = ({
   comment,
   depth = 0,
   isLatestSignalForUser = true,
-  isReplying = false,
   onReplyClick,
 }) => {
   const { ensName, ensAvatar } = useEnsData(comment.commenter as `0x${string}`)
@@ -118,12 +116,8 @@ export const CandidateCommentCard: React.FC<CandidateCommentCardProps> = ({
 
       {onReplyClick && (
         <Flex justify="flex-end">
-          <Button
-            variant={isReplying ? 'secondary' : 'outline'}
-            size="sm"
-            onClick={() => onReplyClick(comment)}
-          >
-            {isReplying ? 'Cancel Reply' : 'Reply'}
+          <Button variant="outline" size="sm" onClick={() => onReplyClick(comment)}>
+            Reply
           </Button>
         </Flex>
       )}

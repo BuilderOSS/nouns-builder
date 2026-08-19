@@ -165,6 +165,8 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
             member={member}
             totalSupply={totalSupply}
             isActive={isActiveMember(member.voter)}
+            auctionAddress={addresses.auction}
+            treasuryAddress={addresses.treasury}
           />
         ))
       )}

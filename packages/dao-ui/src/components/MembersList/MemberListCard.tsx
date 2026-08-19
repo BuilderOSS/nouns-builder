@@ -14,10 +14,14 @@ export const MemberCard = ({
   member,
   totalSupply,
   isActive,
+  auctionAddress,
+  treasuryAddress,
 }: {
   member: DaoVoter
   totalSupply?: number
   isActive?: boolean
+  auctionAddress?: string
+  treasuryAddress?: string
 }) => {
   const { getProfileLink } = useLinks()
   const { displayName, ensAvatar } = useEnsData(member.voter)
@@ -31,6 +35,15 @@ export const MemberCard = ({
     if (!totalSupply || !member.tokenCount) return '--'
     return ((Number(member.tokenCount) / totalSupply) * 100).toFixed(2)
   }, [totalSupply, member])
+
+  const badge =
+    member.voter.toLowerCase() === auctionAddress?.toLowerCase()
+      ? { label: 'Auction House', variant: 'default' as const }
+      : member.voter.toLowerCase() === treasuryAddress?.toLowerCase()
+        ? { label: 'Treasury', variant: 'default' as const }
+        : isActive
+          ? { label: 'Active', variant: 'positive' as const }
+          : undefined
 
   return (
     <Link
@@ -48,7 +61,7 @@ export const MemberCard = ({
         <Text mx="x2" variant="paragraph-md">
           {displayName}
         </Text>
-        {isActive && <StatBadge variant="positive">Active</StatBadge>}
+        {badge && <StatBadge variant={badge.variant}>{badge.label}</StatBadge>}
       </Flex>
       <Grid columns="1fr 1fr 1fr" flex={1} width={{ '@initial': '100%', '@768': 'auto' }}>
         <Text>

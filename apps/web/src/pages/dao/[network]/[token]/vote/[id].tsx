@@ -1,8 +1,8 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { supportsUpdatableProposals } from '@buildeross/constants/subgraph'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { SectionHandler } from '@buildeross/dao-ui'
+import { useProposal } from '@buildeross/hooks'
 import {
   PropDates,
   ProposalActions,
@@ -10,10 +10,10 @@ import {
   ProposalDetailsGrid,
   ProposalEditedBanner,
   ProposalHeader,
+  ProposalReplacementBanner,
   ProposalVotes,
 } from '@buildeross/proposal-ui'
-import type { Proposal_Filter } from '@buildeross/sdk/subgraph'
-import { formatAndFetchState, getProposal, SubgraphSDK } from '@buildeross/sdk/subgraph'
+import { formatAndFetchState, SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { type DaoContractAddresses, useChainStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ProposalState } from '@buildeross/types'
@@ -30,7 +30,7 @@ import { getDaoLayout } from 'src/layouts/DaoLayout'
 import type { NextPageWithLayout } from 'src/pages/_app'
 import type { ProposalOgMetadata } from 'src/pages/api/og/proposal'
 import { votePageWrapper } from 'src/styles/vote.css'
-import useSWR, { unstable_serialize } from 'swr'
+import { unstable_serialize } from 'swr'
 import { getAddress, isAddress } from 'viem'
 import { useBalance } from 'wagmi'
 
@@ -52,19 +52,34 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
   addresses,
 }) => {
   const chain = useChainStore((state) => state.chain)
-  const { query, push, pathname } = useRouter()
+  const router = useRouter()
+  const { query, push, pathname } = router
 
   const { data: balance } = useBalance({
     address: addresses.treasury,
     chainId: chainId,
   })
 
-  const { data: proposal } = useSWR(
-    chainId && proposalId
-      ? ([SWR_KEYS.PROPOSAL, chainId, proposalId.toLowerCase()] as const)
-      : null,
-    ([, _chainId, _proposalId]) => getProposal(_chainId, _proposalId)
-  )
+  const { proposal } = useProposal({
+    chainId,
+    proposalId,
+  })
+
+  // Smart URL rewrite: hex → number (only for latest versions)
+  React.useEffect(() => {
+    const urlId = router.query.id as string
+
+    if (!proposal || !urlId) return
+
+    // Only rewrite if URL has hex ID AND proposal is latest version
+    if (urlId.startsWith('0x') && proposal.state !== ProposalState.Replaced) {
+      router.replace(
+        `/dao/${chain.slug}/${addresses.token}/vote/${proposal.proposalNumber}`,
+        undefined,
+        { shallow: true }
+      )
+    }
+  }, [proposal, router, chain.slug, addresses.token])
 
   const openProposalReviewPage = React.useCallback(async () => {
     await push({
@@ -190,7 +205,14 @@ const VotePage: NextPageWithLayout<VotePageProps> = ({
                 <Box fontWeight={'heading'}>{displayWarning}</Box>
               </Flex>
             )}
-            <ProposalEditedBanner key="edited-banner" proposal={proposal} />
+            {proposal.state === ProposalState.Replaced && proposal.replacedBy ? (
+              <ProposalReplacementBanner
+                proposalId={proposal.proposalId}
+                replacedByProposalId={proposal.replacedBy.proposalId}
+              />
+            ) : proposal.replaces ? (
+              <ProposalEditedBanner key="edited-banner" proposal={proposal} />
+            ) : null}
 
             {displayActions && (
               <ProposalActions
@@ -250,6 +272,56 @@ VotePage.getLayout = getDaoLayout
 
 export default VotePage
 
+/**
+ * Build GraphQL query parameters based on proposal identifier type
+ */
+function buildProposalQuery(proposalIdOrNumber: string, dao: string) {
+  if (proposalIdOrNumber.startsWith('0x')) {
+    return {
+      where: { proposalId: proposalIdOrNumber.toLowerCase() },
+      first: 1, // Hex ID is unique, only one result
+    }
+  }
+
+  return {
+    where: {
+      proposalNumber: Number.parseInt(proposalIdOrNumber),
+      dao: dao.toLowerCase(),
+    },
+    first: 100, // Fetch all proposals with this number (original + all replacements)
+  }
+}
+
+/**
+ * Find the latest active proposal from query results
+ * For hex ID queries, returns the single result
+ * For number queries, finds the proposal without replacedBy (the active version)
+ *
+ * TODO: Once subgraph re-indexes with updatedAt field, replace this client-side
+ * logic with orderBy: updatedAt in the GraphQL query for better performance
+ */
+function findLatestProposal(
+  proposals: any[],
+  isHexQuery: boolean
+): (typeof proposals)[0] | undefined {
+  if (proposals.length === 0) return undefined
+
+  if (isHexQuery) {
+    // Hex ID query - use the single result
+    return proposals[0]
+  }
+
+  // Number query - find the latest non-replaced proposal
+  const latestProposal = proposals.find((p) => !p.replacedBy)
+
+  if (!latestProposal) {
+    // All proposals are replaced - shouldn't happen, but fallback to first
+    return proposals[0]
+  }
+
+  return latestProposal
+}
+
 export const getServerSideProps: GetServerSideProps = async ({ params, req, res }) => {
   const collection = params?.token as AddressType
   const proposalIdOrNumber = params?.id as string
@@ -266,31 +338,21 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
   const env = process.env.VERCEL_ENV || 'development'
   const protocol = env === 'development' ? 'http' : 'https'
 
-  let where: Proposal_Filter
+  const isHexQuery = proposalIdOrNumber.startsWith('0x')
+  const { where, first } = buildProposalQuery(proposalIdOrNumber, collection)
 
-  where = proposalIdOrNumber.startsWith('0x')
-    ? {
-        proposalId: proposalIdOrNumber.toLowerCase(),
-      }
-    : {
-        proposalNumber: Number.parseInt(proposalIdOrNumber),
-        dao: collection.toLowerCase(),
-      }
+  const queryResult = await SubgraphSDK.connect(chain.id).proposalOGMetadata({
+    where,
+    first,
+  })
 
-  const sdk = SubgraphSDK.connect(chain.id)
-  const data = supportsUpdatableProposals(chain.id)
-    ? await sdk
-        .proposalOGMetadataUpdatable({
-          where,
-          first: 1,
-        })
-        .then((x) => (x.proposals.length > 0 ? x.proposals[0] : undefined))
-    : await sdk
-        .proposalOGMetadata({
-          where,
-          first: 1,
-        })
-        .then((x) => (x.proposals.length > 0 ? x.proposals[0] : undefined))
+  if (!queryResult.proposals || queryResult.proposals.length === 0) {
+    return {
+      notFound: true,
+    }
+  }
+
+  const data = findLatestProposal(queryResult.proposals, isHexQuery)
 
   if (!data) {
     return {
@@ -309,32 +371,6 @@ export const getServerSideProps: GetServerSideProps = async ({ params, req, res 
   if (getAddress(proposal.dao.tokenAddress) !== getAddress(collection)) {
     return {
       notFound: true,
-    }
-  }
-
-  if (proposalIdOrNumber.startsWith('0x')) {
-    return {
-      redirect: {
-        destination: `/dao/${network}/${collection}/vote/${proposal.proposalNumber}`,
-        permanent: false,
-      },
-    }
-  }
-
-  // Redirect to latest version if this proposal has been replaced
-  if (
-    proposal.state === ProposalState.Replaced &&
-    'replacedBy' in data &&
-    data.replacedBy
-  ) {
-    const latestProposalNumber = (data.replacedBy as { proposalNumber: number })
-      .proposalNumber
-
-    return {
-      redirect: {
-        destination: `/dao/${network}/${collection}/vote/${latestProposalNumber}`,
-        permanent: false, // Use temporary redirect since proposals could be updated again
-      },
     }
   }
 

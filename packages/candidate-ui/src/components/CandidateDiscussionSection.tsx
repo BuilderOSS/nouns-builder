@@ -1,41 +1,31 @@
-import {
-  type CandidateComment,
-  type CandidateGroup,
-  type CandidateVersion,
-} from '@buildeross/sdk'
-import { CandidateVoteSupport } from '@buildeross/sdk/subgraph'
+import { type CandidateComment, type CandidateVersion } from '@buildeross/sdk'
+import { CandidateVoteSupport, getCandidateComments } from '@buildeross/sdk/subgraph'
+import { useChainStore } from '@buildeross/stores'
 import { Flex, Stack, Text } from '@buildeross/zord'
-import React, { useCallback, useState } from 'react'
+import React from 'react'
+import useSWR from 'swr'
 
 import { CandidateCommentCard } from './CandidateCommentCard'
 import { CandidateSigners } from './CandidateSigners'
 
 interface CandidateDiscussionSectionProps {
-  candidate: CandidateGroup
-  latestVersion?: CandidateVersion
+  candidateProposer: `0x${string}`
+  candidateVersion?: CandidateVersion
   tokenSymbol?: string
-  comments: CandidateComment[]
-  commentCount: bigint
-  commentsLoading: boolean
-  commentsError?: unknown
   governorAddress: `0x${string}`
   onReplyClick?: (comment: CandidateComment) => void
-  replyingToId?: string
 }
 
 const CandidateCommentsPanel = ({
   comments,
   error,
   isLoading,
-  replyingTo,
   onReplyClick,
 }: {
   comments: CandidateComment[]
   error?: unknown
   isLoading: boolean
-  commentCount: bigint
-  replyingTo?: CandidateComment
-  onReplyClick: (comment: CandidateComment) => void
+  onReplyClick?: (comment: CandidateComment) => void
 }) => {
   const topLevelComments = React.useMemo(
     () =>
@@ -88,7 +78,6 @@ const CandidateCommentsPanel = ({
           comment={comment}
           depth={depth}
           isLatestSignalForUser={latestSignalIds.has(comment.id)}
-          isReplying={replyingTo?.id === comment.id}
           onReplyClick={onReplyClick}
         />
         {repliesByParentId
@@ -96,7 +85,7 @@ const CandidateCommentsPanel = ({
           ?.map((reply) => renderThread(reply, depth + 1))}
       </Stack>
     ),
-    [repliesByParentId, latestSignalIds, replyingTo, onReplyClick]
+    [repliesByParentId, latestSignalIds, onReplyClick]
   )
 
   return (
@@ -126,58 +115,44 @@ const CandidateCommentsPanel = ({
 }
 
 export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProps> = ({
-  candidate,
-  latestVersion,
+  candidateProposer,
+  candidateVersion,
   tokenSymbol,
-  comments,
-  commentCount,
-  commentsLoading,
-  commentsError,
   governorAddress,
-  onReplyClick: onReplyClickProp,
-  replyingToId,
+  onReplyClick,
 }) => {
-  // Hide action buttons if candidate has been promoted to a proposal
-  const isPromoted = !!latestVersion?.proposal?.id
+  const { chain } = useChainStore()
 
-  // Reply state management (internal state if parent doesn't manage it)
-  const [internalReplyingTo, setInternalReplyingTo] = useState<
-    CandidateComment | undefined
-  >()
+  const candidateId = candidateVersion?.candidateId as `0x${string}` | undefined
 
-  // Use internal state if parent doesn't provide replyingToId
-  const effectiveReplyingTo = replyingToId
-    ? comments.find((c) => c.id === replyingToId)
-    : internalReplyingTo
-
-  const handleReplyClick = useCallback(
-    (comment: CandidateComment) => {
-      if (onReplyClickProp) {
-        // Parent manages the reply state
-        onReplyClickProp(comment)
-      } else {
-        // Use internal state management
-        setInternalReplyingTo((current) =>
-          current?.id === comment.id ? undefined : comment
-        )
-      }
-    },
-    [onReplyClickProp]
+  const {
+    data: candidateComments,
+    error: commentsError,
+    isLoading: commentsLoading,
+  } = useSWR(
+    candidateId ? ['candidate-comments', chain.id, candidateId] : null,
+    () => getCandidateComments(chain.id, candidateId!, 100),
+    { revalidateOnFocus: false }
   )
+
+  const comments = candidateComments?.comments || []
+
+  // Hide action buttons if candidate has been promoted to a proposal
+  const isPromoted = !!candidateVersion?.proposal?.id
 
   return (
     <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
-      {latestVersion && tokenSymbol && (
+      {candidateVersion && tokenSymbol && (
         <CandidateSigners
-          candidateId={latestVersion.candidateId as `0x${string}`}
-          proposalHash={latestVersion.proposalHash as `0x${string}`}
-          proposer={candidate.proposer as `0x${string}`}
+          candidateId={candidateVersion.candidateId as `0x${string}`}
+          proposalHash={candidateVersion.proposalHash as `0x${string}`}
+          proposer={candidateProposer as `0x${string}`}
           governorAddress={governorAddress}
           tokenSymbol={String(tokenSymbol)}
-          description={latestVersion.metadata || ''}
-          targets={(latestVersion.targets || []) as string[]}
-          values={(latestVersion.values || []).map((value) => BigInt(value))}
-          calldatas={(latestVersion.calldatas || []) as `0x${string}`[]}
+          description={candidateVersion.metadata || ''}
+          targets={(candidateVersion.targets || []) as string[]}
+          values={(candidateVersion.values || []).map((value) => BigInt(value))}
+          calldatas={(candidateVersion.calldatas || []) as `0x${string}`[]}
           hideActions={isPromoted}
         />
       )}
@@ -186,9 +161,7 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
         comments={comments}
         error={commentsError}
         isLoading={commentsLoading}
-        commentCount={commentCount}
-        replyingTo={effectiveReplyingTo}
-        onReplyClick={handleReplyClick}
+        onReplyClick={onReplyClick}
       />
     </Stack>
   )
