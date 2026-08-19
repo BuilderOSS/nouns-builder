@@ -18,7 +18,6 @@ type ProposalVersionDiffModalProps = {
   versionIndex: number
   isOriginal: boolean
   versionLabel?: string
-  currentVersionProposalId?: string
   previousVersionProposalId?: string
 }
 
@@ -32,7 +31,6 @@ export const ProposalVersionDiffModal: React.FC<ProposalVersionDiffModalProps> =
   versionIndex,
   isOriginal,
   versionLabel = 'Update',
-  currentVersionProposalId,
   previousVersionProposalId,
 }) => {
   const { chain } = useChainStore()

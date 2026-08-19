@@ -11,6 +11,7 @@ import { Stack } from '@buildeross/zord'
 import React from 'react'
 
 import { ArgumentDisplay } from '../ArgumentDisplay'
+import { EscrowTransactionCard, matchEscrowBundler } from '../EscrowTransactionCard'
 import { TransactionAiSummary } from './TransactionAiSummary'
 import {
   DecodedCallDisplay,
@@ -114,11 +115,14 @@ export const TransactionDisplay: React.FC<
     ? decoded.transaction
     : decoded.transaction.encodedData || 'Unavailable'
 
-  const toggleMode: 'toggle' | 'decoding' | 'rawOnly' = isDecoded
-    ? 'toggle'
-    : isDecoding
-      ? 'decoding'
-      : 'rawOnly'
+  // Known Smart Invoice escrow bundlers aren't decoded by the generic ABI-fetch
+  // path (they render as "Raw only"); detect them and render a rich escrow card.
+  const escrowVersion = matchEscrowBundler(chainId, decoded.target)
+  const showEscrowCard =
+    !!escrowVersion && !showRawCalldata && rawCalldata.startsWith('0x')
+
+  const toggleMode: 'toggle' | 'decoding' | 'rawOnly' =
+    isDecoded || escrowVersion ? 'toggle' : isDecoding ? 'decoding' : 'rawOnly'
 
   return (
     <Stack style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }} w="100%">
@@ -128,7 +132,13 @@ export const TransactionDisplay: React.FC<
         onToggle={() => setShowRawCalldata((state) => !state)}
       />
       <TransactionDisplayShell chainId={chainId} target={decoded.target} index={index}>
-        {isDecoded && !showRawCalldata ? (
+        {showEscrowCard ? (
+          <EscrowTransactionCard
+            chainId={chainId}
+            target={decoded.target}
+            calldata={rawCalldata}
+          />
+        ) : isDecoded && !showRawCalldata ? (
           <DecodedCallDisplay
             functionName={decoded.transaction.functionName}
             value={decoded.value}

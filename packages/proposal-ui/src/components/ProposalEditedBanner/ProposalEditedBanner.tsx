@@ -129,7 +129,6 @@ export const ProposalEditedBanner: React.FC<ProposalEditedBannerProps> = ({
         previousVersion={previousVersion}
         versionIndex={selectedVersionIndex!}
         isOriginal={selectedVersionIndex === 0}
-        currentVersionProposalId={selectedVersion?.proposalId}
         previousVersionProposalId={previousVersion?.proposalId}
       />
     </>
