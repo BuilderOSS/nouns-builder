@@ -40,7 +40,9 @@ const PERCENT_EPSILON = 0.0001
 const exceedsMaxDecimals = (n: number): boolean => {
   if (!Number.isFinite(n)) return true
   const scaled = n * 10 ** MAX_DECIMALS
-  return Math.abs(scaled - Math.round(scaled)) > 1e-6
+  return (
+    Math.abs(scaled - Math.round(scaled)) > Number.EPSILON * Math.max(1, Math.abs(scaled))
+  )
 }
 
 /** Validate a split's recipient list. Returns an empty array when valid. */

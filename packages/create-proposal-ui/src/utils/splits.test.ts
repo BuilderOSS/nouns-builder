@@ -13,6 +13,7 @@ import {
 const A = '0xabc0000000000000000000000000000000000001'
 const B = '0xabc0000000000000000000000000000000000002'
 const C = '0xabc0000000000000000000000000000000000003'
+const A_CHECKSUM = getAddress(A)
 
 const rs = (list: Array<[string, number]>): SplitRecipient[] =>
   list.map(([address, percentAllocation]) => ({ address, percentAllocation }))
@@ -48,6 +49,21 @@ describe('validateSplitRecipients', () => {
     const errs = validateSplitRecipients(
       rs([
         ['not-an-address', 50],
+        [B, 50],
+      ])
+    )
+    expect(errs.some((e) => /invalid address/.test(e.message))).toBe(true)
+  })
+
+  it('flags mixed-case checksum typos', () => {
+    const badChecksum = `${A_CHECKSUM.slice(0, 2)}${
+      A_CHECKSUM[2] === A_CHECKSUM[2].toLowerCase()
+        ? A_CHECKSUM[2].toUpperCase()
+        : A_CHECKSUM[2].toLowerCase()
+    }${A_CHECKSUM.slice(3)}`
+    const errs = validateSplitRecipients(
+      rs([
+        [badChecksum, 50],
         [B, 50],
       ])
     )
