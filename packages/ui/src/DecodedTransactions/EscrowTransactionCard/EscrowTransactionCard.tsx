@@ -71,7 +71,7 @@ export const EscrowTransactionCard: React.FC<EscrowTransactionCardProps> = ({
   const decimals = tokenMetadata?.decimals ?? (isWrappedNative ? 18 : undefined)
   const symbol =
     tokenMetadata?.symbol ??
-    (isWrappedNative ? 'ETH' : tokenAddress ? walletSnippet(tokenAddress) : '')
+    (isWrappedNative ? 'WETH' : tokenAddress ? walletSnippet(tokenAddress) : '')
   const fmt = (v: bigint) =>
     decimals == null
       ? '…'

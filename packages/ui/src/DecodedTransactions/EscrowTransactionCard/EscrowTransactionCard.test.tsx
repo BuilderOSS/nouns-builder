@@ -110,4 +110,30 @@ describe('EscrowTransactionCard', () => {
     expect(screen.getByText('Provider')).toBeInTheDocument()
     expect(screen.getByText('Provider payout')).toBeInTheDocument()
   })
+
+  it('shows wrapped-token symbol when token metadata is missing', () => {
+    mockParseEscrowDeploy.mockReturnValue({
+      version: 'v2',
+      provider: '0x3333333333333333333333333333333333333333',
+      milestoneAmounts: [1_000000000000000000n],
+      totalAmount: 1_000000000000000000n,
+      fundAmount: 1_000000000000000000n,
+      escrow: {
+        clientAddress: '0x1111111111111111111111111111111111111111',
+        clientRecipientAddress: '0x1111111111111111111111111111111111111111',
+        providerAddress: '0x3333333333333333333333333333333333333333',
+        providerRecipientAddress: '0x4444444444444444444444444444444444444444',
+        resolverAddress: '0x2222222222222222222222222222222222222222',
+        tokenAddress: '0x4200000000000000000000000000000000000006',
+      },
+    })
+    mockUseEnsData.mockReturnValue({ ensName: undefined })
+    mockUseTokenMetadataSingle.mockReturnValue({ tokenMetadata: null })
+
+    render(
+      <EscrowTransactionCard chainId={8453 as any} target="0xabc" calldata="0x1234" />
+    )
+
+    expect(screen.getAllByText('1 WETH')[0]).toBeInTheDocument()
+  })
 })
