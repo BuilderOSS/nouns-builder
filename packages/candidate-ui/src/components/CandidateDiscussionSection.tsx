@@ -1,8 +1,4 @@
-import {
-  type CandidateComment,
-  type CandidateGroup,
-  type CandidateVersion,
-} from '@buildeross/sdk'
+import { type CandidateComment, type CandidateVersion } from '@buildeross/sdk'
 import { CandidateVoteSupport } from '@buildeross/sdk/subgraph'
 import { Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
@@ -11,8 +7,8 @@ import { CandidateCommentCard } from './CandidateCommentCard'
 import { CandidateSigners } from './CandidateSigners'
 
 interface CandidateDiscussionSectionProps {
-  candidate: CandidateGroup
-  latestVersion?: CandidateVersion
+  candidateProposer: `0x${string}`
+  candidateVersion?: CandidateVersion
   tokenSymbol?: string
   comments: CandidateComment[]
   commentCount: bigint
@@ -126,8 +122,8 @@ const CandidateCommentsPanel = ({
 }
 
 export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProps> = ({
-  candidate,
-  latestVersion,
+  candidateProposer,
+  candidateVersion,
   tokenSymbol,
   comments,
   commentCount,
@@ -138,7 +134,7 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
   replyingToId,
 }) => {
   // Hide action buttons if candidate has been promoted to a proposal
-  const isPromoted = !!latestVersion?.proposal?.id
+  const isPromoted = !!candidateVersion?.proposal?.id
 
   // Reply state management (internal state if parent doesn't manage it)
   const [internalReplyingTo, setInternalReplyingTo] = useState<
@@ -167,17 +163,17 @@ export const CandidateDiscussionSection: React.FC<CandidateDiscussionSectionProp
 
   return (
     <Stack gap={{ '@initial': 'x4', '@768': 'x6' }}>
-      {latestVersion && tokenSymbol && (
+      {candidateVersion && tokenSymbol && (
         <CandidateSigners
-          candidateId={latestVersion.candidateId as `0x${string}`}
-          proposalHash={latestVersion.proposalHash as `0x${string}`}
-          proposer={candidate.proposer as `0x${string}`}
+          candidateId={candidateVersion.candidateId as `0x${string}`}
+          proposalHash={candidateVersion.proposalHash as `0x${string}`}
+          proposer={candidateProposer as `0x${string}`}
           governorAddress={governorAddress}
           tokenSymbol={String(tokenSymbol)}
-          description={latestVersion.metadata || ''}
-          targets={(latestVersion.targets || []) as string[]}
-          values={(latestVersion.values || []).map((value) => BigInt(value))}
-          calldatas={(latestVersion.calldatas || []) as `0x${string}`[]}
+          description={candidateVersion.metadata || ''}
+          targets={(candidateVersion.targets || []) as string[]}
+          values={(candidateVersion.values || []).map((value) => BigInt(value))}
+          calldatas={(candidateVersion.calldatas || []) as `0x${string}`[]}
           hideActions={isPromoted}
         />
       )}

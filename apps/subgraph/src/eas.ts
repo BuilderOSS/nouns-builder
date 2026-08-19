@@ -1,4 +1,12 @@
-import { Address, BigInt, ByteArray, Bytes, crypto, log, store } from '@graphprotocol/graph-ts'
+import {
+  Address,
+  BigInt,
+  ByteArray,
+  Bytes,
+  crypto,
+  log,
+  store,
+} from '@graphprotocol/graph-ts'
 
 import {
   Attested as AttestedEvent,

@@ -3,7 +3,6 @@ import {
   ProposalMarkdown,
   ProposalSection,
 } from '@buildeross/proposal-ui'
-import { type CandidateVersion } from '@buildeross/sdk'
 import {
   type CHAIN_ID,
   type DaoContractAddresses,
@@ -22,7 +21,6 @@ interface CandidateDetailsSectionProps {
   proposalMetadata?: ProposalDescriptionMetadataV1
   chainId: CHAIN_ID
   addresses: DaoContractAddresses
-  versions?: CandidateVersion[]
 }
 
 export const CandidateDetailsSection: React.FC<CandidateDetailsSectionProps> = ({

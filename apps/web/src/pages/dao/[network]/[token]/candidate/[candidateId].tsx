@@ -447,14 +447,13 @@ const CandidateDetailPage: NextPageWithLayout<CandidateDetailPageProps> = ({
       proposalMetadata={proposalMetadata}
       chainId={chain.id as CHAIN_ID}
       addresses={addresses}
-      versions={candidate.versions}
     />
   )
 
   const discussionContent = (
     <CandidateDiscussionSection
-      candidate={candidate}
-      latestVersion={latestVersion}
+      candidateProposer={candidate.proposer as `0x${string}`}
+      candidateVersion={latestVersion}
       tokenSymbol={tokenSymbol ? String(tokenSymbol) : undefined}
       comments={comments}
       commentCount={candidate.commentCount}
