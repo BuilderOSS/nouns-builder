@@ -42,8 +42,11 @@ describe('DatePicker', () => {
     expect(visibleInputs(container)).toHaveLength(1)
   })
 
-  it('keeps the raw input hidden across re-renders', () => {
+  it('keeps the raw input hidden across re-renders, and moves the error styling onto it', () => {
     const { container, rerender } = renderPicker()
+
+    const [before] = visibleInputs(container)
+    const classBefore = before.className
 
     // flatpickr hides the raw input by setting type="hidden", but React
     // re-applies `type` on every update to an <input> — which used to make the
@@ -62,7 +65,13 @@ describe('DatePicker', () => {
       />
     )
 
-    expect(visibleInputs(container)).toHaveLength(1)
+    const visible = visibleInputs(container)
+    expect(visible).toHaveLength(1)
+
+    // flatpickr snapshots className onto the alt input at init, so the error
+    // style has to be pushed onto the element the user actually sees.
+    expect(visible[0]).toBe(before)
+    expect(visible[0].className).not.toBe(classBefore)
   })
 
   it('renders a single input when no altFormat is set', () => {

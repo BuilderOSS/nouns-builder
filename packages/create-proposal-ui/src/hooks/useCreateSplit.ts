@@ -3,9 +3,24 @@
 import { SplitsClient } from '@0xsplits/splits-sdk'
 import { useChainStore } from '@buildeross/stores'
 import { useState } from 'react'
+import { parseEventLogs } from 'viem'
 import { usePublicClient, useWalletClient } from 'wagmi'
 
 import { prepareSplitConfigForSDK, type SplitConfig } from '../utils/splits'
+
+/*
+  SplitMain's creation event. Reading the split address out of the receipt
+  ourselves keeps the deployed address recoverable even when the SDK's own
+  event lookup fails — by then the split exists and redeploying just burns gas.
+*/
+const createSplitEventAbi = [
+  {
+    type: 'event',
+    name: 'CreateSplit',
+    anonymous: false,
+    inputs: [{ indexed: true, name: 'split', type: 'address' }],
+  },
+] as const
 
 export interface UseCreateSplitResult {
   /** Sends the createSplit wallet transaction; resolves to the split address. */
@@ -59,16 +74,31 @@ export const useCreateSplit = (): UseCreateSplitResult => {
       })
 
       const sdkConfig = prepareSplitConfigForSDK(config)
-      const response = await splitsClient.splitV1.createSplit({
+      const { txHash } = await splitsClient.splitV1.submitCreateSplitTransaction({
         recipients: sdkConfig.recipients,
         distributorFeePercent: sdkConfig.distributorFeePercent,
         controller: sdkConfig.controller,
       })
 
-      const address = response.splitAddress
+      // Persist the hash the moment it exists: from here on the split may well
+      // be deployed, so every failure has to leave a way back to it.
+      setTxHash(txHash)
+
+      const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash })
+      const [createSplitEvent] = parseEventLogs({
+        abi: createSplitEventAbi,
+        eventName: 'CreateSplit',
+        logs: receipt.logs,
+      })
+
+      const address = createSplitEvent?.args.split
+      if (!address) {
+        throw new Error(
+          `Split creation transaction ${txHash} did not emit a CreateSplit event`
+        )
+      }
+
       setSplitAddress(address)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setTxHash((response.event as any)?.transactionHash ?? null)
       return address
     } catch (err) {
       const e = err instanceof Error ? err : new Error('Failed to create split')

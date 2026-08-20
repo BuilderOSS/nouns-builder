@@ -41,14 +41,10 @@ type Resolution = { ethAddress?: Address; isLoading: boolean }
  */
 const cacheKey = (input: string) => input.trim().toLowerCase()
 
-/** Row indices whose address failed validation, from the validator's field paths. */
-const addressErrorRows = (fields: string[]): Set<number> => {
-  const rows = new Set<number>()
-  fields.forEach((field) => {
-    const match = /^recipients\[(\d+)\]\.address$/.exec(field)
-    if (match) rows.add(Number(match[1]))
-  })
-  return rows
+/** The row an address error belongs to, or undefined for a list-wide error. */
+const addressErrorRow = (field: string): number | undefined => {
+  const match = /^recipients\[(\d+)\]\.address$/.exec(field)
+  return match ? Number(match[1]) : undefined
 }
 
 const EMPTY: SplitRecipient[] = [
@@ -128,7 +124,7 @@ const RecipientRow: React.FC<RecipientRowProps> = ({
 
 export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated }) => {
   const chainId = useChainStore((x) => x.chain.id)
-  const { createSplit, isPending, error, splitAddress, reset } = useCreateSplit()
+  const { createSplit, isPending, error, splitAddress, txHash, reset } = useCreateSplit()
   const [recipients, setRecipients] = useState<SplitRecipient[]>(EMPTY)
   const [resolutions, setResolutions] = useState<Record<string, Resolution>>({})
 
@@ -171,16 +167,26 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated
   )
 
   const errors = useMemo(() => validateSplitRecipients(resolved), [resolved])
-  const invalidRows = useMemo(
-    () =>
-      isResolving ? new Set<number>() : addressErrorRows(errors.map((e) => e.field)),
-    [errors, isResolving]
-  )
+  /* An address the user typed that didn't resolve — marked on the row itself. */
+  const invalidRows = useMemo(() => {
+    if (isResolving) return new Set<number>()
+    const rows = new Set<number>()
+    errors.forEach(({ field }) => {
+      const index = addressErrorRow(field)
+      if (index !== undefined && recipients[index]?.address.trim()) rows.add(index)
+    })
+    return rows
+  }, [errors, isResolving, recipients])
+
   /*
-    A row the user has filled in marks itself; an empty one is simply unfinished,
-    so it stays neutral and only the disabled Create button holds the form back.
+    Everything the rows don't already say: allocation and duplicate problems, plus
+    the still-empty rows — those stay visually neutral, but shouldn't leave a
+    disabled Create button with no explanation.
   */
-  const summaryError = errors.find(({ field }) => !/\.address$/.test(field))
+  const summaryError = errors.find(({ field }) => {
+    const index = addressErrorRow(field)
+    return index === undefined || !invalidRows.has(index)
+  })
 
   const total = recipients.reduce((s, r) => s + (Number(r.percentAllocation) || 0), 0)
 
@@ -231,7 +237,7 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated
           index={i}
           recipient={r}
           canRemove={recipients.length > 2}
-          hasAddressError={!!r.address.trim() && invalidRows.has(i)}
+          hasAddressError={invalidRows.has(i)}
           onChange={update}
           onRemove={removeAt}
           onResolve={handleResolve}
@@ -287,7 +293,17 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated
         </ContractButton>
       )}
 
-      {error && !splitAddress && <div className={errorText}>{error.message}</div>}
+      {error && !splitAddress && (
+        <>
+          <div className={errorText}>{error.message}</div>
+          {txHash && (
+            <div className={hintText}>
+              Transaction {formatSplitAddress(txHash)} was already submitted — check
+              whether it deployed a split before creating another one.
+            </div>
+          )}
+        </>
+      )}
 
       {splitAddress && (
         <Button type={'button'} variant={'ghost'} size={'sm'} mt={'x2'} onClick={reset}>
