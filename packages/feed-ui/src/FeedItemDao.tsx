@@ -1,4 +1,5 @@
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { LinkWrapper } from '@buildeross/ui/LinkWrapper'
@@ -24,21 +25,33 @@ export const FeedItemDao: React.FC<FeedItemDaoProps> = ({
 
   return (
     <LinkWrapper link={getDaoLink(chainId, address)} align="center" gap="x1">
-      <Flex
-        style={{
-          width: 24,
-          height: 24,
-          borderRadius: '50%',
-          overflow: 'hidden',
-          flexShrink: 0,
-        }}
-      >
-        <FallbackImage
-          src={daoImage}
-          alt={daoName}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-      </Flex>
+      {daoImage ? (
+        <Flex
+          style={{
+            width: 24,
+            height: 24,
+            borderRadius: '50%',
+            overflow: 'hidden',
+            flexShrink: 0,
+          }}
+        >
+          <FallbackImage
+            src={daoImage}
+            alt={daoName}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        </Flex>
+      ) : (
+        <Flex
+          style={{
+            width: 24,
+            height: 24,
+            flexShrink: 0,
+          }}
+        >
+          <Avatar address={address} size="24" />
+        </Flex>
+      )}
       <Text className={feedItemActorName} variant="paragraph-sm">
         {daoName}
       </Text>
