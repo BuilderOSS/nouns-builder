@@ -76,9 +76,13 @@ export const validateSplitRecipients = (
       // Strict (EIP-55) validation: a mixed-case address that fails its
       // checksum is rejected, since the split's funds recipient is immutable
       // and a mistyped address would permanently misroute proceeds.
+      //
+      // Callers pass addresses already resolved from whatever the user typed
+      // (see SplitRecipients), so an ENS name or basename that reaches here is
+      // one that failed to resolve.
       errors.push({
         field: `recipients[${i}].address`,
-        message: `Recipient ${i + 1}: invalid address`,
+        message: `Recipient ${i + 1}: invalid address or ENS name`,
       })
     }
     if (!Number.isFinite(r.percentAllocation)) {

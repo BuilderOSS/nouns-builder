@@ -1,5 +1,5 @@
 import { vars } from '@buildeross/zord'
-import { style } from '@vanilla-extract/css'
+import { globalStyle, style } from '@vanilla-extract/css'
 
 export const wrapper = style({
   borderStyle: 'solid',
@@ -11,10 +11,18 @@ export const wrapper = style({
 
 export const row = style({
   display: 'grid',
-  gridTemplateColumns: '1fr 90px 36px',
+  gridTemplateColumns: '1fr 110px 36px',
   gap: '0.5rem',
   alignItems: 'center',
   marginBottom: '0.5rem',
+})
+
+/*
+  SmartInput wraps its input in a `<fieldset mb="x8">`; inside a compact
+  recipient row that margin would stack up, so collapse it here.
+*/
+globalStyle(`${row} fieldset`, {
+  marginBottom: 0,
 })
 
 export const removeBtn = style({
@@ -50,6 +58,12 @@ export const allocBarFill = style({
   height: '100%',
   borderRadius: vars.radii.round,
   transition: 'width 0.2s ease, background 0.2s ease',
+})
+
+export const hintText = style({
+  color: vars.color.text3,
+  fontSize: '13px',
+  marginTop: '0.5rem',
 })
 
 export const errorText = style({

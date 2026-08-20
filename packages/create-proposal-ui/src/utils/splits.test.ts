@@ -55,6 +55,18 @@ describe('validateSplitRecipients', () => {
     expect(errs.some((e) => /invalid address/.test(e.message))).toBe(true)
   })
 
+  it('flags an ENS name that failed to resolve', () => {
+    // SplitRecipients resolves names before validating, so a name reaching the
+    // validator is one ENS/basename lookup could not resolve to an address.
+    const errs = validateSplitRecipients(
+      rs([
+        ['nobody.eth', 50],
+        [B, 50],
+      ])
+    )
+    expect(errs.some((e) => /invalid address or ENS name/.test(e.message))).toBe(true)
+  })
+
   it('flags mixed-case checksum typos', () => {
     const badChecksum = `${A_CHECKSUM.slice(0, 2)}${
       A_CHECKSUM[2] === A_CHECKSUM[2].toLowerCase()
