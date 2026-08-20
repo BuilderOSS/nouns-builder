@@ -11,62 +11,6 @@ export interface ProposalsResponse {
   }
 }
 
-/**
- * Sort proposals with replacement-aware logic.
- * Primary sort: timeCreated descending (newest first)
- * Tie-breaker: For proposals with same timeCreated, newer replacements come before older versions
- *
- * TODO: Once subgraph re-indexes with updatedAt field, replace this client-side sorting
- * with GraphQL orderBy: updatedAt for better performance and simpler logic.
- */
-function sortProposalsWithReplacements(proposals: Proposal[]): Proposal[] {
-  // Build lookup map for O(1) access
-  const proposalMap = new Map<string, Proposal>()
-  proposals.forEach((p) => proposalMap.set(p.proposalId.toString(), p))
-
-  // Check if proposalA replaces proposalB (with cycle detection for safety)
-  function replacesTransitive(
-    aId: string,
-    bId: string,
-    visited = new Set<string>()
-  ): boolean {
-    if (visited.has(aId)) return false // Cycle detected
-    visited.add(aId)
-
-    const a = proposalMap.get(aId)
-    if (!a?.replaces?.proposalId) return false
-
-    const replacedId = a.replaces.proposalId.toString()
-    if (replacedId === bId) return true
-
-    return replacesTransitive(replacedId, bId, visited)
-  }
-
-  return [...proposals].sort((a, b) => {
-    // Primary sort: timeCreated descending
-    const aTime = Number(a.timeCreated)
-    const bTime = Number(b.timeCreated)
-    if (aTime !== bTime) {
-      return bTime - aTime
-    }
-
-    // Tie-breaker: Check replacement relationships
-    const aId = a.proposalId.toString()
-    const bId = b.proposalId.toString()
-
-    // Direct replacement check
-    if (a.replaces?.proposalId?.toString() === bId) return -1 // a replaces b, so a comes first
-    if (b.replaces?.proposalId?.toString() === aId) return 1 // b replaces a, so b comes first
-
-    // Transitive replacement check (for chains A → B → C)
-    if (replacesTransitive(aId, bId)) return -1
-    if (replacesTransitive(bId, aId)) return 1
-
-    // Fallback: sort by proposalNumber descending
-    return b.proposalNumber - a.proposalNumber
-  })
-}
-
 export const getProposals = async (
   chainId: CHAIN_ID,
   token: string,
@@ -74,16 +18,23 @@ export const getProposals = async (
   page?: number
 ): Promise<ProposalsResponse> => {
   try {
+    // Fetch one extra result to determine if there's a next page
     const data = await SDK.connect(chainId).proposals({
       where: {
         dao: token.toLowerCase(),
+        replacedBy: null,
       },
-      first: limit,
+      first: limit + 1,
       skip: page ? (page - 1) * limit : 0,
     })
 
-    const allProposals = await Promise.all(
-      data?.proposals.map(async (p) => {
+    // Derive hasNextPage from raw result count before enrichment
+    const hasNextPage = data.proposals.length > limit
+    const proposalsToEnrich = hasNextPage ? data.proposals.slice(0, limit) : data.proposals
+
+    // Enrich only the proposals we're returning (not the extra one used for pagination)
+    const proposals = await Promise.all(
+      proposalsToEnrich.map(async (p) => {
         const { executableFrom, expiresAt, calldatas, updatePeriodEnd, ...proposal } = p
 
         const baseProposal = {
@@ -109,14 +60,10 @@ export const getProposals = async (
       })
     )
 
-    // Show all proposals including replaced versions
-    // Sort with replacement-aware logic to handle proposals with same timeCreated
-    const sortedProposals = sortProposalsWithReplacements(allProposals)
-
     return {
-      proposals: sortedProposals,
+      proposals,
       pageInfo: {
-        hasNextPage: data.proposals.reverse()[0].proposalNumber !== 1,
+        hasNextPage,
       },
     }
   } catch (e) {
