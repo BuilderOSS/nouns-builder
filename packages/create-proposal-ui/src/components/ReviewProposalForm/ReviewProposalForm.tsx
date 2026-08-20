@@ -369,7 +369,7 @@ export const ReviewProposalForm = ({
               params.values,
               params.calldatas,
               params.description,
-              '', // updateMessage - optional message about what changed
+              values.updateMessage || '', // updateMessage - optional message about what changed
             ],
           })
           hash = await writeContract(config, data.request)
