@@ -28,8 +28,13 @@ export const getProposals = async (
       skip: page ? (page - 1) * limit : 0,
     })
 
-    const allProposals = await Promise.all(
-      data?.proposals.map(async (p) => {
+    // Derive hasNextPage from raw result count before enrichment
+    const hasNextPage = data.proposals.length > limit
+    const proposalsToEnrich = hasNextPage ? data.proposals.slice(0, limit) : data.proposals
+
+    // Enrich only the proposals we're returning (not the extra one used for pagination)
+    const proposals = await Promise.all(
+      proposalsToEnrich.map(async (p) => {
         const { executableFrom, expiresAt, calldatas, updatePeriodEnd, ...proposal } = p
 
         const baseProposal = {
@@ -54,10 +59,6 @@ export const getProposals = async (
         return baseProposal
       })
     )
-
-    // If we got more results than the limit, there's a next page
-    const hasNextPage = allProposals.length > limit
-    const proposals = hasNextPage ? allProposals.slice(0, limit) : allProposals
 
     return {
       proposals,
