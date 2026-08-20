@@ -18,12 +18,13 @@ export const getProposals = async (
   page?: number
 ): Promise<ProposalsResponse> => {
   try {
+    // Fetch one extra result to determine if there's a next page
     const data = await SDK.connect(chainId).proposals({
       where: {
         dao: token.toLowerCase(),
         replacedBy: null,
       },
-      first: limit,
+      first: limit + 1,
       skip: page ? (page - 1) * limit : 0,
     })
 
@@ -54,10 +55,14 @@ export const getProposals = async (
       })
     )
 
+    // If we got more results than the limit, there's a next page
+    const hasNextPage = allProposals.length > limit
+    const proposals = hasNextPage ? allProposals.slice(0, limit) : allProposals
+
     return {
-      proposals: allProposals,
+      proposals,
       pageInfo: {
-        hasNextPage: data.proposals.reverse()[0].proposalNumber !== 1,
+        hasNextPage,
       },
     }
   } catch (e) {
