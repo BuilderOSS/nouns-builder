@@ -1,5 +1,6 @@
 'use client'
 
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useChainStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -188,6 +189,13 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated
     return index === undefined || !invalidRows.has(index)
   })
 
+  /*
+    The transaction went out but we never saw a CreateSplit log, so a split may
+    or may not exist at this point. Deploying again on a guess would burn gas on
+    a duplicate, so the user has to look at the transaction and say so.
+  */
+  const outcomeUnknown = !!error && !!txHash && !splitAddress
+
   const total = recipients.reduce((s, r) => s + (Number(r.percentAllocation) || 0), 0)
 
   const update = (i: number, patch: Partial<SplitRecipient>) =>
@@ -286,7 +294,7 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated
           mt={'x4'}
           width={'100%'}
           loading={isPending}
-          disabled={errors.length > 0 || isPending || isResolving}
+          disabled={errors.length > 0 || isPending || isResolving || outcomeUnknown}
           handleClick={handleCreate}
         >
           Create split
@@ -296,18 +304,25 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated
       {error && !splitAddress && (
         <>
           <div className={errorText}>{error.message}</div>
-          {txHash && (
+          {outcomeUnknown && (
             <div className={hintText}>
-              Transaction {formatSplitAddress(txHash)} was already submitted — check
-              whether it deployed a split before creating another one.
+              The transaction was already submitted, so a split may have been deployed.{' '}
+              <a
+                href={`${ETHERSCAN_BASE_URL[chainId]}/tx/${txHash}`}
+                target={'_blank'}
+                rel={'noreferrer noopener'}
+              >
+                Check it on the explorer
+              </a>{' '}
+              before creating another one.
             </div>
           )}
         </>
       )}
 
-      {splitAddress && (
+      {(splitAddress || outcomeUnknown) && (
         <Button type={'button'} variant={'ghost'} size={'sm'} mt={'x2'} onClick={reset}>
-          Create a different split
+          {splitAddress ? 'Create a different split' : "I've checked — start over"}
         </Button>
       )}
     </Box>
