@@ -1,24 +1,20 @@
 import {
   EAS_CONTRACT_ADDRESS,
   easAbi,
-  TREASURY_ASSET_PIN_SCHEMA,
   TREASURY_ASSET_PIN_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box } from '@buildeross/zord'
-import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import type { FormikHelpers } from 'formik'
 import { Formik } from 'formik'
 import { useCallback } from 'react'
-import { encodeFunctionData, getAddress, type Hex, zeroHash } from 'viem'
+import { encodeAbiParameters, encodeFunctionData, getAddress, zeroHash } from 'viem'
 
 import { useTransactionComposer } from '../../shared'
 import { pinTreasuryAssetSchema, PinTreasuryAssetValues } from './PinTreasuryAsset.schema'
 import { PinTreasuryAssetForm } from './PinTreasuryAssetForm'
-
-const schemaEncoder = new SchemaEncoder(TREASURY_ASSET_PIN_SCHEMA)
 
 export const PinTreasuryAsset: React.FC = () => {
   const { addTransaction, resetTransactionType } = useTransactionComposer()
@@ -45,12 +41,15 @@ export const PinTreasuryAsset: React.FC = () => {
 
       // Encode the attestation data according to schema:
       // uint8 tokenType, address token, bool isCollection, uint256 tokenId
-      const encodedData = schemaEncoder.encodeData([
-        { name: 'tokenType', type: 'uint8', value: values.tokenType },
-        { name: 'token', type: 'address', value: tokenAddress },
-        { name: 'isCollection', type: 'bool', value: values.isCollection },
-        { name: 'tokenId', type: 'uint256', value: tokenId },
-      ]) as Hex
+      const encodedData = encodeAbiParameters(
+        [
+          { name: 'tokenType', type: 'uint8' },
+          { name: 'token', type: 'address' },
+          { name: 'isCollection', type: 'bool' },
+          { name: 'tokenId', type: 'uint256' },
+        ],
+        [values.tokenType, tokenAddress, values.isCollection, tokenId]
+      )
 
       // Encode EAS attest function call
       const calldata = encodeFunctionData({

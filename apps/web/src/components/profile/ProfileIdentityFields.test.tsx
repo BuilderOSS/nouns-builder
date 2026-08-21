@@ -12,7 +12,7 @@ describe('ProfileIdentityFields', () => {
           x: { handle: 'builder', url: 'https://x.com/builder', label: '@builder' },
           farcaster: {
             handle: 'builder',
-            url: 'https://warpcast.com/builder',
+            url: 'https://farcaster.xyz/builder',
             label: '@builder',
           },
         }}
@@ -29,7 +29,12 @@ describe('ProfileIdentityFields', () => {
     )
     expect(
       screen.getByRole('link', { name: 'Open @builder on Farcaster' })
-    ).toHaveAttribute('href', 'https://warpcast.com/builder')
+    ).toHaveAttribute('href', 'https://farcaster.xyz/builder')
+    expect(
+      screen
+        .getByRole('link', { name: 'Open @builder on Farcaster' })
+        .querySelector('img')
+    ).toHaveAttribute('src', '/farcaster-logo.svg')
     expect(website.compareDocumentPosition(bio) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     )

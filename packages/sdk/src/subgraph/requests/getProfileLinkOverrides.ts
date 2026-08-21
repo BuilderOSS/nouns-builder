@@ -105,6 +105,7 @@ export async function getProfileLinkOverrides(
       PROFILE_LINK_ATTESTATIONS_QUERY,
       {
         where: {
+          attester: { equals: profile },
           recipient: { equals: profile },
           schemaId: { equals: PROFILE_LINK_SCHEMA_UID },
         },

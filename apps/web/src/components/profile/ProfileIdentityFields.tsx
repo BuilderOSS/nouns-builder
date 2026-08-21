@@ -1,5 +1,7 @@
 import { Box, Flex, Icon, Text } from '@buildeross/zord'
+import Image from 'next/image'
 import React from 'react'
+import { profileIdentityLinks, profileSocialIcon } from 'src/styles/profile.css'
 import type { ProfileIdentity } from 'src/utils/profileIdentity'
 
 type ProfileIdentityFieldsProps = {
@@ -13,7 +15,7 @@ export const ProfileIdentityFields: React.FC<ProfileIdentityFieldsProps> = ({
     return null
 
   return (
-    <Flex mt="x4" direction="column" gap="x3" align="flex-start">
+    <Flex className={profileIdentityLinks} direction="column" gap="x3" align="flex-start">
       {(identity.website || identity.x || identity.farcaster) && (
         <Flex gap="x2" wrap>
           {identity.website ? (
@@ -61,7 +63,15 @@ export const ProfileIdentityFields: React.FC<ProfileIdentityFieldsProps> = ({
               style={{ textDecoration: 'none' }}
             >
               <Flex align="center" gap="x1">
-                <Icon id="external-16" size="sm" />
+                {/* Decorative: the link's accessible name already identifies Farcaster. */}
+                <Image
+                  src="/farcaster-logo.svg"
+                  alt=""
+                  aria-hidden="true"
+                  width={16}
+                  height={16}
+                  className={profileSocialIcon}
+                />
                 <Text>{identity.farcaster.label}</Text>
               </Flex>
             </Box>

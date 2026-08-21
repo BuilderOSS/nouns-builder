@@ -57,8 +57,9 @@ export const responsiveGrid = style({
 
 export const profileDaoLink = style({
   cursor: 'pointer',
-  transition:
-    'border-color 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease, transform 0.12s ease',
+  transition: 'background-color 0.12s ease, opacity 0.12s ease, transform 0.12s ease',
+  borderRadius: '8px',
+  overflow: 'hidden',
   selectors: {
     '&:hover': {
       backgroundColor: color.background2,
@@ -68,27 +69,33 @@ export const profileDaoLink = style({
       borderColor: vars.color.background2,
     },
   },
+  '@media': {
+    '(hover: none)': {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+  },
 })
 
 export const profileDaoLinkActive = style({
-  borderColor: color.text1,
-  boxShadow: `0 0 0 1px ${color.text1}`,
+  backgroundColor: color.neutralHover,
+  borderRadius: '8px',
   selectors: {
     '&:hover': {
-      borderColor: color.text1,
+      backgroundColor: color.neutralHover,
     },
     'html[data-theme-mode="dark"] &': {
-      borderColor: vars.color.text1,
-      boxShadow: `0 0 0 1px ${vars.color.text1}`,
+      backgroundColor: vars.color.neutralHover,
     },
     'html[data-theme-mode="dark"] &:hover': {
-      borderColor: vars.color.text1,
+      backgroundColor: vars.color.neutralHover,
     },
   },
 })
 
 export const profileHiddenDaoLink = style({
   backgroundColor: color.background2,
+  borderRadius: '8px',
   selectors: {
     'html[data-theme-mode="dark"] &': {
       backgroundColor: vars.color.backdrop,
@@ -104,6 +111,30 @@ export const profileHiddenDaoLink = style({
 
 export const daoEditorRow = style({
   width: '100%',
+})
+
+export const profileDaoListRow = style({
+  width: '100%',
+  padding: '0',
+  borderBottom: `1px solid ${color.border}`,
+  selectors: {
+    '&:last-child': {
+      borderBottom: 'none',
+    },
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.border,
+    },
+  },
+})
+
+export const profileDaoListRowContent = style({
+  boxSizing: 'border-box',
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  minHeight: '64px',
+  gap: '12px',
+  padding: '8px 0',
 })
 
 export const daoEditorButtonGroup = style({
@@ -482,8 +513,8 @@ export const walletScannerMenuButton = style({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  width: '28px',
-  height: '28px',
+  width: '32px',
+  height: '32px',
   padding: 0,
   border: 'none',
   borderRadius: '6px',
@@ -536,11 +567,20 @@ export const walletScannerMenuItem = style({
   width: '100%',
   padding: '10px',
   borderRadius: '6px',
+  border: 'none',
+  backgroundColor: 'transparent',
   color: color.text1,
   textDecoration: 'none',
+  font: 'inherit',
+  cursor: 'pointer',
   selectors: {
     '&:hover': {
       backgroundColor: color.background2,
+    },
+    '&:focus-visible': {
+      outline: `3px solid ${color.positive}`,
+      outlineOffset: '2px',
+      borderRadius: '6px',
     },
     'html[data-theme-mode="dark"] &': {
       color: vars.color.text1,
@@ -685,17 +725,18 @@ export const profileDaoNameLink = style({
 })
 
 export const profilePage = style({
+  boxSizing: 'border-box',
   width: '100%',
   maxWidth: '1440px',
   margin: '0 auto',
-  padding: '32px 16px 64px',
+  padding: '24px 16px 56px',
   display: 'flex',
   flexDirection: 'column',
-  gap: '24px',
+  gap: '20px',
   '@media': {
     '(min-width: 768px)': {
-      padding: '48px 32px 80px',
-      gap: '32px',
+      padding: '36px 24px 72px',
+      gap: '24px',
     },
   },
 })
@@ -721,16 +762,53 @@ export const profileHeaderSurface = style({
 })
 
 export const profileHeaderMain = style({
-  padding: '24px',
+  padding: '10px 12px',
   display: 'flex',
   flexDirection: 'column',
-  gap: '20px',
+  gap: '10px',
   '@media': {
-    '(min-width: 768px)': {
-      padding: '32px',
+    '(min-width: 1024px)': {
+      padding: '10px 16px',
       flexDirection: 'row',
-      alignItems: 'flex-start',
+      alignItems: 'center',
       justifyContent: 'space-between',
+      gap: '16px',
+      minHeight: '104px',
+    },
+  },
+})
+
+export const profileHeaderRight = style({
+  minWidth: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+  flex: '0 0 auto',
+  width: '100%',
+  alignItems: 'stretch',
+  '@media': {
+    '(min-width: 1024px)': {
+      width: 'auto',
+      maxWidth: '520px',
+      gap: '12px',
+      alignSelf: 'center',
+    },
+  },
+})
+
+export const profileHeaderTopRow = style({
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
+  gap: '8px',
+  alignItems: 'flex-start',
+  flex: '1',
+  '@media': {
+    '(min-width: 1024px)': {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: '12px',
+      justifyContent: 'flex-end',
     },
   },
 })
@@ -739,51 +817,138 @@ export const profileHeaderIdentity = style({
   minWidth: 0,
   flex: 1,
   display: 'flex',
-  flexDirection: 'column',
-  gap: '16px',
+  flexDirection: 'row',
+  alignItems: 'flex-start',
+  gap: '10px',
   '@media': {
     '(min-width: 640px)': {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
+      gap: '12px',
     },
   },
+})
+
+export const profileHeaderIdentityContent = style({
+  minWidth: 0,
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2px',
 })
 
 export const profileHeaderNameRow = style({
   width: '100%',
   minWidth: 0,
   display: 'flex',
+  flexDirection: 'row',
   alignItems: 'center',
-  flexWrap: 'wrap',
-  columnGap: '16px',
-  rowGap: '12px',
+  flexWrap: 'nowrap',
+  columnGap: '10px',
+  rowGap: '0',
+  '@media': {
+    '(min-width: 640px)': {
+      columnGap: '10px',
+      rowGap: '6px',
+    },
+  },
 })
 
 export const profileHeaderCopyRow = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '8px',
-  flex: '0 1 460px',
-  minWidth: 0,
-  maxWidth: '100%',
-  padding: '6px 10px',
-  border: `1px solid ${color.border}`,
-  borderRadius: '8px',
+  gap: '10px',
+  flex: '0 1 auto',
+  minWidth: '74px',
+  maxWidth: '48%',
+  marginLeft: '0',
+  padding: '0',
+  borderRadius: '0',
   selectors: {
     'html[data-theme-mode="dark"] &': {
       borderColor: vars.color.border,
     },
   },
+  '@media': {
+    '(min-width: 640px)': {
+      flex: '0 1 auto',
+      minWidth: 0,
+      maxWidth: '100%',
+      marginLeft: '0',
+    },
+  },
+})
+
+export const profileIdentityLinks = style({
+  marginTop: '0',
+})
+
+export const profileSocialIcon = style({
+  display: 'block',
+  width: '16px',
+  height: '16px',
+  flexShrink: 0,
+  filter: 'invert(1)',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      filter: 'none',
+    },
+  },
 })
 
 export const profileWalletAddress = style({
-  flex: 1,
+  flex: '0 1 auto',
   minWidth: 0,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   fontFamily: 'monospace',
-  fontSize: '13px',
+  fontSize: '12px',
+  lineHeight: 1.2,
+  color: color.text2,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      color: vars.color.text2,
+    },
+  },
+})
+
+export const profileHeaderCopyLinkButton = style({
+  minHeight: '30px',
+  padding: '5px 10px',
+  borderRadius: '999px',
+  border: `1px solid ${color.border}`,
+  backgroundColor: color.background2,
+  color: color.text1,
+  fontFamily: 'inherit',
+  fontSize: '12px',
+  lineHeight: 1.2,
+  fontWeight: 600,
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+  transition:
+    'border-color 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease',
+  selectors: {
+    '&:hover': {
+      backgroundColor: color.neutralHover,
+      borderColor: color.text3,
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${color.positive}`,
+      outlineOffset: '2px',
+    },
+    '&:disabled': {
+      opacity: 0.65,
+      cursor: 'not-allowed',
+    },
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background2,
+      borderColor: vars.color.border,
+      color: vars.color.text1,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      backgroundColor: vars.color.neutralHover,
+      borderColor: vars.color.text3,
+    },
+  },
 })
 
 export const profileHeaderActions = style({
@@ -792,59 +957,74 @@ export const profileHeaderActions = style({
   flexWrap: 'wrap',
   gap: '8px',
   flexShrink: 0,
+  minWidth: 0,
+  flex: '0 0 auto',
+  marginTop: '0',
+  marginLeft: '10px',
 })
 
 export const profileStats = style({
+  width: '100%',
   display: 'grid',
-  gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-  borderTop: `1px solid ${color.border}`,
-  selectors: {
-    'html[data-theme-mode="dark"] &': {
-      borderColor: vars.color.border,
-    },
-  },
+  flex: '0 1 auto',
+  gridTemplateColumns: 'repeat(5, minmax(72px, 1fr))',
+  gap: '6px',
+  overflowX: 'auto',
   '@media': {
-    '(min-width: 640px)': {
+    '(min-width: 1024px)': {
+      marginLeft: 0,
       gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+    },
+    '(min-width: 640px)': {
+      gap: '8px',
     },
   },
 })
 
 export const profileStat = style({
-  minHeight: '96px',
-  padding: '16px 12px',
+  minWidth: 0,
+  padding: '8px 10px',
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'center',
   justifyContent: 'center',
-  gap: '6px',
+  gap: '2px',
   textAlign: 'center',
-  borderRight: `1px solid ${color.border}`,
-  borderBottom: `1px solid ${color.border}`,
+  border: `1px solid ${color.border}`,
+  borderRadius: '8px',
+  backgroundColor: color.background2,
+  minHeight: '48px',
   selectors: {
-    '&:first-child': {
-      gridColumn: '1 / -1',
-    },
     'html[data-theme-mode="dark"] &': {
       borderColor: vars.color.border,
-    },
-  },
-  '@media': {
-    '(min-width: 640px)': {
-      borderBottom: 0,
-      selectors: {
-        '&:first-child': {
-          gridColumn: 'auto',
-        },
-      },
+      backgroundColor: vars.color.background2,
     },
   },
 })
 
+export const profileStatPrimary = style({
+  gridColumn: '1 / -1',
+})
+
 export const profileStatValue = style({
-  fontSize: '28px',
+  fontSize: '16px',
   lineHeight: 1,
   fontWeight: 700,
+  wordBreak: 'break-word',
+})
+
+export const profileStatLabel = style({
+  fontSize: '11px',
+  lineHeight: 1.2,
+  whiteSpace: 'nowrap',
+  color: color.text3,
+  textTransform: 'uppercase',
+  letterSpacing: '0.03em',
+  fontWeight: 600,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      color: vars.color.text3,
+    },
+  },
 })
 
 export const profileSection = style({
@@ -862,7 +1042,13 @@ export const profileSectionHeader = style({
   justifyContent: 'space-between',
   flexWrap: 'wrap',
   gap: '12px',
-  marginBottom: '20px',
+  marginBottom: '14px',
+})
+
+export const tokenSectionHeaderCollapsed = style({
+  paddingTop: '0',
+  paddingBottom: '0',
+  marginBottom: '14px',
 })
 
 export const daoSelectorList = style({
@@ -1030,7 +1216,7 @@ export const daoSelectorInfoTooltip = style({
   top: 'calc(100% + 8px)',
   left: '-72px',
   zIndex: 100,
-  width: 'min(280px, calc(100vw - 48px))',
+  width: 'min(280px, calc(100vw - 80px))',
   padding: '10px 12px',
   border: `1px solid ${color.border}`,
   borderRadius: '8px',
@@ -1093,6 +1279,17 @@ export const profileChainIcon = style({
   display: 'block',
   width: '18px',
   height: '18px',
+  objectFit: 'contain',
+  borderRadius: '50%',
+  backgroundColor: color.background2,
+  border: `1px solid ${color.border}`,
+  padding: '1px',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background2,
+      borderColor: vars.color.border,
+    },
+  },
 })
 
 export const profileChainFallback = style({
@@ -1117,10 +1314,12 @@ export const profileChainFallback = style({
 export const profileDashboardGrid = style({
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr)',
+  gridTemplateAreas: '"activity" "daos"',
   gap: '24px',
   '@media': {
-    '(min-width: 768px)': {
+    '(min-width: 1024px)': {
       gridTemplateColumns: 'minmax(240px, 340px) minmax(0, 1fr)',
+      gridTemplateAreas: '"daos activity"',
       alignItems: 'stretch',
     },
   },
@@ -1129,14 +1328,16 @@ export const profileDashboardGrid = style({
 export const activityGrid = profileDashboardGrid
 
 export const profileDashboardSurface = style({
+  gridArea: 'activity',
   '@media': {
-    '(min-width: 768px)': {
+    '(min-width: 1024px)': {
       height: '652px',
     },
   },
 })
 
 export const profileDaoSurface = style({
+  gridArea: 'daos',
   position: 'relative',
   zIndex: 2,
   overflow: 'visible',
@@ -1144,7 +1345,7 @@ export const profileDaoSurface = style({
 
 export const profileDashboardSection = style({
   '@media': {
-    '(min-width: 768px)': {
+    '(min-width: 1024px)': {
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
@@ -1156,14 +1357,58 @@ export const profileDashboardSection = style({
 export const profileDaoListViewport = style({
   boxSizing: 'border-box',
   width: '100%',
-  overflow: 'visible',
+  maxHeight: '324px',
+  overflowY: 'auto',
   padding: '2px',
+  paddingRight: '6px',
+  scrollbarWidth: 'thin',
+  scrollbarColor: 'transparent transparent',
+  scrollbarGutter: 'stable',
   '@media': {
-    '(min-width: 768px)': {
+    '(min-width: 1024px)': {
       flex: 1,
       minHeight: 0,
+      maxHeight: 'none',
       overflowY: 'auto',
       paddingRight: '6px',
+    },
+  },
+  selectors: {
+    '&::-webkit-scrollbar': {
+      width: '6px',
+    },
+    '&::-webkit-scrollbar-track': {
+      backgroundColor: 'transparent',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      borderRadius: '999px',
+      border: `2px solid transparent`,
+      backgroundClip: 'content-box',
+      backgroundColor: 'transparent',
+    },
+    '&::-webkit-scrollbar-thumb:hover': {
+      backgroundColor: 'transparent',
+    },
+    '&:hover': {
+      scrollbarColor: `${color.text3} transparent`,
+    },
+    '&:focus-within': {
+      scrollbarColor: `${color.text3} transparent`,
+    },
+    '&:hover::-webkit-scrollbar': {
+      width: '6px',
+    },
+    '&:hover::-webkit-scrollbar-thumb': {
+      backgroundColor: color.text3,
+    },
+    '&:hover::-webkit-scrollbar-thumb:hover': {
+      backgroundColor: color.text2,
+    },
+    '&:focus-within::-webkit-scrollbar-thumb': {
+      backgroundColor: color.text3,
+    },
+    '&:focus-within::-webkit-scrollbar-thumb:hover': {
+      backgroundColor: color.text2,
     },
   },
 })
@@ -1172,11 +1417,52 @@ export const activityViewport = style({
   maxHeight: '548px',
   overflowY: 'auto',
   paddingRight: '6px',
+  scrollbarWidth: 'thin',
+  scrollbarColor: 'transparent transparent',
+  scrollbarGutter: 'stable',
   '@media': {
-    '(min-width: 768px)': {
+    '(min-width: 1024px)': {
       flex: 1,
       minHeight: 0,
       maxHeight: 'none',
+    },
+  },
+  selectors: {
+    '&::-webkit-scrollbar': {
+      width: '6px',
+    },
+    '&::-webkit-scrollbar-track': {
+      backgroundColor: 'transparent',
+    },
+    '&::-webkit-scrollbar-thumb': {
+      borderRadius: '999px',
+      border: `2px solid transparent`,
+      backgroundClip: 'content-box',
+      backgroundColor: 'transparent',
+    },
+    '&::-webkit-scrollbar-thumb:hover': {
+      backgroundColor: 'transparent',
+    },
+    '&:hover': {
+      scrollbarColor: `${color.text3} transparent`,
+    },
+    '&:focus-within': {
+      scrollbarColor: `${color.text3} transparent`,
+    },
+    '&:hover::-webkit-scrollbar': {
+      width: '6px',
+    },
+    '&:hover::-webkit-scrollbar-thumb': {
+      backgroundColor: color.text3,
+    },
+    '&:hover::-webkit-scrollbar-thumb:hover': {
+      backgroundColor: color.text2,
+    },
+    '&:focus-within::-webkit-scrollbar-thumb': {
+      backgroundColor: color.text3,
+    },
+    '&:focus-within::-webkit-scrollbar-thumb:hover': {
+      backgroundColor: color.text2,
     },
   },
 })
@@ -1192,33 +1478,34 @@ export const activityHeaderControls = style({
 export const activityList = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '8px',
+  gap: '0',
 })
 
 export const activityRow = style({
-  minHeight: '100px',
-  padding: '14px',
+  minHeight: '64px',
+  padding: '10px 0',
   display: 'grid',
-  gridTemplateColumns: '48px minmax(0, 1fr)',
+  gridTemplateColumns: '48px minmax(0, 1fr) auto',
   alignItems: 'center',
-  gap: '12px',
-  border: `1px solid ${color.border}`,
-  borderRadius: '8px',
+  columnGap: '8px',
+  rowGap: '2px',
+  borderBottom: `1px solid ${color.border}`,
   color: color.text1,
   textDecoration: 'none',
-  backgroundColor: color.background2,
   selectors: {
-    '&:hover': { borderColor: color.text3 },
+    '&:hover': { color: color.text1 },
     '&:focus-visible': { outline: `3px solid ${color.positive}`, outlineOffset: '2px' },
+    '&:last-child': { borderBottom: 'none' },
     'html[data-theme-mode="dark"] &': {
       color: vars.color.text1,
       borderColor: vars.color.border,
-      backgroundColor: vars.color.background2,
+      borderBottom: `1px solid ${vars.color.border}`,
     },
   },
   '@media': {
     '(min-width: 640px)': {
       gridTemplateColumns: '48px minmax(0, 1fr) minmax(112px, 32%)',
+      gap: '12px',
     },
   },
 })
@@ -1228,7 +1515,21 @@ export const activityRowContent = style({
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
-  gap: '4px',
+  gap: '1px',
+})
+
+export const activityRowTitleRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  minWidth: 0,
+})
+
+export const activityRowTitle = style({
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 })
 
 export const activityBadge = style({
@@ -1251,12 +1552,13 @@ export const activityBadge = style({
 export const activityBadgeRow = style({
   display: 'flex',
   alignItems: 'center',
-  flexWrap: 'wrap',
+  flexWrap: 'nowrap',
   gap: '6px',
+  whiteSpace: 'nowrap',
 })
 
 export const activityVoteSupport = style({
-  fontSize: '12px',
+  fontSize: 'inherit',
   fontWeight: 700,
 })
 
@@ -1294,23 +1596,25 @@ export const activityMeta = style({
 })
 
 export const activityDaoMeta = style({
-  gridColumn: '2',
+  gridColumn: '3',
   minWidth: 0,
   display: 'flex',
   flexDirection: 'column',
-  alignItems: 'flex-start',
-  gap: '4px',
+  alignItems: 'flex-end',
+  gap: '2px',
   color: color.text3,
   fontSize: '12px',
-  textAlign: 'left',
+  textAlign: 'right',
+  width: 'auto',
+  whiteSpace: 'nowrap',
   selectors: {
     'html[data-theme-mode="dark"] &': { color: vars.color.text3 },
   },
   '@media': {
     '(min-width: 640px)': {
       gridColumn: '3',
-      alignItems: 'flex-end',
       textAlign: 'right',
+      width: '100%',
     },
   },
 })
@@ -1319,6 +1623,7 @@ export const activityDaoNameRow = style({
   minWidth: 0,
   display: 'flex',
   alignItems: 'center',
+  justifyContent: 'flex-end',
   gap: '6px',
   color: color.text2,
   fontWeight: 600,
@@ -1363,6 +1668,14 @@ export const tokenGrid = style({
   display: 'grid',
   gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
   gap: '16px',
+  width: '100%',
+  marginLeft: '0',
+  marginRight: '0',
+  paddingLeft: 0,
+  paddingRight: 0,
+  listStyle: 'none',
+  marginTop: 0,
+  marginBottom: 0,
   '@media': {
     '(min-width: 640px)': { gridTemplateColumns: 'repeat(3, minmax(0, 1fr))' },
     '(min-width: 1024px)': { gridTemplateColumns: 'repeat(4, minmax(0, 1fr))' },
@@ -1371,7 +1684,80 @@ export const tokenGrid = style({
   },
 })
 
+export const tokenGalleryToggle = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '0',
+  padding: '0',
+  cursor: 'pointer',
+  minHeight: '32px',
+  flexShrink: 0,
+  width: '32px',
+  height: '32px',
+  border: 'none',
+  backgroundColor: 'transparent',
+  color: color.text2,
+  selectors: {
+    '&:hover': {
+      backgroundColor: 'transparent',
+      boxShadow: 'none',
+    },
+    '&:focus': {
+      backgroundColor: 'transparent',
+      boxShadow: 'none',
+    },
+    '&:active': {
+      backgroundColor: 'transparent',
+      boxShadow: 'none',
+    },
+    '&:focus-visible': {
+      outline: `2px solid ${color.positive}`,
+      outlineOffset: '2px',
+    },
+    'html[data-theme-mode="dark"] &': {
+      color: vars.color.text2,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      color: vars.color.text1,
+    },
+  },
+})
+
+export const tokenGalleryToggleIcon = style({
+  width: '20px',
+  height: '20px',
+})
+
+export const activityDaoNameText = style({
+  display: 'none',
+  '@media': {
+    '(min-width: 640px)': {
+      display: 'inline',
+    },
+  },
+})
+
+export const tokenGalleryHeaderLeft = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '6px',
+})
+
+export const tokenGalleryHeaderRight = style({
+  marginLeft: 'auto',
+  display: 'inline-flex',
+  alignItems: 'center',
+})
+
+export const tokenGalleryBody = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '12px',
+})
+
 export const tokenGridItem = style({
+  position: 'relative',
   display: 'flex',
   minWidth: 0,
 })
@@ -1396,6 +1782,8 @@ export const tokenGridViewportLocked = style({
 
 export const tokenCard = style({
   minWidth: 0,
+  position: 'relative',
+  width: '100%',
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
@@ -1416,12 +1804,218 @@ export const tokenCard = style({
   },
 })
 
+export const tokenCardImage = style({
+  position: 'relative',
+  aspectRatio: '1 / 1',
+  width: '100%',
+  overflow: 'hidden',
+})
+
+export const tokenCardIdBadge = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  padding: '2px 6px',
+  border: `1px solid ${color.border}`,
+  borderRadius: '999px',
+  backgroundColor: color.background1,
+  color: color.text2,
+  fontSize: '11px',
+  lineHeight: 1.1,
+  fontWeight: 700,
+  whiteSpace: 'nowrap',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
+      color: vars.color.text2,
+    },
+  },
+})
+
+export const tokenCardChainBadge = style({
+  position: 'absolute',
+  top: '6px',
+  right: '6px',
+  zIndex: 2,
+  opacity: 0,
+  transform: 'scale(0.95)',
+  transition: 'opacity 0.15s ease, transform 0.15s ease',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  selectors: {
+    [`${tokenCard}:hover &`]: {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+    [`${tokenCard}:focus-visible &`]: {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+  },
+  '@media': {
+    '(hover: none)': {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+  },
+})
+
+export const tokenCardSelected = style({
+  borderColor: color.positive,
+  boxShadow: `0 0 0 2px ${color.positive}`,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.positive,
+      boxShadow: `0 0 0 2px ${vars.color.positive}`,
+    },
+  },
+})
+
+export const tokenCardSelectionBadge = style({
+  position: 'absolute',
+  top: '6px',
+  left: '6px',
+  zIndex: 3,
+  width: '24px',
+  height: '24px',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '50%',
+  backgroundColor: color.background1,
+  border: `1px solid ${color.border}`,
+  color: color.text2,
+  opacity: 0,
+  transform: 'scale(0.95)',
+  transition: 'opacity 0.15s ease, transform 0.15s ease',
+  selectors: {
+    [`${tokenCard}:hover &`]: {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+    [`${tokenCard}:focus-visible &`]: {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+    [`${tokenCard}:active &`]: {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
+      color: vars.color.text2,
+    },
+  },
+  '@media': {
+    '(hover: none)': {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+  },
+})
+
+export const tokenCardSelectionButton = style({
+  padding: 0,
+  font: 'inherit',
+  cursor: 'pointer',
+  selectors: {
+    [`${tokenGridItem}:hover &`]: {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+    [`${tokenGridItem}:focus-within &`]: {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+  },
+})
+
+export const tokenCardSelectionBadgeActive = style({
+  backgroundColor: color.positive,
+  borderColor: color.positive,
+  color: color.background1,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.positive,
+      borderColor: vars.color.positive,
+      color: vars.color.background1,
+    },
+  },
+})
+
+export const profileHeaderDisplayName = style({
+  minWidth: 0,
+  flex: '0 1 auto',
+  maxWidth: '100%',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+})
+
+export const tokenCardChainBadgeLogo = style({
+  backgroundColor: 'transparent',
+  border: 'none',
+  padding: 0,
+})
+
+export const profileChainIconNoBackground = style({
+  backgroundColor: 'transparent',
+  border: 'none',
+  padding: 0,
+  borderRadius: '999px',
+})
+
+export const profileChainFallbackNoBackground = style({
+  backgroundColor: 'transparent',
+  border: 'none',
+  borderRadius: '999px',
+})
+
 export const tokenCardBody = style({
-  flex: 1,
-  padding: '12px',
+  position: 'absolute',
+  left: '-1px',
+  right: '-1px',
+  bottom: '-1px',
+  padding: '8px 10px',
   display: 'flex',
   flexDirection: 'column',
-  gap: '4px',
+  gap: '2px',
+  pointerEvents: 'none',
+  opacity: 0,
+  visibility: 'hidden',
+  transform: 'translateY(100%)',
+  transition: 'opacity 0.15s ease, transform 0.15s ease',
+  backgroundColor: color.background2,
+  borderRadius: '0 0 8px 8px',
+  color: color.text1,
+  selectors: {
+    [`${tokenCard}:hover &`]: {
+      opacity: 1,
+      transform: 'translateY(0)',
+      pointerEvents: 'auto',
+      visibility: 'visible',
+    },
+    [`${tokenCard}:focus-visible &`]: {
+      opacity: 1,
+      transform: 'translateY(0)',
+      pointerEvents: 'auto',
+      visibility: 'visible',
+    },
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background2,
+      color: vars.color.text1,
+    },
+  },
+  '@media': {
+    '(hover: none)': {
+      opacity: 1,
+      visibility: 'visible',
+      transform: 'translateY(0)',
+      pointerEvents: 'auto',
+    },
+  },
 })
 
 export const tokenCardMeta = style({
@@ -1430,7 +2024,124 @@ export const tokenCardMeta = style({
   alignItems: 'center',
   justifyContent: 'space-between',
   gap: '8px',
-  marginTop: 'auto',
+  marginTop: 0,
+})
+
+export const tokenTransferTray = style({
+  position: 'fixed',
+  left: '12px',
+  right: '12px',
+  bottom: '12px',
+  zIndex: 110,
+  maxWidth: '760px',
+  margin: '0 auto',
+  padding: '14px',
+  border: `1px solid ${color.border}`,
+  borderRadius: '10px',
+  backgroundColor: color.background1,
+  boxShadow: '0 18px 44px rgba(0, 0, 0, 0.2)',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
+    },
+  },
+})
+
+export const tokenTransferTrayRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  width: '100%',
+  flexWrap: 'wrap',
+})
+
+export const tokenTransferInput = style({
+  flex: '1 1 220px',
+  minHeight: '40px',
+  padding: '0 12px',
+  border: `1px solid ${color.border}`,
+  borderRadius: '8px',
+  backgroundColor: color.background2,
+  color: color.text1,
+  fontSize: '14px',
+  selectors: {
+    '&:focus-visible': {
+      outline: `3px solid ${color.positive}`,
+      outlineOffset: '2px',
+    },
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background2,
+      borderColor: vars.color.border,
+      color: vars.color.text1,
+    },
+  },
+})
+
+export const tokenTransferBackButton = style({
+  border: `1px solid ${color.text1}`,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.text1,
+    },
+  },
+})
+
+export const tokenTransferReview = style({
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+  padding: '10px',
+  borderRadius: '8px',
+  backgroundColor: color.background2,
+  color: color.text2,
+  fontSize: '13px',
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background2,
+      color: vars.color.text2,
+    },
+  },
+})
+
+export const tokenTransferPreviewGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, 36px)',
+  gap: '6px',
+  alignItems: 'center',
+})
+
+export const tokenTransferPreview = style({
+  position: 'relative',
+  width: '36px',
+  height: '36px',
+  overflow: 'hidden',
+  border: `1px solid ${color.border}`,
+  borderRadius: '6px',
+  backgroundColor: color.background1,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      backgroundColor: vars.color.background1,
+      borderColor: vars.color.border,
+    },
+  },
+})
+
+export const tokenTransferWarning = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '8px',
+  padding: '10px',
+  border: `1px solid ${color.negative}`,
+  borderRadius: '8px',
+  color: color.text1,
+  selectors: {
+    'html[data-theme-mode="dark"] &': {
+      borderColor: vars.color.negative,
+      color: vars.color.text1,
+    },
+  },
 })
 
 export const profileStatBadge = style({

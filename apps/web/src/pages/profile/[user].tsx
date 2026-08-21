@@ -2,10 +2,13 @@ import { BASE_URL, CACHE_TIMES, SWR_KEYS } from '@buildeross/constants'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useUserDaos } from '@buildeross/hooks/useUserDaos'
-import { myDaosRequest, type ProfileDashboardChainResult } from '@buildeross/sdk/subgraph'
+import {
+  myDaosRequest,
+  type ProfileDashboardChainResult,
+  type ProfileDashboardQueryMode,
+} from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID, FeedItem } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
-import { CopyButton } from '@buildeross/ui/CopyButton'
 import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { withTimeout } from '@buildeross/utils/withTimeout'
@@ -14,11 +17,9 @@ import type { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { Meta } from 'src/components/Meta'
-import { DelegateToProfileButton } from 'src/components/profile/DelegateToProfileButton'
 import { ProfileActivityPanel } from 'src/components/profile/ProfileActivityPanel'
 import { ProfileDaoSelector } from 'src/components/profile/ProfileDaoSelector'
 import { ProfileIdentityFields } from 'src/components/profile/ProfileIdentityFields'
-import { ProfileLinksEditButton } from 'src/components/profile/ProfileLinksEditButton'
 import { ProfileTokenGallery } from 'src/components/profile/ProfileTokenGallery'
 import { ProfileWalletScannerMenu } from 'src/components/profile/ProfileWalletScannerMenu'
 import { useProfileIdentity } from 'src/hooks/useProfileIdentity'
@@ -26,14 +27,18 @@ import { getProfileLayout } from 'src/layouts/ProfileLayout'
 import type { NextPageWithLayout } from 'src/pages/_app'
 import {
   profileDashboardGrid,
-  profileHeaderActions,
   profileHeaderCopyRow,
+  profileHeaderDisplayName,
   profileHeaderIdentity,
+  profileHeaderIdentityContent,
   profileHeaderMain,
   profileHeaderNameRow,
+  profileHeaderRight,
   profileHeaderSurface,
+  profileHeaderTopRow,
   profilePage,
   profileStat,
+  profileStatLabel,
   profileStats,
   profileStatValue,
   profileSurface,
@@ -42,6 +47,7 @@ import {
 import {
   createDaoKey,
   dedupeProfileTokens,
+  isOwnProfileAddress,
   parseDaoKeys,
   type ProfileToken,
   toggleDaoSelection,
@@ -49,6 +55,7 @@ import {
 import { TOKEN_SORT_OPTIONS, type TokenSortOption } from 'src/utils/profileIdentity'
 import useSWR, { unstable_serialize } from 'swr'
 import { isAddress } from 'viem'
+import { useAccount } from 'wagmi'
 
 interface ProfileProps {
   userAddress: string
@@ -57,11 +64,14 @@ interface ProfileProps {
 }
 
 type ProfileDashboardResponse = {
+  mode: ProfileDashboardQueryMode
   chains: Array<{
     chainId: CHAIN_ID
     chainName: string
     chainSlug: string
-    result?: ProfileDashboardChainResult
+    result?: Omit<ProfileDashboardChainResult, 'counts'> & {
+      counts: ProfileDashboardChainResult['counts'] & { tokenHoldings?: number }
+    }
     error?: string
   }>
 }
@@ -111,6 +121,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   ogImageURL,
 }) => {
   const router = useRouter()
+  const { address: connectedAddress } = useAccount()
   const { ensName, ensAvatar } = useEnsData(userAddress)
   const { data: profileIdentity, mutate: mutateProfileIdentity } = useProfileIdentity(
     ensName && !isAddress(ensName, { strict: false }) ? ensName : undefined,
@@ -124,12 +135,22 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
     address: userAddress,
   })
   const {
-    data: dashboard,
-    error: dashboardError,
-    isLoading: isLoadingDashboard,
-    mutate: mutateDashboard,
+    data: summaryDashboard,
+    error: summaryDashboardError,
+    isLoading: isLoadingSummaryDashboard,
   } = useSWR<ProfileDashboardResponse>(
-    `/api/profile-dashboard?address=${userAddress}`,
+    `/api/profile-dashboard?address=${userAddress}&mode=summary`,
+    dashboardFetcher,
+    { revalidateOnFocus: false }
+  )
+  const [shouldLoadTokens, setShouldLoadTokens] = React.useState(false)
+  const {
+    data: tokenDashboard,
+    error: tokenDashboardError,
+    isLoading: isLoadingTokenDashboard,
+    mutate: mutateTokenDashboard,
+  } = useSWR<ProfileDashboardResponse>(
+    shouldLoadTokens ? `/api/profile-dashboard?address=${userAddress}&mode=tokens` : null,
     dashboardFetcher,
     { revalidateOnFocus: false }
   )
@@ -145,6 +166,9 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   const tokenSort = validTokenSortValues.has(router.query.tokenSort as TokenSortOption)
     ? (router.query.tokenSort as TokenSortOption)
     : 'newest'
+
+  const profileLink = `https://nouns.build/profile/${userAddress}`
+  const isOwnProfile = isOwnProfileAddress(connectedAddress, userAddress)
 
   const updateQuery = React.useCallback(
     async (updates: Record<string, string | undefined>) => {
@@ -177,22 +201,43 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   const dashboardData = React.useMemo(() => {
     const tokens: ProfileToken[] = []
     const auctionWins: FeedItem[] = []
-    const failedChainNames: string[] = []
-    const truncatedChainNames: string[] = []
+    const summaryFailedChainNames: string[] = []
+    const summaryTruncatedChainNames: string[] = []
+    const tokenFailedChainNames: string[] = []
+    const tokenTruncatedChainNames: string[] = []
+    let tokenHoldings = 0
     let proposalVotes = 0
     let proposalsSubmitted = 0
     let bidsPlaced = 0
-    let isComplete = !!dashboard
+    let isSummaryComplete = !!summaryDashboard
+    let isTokensComplete = !!tokenDashboard
 
-    dashboard?.chains.forEach((chain) => {
+    summaryDashboard?.chains.forEach((chain) => {
       if (!chain.result) {
-        failedChainNames.push(chain.chainName)
-        isComplete = false
+        summaryFailedChainNames.push(chain.chainName)
+        isSummaryComplete = false
         return
       }
       if (!chain.result.isComplete) {
-        truncatedChainNames.push(chain.chainName)
-        isComplete = false
+        summaryTruncatedChainNames.push(chain.chainName)
+        isSummaryComplete = false
+      }
+      auctionWins.push(...chain.result.auctionWins)
+      tokenHoldings += chain.result.counts.tokenHoldings ?? chain.result.tokens.length
+      proposalVotes += chain.result.counts.proposalVotes
+      proposalsSubmitted += chain.result.counts.proposalsSubmitted
+      bidsPlaced += chain.result.counts.bidsPlaced
+    })
+
+    tokenDashboard?.chains.forEach((chain) => {
+      if (!chain.result) {
+        tokenFailedChainNames.push(chain.chainName)
+        isTokensComplete = false
+        return
+      }
+      if (!chain.result.isComplete) {
+        tokenTruncatedChainNames.push(chain.chainName)
+        isTokensComplete = false
       }
       tokens.push(
         ...chain.result.tokens.map((token) => ({
@@ -209,33 +254,38 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
           daoImage: token.dao.contractImage,
         }))
       )
-      auctionWins.push(...chain.result.auctionWins)
-      proposalVotes += chain.result.counts.proposalVotes
-      proposalsSubmitted += chain.result.counts.proposalsSubmitted
-      bidsPlaced += chain.result.counts.bidsPlaced
     })
 
-    if (dashboardError) {
-      isComplete = false
-      if (!failedChainNames.length) failedChainNames.push('All supported chains')
+    if (summaryDashboardError) {
+      isSummaryComplete = false
+      if (!summaryFailedChainNames.length)
+        summaryFailedChainNames.push('All supported chains')
+    }
+    if (tokenDashboardError) {
+      isTokensComplete = false
+      if (!tokenFailedChainNames.length)
+        tokenFailedChainNames.push('All supported chains')
     }
 
     return {
       tokens: dedupeProfileTokens(tokens),
       auctionWins,
-      failedChainNames: Array.from(new Set(failedChainNames)),
-      truncatedChainNames: Array.from(new Set(truncatedChainNames)),
-      counts: { proposalVotes, proposalsSubmitted, bidsPlaced },
-      isComplete,
+      summaryFailedChainNames: Array.from(new Set(summaryFailedChainNames)),
+      summaryTruncatedChainNames: Array.from(new Set(summaryTruncatedChainNames)),
+      tokenFailedChainNames: Array.from(new Set(tokenFailedChainNames)),
+      tokenTruncatedChainNames: Array.from(new Set(tokenTruncatedChainNames)),
+      counts: { tokenHoldings, proposalVotes, proposalsSubmitted, bidsPlaced },
+      isSummaryComplete,
+      isTokensComplete,
     }
-  }, [dashboard, dashboardError])
+  }, [summaryDashboard, summaryDashboardError, tokenDashboard, tokenDashboardError])
 
   const daoCount = new Set(
     daos?.map((dao) => createDaoKey(dao.chainId, dao.collectionAddress)) ?? []
   ).size
   const displayName = ensName || userName
   const pageTitle = `${displayName}'s Profile`
-  const isDashboardPending = isLoadingDashboard && !dashboard
+  const isDashboardPending = isLoadingSummaryDashboard && !summaryDashboard
   const stats: Array<{ label: string; value: number | string; isPartial?: boolean }> = [
     {
       label: 'DAOs',
@@ -243,27 +293,33 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
       isPartial: !!daosError,
     },
     {
-      label: 'Tokens held',
-      value: dashboardData.isComplete ? dashboardData.tokens.length : '—',
-      isPartial: !isDashboardPending && !dashboardData.isComplete,
+      label: 'TOKENS',
+      value:
+        shouldLoadTokens && dashboardData.isTokensComplete && dashboardData.tokens.length
+          ? dashboardData.tokens.length
+          : dashboardData.isSummaryComplete
+            ? dashboardData.counts.tokenHoldings
+            : '—',
+      isPartial: !isDashboardPending && !dashboardData.isSummaryComplete,
     },
     {
-      label: 'Proposal votes',
-      value: dashboardData.isComplete ? dashboardData.counts.proposalVotes : '—',
-      isPartial: !isDashboardPending && !dashboardData.isComplete,
+      label: 'VOTES',
+      value: dashboardData.isSummaryComplete ? dashboardData.counts.proposalVotes : '—',
+      isPartial: !isDashboardPending && !dashboardData.isSummaryComplete,
     },
     {
-      label: 'Proposals submitted',
-      value: dashboardData.isComplete ? dashboardData.counts.proposalsSubmitted : '—',
-      isPartial: !isDashboardPending && !dashboardData.isComplete,
+      label: 'PROPOSALS',
+      value: dashboardData.isSummaryComplete
+        ? dashboardData.counts.proposalsSubmitted
+        : '—',
+      isPartial: !isDashboardPending && !dashboardData.isSummaryComplete,
     },
     {
-      label: 'Bids placed',
-      value: dashboardData.isComplete ? dashboardData.counts.bidsPlaced : '—',
-      isPartial: !isDashboardPending && !dashboardData.isComplete,
+      label: 'BIDS',
+      value: dashboardData.isSummaryComplete ? dashboardData.counts.bidsPlaced : '—',
+      isPartial: !isDashboardPending && !dashboardData.isSummaryComplete,
     },
   ]
-
   return (
     <>
       <Meta
@@ -280,51 +336,62 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
         >
           <div className={profileHeaderMain}>
             <div className={profileHeaderIdentity}>
-              <Avatar address={userAddress} src={ensAvatar} size="90" />
-              <Flex direction="column" gap="x3" style={{ minWidth: 0, flex: 1 }}>
+              <Avatar address={userAddress} src={ensAvatar} size="80" />
+              <Flex direction="column" className={profileHeaderIdentityContent}>
                 <div className={profileHeaderNameRow}>
-                  <Text as="h1" id="profile-heading" variant="heading-lg">
+                  <Text
+                    as="h1"
+                    id="profile-heading"
+                    variant="heading-md"
+                    className={profileHeaderDisplayName}
+                  >
                     {displayName}
                   </Text>
                   <div className={profileHeaderCopyRow}>
                     <span className={profileWalletAddress} title={userAddress}>
-                      {userAddress}
+                      {walletSnippet(userAddress)}
                     </span>
-                    <CopyButton text={userAddress} />
-                    <ProfileWalletScannerMenu address={userAddress as AddressType} />
+                    <ProfileWalletScannerMenu
+                      address={userAddress as AddressType}
+                      profileLink={profileLink}
+                      profileAddress={userAddress as AddressType}
+                      profileName={displayName}
+                      identity={profileIdentity}
+                      onIdentitySaved={() => mutateProfileIdentity()}
+                    />
                   </div>
                 </div>
                 <ProfileIdentityFields identity={profileIdentity} />
               </Flex>
             </div>
-            <div className={profileHeaderActions}>
-              <ProfileLinksEditButton
-                identity={profileIdentity}
-                profileAddress={userAddress as AddressType}
-                onSaved={() => mutateProfileIdentity()}
-              />
-              <DelegateToProfileButton
-                profileAddress={userAddress as AddressType}
-                profileName={displayName}
-              />
-            </div>
-          </div>
-          <div className={profileStats} aria-label="Profile statistics">
-            {stats.map((stat) => (
-              <div key={stat.label} className={profileStat}>
-                <span className={profileStatValue}>{stat.value}</span>
-                <Text color="text3">{stat.label}</Text>
-                {stat.isPartial ? (
-                  <Text color="text3" fontSize="12">
-                    Unavailable
-                  </Text>
-                ) : null}
+            <div className={profileHeaderRight}>
+              <div className={profileHeaderTopRow}>
+                <div className={profileStats} aria-label="Profile statistics">
+                  {stats.map((stat) => (
+                    <div key={stat.label} className={profileStat}>
+                      <span className={profileStatValue}>{stat.value}</span>
+                      <Text className={profileStatLabel}>{stat.label}</Text>
+                      {stat.isPartial ? (
+                        <Text color="text3" fontSize="11">
+                          Unavailable
+                        </Text>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            </div>
           </div>
         </section>
 
         <div className={profileDashboardGrid}>
+          <ProfileActivityPanel
+            profileAddress={userAddress as AddressType}
+            selectedDaoKeys={selectedDaoKeys}
+            extraItems={dashboardData.auctionWins}
+            failedChainNames={dashboardData.summaryFailedChainNames}
+            truncatedChainNames={dashboardData.summaryTruncatedChainNames}
+          />
           <ProfileDaoSelector
             daos={daos}
             isLoading={isLoadingDaos}
@@ -333,26 +400,23 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
             onToggle={(daoKey) => setDaoKeys(toggleDaoSelection(selectedDaoKeys, daoKey))}
             onClear={() => setDaoKeys([])}
           />
-          <ProfileActivityPanel
-            profileAddress={userAddress as AddressType}
-            selectedDaoKeys={selectedDaoKeys}
-            extraItems={dashboardData.auctionWins}
-            failedChainNames={dashboardData.failedChainNames}
-            truncatedChainNames={dashboardData.truncatedChainNames}
-          />
         </div>
 
         <ProfileTokenGallery
           tokens={dashboardData.tokens}
-          isLoading={isLoadingDashboard}
+          isLoading={shouldLoadTokens && isLoadingTokenDashboard}
           selectedDaoKeys={selectedDaoKeys}
           sort={tokenSort}
           onSortChange={(sort) =>
             updateQuery({ tokenSort: sort === 'newest' ? undefined : sort })
           }
-          failedChainNames={dashboardData.failedChainNames}
-          truncatedChainNames={dashboardData.truncatedChainNames}
-          onRetry={() => mutateDashboard()}
+          failedChainNames={dashboardData.tokenFailedChainNames}
+          truncatedChainNames={dashboardData.tokenTruncatedChainNames}
+          onRetry={() => mutateTokenDashboard()}
+          onExpand={() => setShouldLoadTokens(true)}
+          canTransferTokens={isOwnProfile}
+          profileAddress={userAddress as AddressType}
+          onTransferComplete={() => mutateTokenDashboard()}
         />
       </main>
     </>

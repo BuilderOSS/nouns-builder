@@ -8,21 +8,24 @@ import { Button, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import React from 'react'
 import {
-  activityBadge,
-  activityBadgeRow,
   activityDaoMeta,
   activityDaoNameRow,
+  activityDaoNameText,
   activityHeaderControls,
   activityList,
   activityMeta,
   activityRow,
   activityRowContent,
+  activityRowTitle,
+  activityRowTitleRow,
   activityViewport,
   activityVoteAbstain,
   activityVoteAgainst,
   activityVoteFor,
   activityVoteSupport,
   loadingSkeleton,
+  profileChainFallbackNoBackground,
+  profileChainIconNoBackground,
   profileDashboardSection,
   profileDashboardSurface,
   profileEmptyState,
@@ -54,20 +57,61 @@ type ProfileActivityPanelProps = {
 const amountLabel = (item: FeedItem) => {
   if (item.type !== 'AUCTION_BID_PLACED' && item.type !== 'AUCTION_SETTLED') return null
   try {
-    return `${Number(formatEther(BigInt(item.amount))).toLocaleString('en-US', {
-      maximumFractionDigits: 4,
-    })} ETH`
+    const value = formatEther(BigInt(item.amount))
+    const [whole, rawDecimals = ''] = value.split('.')
+    const truncated = rawDecimals.slice(0, 4).replace(/0+$/, '')
+    const decimals =
+      truncated || (Number(rawDecimals) > 0 ? rawDecimals.replace(/0+$/, '') : '')
+    const formattedAmount = `${whole}${decimals ? `.${decimals}` : ''}`
+    return `${formattedAmount} ETH`
   } catch {
     return null
   }
 }
 
+const tokenNameWithId = (tokenName: string, tokenId?: string) => {
+  if (!tokenId) return tokenName
+  const idPattern = new RegExp(`#\\s*${tokenId}\\b`, 'i')
+  return idPattern.test(tokenName) ? tokenName : `${tokenName} #${tokenId}`
+}
+
 const itemTitle = (item: FeedItem, kind?: string) => {
-  if (item.type === 'AUCTION_BID_PLACED') return `Bid on ${item.tokenName}`
-  if (item.type === 'AUCTION_SETTLED')
-    return kind === 'win' ? `Won ${item.tokenName}` : `Settled ${item.tokenName}`
-  if ('proposalTitle' in item)
-    return item.proposalTitle || `Proposal ${item.proposalNumber}`
+  const proposalTitle =
+    'proposalTitle' in item
+      ? (item as { proposalTitle?: string }).proposalTitle
+      : undefined
+  const proposalNumber =
+    'proposalNumber' in item
+      ? (item as { proposalNumber?: number | string }).proposalNumber
+      : undefined
+
+  if (item.type === 'AUCTION_BID_PLACED') {
+    const suffix = item.tokenId ? ` #${item.tokenId}` : ''
+    return `Bid on ${item.tokenName}${suffix}`
+  }
+
+  if (item.type === 'AUCTION_SETTLED') {
+    if (kind === 'win') {
+      const amount = amountLabel(item)
+      return `Won ${tokenNameWithId(item.tokenName, item.tokenId)}${amount ? ` for ${amount}` : ''}`
+    }
+
+    return `Settled ${tokenNameWithId(item.tokenName, item.tokenId)}`
+  }
+
+  if (item.type === 'PROPOSAL_CREATED')
+    return `Proposal Created - ${proposalTitle || `Proposal ${proposalNumber}`}`
+
+  if (item.type === 'PROPOSAL_EXECUTED')
+    return `Proposal Executed - ${proposalTitle || `Proposal ${proposalNumber}`}`
+
+  if (item.type === 'PROPOSAL_UPDATED')
+    return `Proposal Updated - ${proposalTitle || `Proposal ${proposalNumber}`}`
+
+  if (item.type === 'PROPOSAL_VOTED') return proposalTitle || `Proposal ${proposalNumber}`
+
+  if (proposalTitle) return proposalTitle
+  if (proposalNumber) return `Proposal ${proposalNumber}`
   return item.daoName
 }
 
@@ -76,7 +120,7 @@ const voteSupport = (item: FeedItem) => {
   if (item.support === 'FOR') return { label: 'For', className: activityVoteFor }
   if (item.support === 'AGAINST')
     return { label: 'Against', className: activityVoteAgainst }
-  return { label: 'Abstained', className: activityVoteAbstain }
+  return { label: 'Abstain', className: activityVoteAbstain }
 }
 
 export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
@@ -128,7 +172,7 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
     >
       <div className={[profileSection, profileDashboardSection].join(' ')}>
         <div className={profileSectionHeader}>
-          <Text as="h2" id="profile-activity-heading" variant="heading-md">
+          <Text as="h2" id="profile-activity-heading" variant="heading-sm">
             Activity
           </Text>
           <div className={activityHeaderControls}>
@@ -207,11 +251,6 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
             <div className={activityList}>
               {displayedItems.map((item) => {
                 const classification = classifyProfileActivity(item, profileAddress)
-                const classificationLabel = classification
-                  ? PROFILE_ACTIVITY_FILTER_OPTIONS.find(
-                      (option) => option.value === classification.kind
-                    )?.label
-                  : undefined
                 const vote = voteSupport(item)
                 const chain = getProfileChainMetadata(item.chainId)
                 const amount = amountLabel(item)
@@ -252,27 +291,32 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
                       />
                     </span>
                     <span className={activityRowContent}>
-                      <span className={activityBadgeRow}>
-                        {classificationLabel ? (
-                          <span className={activityBadge}>{classificationLabel}</span>
-                        ) : null}
-                        {vote ? (
-                          <span
-                            className={[activityVoteSupport, vote.className].join(' ')}
-                          >
-                            {vote.label}
-                          </span>
-                        ) : null}
+                      <span className={activityRowTitleRow}>
+                        <Text className={activityRowTitle} fontWeight="display">
+                          {item.type === 'PROPOSAL_VOTED' ? 'Voted ' : ''}
+                          {vote ? (
+                            <span
+                              className={[activityVoteSupport, vote.className].join(' ')}
+                            >
+                              {vote.label}
+                            </span>
+                          ) : null}
+                          {item.type === 'PROPOSAL_VOTED' ? ' - ' : ''}
+                          {itemTitle(item, classification?.kind)}
+                        </Text>
                       </span>
-                      <Text fontWeight="display" style={{ overflowWrap: 'anywhere' }}>
-                        {itemTitle(item, classification?.kind)}
-                      </Text>
-                      {amount ? <span className={activityMeta}>{amount}</span> : null}
+                      {item.type === 'AUCTION_BID_PLACED' && amount ? (
+                        <span className={activityMeta}>{amount}</span>
+                      ) : null}
                     </span>
                     <span className={activityDaoMeta}>
                       <span className={activityDaoNameRow}>
-                        <span>{item.daoName}</span>
-                        <ProfileChainIcon chainId={item.chainId} />
+                        <span className={activityDaoNameText}>{item.daoName}</span>
+                        <ProfileChainIcon
+                          chainId={item.chainId}
+                          imageClassName={profileChainIconNoBackground}
+                          fallbackClassName={profileChainFallbackNoBackground}
+                        />
                       </span>
                       <span>{formatTimeAgo(item.timestamp)}</span>
                     </span>

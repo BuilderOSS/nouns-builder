@@ -28,6 +28,20 @@ vi.mock('next/image', () => ({
   ),
 }))
 
+vi.mock('wagmi', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('wagmi')>()
+  return {
+    ...actual,
+    useConfig: () => ({}),
+  }
+})
+
+vi.mock('wagmi/actions', () => ({
+  simulateContract: vi.fn(),
+  waitForTransactionReceipt: vi.fn(),
+  writeContract: vi.fn(),
+}))
+
 const tokens: ProfileToken[] = Array.from({ length: 40 }, (_, index) => ({
   chainId: 1,
   chainSlug: 'ethereum',
@@ -50,6 +64,7 @@ const props = {
   failedChainNames: [],
   truncatedChainNames: [],
   onRetry: vi.fn(),
+  onExpand: vi.fn(),
 }
 
 describe('ProfileTokenGallery', () => {
@@ -82,12 +97,24 @@ describe('ProfileTokenGallery', () => {
   it('uses an h3 for the dashboard section heading', () => {
     render(<ProfileTokenGallery {...props} />)
 
-    expect(screen.getByRole('heading', { level: 3, name: 'Tokens held' })).toBeVisible()
+    expect(screen.getByRole('heading', { level: 3, name: 'Tokens' })).toBeVisible()
+  })
+
+  it('requests token data only when the collapsed section is expanded', () => {
+    const onExpand = vi.fn()
+    render(<ProfileTokenGallery {...props} tokens={[]} onExpand={onExpand} />)
+
+    expect(screen.queryByRole('region', { name: 'Tokens held gallery' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Expand tokens section' }))
+
+    expect(onExpand).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('button', { name: 'Collapse tokens section' })).toBeVisible()
   })
 
   it('keeps native single-select semantics while matching activity controls', () => {
     const onSortChange = vi.fn()
     render(<ProfileTokenGallery {...props} onSortChange={onSortChange} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Expand tokens section' }))
 
     const select = screen.getByRole('combobox', { name: 'Sort tokens' })
     expect(select).toHaveClass(compactFilterControl)
@@ -100,19 +127,63 @@ describe('ProfileTokenGallery', () => {
 
   it('shows the token chain as a bottom-right logo instead of metadata text', () => {
     render(<ProfileTokenGallery {...props} tokens={[tokens[0]]} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Expand tokens section' }))
 
     const chainLogo = screen.getByRole('img', { name: 'Ethereum network' })
-    const cardBody = screen.getByText('Test DAO').parentElement
+    const card = screen.getByRole('link', { name: /Token 1/ })
 
-    expect(cardBody).toContainElement(chainLogo)
-    expect(cardBody?.lastElementChild).toContainElement(chainLogo)
-    expect(cardBody).not.toHaveTextContent('Ethereum')
-    expect(screen.getByRole('link', { name: /Token 1/ })).toBeVisible()
-    expect(screen.getByRole('link', { name: /Token 1/ }).closest('li')).not.toBeNull()
+    expect(card).toContainElement(chainLogo)
+    expect(card).not.toHaveTextContent('Ethereum')
+    expect(card).toBeVisible()
+    expect(card.closest('li')).not.toBeNull()
+  })
+
+  it('keeps token navigation available while showing owner transfer selectors', () => {
+    render(<ProfileTokenGallery {...props} tokens={[tokens[0]]} canTransferTokens />)
+    fireEvent.click(screen.getByRole('button', { name: 'Expand tokens section' }))
+
+    const card = screen.getByRole('link', { name: /Token 1/ })
+    const selector = screen.getByRole('button', {
+      name: 'Select Token 1 #1 for transfer',
+    })
+
+    expect(card).toHaveAttribute(
+      'href',
+      '/dao/ethereum/0xDaa0000000000000000000000000000000000000/1'
+    )
+    expect(card).not.toBe(selector)
+
+    fireEvent.click(selector)
+
+    expect(selector).toHaveAttribute('aria-pressed', 'true')
+    expect(
+      screen.getByRole('button', { name: 'Deselect Token 1 #1 for transfer' })
+    ).toBeVisible()
+  })
+
+  it('labels the entry transfer action as continue', () => {
+    render(
+      <ProfileTokenGallery
+        {...props}
+        tokens={[tokens[0]]}
+        canTransferTokens
+        profileAddress="0x00000000000000000000000000000000000000aa"
+      />
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Expand tokens section' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Select Token 1 #1 for transfer' })
+    )
+    fireEvent.change(screen.getByPlaceholderText('ENS or wallet address'), {
+      target: { value: '0x00000000000000000000000000000000000000aa' },
+    })
+
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeVisible()
   })
 
   it('locks the initial gallery height while appending tokens and resets on sort', () => {
     const { rerender } = render(<ProfileTokenGallery {...props} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Expand tokens section' }))
     const gallery = screen.getByRole('region', { name: 'Tokens held gallery' })
 
     expect(screen.getAllByRole('listitem')).toHaveLength(32)

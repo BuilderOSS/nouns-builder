@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { profileDaoListFooter, profileDaoListViewport } from 'src/styles/profile.css'
 
 import { ProfileDaoList } from './ProfileDaoList'
@@ -115,5 +115,27 @@ describe('ProfileDaoList', () => {
     expect(updateDaoVisibilityAndOrder).toHaveBeenCalled()
     expect(persistOrderedDaos).toHaveBeenCalled()
     expect(onDaoClick).not.toHaveBeenCalled()
+  })
+
+  it('exposes DAO overflow as a keyboard-scrollable list when more than five rows render', () => {
+    render(
+      <ProfileDaoList
+        daos={Array.from({ length: 6 }, (_, index) => ({
+          name: `DAO ${index + 1}`,
+          chainId: 1,
+          collectionAddress: `0xDao${index + 1}`,
+          auctionAddress: `0xAuction${index + 1}`,
+        }))}
+        isOwnProfile={false}
+        onDaoClick={vi.fn()}
+        userAddress="0xProfile"
+      />
+    )
+
+    const viewport = screen.getByRole('region', { name: 'DAO list' })
+    expect(viewport).toHaveAttribute('tabindex', '0')
+    expect(
+      within(viewport).getAllByRole('button', { name: /Filter activity by DAO/ })
+    ).toHaveLength(6)
   })
 })

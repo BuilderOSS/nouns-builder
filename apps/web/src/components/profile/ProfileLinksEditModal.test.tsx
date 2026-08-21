@@ -31,12 +31,11 @@ vi.mock('@buildeross/ui/Modal', () => ({
 describe('ProfileLinksEditModal', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    readContractMock.mockResolvedValue({ uid: PROFILE_LINK_SCHEMA_UID })
     writeContractMock.mockResolvedValue(`0x${'1'.repeat(64)}`)
     waitForTransactionReceiptMock.mockResolvedValue({ status: 'success' })
   })
 
-  it('checks the schema onchain and batches changed links into one multi-attest', async () => {
+  it('uses the pre-registered schema and batches changed links into one multi-attest', async () => {
     render(
       <ProfileLinksEditModal
         identity={{
@@ -61,13 +60,7 @@ describe('ProfileLinksEditModal', () => {
 
     await waitFor(() => expect(writeContractMock).toHaveBeenCalledTimes(1))
 
-    expect(readContractMock).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        functionName: 'getSchema',
-        args: [PROFILE_LINK_SCHEMA_UID],
-      })
-    )
+    expect(readContractMock).not.toHaveBeenCalled()
     expect(writeContractMock).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({

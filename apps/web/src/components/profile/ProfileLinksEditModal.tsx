@@ -1,6 +1,5 @@
 import {
   EAS_CONTRACT_ADDRESS,
-  EAS_SCHEMA_REGISTRY_ADDRESS,
   easAbi,
   PROFILE_LINK_EAS_CHAIN_ID,
   PROFILE_LINK_SCHEMA,
@@ -21,9 +20,9 @@ import {
   type ProfileIdentity,
   validateWebsiteUrl,
 } from 'src/utils/profileIdentity'
-import { encodeAbiParameters, zeroAddress, zeroHash } from 'viem'
+import { encodeAbiParameters, zeroHash } from 'viem'
 import { useAccount, useConfig, useSwitchChain } from 'wagmi'
-import { readContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
 type ProfileLinkKey = 'website' | 'x' | 'farcaster'
 
@@ -31,43 +30,6 @@ type ProfileLinkUpdate = {
   key: ProfileLinkKey
   value: string
 }
-
-const schemaRegistryAbi = [
-  {
-    inputs: [{ internalType: 'bytes32', name: 'uid', type: 'bytes32' }],
-    name: 'getSchema',
-    outputs: [
-      {
-        components: [
-          { internalType: 'bytes32', name: 'uid', type: 'bytes32' },
-          {
-            internalType: 'contract ISchemaResolver',
-            name: 'resolver',
-            type: 'address',
-          },
-          { internalType: 'bool', name: 'revocable', type: 'bool' },
-          { internalType: 'string', name: 'schema', type: 'string' },
-        ],
-        internalType: 'struct ISchemaRegistry.SchemaRecord',
-        name: '',
-        type: 'tuple',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      { internalType: 'string', name: 'schema', type: 'string' },
-      { internalType: 'contract ISchemaResolver', name: 'resolver', type: 'address' },
-      { internalType: 'bool', name: 'revocable', type: 'bool' },
-    ],
-    name: 'register',
-    outputs: [{ internalType: 'bytes32', name: '', type: 'bytes32' }],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-] as const
 
 type ProfileLinksEditModalProps = {
   identity?: ProfileIdentity
@@ -149,51 +111,6 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
     ]
   }
 
-  const ensureProfileLinkSchema = async (): Promise<`0x${string}` | null> => {
-    const registryAddress = EAS_SCHEMA_REGISTRY_ADDRESS[PROFILE_LINK_EAS_CHAIN_ID]
-    if (!registryAddress) {
-      throw new Error(
-        'Profile link schema registration is not supported on this network.'
-      )
-    }
-
-    const isRegistered = async () => {
-      const record = await readContract(config, {
-        abi: schemaRegistryAbi,
-        address: registryAddress,
-        chainId: PROFILE_LINK_EAS_CHAIN_ID,
-        functionName: 'getSchema',
-        args: [PROFILE_LINK_SCHEMA_UID],
-      })
-
-      return record.uid.toLowerCase() === PROFILE_LINK_SCHEMA_UID.toLowerCase()
-    }
-
-    if (await isRegistered()) return null
-
-    try {
-      const hash = await writeContract(config, {
-        abi: schemaRegistryAbi,
-        address: registryAddress,
-        chainId: PROFILE_LINK_EAS_CHAIN_ID,
-        functionName: 'register',
-        args: [PROFILE_LINK_SCHEMA, zeroAddress, true],
-      })
-      await waitForTransactionReceipt(config, {
-        hash,
-        chainId: PROFILE_LINK_EAS_CHAIN_ID,
-      })
-
-      return hash
-    } catch (err) {
-      // A concurrent registration can make our transaction revert. Confirm the
-      // onchain record rather than relying on provider-specific error strings.
-      if (await isRegistered()) return null
-
-      throw err
-    }
-  }
-
   const attestProfileLinks = async (
     easAddress: `0x${string}`,
     updates: ProfileLinkUpdate[]
@@ -236,15 +153,7 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
   const saveProfileLinks = async (
     easAddress: `0x${string}`,
     updates: ProfileLinkUpdate[]
-  ): Promise<`0x${string}`[]> => {
-    const hashes: `0x${string}`[] = []
-
-    const schemaHash = await ensureProfileLinkSchema()
-    if (schemaHash) hashes.push(schemaHash)
-
-    hashes.push(await attestProfileLinks(easAddress, updates))
-    return hashes
-  }
+  ): Promise<`0x${string}`[]> => [await attestProfileLinks(easAddress, updates)]
 
   const handleSave = async () => {
     let updates: ProfileLinkUpdate[]
@@ -270,7 +179,11 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
         await switchChainAsync({ chainId: PROFILE_LINK_EAS_CHAIN_ID })
       }
 
-      const easAddress = EAS_CONTRACT_ADDRESS[PROFILE_LINK_EAS_CHAIN_ID]
+      const profileLinkChainId =
+        PROFILE_LINK_EAS_CHAIN_ID as keyof typeof EAS_CONTRACT_ADDRESS
+      const easAddress = EAS_CONTRACT_ADDRESS[profileLinkChainId] as
+        | `0x${string}`
+        | undefined
       if (!easAddress) {
         throw new Error('Profile link attestations are not supported on this network.')
       }
@@ -345,8 +258,7 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
         <Box className={delegateModalSection}>
           <Text color="text3" fontSize="14">
             This attests the fields you changed with the {PROFILE_LINK_SCHEMA} EAS schema.
-            If this is the first profile link update on this network, your wallet may ask
-            to register the schema first.
+            The schema is pre-registered on the supported Base network.
           </Text>
         </Box>
 

@@ -72,7 +72,7 @@ export const normalizeFarcasterHandle = (
   return {
     handle,
     label: `@${handle}`,
-    url: `https://warpcast.com/${handle}`,
+    url: `https://farcaster.xyz/${handle}`,
   }
 }
 

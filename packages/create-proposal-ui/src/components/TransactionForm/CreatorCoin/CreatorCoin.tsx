@@ -6,7 +6,6 @@ import {
 import {
   EAS_CONTRACT_ADDRESS,
   easAbi,
-  TREASURY_ASSET_PIN_SCHEMA,
   TREASURY_ASSET_PIN_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import {
@@ -37,13 +36,13 @@ import {
   isChainIdSupportedByCoining,
 } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text, vars } from '@buildeross/zord'
-import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { type ClankerTokenV4, FEE_CONFIGS as SDK_FEE_CONFIGS } from 'clanker-sdk'
 import { Clanker } from 'clanker-sdk/v4'
 import { Form, Formik, type FormikHelpers, useFormikContext } from 'formik'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   type Address,
+  encodeAbiParameters,
   encodeFunctionData,
   formatEther,
   getAddress,
@@ -57,8 +56,6 @@ import { ZodError } from 'zod'
 
 import { useTransactionComposer } from '../../shared'
 import { CreatorCoinPreviewDisplay } from './CreatorCoinPreviewDisplay'
-
-const schemaEncoder = new SchemaEncoder(TREASURY_ASSET_PIN_SCHEMA)
 
 const warningSurface = `color-mix(in srgb, ${vars.color.warning} 14%, transparent)`
 const negativeSurface = `color-mix(in srgb, ${vars.color.negative} 14%, transparent)`
@@ -551,12 +548,15 @@ export const CreatorCoin: React.FC = () => {
         const easContractAddress = EAS_CONTRACT_ADDRESS[chain.id]
         if (easContractAddress) {
           const coinAddress = getAddress(txData.expectedAddress)
-          const encodedData = schemaEncoder.encodeData([
-            { name: 'tokenType', type: 'uint8', value: 0 },
-            { name: 'token', type: 'address', value: coinAddress },
-            { name: 'isCollection', type: 'bool', value: true },
-            { name: 'tokenId', type: 'uint256', value: 0n },
-          ]) as Hex
+          const encodedData = encodeAbiParameters(
+            [
+              { name: 'tokenType', type: 'uint8' },
+              { name: 'token', type: 'address' },
+              { name: 'isCollection', type: 'bool' },
+              { name: 'tokenId', type: 'uint256' },
+            ],
+            [0, coinAddress, true, 0n]
+          )
 
           const pinCalldata = encodeFunctionData({
             abi: easAbi,

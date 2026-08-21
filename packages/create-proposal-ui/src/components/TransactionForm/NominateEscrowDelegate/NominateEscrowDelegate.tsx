@@ -2,7 +2,6 @@ import {
   AttestationParams,
   EAS_CONTRACT_ADDRESS,
   easAbi,
-  ESCROW_DELEGATE_SCHEMA,
   ESCROW_DELEGATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { useEscrowDelegate } from '@buildeross/hooks/useEscrowDelegate'
@@ -13,10 +12,15 @@ import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { addressValidationSchemaWithError } from '@buildeross/utils/yup'
 import { Box, Button } from '@buildeross/zord'
-import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import { Form, Formik } from 'formik'
 import { useCallback } from 'react'
-import { encodeFunctionData, getAddress, Hex, isAddress, zeroHash } from 'viem'
+import {
+  encodeAbiParameters,
+  encodeFunctionData,
+  getAddress,
+  isAddress,
+  zeroHash,
+} from 'viem'
 import * as yup from 'yup'
 
 import { useTransactionComposer } from '../../shared'
@@ -50,8 +54,6 @@ const escrowDelegateFormSchema = (_escrowDelegate: string | undefined) =>
     ),
   })
 
-const schemaEncoder = new SchemaEncoder(ESCROW_DELEGATE_SCHEMA)
-
 export const NominateEscrowDelegate: React.FC = () => {
   const { token, treasury } = useDaoStore((state) => state.addresses)
   const { addTransaction, resetTransactionType } = useTransactionComposer()
@@ -74,9 +76,10 @@ export const NominateEscrowDelegate: React.FC = () => {
         console.error('Failed to resolve valid escrow delegate address')
         return
       }
-      const encodedData = schemaEncoder.encodeData([
-        { name: 'daoMultiSig', type: 'address', value: newEscrowDelegate },
-      ]) as Hex
+      const encodedData = encodeAbiParameters(
+        [{ name: 'daoMultiSig', type: 'address' }],
+        [newEscrowDelegate]
+      )
 
       const params: AttestationParams = {
         schema: ESCROW_DELEGATE_SCHEMA_UID,

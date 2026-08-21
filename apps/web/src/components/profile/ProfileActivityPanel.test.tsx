@@ -3,6 +3,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import {
   activityDaoMeta,
   activityDaoNameRow,
+  activityDaoNameText,
   activityRowContent,
   activityVoteAgainst,
   activityVoteFor,
@@ -96,7 +97,7 @@ vi.mock('next/link', () => ({
 }))
 
 describe('ProfileActivityPanel', () => {
-  it('renders DAO and chain logo above the date on the right side of the card', () => {
+  it('renders dao name and chain logo above the date on the right side of the card', () => {
     render(<ProfileActivityPanel profileAddress={profileAddress} selectedDaoKeys={[]} />)
 
     const row = screen.getByRole('link', { name: /Bid on Token 1/ })
@@ -114,11 +115,38 @@ describe('ProfileActivityPanel', () => {
 
     expect(daoMetadata).toBeVisible()
     expect(daoName.parentElement).toHaveClass(activityDaoNameRow)
+    expect(daoName).toHaveClass(activityDaoNameText)
     expect(daoName.parentElement).toContainElement(chainLogo)
+    expect(daoMetadata.firstElementChild).toBe(daoName.parentElement)
+    expect(daoMetadata.firstElementChild).toHaveTextContent('Test DAO')
     expect(daoMetadata.lastElementChild).not.toBe(daoName.parentElement)
+    expect(daoMetadata.lastElementChild).not.toHaveTextContent('Test DAO')
     expect(activityDetails).toHaveTextContent('1 ETH')
     expect(daoMetadata).not.toHaveTextContent('1 ETH')
     expect(within(row).queryByText('Ethereum')).not.toBeInTheDocument()
+  })
+
+  it('does not round tiny non-zero bid amounts down to zero', () => {
+    render(
+      <ProfileActivityPanel
+        profileAddress={profileAddress}
+        selectedDaoKeys={[]}
+        extraItems={[
+          {
+            ...bid,
+            id: 'tiny-bid',
+            tokenId: '2',
+            tokenName: 'Tiny Token',
+            timestamp: 3,
+            amount: '50000000000000',
+          } as FeedItem,
+        ]}
+      />
+    )
+
+    const row = screen.getByRole('link', { name: /Bid on Tiny Token #2/ })
+    expect(row).toHaveTextContent('0.00005 ETH')
+    expect(row).not.toHaveTextContent('0 ETH')
   })
 
   it('labels proposal votes as for or against with semantic colors', () => {
@@ -152,11 +180,11 @@ describe('ProfileActivityPanel', () => {
     )
     expect(screen.getByRole('link', { name: /Bid on Token 1/ })).toBeVisible()
     expect(screen.getByRole('link', { name: /FOR proposal/ })).toBeVisible()
-    expect(screen.getByText('Bids')).toBeVisible()
     expect(screen.queryByText('bid')).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Activity list' })).toBeVisible()
 
     fireEvent.click(screen.getByRole('button', { name: 'Filter activity' }))
+    expect(screen.getByText('Bids')).toBeVisible()
     expect(
       screen.getAllByRole('checkbox').map((checkbox) => checkbox.getAttribute('name'))
     ).toHaveLength(7)

@@ -20,11 +20,19 @@ export type ProfileDashboardChainResult = {
   tokens: ProfileDashboardToken[]
   auctionWins: FeedItem[]
   counts: {
+    tokenHoldings: number
     proposalVotes: number
     proposalsSubmitted: number
     bidsPlaced: number
   }
   isComplete: boolean
+}
+
+export type ProfileDashboardQueryMode = 'all' | 'summary' | 'tokens'
+
+export type ProfileDashboardQueryOptions = {
+  mode?: ProfileDashboardQueryMode
+  signal?: AbortSignal
 }
 
 type IdEntity = { id: string }
@@ -114,43 +122,51 @@ const PROFILE_TOKENS_PAGE_QUERY = `
   }
 `
 
-const PROFILE_PROPOSAL_VOTES_PAGE_QUERY = `
-  query profileDashboardProposalVotesPage(
-    $address: Bytes!
-    $first: Int!
-    $cursor: ID!
-  ) {
+const PROFILE_COUNTS_PAGE_QUERY = `
+  query profileDashboardCountsPage($address: Bytes!, $first: Int!, $skip: Int!) {
+    tokens(
+      first: $first
+      skip: $skip
+      orderBy: id
+      orderDirection: asc
+      where: { owner: $address }
+    ) {
+      id
+    }
+    daoTokenOwners(
+      first: $first
+      skip: $skip
+      orderBy: id
+      orderDirection: asc
+      where: { owner: $address }
+    ) {
+      id
+      daoTokenCount
+    }
     proposalVotedEvents(
       first: $first
+      skip: $skip
       orderBy: id
       orderDirection: asc
-      where: { actor: $address, id_gt: $cursor }
+      where: { actor: $address }
     ) {
       id
     }
-  }
-`
-
-const PROFILE_PROPOSALS_PAGE_QUERY = `
-  query profileDashboardProposalsPage($address: Bytes!, $first: Int!, $cursor: ID!) {
     proposalCreatedEvents(
       first: $first
+      skip: $skip
       orderBy: id
       orderDirection: asc
-      where: { actor: $address, id_gt: $cursor }
+      where: { actor: $address }
     ) {
       id
     }
-  }
-`
-
-const PROFILE_BIDS_PAGE_QUERY = `
-  query profileDashboardBidsPage($address: Bytes!, $first: Int!, $cursor: ID!) {
     auctionBidPlacedEvents(
       first: $first
+      skip: $skip
       orderBy: id
       orderDirection: asc
-      where: { actor: $address, id_gt: $cursor }
+      where: { actor: $address }
     ) {
       id
     }
@@ -200,20 +216,30 @@ const INITIAL_TIMESTAMP_CURSOR = '999999999999999999999999999999999999'
 
 type PageResult<T> = { items: T[]; isComplete: boolean }
 
+type CountPageResult = {
+  counts: ProfileDashboardChainResult['counts']
+  isComplete: boolean
+}
+
 async function fetchIdCursorPages<T extends IdEntity>(
   client: GraphQLClient,
   query: string,
   collection: string,
-  address: string
+  address: string,
+  signal?: AbortSignal
 ): Promise<PageResult<T>> {
   const items: T[] = []
   let cursor = ''
 
   for (let page = 0; page < MAX_PAGES; page++) {
-    const data = await client.request<Record<string, T[]>>(query, {
-      address,
-      first: PAGE_SIZE,
-      cursor,
+    const data = await client.request<Record<string, T[]>>({
+      document: query,
+      variables: {
+        address,
+        first: PAGE_SIZE,
+        cursor,
+      },
+      signal,
     })
     const pageItems = data[collection] || []
     items.push(...pageItems)
@@ -225,19 +251,97 @@ async function fetchIdCursorPages<T extends IdEntity>(
   return { items, isComplete: false }
 }
 
+async function fetchCountPages(
+  client: GraphQLClient,
+  address: string,
+  signal?: AbortSignal
+): Promise<CountPageResult> {
+  const tokenOwners = new Map<string, number>()
+  const tokens = new Set<string>()
+  let sawTokenCollection = false
+  const proposalVotes = new Set<string>()
+  const proposals = new Set<string>()
+  const bids = new Set<string>()
+
+  for (let page = 0; page < MAX_PAGES; page++) {
+    const data = await client.request<{
+      tokens: IdEntity[]
+      daoTokenOwners: Array<IdEntity & { daoTokenCount: number }>
+      proposalVotedEvents: IdEntity[]
+      proposalCreatedEvents: IdEntity[]
+      auctionBidPlacedEvents: IdEntity[]
+    }>({
+      document: PROFILE_COUNTS_PAGE_QUERY,
+      variables: {
+        address,
+        first: PAGE_SIZE,
+        skip: page * PAGE_SIZE,
+      },
+      signal,
+    })
+
+    sawTokenCollection ||= Array.isArray(data.tokens)
+    const tokenItems = data.tokens || []
+    const tokenOwnerItems = data.daoTokenOwners || []
+    const voteItems = data.proposalVotedEvents || []
+    const proposalItems = data.proposalCreatedEvents || []
+    const bidItems = data.auctionBidPlacedEvents || []
+    tokenItems.forEach((item) => tokens.add(item.id))
+    tokenOwnerItems.forEach((item) => tokenOwners.set(item.id, item.daoTokenCount))
+    voteItems.forEach((item) => proposalVotes.add(item.id))
+    proposalItems.forEach((item) => proposals.add(item.id))
+    bidItems.forEach((item) => bids.add(item.id))
+
+    if (
+      tokenItems.length < PAGE_SIZE &&
+      tokenOwnerItems.length < PAGE_SIZE &&
+      voteItems.length < PAGE_SIZE &&
+      proposalItems.length < PAGE_SIZE &&
+      bidItems.length < PAGE_SIZE
+    ) {
+      return {
+        counts: {
+          tokenHoldings: sawTokenCollection
+            ? tokens.size
+            : sumTokenOwnerCounts(tokenOwners),
+          proposalVotes: proposalVotes.size,
+          proposalsSubmitted: proposals.size,
+          bidsPlaced: bids.size,
+        },
+        isComplete: true,
+      }
+    }
+  }
+
+  return {
+    counts: {
+      tokenHoldings: sawTokenCollection ? tokens.size : sumTokenOwnerCounts(tokenOwners),
+      proposalVotes: proposalVotes.size,
+      proposalsSubmitted: proposals.size,
+      bidsPlaced: bids.size,
+    },
+    isComplete: false,
+  }
+}
+
+const sumTokenOwnerCounts = (tokenOwners: Map<string, number>) =>
+  Array.from(tokenOwners.values()).reduce((total, count) => total + count, 0)
+
 async function fetchSettlementTimestamp(
   client: GraphQLClient,
   address: string,
-  timestamp: string
+  timestamp: string,
+  signal?: AbortSignal
 ): Promise<PageResult<AuctionSettlement>> {
   const items: AuctionSettlement[] = []
   let cursor = ''
 
   for (let page = 0; page < MAX_PAGES; page++) {
-    const data = await client.request<{ auctionSettledEvents: AuctionSettlement[] }>(
-      PROFILE_AUCTION_SETTLEMENTS_AT_TIMESTAMP_QUERY,
-      { address, first: PAGE_SIZE, timestamp, cursor }
-    )
+    const data = await client.request<{ auctionSettledEvents: AuctionSettlement[] }>({
+      document: PROFILE_AUCTION_SETTLEMENTS_AT_TIMESTAMP_QUERY,
+      variables: { address, first: PAGE_SIZE, timestamp, cursor },
+      signal,
+    })
     const pageItems = data.auctionSettledEvents || []
     items.push(...pageItems)
 
@@ -250,16 +354,18 @@ async function fetchSettlementTimestamp(
 
 async function fetchAuctionSettlements(
   client: GraphQLClient,
-  address: string
+  address: string,
+  signal?: AbortSignal
 ): Promise<PageResult<AuctionSettlement>> {
   const items = new Map<string, AuctionSettlement>()
   let beforeTimestamp = INITIAL_TIMESTAMP_CURSOR
 
   for (let page = 0; page < MAX_PAGES; page++) {
-    const data = await client.request<{ auctionSettledEvents: AuctionSettlement[] }>(
-      PROFILE_AUCTION_SETTLEMENTS_PAGE_QUERY,
-      { address, first: PAGE_SIZE, beforeTimestamp }
-    )
+    const data = await client.request<{ auctionSettledEvents: AuctionSettlement[] }>({
+      document: PROFILE_AUCTION_SETTLEMENTS_PAGE_QUERY,
+      variables: { address, first: PAGE_SIZE, beforeTimestamp },
+      signal,
+    })
     const pageItems = data.auctionSettledEvents || []
     pageItems.forEach((item) => items.set(item.id, item))
 
@@ -270,7 +376,12 @@ async function fetchAuctionSettlements(
     // Timestamp sorting has no secondary order. Exhaust the boundary timestamp by
     // ID before moving below it so settlements with identical timestamps are stable.
     const boundaryTimestamp = pageItems[pageItems.length - 1].timestamp
-    const boundary = await fetchSettlementTimestamp(client, address, boundaryTimestamp)
+    const boundary = await fetchSettlementTimestamp(
+      client,
+      address,
+      boundaryTimestamp,
+      signal
+    )
     boundary.items.forEach((item) => items.set(item.id, item))
     if (!boundary.isComplete) return { items: [...items.values()], isComplete: false }
     beforeTimestamp = boundaryTimestamp
@@ -279,11 +390,10 @@ async function fetchAuctionSettlements(
   return { items: [...items.values()], isComplete: false }
 }
 
-const uniqueCount = (items: IdEntity[]) => new Set(items.map((item) => item.id)).size
-
 export const profileDashboardQuery = async (
   chainId: CHAIN_ID,
-  address: string
+  address: string,
+  { mode = 'all', signal }: ProfileDashboardQueryOptions = {}
 ): Promise<ProfileDashboardChainResult> => {
   const subgraphUrl = PUBLIC_SUBGRAPH_URL.get(chainId)
   if (!subgraphUrl) throw new Error(`No subgraph URL found for chain ID ${chainId}`)
@@ -292,32 +402,43 @@ export const profileDashboardQuery = async (
     headers: { 'Content-Type': 'application/json' },
   })
   const normalizedAddress = address.toLowerCase()
-  const [tokens, proposalVotes, proposals, bids, settlements] = await Promise.all([
-    fetchIdCursorPages<CursorToken>(
+
+  if (mode === 'tokens') {
+    const tokens = await fetchIdCursorPages<CursorToken>(
       client,
       PROFILE_TOKENS_PAGE_QUERY,
       'tokens',
-      normalizedAddress
-    ),
-    fetchIdCursorPages<IdEntity>(
-      client,
-      PROFILE_PROPOSAL_VOTES_PAGE_QUERY,
-      'proposalVotedEvents',
-      normalizedAddress
-    ),
-    fetchIdCursorPages<IdEntity>(
-      client,
-      PROFILE_PROPOSALS_PAGE_QUERY,
-      'proposalCreatedEvents',
-      normalizedAddress
-    ),
-    fetchIdCursorPages<IdEntity>(
-      client,
-      PROFILE_BIDS_PAGE_QUERY,
-      'auctionBidPlacedEvents',
-      normalizedAddress
-    ),
-    fetchAuctionSettlements(client, normalizedAddress),
+      normalizedAddress,
+      signal
+    )
+
+    return {
+      tokens: tokens.items,
+      auctionWins: [],
+      counts: {
+        tokenHoldings: tokens.items.length,
+        proposalVotes: 0,
+        proposalsSubmitted: 0,
+        bidsPlaced: 0,
+      },
+      isComplete: tokens.isComplete,
+    }
+  }
+
+  const tokensPromise =
+    mode === 'all'
+      ? fetchIdCursorPages<CursorToken>(
+          client,
+          PROFILE_TOKENS_PAGE_QUERY,
+          'tokens',
+          normalizedAddress,
+          signal
+        )
+      : Promise.resolve<PageResult<CursorToken>>({ items: [], isComplete: true })
+  const [tokens, countResult, settlements] = await Promise.all([
+    tokensPromise,
+    fetchCountPages(client, normalizedAddress, signal),
+    fetchAuctionSettlements(client, normalizedAddress, signal),
   ])
 
   const auctionWins = settlements.items
@@ -355,12 +476,12 @@ export const profileDashboardQuery = async (
     tokens: tokens.items,
     auctionWins,
     counts: {
-      proposalVotes: uniqueCount(proposalVotes.items),
-      proposalsSubmitted: uniqueCount(proposals.items),
-      bidsPlaced: uniqueCount(bids.items),
+      ...countResult.counts,
+      tokenHoldings:
+        mode === 'all' && tokens.isComplete
+          ? tokens.items.length
+          : countResult.counts.tokenHoldings,
     },
-    isComplete: [tokens, proposalVotes, proposals, bids, settlements].every(
-      (result) => result.isComplete
-    ),
+    isComplete: [tokens, countResult, settlements].every((result) => result.isComplete),
   }
 }

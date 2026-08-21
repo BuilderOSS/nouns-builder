@@ -77,5 +77,14 @@ describe('getProfileLinkOverrides', () => {
     expect(clientConfigMock).toHaveBeenCalledWith(
       expect.objectContaining({ signal: timeoutSignal })
     )
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        where: expect.objectContaining({
+          attester: { equals: profileAddress },
+          recipient: { equals: profileAddress },
+        }),
+      })
+    )
   })
 })

@@ -35,6 +35,8 @@ import {
   profileDaoLinkActive,
   profileDaoListFooter,
   profileDaoListRoot,
+  profileDaoListRow,
+  profileDaoListRowContent,
   profileDaoListViewport,
   profileDaoNameLink,
   profileHiddenDaoLink,
@@ -46,6 +48,7 @@ type ProfileDaoListItem = {
   auctionAddress: string
   chainId: number
   collectionAddress: string
+  contractImage?: string | null
   name: string
 }
 
@@ -169,16 +172,12 @@ const ProfileDaoListRow = React.memo(
           ref={handleRowRef}
           align="center"
           gap="x3"
-          p="x3"
-          borderRadius="curved"
-          borderStyle="solid"
-          borderWidth="thin"
-          borderColor="border"
           style={{
             transition: 'opacity 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease',
             opacity: isDragging ? 0.42 : isHidden ? 0.7 : 1,
           }}
           className={[
+            profileDaoListRowContent,
             !isEditing ? profileDaoLink : undefined,
             daoHref ? profileDaoFilterContent : undefined,
             isSelected ? profileDaoLinkActive : undefined,
@@ -190,6 +189,7 @@ const ProfileDaoListRow = React.memo(
             <DaoAvatar
               collectionAddress={dao.collectionAddress}
               size="48"
+              src={dao.contractImage ?? undefined}
               auctionAddress={dao.auctionAddress}
               chainId={dao.chainId}
             />
@@ -792,7 +792,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
     <div className={profileDaoListRoot}>
       <div className={profileSectionHeader}>
         <Flex align="center" gap="x2">
-          <Text as="h2" id="profile-daos-heading" variant="heading-md">
+          <Text as="h2" id="profile-daos-heading" variant="heading-sm">
             DAOs
           </Text>
           {onDaoClick ? (
@@ -823,7 +823,10 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
         className={profileDaoListViewport}
         data-testid="profile-dao-list-viewport"
         direction="column"
-        gap="x3"
+        gap="x0"
+        role="region"
+        aria-label="DAO list"
+        tabIndex={daosForDisplay.length > 5 ? 0 : undefined}
         w="100%"
       >
         {daosForDisplay.map((dao, index) => {
@@ -858,7 +861,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
           )
 
           return (
-            <Box key={daoKey}>
+            <Box key={daoKey} className={profileDaoListRow}>
               {isEditingDaos ? (
                 row
               ) : onDaoClick ? (
@@ -911,7 +914,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
             isOpen={isHiddenDaosOpen}
             onToggle={() => setIsHiddenDaosOpen((current) => !current)}
           >
-            <Flex direction="column" gap="x3" w="100%">
+            <Flex direction="column" gap="x0" w="100%">
               {hiddenDaos.map((dao) => {
                 const daoKey = getDaoKey(dao.chainId, dao.collectionAddress)
                 const daoHref = `/dao/${chainSlugsById.get(dao.chainId)}/${dao.collectionAddress}`
@@ -939,7 +942,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
                 )
 
                 return (
-                  <Box key={daoKey}>
+                  <Box key={daoKey} className={profileDaoListRow}>
                     {isEditingDaos ? (
                       row
                     ) : onDaoClick ? (

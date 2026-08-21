@@ -33,12 +33,12 @@ describe('profile identity helpers', () => {
     expect(normalizeFarcasterHandle('@builder')).toEqual({
       handle: 'builder',
       label: '@builder',
-      url: 'https://warpcast.com/builder',
+      url: 'https://farcaster.xyz/builder',
     })
     expect(normalizeFarcasterHandle('noun-42')).toEqual({
       handle: 'noun-42',
       label: '@noun-42',
-      url: 'https://warpcast.com/noun-42',
+      url: 'https://farcaster.xyz/noun-42',
     })
   })
 
@@ -110,7 +110,7 @@ describe('profile identity helpers', () => {
       farcaster: {
         handle: 'builder',
         label: '@builder',
-        url: 'https://warpcast.com/builder',
+        url: 'https://farcaster.xyz/builder',
       },
     })
   })
