@@ -48,7 +48,11 @@ describe('deriveRecentTransactions', () => {
     },
   ]
   const auctions: AuctionLike[] = [
-    { id: '0xtoken:762', endTime: 2000, winningBid: { amount: eth(0.025).toString() } },
+    {
+      id: '0xtoken:762',
+      endTime: 2000,
+      winningBid: { amount: eth(0.025).toString(), transactionHash: '0xbid762' },
+    },
     { id: '0xtoken:761', endTime: 500, winningBid: { amount: '0' } }, // no bid → excluded
   ]
 
@@ -87,6 +91,21 @@ describe('deriveRecentTransactions', () => {
       []
     )
     expect(rows).toHaveLength(0)
+  })
+
+  it('carries explorer tx hashes: execution hash for props, winning bid for auctions', () => {
+    const [p65, a762, p64] = deriveRecentTransactions(proposals, auctions)
+    expect(p65.txHash).toBe('0xabc')
+    expect(a762.txHash).toBe('0xbid762')
+    expect(p64.txHash).toBeUndefined() // no execution hash → row stays unlinked
+  })
+
+  it('leaves txHash undefined when an auction has no bid transaction hash', () => {
+    const [row] = deriveRecentTransactions(
+      [],
+      [{ id: '0xtoken:900', endTime: 10, winningBid: { amount: eth(1).toString() } }]
+    )
+    expect(row.txHash).toBeUndefined()
   })
 
   it('caps to the limit', () => {

@@ -21,7 +21,7 @@ export interface ProposalLike {
 export interface AuctionLike {
   id: string
   endTime: number | string
-  winningBid?: { amount?: string | null } | null
+  winningBid?: { amount?: string | null; transactionHash?: string | null } | null
 }
 
 /** Sum a proposal's per-transaction `values` (ETH sent) into a single ETH amount. */
@@ -77,6 +77,9 @@ export const deriveRecentTransactions = (
       tag: 'Auction settle',
       amountEth: Number(formatEther(BigInt(a.winningBid!.amount!))),
       timestamp: Number(a.endTime),
+      // The winning bid is the tx that moved this ETH; the subgraph exposes no
+      // settlement hash on `Auction` yet.
+      txHash: a.winningBid?.transactionHash ?? undefined,
     }))
 
   return [...proposalTxs, ...auctionTxs]

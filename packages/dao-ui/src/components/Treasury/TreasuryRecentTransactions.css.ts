@@ -27,7 +27,30 @@ export const row = style({
   borderBottomStyle: 'solid',
   borderBottomWidth: '1px',
   borderBottomColor: vars.color.border,
-  selectors: { '&:last-of-type': { borderBottom: 'none' } },
+})
+
+/**
+ * Last row has no divider. Set explicitly rather than with `:last-of-type` —
+ * linked rows render as <a>, same element type as the "View all" link below.
+ */
+export const rowLast = style({ borderBottom: 'none' })
+
+/** Rows that carry a tx hash link out to the block explorer. */
+export const rowLink = style({
+  textDecoration: 'none',
+  color: 'inherit',
+  cursor: 'pointer',
+  transition: 'background 0.15s ease',
+  marginLeft: '-0.6rem',
+  marginRight: '-0.6rem',
+  paddingLeft: '0.6rem',
+  paddingRight: '0.6rem',
+  borderRadius: vars.radii.small,
+  selectors: {
+    // Neutral tint reads as a subtle highlight in both light and dark themes,
+    // where `background2` is heavy enough to compete with the card itself.
+    '&:hover': { background: 'rgba(128,128,128,0.12)' },
+  },
 })
 
 export const badge = style({
@@ -52,6 +75,9 @@ export const txTitle = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+  selectors: {
+    [`${rowLink}:hover &`]: { textDecoration: 'underline' },
+  },
 })
 
 export const txTag = style({ fontSize: '12px', color: vars.color.text3 })

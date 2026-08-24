@@ -1,5 +1,6 @@
 'use client'
 
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants'
 import { Auction_OrderBy, OrderDirection, SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { formatTimeAgo } from '@buildeross/utils/formatTime'
@@ -55,8 +56,7 @@ export const TreasuryRecentTransactions = () => {
     [proposals, auctions]
   )
 
-  const explorerUrl =
-    chain.blockExplorers?.default?.url?.replace(/\/$/, '') ?? 'https://basescan.org'
+  const explorerUrl = ETHERSCAN_BASE_URL[chain.id]
 
   return (
     <Flex direction={'column'} width={'100%'} mb={'x8'}>
@@ -78,27 +78,50 @@ export const TreasuryRecentTransactions = () => {
         {txs.length === 0 ? (
           <Box className={styles.empty}>No recent treasury activity.</Box>
         ) : (
-          txs.map((tx, i) => (
-            <Box key={`${tx.tag}-${i}`} className={styles.row}>
+          txs.map((tx, i) => {
+            // No explorer for the local foundry chain — those rows stay unlinked.
+            const txUrl =
+              tx.txHash && explorerUrl ? `${explorerUrl}/tx/${tx.txHash}` : undefined
+            return (
               <Box
-                className={`${styles.badge} ${tx.dir === 'in' ? styles.badgeIn : styles.badgeOut}`}
+                key={`${tx.tag}-${i}`}
+                as={txUrl ? 'a' : 'div'}
+                className={[
+                  styles.row,
+                  txUrl ? styles.rowLink : '',
+                  i === txs.length - 1 ? styles.rowLast : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                {...(txUrl
+                  ? {
+                      href: txUrl,
+                      target: '_blank',
+                      rel: 'noreferrer noopener',
+                      title: 'View transaction on explorer',
+                    }
+                  : {})}
               >
-                {tx.dir === 'in' ? '↓' : '↑'}
+                <Box
+                  className={`${styles.badge} ${tx.dir === 'in' ? styles.badgeIn : styles.badgeOut}`}
+                >
+                  {tx.dir === 'in' ? '↓' : '↑'}
+                </Box>
+                <Box style={{ minWidth: 0 }}>
+                  <div className={styles.txTitle}>{tx.title}</div>
+                  <div className={styles.txTag}>{tx.tag}</div>
+                </Box>
+                <Text className={tx.dir === 'in' ? styles.amountIn : styles.amountOut}>
+                  {tx.dir === 'in' ? '+' : '−'}
+                  {formatCryptoVal(tx.amountEth)} ETH
+                </Text>
+                <Text className={styles.time}>{formatTimeAgo(tx.timestamp)}</Text>
               </Box>
-              <Box style={{ minWidth: 0 }}>
-                <div className={styles.txTitle}>{tx.title}</div>
-                <div className={styles.txTag}>{tx.tag}</div>
-              </Box>
-              <Text className={tx.dir === 'in' ? styles.amountIn : styles.amountOut}>
-                {tx.dir === 'in' ? '+' : '−'}
-                {formatCryptoVal(tx.amountEth)} ETH
-              </Text>
-              <Text className={styles.time}>{formatTimeAgo(tx.timestamp)}</Text>
-            </Box>
-          ))
+            )
+          })
         )}
 
-        {treasury && (
+        {treasury && explorerUrl && (
           <a
             className={styles.viewAll}
             href={`${explorerUrl}/address/${treasury}`}
