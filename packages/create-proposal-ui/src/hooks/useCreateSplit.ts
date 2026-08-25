@@ -3,24 +3,9 @@
 import { SplitsClient } from '@0xsplits/splits-sdk'
 import { useChainStore } from '@buildeross/stores'
 import { useState } from 'react'
-import { parseEventLogs } from 'viem'
 import { usePublicClient, useWalletClient } from 'wagmi'
 
 import { prepareSplitConfigForSDK, type SplitConfig } from '../utils/splits'
-
-/*
-  SplitMain's creation event. Reading the split address out of the receipt
-  ourselves keeps the deployed address recoverable even when the SDK's own
-  event lookup fails — by then the split exists and redeploying just burns gas.
-*/
-const createSplitEventAbi = [
-  {
-    type: 'event',
-    name: 'CreateSplit',
-    anonymous: false,
-    inputs: [{ indexed: true, name: 'split', type: 'address' }],
-  },
-] as const
 
 export interface UseCreateSplitResult {
   /** Sends the createSplit wallet transaction; resolves to the split address. */
@@ -74,28 +59,31 @@ export const useCreateSplit = (): UseCreateSplitResult => {
       })
 
       const sdkConfig = prepareSplitConfigForSDK(config)
-      const { txHash } = await splitsClient.splitV1.submitCreateSplitTransaction({
+
+      // Check if the split already exists (CREATE2 deterministic deployment)
+      const { splitAddress: predictedAddress, splitExists } =
+        await splitsClient.splitV1.predictImmutableSplitAddress({
+          recipients: sdkConfig.recipients,
+          distributorFeePercent: sdkConfig.distributorFeePercent,
+        })
+
+      if (splitExists) {
+        // Split already exists, return the existing address without deploying
+        setSplitAddress(predictedAddress)
+        return predictedAddress
+      }
+
+      // Split doesn't exist, create it
+      const { splitAddress: address, event } = await splitsClient.splitV1.createSplit({
         recipients: sdkConfig.recipients,
         distributorFeePercent: sdkConfig.distributorFeePercent,
         controller: sdkConfig.controller,
       })
 
-      // Persist the hash the moment it exists: from here on the split may well
-      // be deployed, so every failure has to leave a way back to it.
-      setTxHash(txHash)
-
-      const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash })
-      const [createSplitEvent] = parseEventLogs({
-        abi: createSplitEventAbi,
-        eventName: 'CreateSplit',
-        logs: receipt.logs,
-      })
-
-      const address = createSplitEvent?.args.split
-      if (!address) {
-        throw new Error(
-          `Split creation transaction ${txHash} did not emit a CreateSplit event`
-        )
+      // Extract the transaction hash from the event log
+      const txHash = event.transactionHash
+      if (txHash) {
+        setTxHash(txHash)
       }
 
       setSplitAddress(address)

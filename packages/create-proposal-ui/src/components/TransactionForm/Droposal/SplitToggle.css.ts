@@ -11,6 +11,19 @@ export const card = style({
   borderColor: vars.color.border,
   borderRadius: vars.radii.curved,
   padding: '1rem 1.15rem',
+  transition: 'border-color 0.2s ease, background 0.2s ease',
+})
+
+export const cardActive = style({
+  borderColor: '#10b981',
+  background: 'rgba(16, 185, 129, 0.05)',
+})
+
+export const checkIcon = style({
+  color: '#10b981',
+  marginRight: '4px',
+  display: 'inline-flex',
+  alignItems: 'center',
 })
 
 export const textCol = style({

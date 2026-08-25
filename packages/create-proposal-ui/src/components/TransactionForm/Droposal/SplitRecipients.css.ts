@@ -70,6 +70,8 @@ export const errorText = style({
   color: vars.color.negative,
   fontSize: '13px',
   marginTop: '0.5rem',
+  wordBreak: 'break-word',
+  overflowWrap: 'break-word',
 })
 
 export const successBox = style({

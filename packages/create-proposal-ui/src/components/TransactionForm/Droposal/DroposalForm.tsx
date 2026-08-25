@@ -3,7 +3,7 @@ import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { DatePicker, FIELD_TYPES, SmartInput, TextArea } from '@buildeross/ui/Fields'
 import { SingleMediaUpload } from '@buildeross/ui/SingleMediaUpload'
 import { defaultHelperTextStyle } from '@buildeross/ui/styles'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { useCallback, useState } from 'react'
 import { useAccount } from 'wagmi'
@@ -53,10 +53,13 @@ const editionSizeOptions = [
   { label: 'Open edition', value: 'open' },
 ]
 
+type SplitState = 'none' | 'creating' | 'active'
+
 export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }) => {
   const [editionType, setEditionType] = useState<EditionType>('open')
   const [isIPFSUploading, setIsIPFSUploading] = useState(false)
-  const [showSplit, setShowSplit] = useState(false)
+  const [splitState, setSplitState] = useState<SplitState>('none')
+  const [activeSplitAddress, setActiveSplitAddress] = useState<string | null>(null)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const { address: user } = useAccount()
   const { treasury } = useDaoStore((x) => x.addresses)
@@ -302,13 +305,31 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                     />
 
                     <Box mt={'x2'}>
-                      <SplitToggle checked={showSplit} onChange={setShowSplit} />
-                      {showSplit && (
+                      <SplitToggle
+                        checked={splitState !== 'none'}
+                        isActive={splitState === 'active' && !!activeSplitAddress}
+                        onChange={(checked) => {
+                          if (checked) {
+                            setSplitState('creating')
+                          } else {
+                            setSplitState('none')
+                            setActiveSplitAddress(null)
+                            formik.setFieldValue('fundsRecipient', treasury || '')
+                          }
+                        }}
+                      />
+                      {splitState !== 'none' && (
                         <Box mt={'x4'}>
                           <SplitRecipients
+                            mode={splitState === 'active' ? 'view' : 'edit'}
+                            activeSplitAddress={activeSplitAddress}
                             onSplitCreated={(address) => {
                               formik.setFieldValue('fundsRecipient', address)
-                              setShowSplit(false)
+                              setActiveSplitAddress(address)
+                              setSplitState('active')
+                            }}
+                            onEditSplit={() => {
+                              setSplitState('creating')
                             }}
                           />
                         </Box>
@@ -332,7 +353,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                           .filter(Boolean)
                           .join(' ')}
                       >
-                        ›
+                        <Icon id={'chevron-down'} size={'md'} align={'center'} />
                       </span>
                     </button>
                     {showAdvanced && (

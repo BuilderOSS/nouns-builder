@@ -5,7 +5,7 @@ import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useChainStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
-import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Address } from 'viem'
 
@@ -31,6 +31,12 @@ import {
 export interface SplitRecipientsProps {
   /** Called with the deployed split address once creation succeeds. */
   onSplitCreated: (address: string) => void
+  /** Display mode: 'edit' allows creating/editing split, 'view' shows read-only summary */
+  mode?: 'edit' | 'view'
+  /** The currently active split address (used in view mode) */
+  activeSplitAddress?: string | null
+  /** Called when user wants to edit an existing split */
+  onEditSplit?: () => void
 }
 
 /** What a recipient's raw input resolved to (ENS/basename or a plain address). */
@@ -117,13 +123,18 @@ const RecipientRow: React.FC<RecipientRowProps> = ({
         disabled={!canRemove}
         onClick={() => onRemove(index)}
       >
-        ×
+        <Icon id={'cross-16'} size={'sm'} />
       </button>
     </Box>
   )
 }
 
-export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated }) => {
+export const SplitRecipients: React.FC<SplitRecipientsProps> = ({
+  onSplitCreated,
+  mode = 'edit',
+  activeSplitAddress,
+  onEditSplit,
+}) => {
   const chainId = useChainStore((x) => x.chain.id)
   const { createSplit, isPending, error, splitAddress, txHash, reset } = useCreateSplit()
   const [recipients, setRecipients] = useState<SplitRecipient[]>(EMPTY)
@@ -225,6 +236,57 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated
     }
   }
 
+  // View mode: show read-only summary of active split
+  if (mode === 'view' && activeSplitAddress) {
+    return (
+      <Box className={wrapper}>
+        <div className={successBox}>
+          Split contract deployed at {formatSplitAddress(activeSplitAddress)}
+          {recipients.length > 0 && (
+            <>
+              {' with '}
+              {recipients.length} recipient{recipients.length > 1 ? 's' : ''}
+            </>
+          )}
+        </div>
+
+        {recipients.length > 0 && (
+          <Box mt={'x4'}>
+            <SplitFlowChart recipients={resolved} />
+          </Box>
+        )}
+
+        <Flex gap={'x2'} mt={'x4'}>
+          <Button
+            type={'button'}
+            variant={'secondary'}
+            size={'sm'}
+            onClick={() => {
+              reset()
+              onEditSplit?.()
+            }}
+          >
+            Create a different split
+          </Button>
+          <Button
+            type={'button'}
+            variant={'ghost'}
+            size={'sm'}
+            onClick={() => {
+              window.open(
+                `${ETHERSCAN_BASE_URL[chainId]}/address/${activeSplitAddress}`,
+                '_blank'
+              )
+            }}
+          >
+            View on explorer
+          </Button>
+        </Flex>
+      </Box>
+    )
+  }
+
+  // Edit mode: full creation/editing interface
   return (
     <Box className={wrapper}>
       <Text fontWeight={'label'} mb={'x2'}>
@@ -285,8 +347,13 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({ onSplitCreated
 
       {splitAddress ? (
         <div className={successBox}>
-          ✓ Split deployed at {formatSplitAddress(splitAddress)} — set as the payout
-          address above.
+          Split contract deployed at {formatSplitAddress(splitAddress)}
+          {recipients.length > 0 && (
+            <>
+              {' with '}
+              {recipients.length} recipient{recipients.length > 1 ? 's' : ''}
+            </>
+          )}
         </div>
       ) : (
         <ContractButton

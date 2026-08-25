@@ -61,8 +61,9 @@ export const advancedChevron = style({
   transition: 'transform 0.15s ease',
   color: vars.color.text3,
   fontSize: '16px',
+  transform: 'rotate(-90deg)',
 })
 
 export const advancedChevronOpen = style({
-  transform: 'rotate(90deg)',
+  transform: 'rotate(0deg)',
 })
