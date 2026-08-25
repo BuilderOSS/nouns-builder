@@ -3,6 +3,7 @@
 import { SplitsClient } from '@0xsplits/splits-sdk'
 import { useChainStore } from '@buildeross/stores'
 import { useState } from 'react'
+import { decodeEventLog } from 'viem'
 import { usePublicClient, useWalletClient } from 'wagmi'
 
 import { prepareSplitConfigForSDK, type SplitConfig } from '../utils/splits'
@@ -74,18 +75,45 @@ export const useCreateSplit = (): UseCreateSplitResult => {
       }
 
       // Split doesn't exist, create it
-      const { splitAddress: address, event } = await splitsClient.splitV1.createSplit({
+      // 1. Submit transaction and get hash immediately
+      const { txHash } = await splitsClient.splitV1.submitCreateSplitTransaction({
         recipients: sdkConfig.recipients,
         distributorFeePercent: sdkConfig.distributorFeePercent,
         controller: sdkConfig.controller,
       })
 
-      // Extract the transaction hash from the event log
-      const txHash = event.transactionHash
-      if (txHash) {
-        setTxHash(txHash)
+      // 2. Persist hash BEFORE waiting for receipt (critical for unknown-outcome state)
+      setTxHash(txHash)
+
+      // 3. Wait for receipt and get events (can fail without losing hash)
+      const eventTopics = splitsClient.splitV1.getEventTopics(chainId)
+      const events = await splitsClient.getTransactionEvents({
+        txHash,
+        eventTopics: eventTopics.createSplit,
+      })
+
+      const event = events.length > 0 ? events[0] : undefined
+      if (!event) {
+        throw new Error('Split creation transaction did not emit a CreateSplit event')
       }
 
+      // 4. Decode event to get split address
+      // Access the protected _getSplitMainAbi method via bracket notation
+      const abi = (splitsClient.splitV1 as any)['_getSplitMainAbi'](chainId)
+      const log = decodeEventLog({
+        abi,
+        data: event.data,
+        topics: event.topics,
+      }) as {
+        eventName: string
+        args: { split: string }
+      }
+
+      if (log.eventName !== 'CreateSplit') {
+        throw new Error('Unexpected event type')
+      }
+
+      const address = log.args.split
       setSplitAddress(address)
       return address
     } catch (err) {

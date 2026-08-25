@@ -82,6 +82,9 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
   const handleSubmit = useCallback(
     (values: DroposalFormValues, actions: FormikHelpers<DroposalFormValues>) => {
       onSubmit?.(values, actions)
+      // Reset split state after submission
+      setSplitState('none')
+      setActiveSplitAddress(null)
     },
     [onSubmit]
   )
