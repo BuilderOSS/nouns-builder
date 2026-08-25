@@ -1,0 +1,195 @@
+import { attestCandidateSignature } from '@buildeross/sdk'
+import { governorAbi } from '@buildeross/sdk/contract'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { AnimatedModal, ContractButton, SuccessModalContent } from '@buildeross/ui'
+import { getErrorMessage } from '@buildeross/utils/errors'
+import { Box, vars } from '@buildeross/zord'
+import React, { useCallback, useState } from 'react'
+import { type Hex } from 'viem'
+import { useAccount, useConfig, useReadContract, useWalletClient } from 'wagmi'
+
+import {
+  CANDIDATE_SIGNATURE_VALIDITY_DAYS,
+  CANDIDATE_SIGNATURE_VALIDITY_SECONDS,
+} from '../utils/candidateProposal'
+
+export interface CandidateSignatureButtonProps {
+  candidateId: Hex
+  proposalHash: Hex
+  proposer: `0x${string}`
+  governorAddress: `0x${string}`
+  tokenSymbol: string
+  buttonVariant?: React.ComponentProps<typeof ContractButton>['variant']
+  alreadySigned?: boolean
+  voteWeight?: bigint
+  onSuccess?: () => void
+}
+
+export const CandidateSignatureButton: React.FC<CandidateSignatureButtonProps> = ({
+  candidateId,
+  proposalHash,
+  proposer,
+  governorAddress,
+  tokenSymbol,
+  buttonVariant = 'primary',
+  alreadySigned = false,
+  voteWeight = 0n,
+  onSuccess,
+}) => {
+  const config = useConfig()
+  const { address } = useAccount()
+  const { data: walletClient } = useWalletClient()
+  const { chain } = useChainStore()
+  const { addresses } = useDaoStore()
+  const isProposer = React.useMemo(
+    () => !!address && address.toLowerCase() === proposer.toLowerCase(),
+    [address, proposer]
+  )
+
+  const { data: nonce, isLoading: isNonceLoading } = useReadContract({
+    abi: governorAbi,
+    address: governorAddress,
+    functionName: 'proposeSignatureNonce',
+    args: address ? [address] : undefined,
+    chainId: chain.id,
+    query: { enabled: !!address && !!governorAddress },
+  })
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isTxSuccess, setIsTxSuccess] = useState(false)
+
+  const canSign = React.useMemo(() => {
+    return (
+      !!address && !!walletClient && nonce !== undefined && !isProposer && voteWeight > 0n
+    )
+  }, [address, walletClient, nonce, isProposer, voteWeight])
+
+  const handleSign = useCallback(async () => {
+    if (!canSign || !address || !walletClient || nonce === undefined) return
+
+    setIsTxSuccess(false)
+    setErrorMessage(null)
+    setIsSubmitting(true)
+
+    // Calculate fresh deadline on each sign attempt
+    const freshDeadline =
+      Math.floor(Date.now() / 1000) + CANDIDATE_SIGNATURE_VALIDITY_SECONDS
+
+    try {
+      await attestCandidateSignature({
+        config,
+        chainId: chain.id,
+        walletClient,
+        daoTokenAddress: addresses.token!,
+        governorAddress,
+        tokenSymbol,
+        candidateId,
+        proposalHash,
+        signer: address,
+        proposer,
+        nonce,
+        deadline: freshDeadline,
+      })
+
+      setIsTxSuccess(true)
+
+      if (onSuccess) {
+        setTimeout(onSuccess, 1500)
+      }
+    } catch (err: unknown) {
+      console.error('Error signing candidate:', err)
+      const message = getErrorMessage(err)
+      setErrorMessage(message)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [
+    canSign,
+    address,
+    walletClient,
+    config,
+    chain.id,
+    addresses.token,
+    governorAddress,
+    tokenSymbol,
+    candidateId,
+    proposalHash,
+    proposer,
+    nonce,
+    onSuccess,
+  ])
+
+  const handleCloseModal = () => {
+    setIsTxSuccess(false)
+    setErrorMessage(null)
+  }
+
+  const buttonText = React.useMemo(() => {
+    if (isNonceLoading) return 'Loading Signature Nonce...'
+    if (isProposer) return 'Candidate Creator Cannot Sign'
+    if (alreadySigned) return 'Update Signature'
+    if (voteWeight === 0n) return 'No Voting Power'
+    return `Sign Candidate`
+  }, [alreadySigned, isNonceLoading, isProposer, voteWeight])
+
+  if (isProposer) return null
+
+  return (
+    <>
+      <ContractButton
+        chainId={chain.id}
+        handleClick={handleSign}
+        disabled={!canSign}
+        loading={isSubmitting}
+        variant={buttonVariant}
+        style={{ position: 'relative' }}
+      >
+        <Box>{buttonText}</Box>
+        {voteWeight > 0n && !alreadySigned && (
+          <Box
+            position="absolute"
+            right={{ '@initial': 'x2', '@768': 'x4' }}
+            px="x3"
+            py="x1"
+            borderRadius="normal"
+            fontSize={14}
+            style={{
+              backgroundColor: `color-mix(in srgb, ${vars.color.onAccent} 30%, transparent)`,
+            }}
+          >
+            {voteWeight.toString()} Votes
+          </Box>
+        )}
+      </ContractButton>
+
+      {/* Transaction Status Modal */}
+      <AnimatedModal
+        open={isSubmitting || isTxSuccess}
+        close={isSubmitting ? undefined : handleCloseModal}
+      >
+        <SuccessModalContent
+          success={isTxSuccess}
+          pending={!isTxSuccess && !errorMessage}
+          title={
+            isTxSuccess
+              ? alreadySigned
+                ? 'Signature Updated'
+                : 'Signature Added'
+              : errorMessage
+                ? 'Transaction Failed'
+                : alreadySigned
+                  ? 'Updating Signature...'
+                  : 'Signing Candidate...'
+          }
+          subtitle={
+            isTxSuccess
+              ? `Your signature has been ${alreadySigned ? 'updated' : 'recorded'} with ${voteWeight.toString()} vote weight.`
+              : errorMessage
+                ? errorMessage
+                : `You'll be asked to sign twice - once for the signature, then to submit on-chain. Signature valid for ${CANDIDATE_SIGNATURE_VALIDITY_DAYS} days.`
+          }
+        />
+      </AnimatedModal>
+    </>
+  )
+}

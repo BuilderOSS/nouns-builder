@@ -11,6 +11,7 @@ import { useMemo } from 'react'
 import useSWR from 'swr'
 
 import { propPageWrapper } from '../styles.css'
+import { ParticipationHistory, VoteTimeline } from '../VoteMetrics'
 import { VotePlacard } from './VotePlacard'
 import { VoterParticipation } from './VoterParticipation'
 
@@ -61,6 +62,11 @@ export const ProposalVotes: React.FC<ProposalVotesProps> = ({ proposal }) => {
       {hasVotes ? (
         <>
           <VoterParticipation totalVotes={totalVotes} maxVotes={maxVotes} />
+          <VoteTimeline
+            votes={proposal.votes ?? []}
+            voteStart={Number(proposal.voteStart)}
+            voteEnd={Number(proposal.voteEnd)}
+          />
           {proposal.votes
             ?.map((vote) => (
               <VotePlacard key={vote.voter} vote={vote} totalVotes={totalVotes} />
@@ -72,6 +78,7 @@ export const ProposalVotes: React.FC<ProposalVotesProps> = ({ proposal }) => {
           No votes yet for this proposal.
         </Text>
       )}
+      <ParticipationHistory />
     </Flex>
   )
 }

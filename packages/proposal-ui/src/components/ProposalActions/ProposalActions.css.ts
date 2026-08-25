@@ -9,6 +9,9 @@ const proposalActionButton = style([
   {
     padding: '8px 16px',
     maxHeight: 40,
+    minWidth: 149,
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
   },
 ])
 
@@ -28,7 +31,6 @@ export const proposalActionButtonVariants = styleVariants({
     {
       background: vars.color.background2,
       color: vars.color.text1,
-      minWidth: 149,
     },
   ],
   queue: [
@@ -45,13 +47,4 @@ export const proposalActionButtonVariants = styleVariants({
       width: '100%',
     },
   ],
-})
-
-export const cancelButtonBorder = style({
-  borderTop: `2px solid ${vars.color.background2}`,
-  '@media': {
-    '(min-width: 768px)': {
-      borderTop: 'none',
-    },
-  },
 })

@@ -20,6 +20,7 @@ export type Proposal = Omit<
   | 'values'
   | 'executedAt'
   | 'proposer'
+  | 'updatePeriodEnd'
 > & {
   proposer: string
   values: string[]
@@ -32,6 +33,7 @@ export type Proposal = Omit<
   executableFrom?: number
   expiresAt?: number
   executedAt?: number
+  updatePeriodEnd?: number
   votes?: ProposalVote[]
 }
 
@@ -39,8 +41,14 @@ export const formatAndFetchState = async (
   chainId: CHAIN_ID,
   data: ProposalFragment | ProposalDetailFragment
 ) => {
-  const { executableFrom, expiresAt, calldatas, executionTransactionHash, ...proposal } =
-    data
+  const {
+    executableFrom,
+    expiresAt,
+    calldatas,
+    executionTransactionHash,
+    updatePeriodEnd,
+    ...proposal
+  } = data
 
   const baseProposal = {
     ...proposal,
@@ -50,6 +58,7 @@ export const formatAndFetchState = async (
       proposal.dao.governorAddress,
       proposal.proposalId
     ),
+    ...(updatePeriodEnd ? { updatePeriodEnd: Number(updatePeriodEnd) } : {}),
   }
 
   // executableFrom and expiresAt will always either be both defined, or neither defined

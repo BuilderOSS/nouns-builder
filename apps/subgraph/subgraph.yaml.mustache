@@ -53,6 +53,10 @@ dataSources:
         - DAO
         - Proposal
         - ProposalUpdate
+        - ProposalCandidateGroup
+        - ProposalCandidateVersion
+        - CandidateComment
+        - CandidateSponsorSignature
       abis:
         - name: EAS
           file: ./abis/EAS.json
@@ -70,6 +74,10 @@ dataSources:
               '0x8bd0d42901ce3cd9898dbea6ae2fbf1e796ef0923e7cbb0a1cecac2e42d47cb3',
               '0x1289c5f988998891af7416d83820c40ba1c6f5ba31467f2e611172334dc53a0e',
               '0xc384fd4fdacb670667c07759423132a193053742b58d5a056b61d72ba1a09e26',
+              '0xc3315fb5b910e904d24f56c5b37dd5a5d06392bb040ba8ad669a9f7b3bbe2e4f',
+              '0x1decf999b02cbecd8697ae7cf0c4017bc0115adbee476da79634332fdff965b2',
+              '0x58cd8b0e3e1bd4c8c0d980826c3a041d315132ecccbfb7063f6458c05809e54a',
+              '0xa784c12c8d2e33ae2c50cc797a04f8852aea77d51a1a37ff117c3b4de0159593',
             ]
           calls:
             getAttestation: EAS[event.address].getAttestation(event.params.uid)
@@ -221,14 +229,23 @@ templates:
       entities:
         - Proposal
         - ProposalVote
+        - ProposalSigner
       abis:
         - name: Governor
           file: ./abis/Governor.json
+        - name: Token
+          file: ./abis/Token.json
         - name: Treasury
           file: ./abis/Treasury.json
       eventHandlers:
         - event: ProposalCreated(bytes32,address[],uint256[],bytes[],string,bytes32,(address,uint32,uint32,uint32,uint32,uint32,uint32,uint32,uint32,bool,bool,bool))
           handler: handleProposalCreated
+        - event: ProposalUpdated(bytes32,bytes32,address,address[],uint256[],bytes[],string,string)
+          handler: handleProposalUpdated
+        - event: ProposalSignersSet(bytes32,address[])
+          handler: handleProposalSignersSet
+        - event: ProposalUpdatablePeriodUpdated(uint256,uint256)
+          handler: handleProposalUpdatablePeriodUpdated
         - event: ProposalQueued(bytes32,uint256)
           handler: handleProposalQueued
         - event: ProposalExecuted(bytes32)
@@ -349,7 +366,7 @@ templates:
     name: ClankerToken
     network: {{network}}
     source:
-      abi: ERC20
+      abi: ClankerToken
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -357,12 +374,21 @@ templates:
       entities:
         - ClankerToken
         - ClankerTokenHolder
+        - ClankerTokenLinkedEvent
+        - ClankerTokenUnlinkedEvent
+        - DAO
       abis:
-        - name: ERC20
-          file: ./abis/ERC20.json
+        - name: ClankerToken
+          file: ./abis/ClankerToken.json
+        - name: Treasury
+          file: ./abis/Treasury.json
+        - name: Governor
+          file: ./abis/Governor.json
       eventHandlers:
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
+        - event: UpdateAdmin(indexed address,indexed address)
+          handler: handleUpdateAdmin
       file: ./src/clankerTokenTemplate.ts
 {{/clanker}}
 {{#zoraFactory}}

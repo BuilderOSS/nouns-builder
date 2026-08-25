@@ -1,13 +1,12 @@
 import { useEscrowDelegate } from '@buildeross/hooks/useEscrowDelegate'
 import { erc20Abi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { Accordion } from '@buildeross/ui/Accordion'
 import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
-import { getProvider } from '@buildeross/utils/provider'
 import {
   encodeCreateWithDurationsLD,
   encodeCreateWithDurationsLL,
@@ -35,7 +34,7 @@ import {
   parseUnits,
 } from 'viem'
 
-import { TokenSelectionForm } from '../../shared'
+import { TokenSelectionForm, useTransactionComposer } from '../../shared'
 import { StreamForm } from './StreamForm'
 import streamTokensSchema, {
   StreamFormValues,
@@ -80,8 +79,7 @@ const SyncSenderAddressFromEscrowDelegate = ({
 }
 
 export const StreamTokens: React.FC = () => {
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
 
@@ -166,7 +164,7 @@ export const StreamTokens: React.FC = () => {
     // Resolve sender ENS name with error handling
     let senderAddress: string
     try {
-      const resolved = await getEnsAddress(values.senderAddress, getProvider(chain.id))
+      const resolved = await getEnsAddress(values.senderAddress)
       // Validate that the resolved value is actually a valid address
       if (!resolved || !isAddress(resolved, { strict: false })) {
         actions.setFieldError(
@@ -234,10 +232,7 @@ export const StreamTokens: React.FC = () => {
         // Resolve recipient ENS name
         let recipientAddress: string
         try {
-          const resolved = await getEnsAddress(
-            stream.recipientAddress,
-            getProvider(chain.id)
-          )
+          const resolved = await getEnsAddress(stream.recipientAddress)
           // Validate that the resolved value is actually a valid address
           if (!resolved || !isAddress(resolved, { strict: false })) {
             actions.setFieldError(

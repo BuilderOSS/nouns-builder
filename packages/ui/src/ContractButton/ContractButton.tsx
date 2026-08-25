@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants'
 import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, ButtonProps, Flex, Icon, PopUp, Text } from '@buildeross/zord'
@@ -40,7 +40,7 @@ export const ContractButton = React.forwardRef<HTMLButtonElement, ContractButton
     const disconnectWallet = useWalletDisconnect()
 
     const chainName = useMemo(() => {
-      const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
+      const chain = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === chainId)
       return chain?.name ?? 'Unknown Chain (ID: ' + chainId + ')'
     }, [chainId])
 

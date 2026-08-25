@@ -1,10 +1,12 @@
+import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants'
+import { useManagerVersion } from '@buildeross/hooks'
 import { useChainStore } from '@buildeross/stores'
 import { DaysHoursMinsSecs, FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import {
   defaultFormAdvancedToggle,
   defaultFormAdvancedWrapper,
 } from '@buildeross/ui/styles'
-import { isTestnetChain } from '@buildeross/utils/chains'
+import { isFastDAOAllowed } from '@buildeross/utils/chains'
 import { formatDuration } from '@buildeross/utils/formatDuration'
 import { isEmpty } from '@buildeross/utils/helpers'
 import { Button, Flex, Heading, Icon, Stack } from '@buildeross/zord'
@@ -56,8 +58,14 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
   const chain = useChainStore((x) => x.chain)
   const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false)
 
+  // Check if Manager contract supports v3 features (proposalUpdatablePeriod)
+  const { isV3OrHigher } = useManagerVersion({
+    chainId: chain.id,
+    managerAddress: PUBLIC_MANAGER_ADDRESS[chain.id],
+  })
+
   useEffect(() => {
-    if (enableFastDAO && !isTestnetChain(chain.id)) {
+    if (enableFastDAO && !isFastDAOAllowed(chain.id)) {
       setEnableFastDAO(false)
     }
   }, [chain.id, enableFastDAO, setEnableFastDAO])
@@ -95,6 +103,12 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
       minutes: auctionSettings?.timelockDelay?.minutes,
       days: auctionSettings?.timelockDelay?.days ?? 2,
       hours: auctionSettings?.timelockDelay?.hours,
+    },
+    proposalUpdatablePeriod: {
+      seconds: auctionSettings?.proposalUpdatablePeriod?.seconds,
+      minutes: auctionSettings?.proposalUpdatablePeriod?.minutes,
+      days: auctionSettings?.proposalUpdatablePeriod?.days ?? 1,
+      hours: auctionSettings?.proposalUpdatablePeriod?.hours,
     },
   }
 
@@ -138,6 +152,12 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
           days: 0,
           hours: 0,
           minutes: FAST_DAO_TIMINGS.TIMELOCK_DELAY.minutes,
+          seconds: 0,
+        },
+        proposalUpdatablePeriod: {
+          days: 0,
+          hours: 0,
+          minutes: FAST_DAO_TIMINGS.PROPOSAL_UPDATABLE_PERIOD.minutes,
           seconds: 0,
         },
       })
@@ -201,7 +221,7 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               />
             </Stack>
 
-            {isTestnetChain(chain.id) && (
+            {isFastDAOAllowed(chain.id) && (
               <Flex mt={'x4'} mb={'x4'}>
                 <Flex align={'center'} justify={'center'} gap={'x4'}>
                   <Flex
@@ -219,12 +239,13 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                     {enableFastDAO && <Icon fill="background1" id="check" />}
                   </Flex>
                   <Flex className={deployCheckboxHelperText}>
-                    <strong>Enable Fast DAO (testnet only):</strong> ultra-short timings
+                    <strong>Enable Fast DAO (testing only):</strong> ultra-short timings
                     for testing &mdash;{' '}
                     {formatDuration(FAST_DAO_TIMINGS.AUCTION_DURATION)} auction (0 ETH
-                    reserve), {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock,{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)} voting delay,{' '}
-                    {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting period.{' '}
+                    reserve), {formatDuration(FAST_DAO_TIMINGS.PROPOSAL_UPDATABLE_PERIOD)}{' '}
+                    updatable period, {formatDuration(FAST_DAO_TIMINGS.VOTING_DELAY)}{' '}
+                    voting delay, {formatDuration(FAST_DAO_TIMINGS.VOTING_PERIOD)} voting
+                    period, {formatDuration(FAST_DAO_TIMINGS.TIMELOCK_DELAY)} timelock.{' '}
                     <strong>Not for production.</strong>
                   </Flex>
                 </Flex>
@@ -253,6 +274,24 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
               <Heading as={'h3'} mt={'x0'} mb={'x8'} fontSize={40}>
                 Governance Settings
               </Heading>
+              <Flex mb={'x6'} align="center" gap="x2">
+                <a
+                  href="https://docs.nouns.build/guides/governance/#proposal-lifecycle"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '14px',
+                    color: 'inherit',
+                    textDecoration: 'none',
+                  }}
+                >
+                  Learn about proposal lifecycle
+                  <Icon id="external-16" size="sm" />
+                </a>
+              </Flex>
               <SmartInput
                 {...formik.getFieldProps('proposalThreshold')}
                 inputLabel={'Proposal Threshold'}
@@ -292,6 +331,26 @@ export const AuctionSettingsForm: React.FC<AuctionSettingsFormProps> = ({ title 
                 perma={'%'}
                 step={1}
               />
+              {isV3OrHigher && (
+                <DaysHoursMinsSecs
+                  {...formik.getFieldProps('proposalUpdatablePeriod')}
+                  inputLabel={'Updatable Period'}
+                  formik={formik}
+                  id={'proposalUpdatablePeriod'}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  errorMessage={
+                    formik.touched['proposalUpdatablePeriod'] &&
+                    formik.errors['proposalUpdatablePeriod']
+                      ? formik.errors['proposalUpdatablePeriod']
+                      : undefined
+                  }
+                  helperText="The period during which proposers can edit their proposals after creation. Can be set to 0 to disable. Must be less than or equal to voting period."
+                  placeholder={['1', '0', '0', '0']}
+                  disabled={enableFastDAO}
+                />
+              )}
+
               <DaysHoursMinsSecs
                 {...formik.getFieldProps('votingPeriod')}
                 inputLabel={'Voting Period'}

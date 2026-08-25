@@ -117,6 +117,12 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     icon: 'migrate',
     iconBackdrop: iconBackdrop(color.warning),
   },
+  [TransactionType.CROSS_CHAIN_MIGRATION]: {
+    title: 'Cross-Chain Migration',
+    subTitle: 'Deploy DAO on another chain and migrate treasury',
+    icon: 'migrate',
+    iconBackdrop: iconBackdrop(color.warning),
+  },
   [TransactionType.WALLET_CONNECT]: {
     title: 'WalletConnect',
     subTitle: 'Connect to dApps and execute transactions via WalletConnect',

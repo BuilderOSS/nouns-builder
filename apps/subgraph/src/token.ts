@@ -142,6 +142,7 @@ export function handleTransfer(event: TransferEvent): void {
     token.tokenContract = event.address
     token.tokenId = event.params.tokenId
     token.mintedAt = event.block.timestamp
+    token.mintTransactionHash = event.transaction.hash
     token.dao = event.address.toHexString()
 
     dao.totalSupply = dao.totalSupply + 1

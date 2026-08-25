@@ -13,18 +13,18 @@ import {
   SectionHandler,
   SmartContracts,
 } from '@buildeross/dao-ui'
+import { useGovernorVersion } from '@buildeross/hooks/useContractVersion'
 import { auctionAbi, getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
 import { DaoContractAddresses, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID, ProposalCreateStage } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
-import { atoms, Flex, Text, theme } from '@buildeross/zord'
+import { Box, Flex, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React from 'react'
 import { Meta } from 'src/components/Meta'
-import NogglesLogo from 'src/layouts/assets/builder-framed.svg'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { isAddress } from 'viem'
@@ -107,6 +107,11 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
   // Check if signer address is a minter - show custom minter tab if true
   const isSignerCustomMinter = !!signerAddress && !!isSignerMinter
 
+  const { supportsCandidates } = useGovernorVersion({
+    chainId: chain.id,
+    governorAddress: addresses.governor,
+  })
+
   const [showMinterModal, setShowMinterModal] = React.useState(false)
 
   const openTab = React.useCallback(
@@ -166,6 +171,20 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     [push, chain.slug, addresses.token]
   )
 
+  const openCandidateCreatePage = React.useCallback(
+    async (stage?: ProposalCreateStage) => {
+      await push({
+        pathname: `/dao/[network]/[token]/candidate/create`,
+        query: {
+          network: chain.slug,
+          token: addresses.token,
+          ...(stage ? { stage } : {}),
+        },
+      })
+    },
+    [push, chain.slug, addresses.token]
+  )
+
   const openProposalReviewPage = React.useCallback(async () => {
     await push({
       pathname: `/dao/[network]/[token]/proposal/review`,
@@ -176,20 +195,35 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
     })
   }, [push, chain.slug, addresses.token])
 
+  const isOwner = owner === signerAddress
+
   const sections = React.useMemo(() => {
     const aboutSection = {
       title: 'About',
       component: [<About key={'about'} />],
     }
-    const baseSections = [
+
+    const contractsSection = {
+      title: 'Contracts',
+      component: [<SmartContracts key={'smart_contracts'} />],
+    }
+
+    // Non-owner sections (read-only)
+    if (!isOwner) {
+      return [aboutSection, contractsSection]
+    }
+
+    // Owner sections (full access)
+    const ownerSections = [
       aboutSection,
       {
-        title: 'Activity',
+        title: supportsCandidates ? 'Proposals' : 'Activity',
         component: [
           <Activity
-            key={'proposals'}
+            key={supportsCandidates ? 'proposals' : 'activity'}
             onOpenProposalCreate={openProposalCreatePage}
             onOpenProposalReview={openProposalReviewPage}
+            onOpenCandidateCreate={openCandidateCreatePage}
           />,
         ],
       },
@@ -222,59 +256,68 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
       })
     }
 
-    return [
-      ...baseSections,
-      ...minterSections,
-      {
-        title: 'Contracts',
-        component: [<SmartContracts key={'smart_contracts'} />],
-      },
-    ]
+    return [...ownerSections, ...minterSections, contractsSection]
   }, [
+    isOwner,
     isMerkleReserveMinter,
     isERC721RedeemMinter,
     isSignerCustomMinter,
+    supportsCandidates,
     openProposalCreatePage,
     openProposalReviewPage,
+    openCandidateCreatePage,
   ])
 
   if (!owner) {
     return null
   }
 
-  const isOwner = owner === signerAddress
-
-  if (!isOwner) {
-    return (
-      <Flex direction={'column'} align={'center'} width={'100%'} height={'100vh'}>
-        <Flex mt={'x64'} direction="column" align={'center'}>
-          <NogglesLogo
-            fill={theme.colors.text4}
-            className={atoms({ width: 'x23', cursor: 'pointer' })}
-          />
-          <Text mt={'x2'} color="text4">
-            There’s nothing here yet
-          </Text>
-        </Flex>
-      </Flex>
-    )
-  }
-
-  const activeTab = query.tab ? (query.tab as string) : 'activity'
+  // Normalize tab - both 'activity' and 'proposals' should map to the proposals/activity section
+  const rawTab = query.tab ? (query.tab as string) : isOwner ? 'admin' : 'about'
+  const activeTab =
+    rawTab === 'proposals' || rawTab === 'activity'
+      ? supportsCandidates
+        ? 'proposals'
+        : 'activity'
+      : rawTab
   const path = `/dao/${chain.slug}/${addresses.token}/?tab=${activeTab}`
 
   return (
     <Flex direction="column" pb="x30">
       <Meta title={'dao page'} path={path} />
 
-      <PreAuction
-        chain={chain}
-        collectionAddress={collectionAddress}
-        onOpenAuction={openTokenPage}
-        onOpenSettings={() => openTab('admin')}
-        remainingTokensInReserve={remainingTokensInReserve}
-        openMinterModal={() => setShowMinterModal(true)}
-      />
+      {!isOwner && (
+        <Flex mt="x6" mb="x6" mx="auto" width="100%" style={{ maxWidth: '912px' }}>
+          <Box
+            width="100%"
+            borderRadius="curved"
+            borderStyle="solid"
+            borderWidth="normal"
+            borderColor="border"
+            backgroundColor="background2"
+            p="x6"
+          >
+            <Text fontSize={16} fontWeight="label" mb="x2">
+              Auctions are currently paused
+            </Text>
+            <Text fontSize={14} color="text3">
+              This DAO has not been initialized yet. Please contact the DAO owner to
+              initialize and start auctions.
+            </Text>
+          </Box>
+        </Flex>
+      )}
+
+      {isOwner && (
+        <PreAuction
+          chain={chain}
+          collectionAddress={collectionAddress}
+          onOpenAuction={openTokenPage}
+          onOpenSettings={() => openTab('admin')}
+          remainingTokensInReserve={remainingTokensInReserve}
+          openMinterModal={() => setShowMinterModal(true)}
+        />
+      )}
 
       <SectionHandler
         sections={sections}
@@ -282,14 +325,16 @@ const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress 
         onTabChange={(tab) => openTab(tab, false)}
       />
 
-      <MinterManagementModal
-        open={showMinterModal}
-        close={() => setShowMinterModal(false)}
-        remainingTokensInReserve={remainingTokensInReserve}
-        isMerkleReserveMinter={isMerkleReserveMinter}
-        isERC721RedeemMinter={isERC721RedeemMinter}
-        onMinterEnabled={handleMinterEnabled}
-      />
+      {isOwner && (
+        <MinterManagementModal
+          open={showMinterModal}
+          close={() => setShowMinterModal(false)}
+          remainingTokensInReserve={remainingTokensInReserve}
+          isMerkleReserveMinter={isMerkleReserveMinter}
+          isERC721RedeemMinter={isERC721RedeemMinter}
+          onMinterEnabled={handleMinterEnabled}
+        />
+      )}
     </Flex>
   )
 }

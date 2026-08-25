@@ -1,5 +1,9 @@
 import { Duration } from '@buildeross/types'
-import { durationValidationSchema, priceValidationSchema } from '@buildeross/utils/yup'
+import {
+  durationValidationSchema,
+  priceValidationSchema,
+  toSeconds,
+} from '@buildeross/utils'
 import * as Yup from 'yup'
 
 export interface AuctionSettingsFormValues {
@@ -10,6 +14,7 @@ export interface AuctionSettingsFormValues {
   votingPeriod: Duration
   votingDelay: Duration
   timelockDelay: Duration
+  proposalUpdatablePeriod?: Duration
 }
 
 const twentyFourWeeks = 60 * 60 * 24 * 7 * 24
@@ -44,5 +49,18 @@ export const auctionSettingsValidationSchema = Yup.object().shape({
   timelockDelay: durationValidationSchema(
     { value: fiveMinutes, description: '5 minutes' },
     { value: twentyFourWeeks, description: '24 weeks' }
+  ),
+  proposalUpdatablePeriod: durationValidationSchema(
+    { value: 0, description: '0 seconds' },
+    { value: twentyFourWeeks, description: '24 weeks' }
+  ).test(
+    'lessThanOrEqualToVotingPeriod',
+    'Proposal updatable period must be less than or equal to voting period',
+    function (value) {
+      if (!value) return true // Optional field
+      const { votingPeriod } = this.parent
+      if (!votingPeriod) return true
+      return toSeconds(value) <= toSeconds(votingPeriod)
+    }
   ),
 })

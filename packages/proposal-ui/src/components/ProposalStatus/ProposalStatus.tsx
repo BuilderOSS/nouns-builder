@@ -17,7 +17,9 @@ export type ProposalForStatus = Pick<
   | 'executedAt'
   | 'title'
   | 'proposalNumber'
+  | 'proposalId'
   | 'timeCreated'
+  | 'candidateVersion'
 >
 
 type StatusProps = ProposalForStatus & {
@@ -32,7 +34,15 @@ export const ProposalStatus: React.FC<StatusProps> = ({
   showTime,
   ...proposal
 }) => {
-  const { state, voteEnd, voteStart, expiresAt, executedAt } = proposal
+  const { state, voteEnd, voteStart, expiresAt, executedAt, candidateVersion } = proposal
+
+  // Override state for promoted proposals: show Pending instead of Updatable
+  // Promoted proposals (from candidates) can't be updated via UI yet (requires signature collection)
+  const isPromotedProposal = !!candidateVersion
+  const displayState =
+    isPromotedProposal && state === ProposalState.Updatable
+      ? ProposalState.Pending
+      : state
 
   const now = dayjs.unix(Date.now() / 1000)
 
@@ -55,26 +65,26 @@ export const ProposalStatus: React.FC<StatusProps> = ({
         borderWidth={'normal'}
         mr={flipped ? { '@initial': 'x3', '@768': 'x0' } : 'x3'}
         ml={flipped ? { '@768': 'x3' } : 'x0'}
-        style={parseBgColor(state)}
+        style={parseBgColor(displayState)}
       >
-        <Label size="sm">{parseState(state)}</Label>
+        <Label size="sm">{parseState(displayState)}</Label>
       </Box>
-      {state === ProposalState.Pending && showTime && (
+      {displayState === ProposalState.Pending && showTime && (
         <Paragraph color="text3" data-testid="time-prefix">
           {parseTime(diffStart, 'Starts')}
         </Paragraph>
       )}
-      {state === ProposalState.Active && showTime && (
+      {displayState === ProposalState.Active && showTime && (
         <Paragraph color="text3" data-testid="time-prefix">
           {parseTime(diffEnd, 'Ends')}
         </Paragraph>
       )}
-      {state === ProposalState.Queued && showTime && (
+      {displayState === ProposalState.Queued && showTime && (
         <Paragraph color="text3" data-testid="time-prefix">
           {parseTime(diffExpiration, 'Expires')}
         </Paragraph>
       )}
-      {state === ProposalState.Executed && showTime && (
+      {displayState === ProposalState.Executed && showTime && (
         <Paragraph color="text3" data-testid="time-prefix">
           {formatTime(diffExecution, 'ago', false)}
         </Paragraph>

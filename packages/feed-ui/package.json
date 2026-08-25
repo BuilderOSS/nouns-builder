@@ -22,13 +22,19 @@
     "@buildeross/ui": "workspace:*",
     "@buildeross/utils": "workspace:*",
     "@buildeross/zord": "workspace:*",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^22.15.21",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.1.5",
     "@vanilla-extract/esbuild-plugin": "^2.3.16",
+    "@vanilla-extract/vite-plugin": "^5.0.2",
+    "@vitejs/plugin-react": "^4.5.0",
     "eslint": "8.57.1",
+    "jsdom": "^26.1.0",
     "tsup": "^8.3.5",
     "typescript": "^5.8.3",
+    "vitest": "^3.1.4",
     "zustand": "^5.0.4"
   },
   "exports": {
@@ -76,6 +82,8 @@
     "build": "tsup",
     "clean": "rm -rf .turbo dist",
     "lint": "pnpm type-check && eslint src --fix",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
   "types": "./dist/index.d.ts"

@@ -3,22 +3,28 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import {
   CreateProposalHeading,
   ProposalStageIndicator,
+  ResetConfirmationModal,
   ReviewProposalForm,
+  TransactionComposerProvider,
+  UpdatingProposalBanner,
 } from '@buildeross/create-proposal-ui'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
+import { useProposal } from '@buildeross/hooks/useProposal'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType, ProposalCreateStage } from '@buildeross/types'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
-import { Flex, Stack } from '@buildeross/zord'
+import { generateProposalSalt } from '@buildeross/utils/proposalMetadata'
+import { Button, Flex, Stack, Text } from '@buildeross/zord'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { notFoundWrap } from 'src/styles/404.css'
 import { useAccount } from 'wagmi'
+import { useShallow } from 'zustand/shallow'
 
 const ReviewProposalPage: NextPageWithLayout = () => {
   const chain = useChainStore((x) => x.chain)
@@ -26,6 +32,7 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   const { addresses } = useDaoStore()
   const { address } = useAccount()
+  const { openConnectModal } = useConnectModal()
 
   const { isLoading, hasThreshold } = useVotes({
     chainId: chain.id,
@@ -41,29 +48,85 @@ const ReviewProposalPage: NextPageWithLayout = () => {
   })
 
   const {
-    transactions,
     disabled,
+    transactionType,
+    setTransactionType,
+    resetTransactionType,
+    addTransaction,
+    addTransactions,
+    removeTransaction,
+    removeAllTransactions,
+    transactions,
     title,
     summary,
     representedAddress,
     discussionUrl,
     representedAddressEnabled,
+    updateProposalId,
+    setUpdateProposalId,
+    setProposalSalt,
     clearProposal,
-  } = useProposalStore()
-  const [proposalHydrated, setProposalHydrated] = useState(false)
+  } = useProposalStore(
+    useShallow((state) => ({
+      disabled: state.disabled,
+      transactionType: state.transactionType,
+      setTransactionType: state.setTransactionType,
+      resetTransactionType: state.resetTransactionType,
+      addTransaction: state.addTransaction,
+      addTransactions: state.addTransactions,
+      removeTransaction: state.removeTransaction,
+      removeAllTransactions: state.removeAllTransactions,
+      transactions: state.transactions,
+      title: state.title,
+      summary: state.summary,
+      representedAddress: state.representedAddress,
+      discussionUrl: state.discussionUrl,
+      representedAddressEnabled: state.representedAddressEnabled,
+      updateProposalId: state.updateProposalId,
+      setUpdateProposalId: state.setUpdateProposalId,
+      setProposalSalt: state.setProposalSalt,
+      clearProposal: state.clearProposal,
+    }))
+  )
 
-  useEffect(() => {
-    if (useProposalStore.persist.hasHydrated()) {
-      setProposalHydrated(true)
-      return
-    }
+  const transactionComposer = useMemo(
+    () => ({
+      transactionType,
+      setTransactionType,
+      resetTransactionType,
+      transactions,
+      addTransaction,
+      addTransactions,
+      removeTransaction,
+      removeAllTransactions,
+    }),
+    [
+      transactionType,
+      setTransactionType,
+      resetTransactionType,
+      transactions,
+      addTransaction,
+      addTransactions,
+      removeTransaction,
+      removeAllTransactions,
+    ]
+  )
+  const proposalHydrated = useProposalStore((state) => state.hasHydrated)
 
-    const unsubscribe = useProposalStore.persist.onFinishHydration(() => {
-      setProposalHydrated(true)
-    })
+  const isUpdatingProposal = !!updateProposalId
+  const [showCreateNewProposalModal, setShowCreateNewProposalModal] = useState(false)
 
-    return unsubscribe
-  }, [])
+  const onCreateNewProposal = useCallback(() => {
+    setUpdateProposalId(undefined)
+    setProposalSalt(generateProposalSalt())
+    setShowCreateNewProposalModal(false)
+  }, [setProposalSalt, setUpdateProposalId])
+
+  const { proposal: updatingProposal } = useProposal({
+    chainId: chain.id,
+    proposalId: updateProposalId,
+    enabled: isUpdatingProposal,
+  })
 
   const onOpenCreatePage = useCallback(async () => {
     await push({
@@ -194,76 +257,127 @@ const ReviewProposalPage: NextPageWithLayout = () => {
 
   if (isLoading) return null
 
-  if (!address)
+  if (!address) {
     return (
-      <Flex className={notFoundWrap}>Please connect your wallet to access this page</Flex>
+      <Flex
+        direction="column"
+        align="flex-start"
+        gap="x4"
+        p="x6"
+        w={'100%'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
+      >
+        <Text fontSize={20} fontWeight="display">
+          Proposal review is restricted
+        </Text>
+        <Text color="text3">
+          You need to connect a wallet before you can review and submit a proposal.
+        </Text>
+        <Button onClick={() => openConnectModal?.()}>Connect Wallet</Button>
+      </Flex>
     )
+  }
 
   if (!hasThreshold || isGovernanceDelayed) {
     return (
-      <Flex className={notFoundWrap}>
-        Access Restricted - You don’t have permission to access this page
+      <Flex
+        direction="column"
+        align="flex-start"
+        gap="x4"
+        p="x6"
+        w={'100%'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
+      >
+        <Text fontSize={20} fontWeight="display">
+          Proposal submission is restricted
+        </Text>
+        <Text color="text3">
+          {!hasThreshold
+            ? "You don't have enough voting power to submit proposals. You need to hold enough tokens to meet the proposal threshold."
+            : 'Proposal submission is currently delayed for this DAO. Please try again later.'}
+        </Text>
       </Flex>
     )
   }
 
   return (
-    <Stack
-      pb={{ '@initial': 'x30', '@768': 'x0' }}
-      w={'100%'}
-      px={'x3'}
-      style={{ maxWidth: 1060 }}
-      mx="auto"
-    >
-      <CreateProposalHeading
-        title={'Review and Submit'}
-        handleBack={onOpenCreatePage}
-        showHelpLinks
-        showStepBack
-        onStepBack={() => void onOpenCreateStage('transactions')}
-        showContinue={false}
-        showQueue={false}
-        showReset
-        hideActionsOnMobile
-        onReset={() => void onResetProposal()}
-      />
-
-      <ProposalStageIndicator
-        currentStage={'review'}
-        onStageSelect={(stage) => {
-          if (stage === 'draft' || stage === 'transactions') {
-            void onOpenCreateStage(stage)
-          }
-        }}
-        isStageClickable={(stage) => stage === 'draft' || stage === 'transactions'}
-      />
-
-      <Stack w={'100%'} px={'x3'} mx="auto">
-        <ReviewProposalForm
-          disabled={disabled}
-          transactions={transactions}
-          title={title}
-          summary={summary}
-          representedAddress={representedAddress}
-          discussionUrl={discussionUrl}
-          representedAddressEnabled={representedAddressEnabled}
-          onProposalCreated={onProposalCreated}
-          onBackMobile={() => void onOpenCreateStage('transactions')}
-          onResetMobile={() => void onResetProposal()}
-        />
-      </Stack>
-
-      <AnimatedModal
-        open={proposalIdCreated !== undefined}
-        close={handleCloseSuccessModal}
+    <TransactionComposerProvider value={transactionComposer}>
+      <Stack
+        pb={{ '@initial': 'x30', '@768': 'x0' }}
+        w={'100%'}
+        px={'x3'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
       >
-        <SuccessModalContent
-          title={`Proposal submitted`}
-          subtitle={`Your Proposal has been successfully submitted!`}
-          success
+        <CreateProposalHeading
+          title={'Review and Submit'}
+          handleBack={onOpenCreatePage}
+          showHelpLinks
+          showStepBack
+          onStepBack={() => void onOpenCreateStage('transactions')}
+          showContinue={false}
+          showQueue={false}
+          showReset
+          hideActionsOnMobile
+          onReset={() => void onResetProposal()}
         />
-      </AnimatedModal>
-    </Stack>
+
+        {isUpdatingProposal && (
+          <UpdatingProposalBanner
+            updateProposalId={updateProposalId}
+            updatingProposal={updatingProposal}
+            onCreateNew={() => setShowCreateNewProposalModal(true)}
+          />
+        )}
+
+        <ResetConfirmationModal
+          open={showCreateNewProposalModal}
+          onCancel={() => setShowCreateNewProposalModal(false)}
+          onConfirm={onCreateNewProposal}
+          title="Create a new proposal?"
+          description="This will stop editing the existing proposal. Your title, summary, metadata, and queued transactions will stay in the draft."
+          confirmLabel="Create new proposal"
+        />
+
+        <ProposalStageIndicator
+          currentStage={'review'}
+          onStageSelect={(stage) => {
+            if (stage === 'draft' || stage === 'transactions') {
+              void onOpenCreateStage(stage)
+            }
+          }}
+          isStageClickable={(stage) => stage === 'draft' || stage === 'transactions'}
+        />
+
+        <Stack w={'100%'} px={'x3'} mx="auto">
+          <ReviewProposalForm
+            disabled={disabled}
+            transactions={transactions}
+            title={title}
+            summary={summary}
+            representedAddress={representedAddress}
+            discussionUrl={discussionUrl}
+            representedAddressEnabled={representedAddressEnabled}
+            onProposalCreated={onProposalCreated}
+            onBackMobile={() => void onOpenCreateStage('transactions')}
+            onResetMobile={() => void onResetProposal()}
+          />
+        </Stack>
+
+        <AnimatedModal
+          open={proposalIdCreated !== undefined}
+          close={handleCloseSuccessModal}
+        >
+          <SuccessModalContent
+            title={`Proposal submitted`}
+            subtitle={`Your Proposal has been successfully submitted!`}
+            success
+          />
+        </AnimatedModal>
+      </Stack>
+    </TransactionComposerProvider>
   )
 }
 

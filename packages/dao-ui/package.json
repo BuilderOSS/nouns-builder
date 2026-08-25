@@ -18,6 +18,7 @@
     "@buildeross/eslint-config-custom": "workspace:*",
     "@buildeross/hooks": "workspace:*",
     "@buildeross/ipfs-service": "workspace:*",
+    "@buildeross/candidate-ui": "workspace:*",
     "@buildeross/proposal-ui": "workspace:*",
     "@buildeross/sdk": "workspace:*",
     "@buildeross/stores": "workspace:*",
@@ -87,6 +88,7 @@
     "clean": "rm -rf .turbo dist",
     "lint": "pnpm type-check && eslint src --fix",
     "test": "vitest run",
+    "test:unit": "vitest run --exclude '**/*.fork.test.{ts,tsx}'",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },

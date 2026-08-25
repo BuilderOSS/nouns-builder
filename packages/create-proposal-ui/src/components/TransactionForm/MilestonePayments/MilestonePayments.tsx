@@ -2,7 +2,7 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { uploadJson } from '@buildeross/ipfs-service/upload'
 import { erc20Abi } from '@buildeross/sdk/contract'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID, TransactionType } from '@buildeross/types'
 import { getEnsAddress } from '@buildeross/utils/ens'
 import {
@@ -19,6 +19,7 @@ import { useCallback, useState } from 'react'
 import useSWR from 'swr'
 import { Address, encodeFunctionData, formatUnits, isAddress, parseUnits } from 'viem'
 
+import { useTransactionComposer } from '../../shared'
 import { MilestonePaymentsFormValues } from './MilestonePayments.schema'
 import MilestonePaymentsForm from './MilestonePaymentsForm'
 import { encodeEscrowData } from './MilestonePaymentsUtils'
@@ -27,13 +28,11 @@ const LIMIT = 20
 const PAGE = 1
 
 export const MilestonePayments: React.FC = () => {
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [ipfsUploadError, setIpfsUploadError] = useState<Error | null>(null)
 
   const chain = useChainStore((state) => state.chain)
-
-  const addTransaction = useProposalStore((state) => state.addTransaction)
 
   const { addresses } = useDaoStore()
 

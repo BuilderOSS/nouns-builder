@@ -1,6 +1,6 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { getPropertyItems, metadataAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { getLayerName } from '@buildeross/ui/Artwork'
 import { transformFileProperties } from '@buildeross/utils/transformFileProperties'
@@ -10,14 +10,14 @@ import useSWR from 'swr'
 import { encodeFunctionData } from 'viem'
 
 import { useArtworkStore } from '../../../stores/useArtworkStore'
+import { useTransactionComposer } from '../../shared'
 import { AddArtworkForm } from './AddArtworkForm'
 
 export const AddArtwork: React.FC = () => {
   const { orderedLayers, ipfsUpload, isUploadingToIPFS, resetForm } = useArtworkStore()
   const addresses = useDaoStore((x) => x.addresses)
   const chain = useChainStore((x) => x.chain)
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
 
   const contractOrderedLayers = useMemo(
     () => [...orderedLayers].reverse(), // traits in the contract are reversed

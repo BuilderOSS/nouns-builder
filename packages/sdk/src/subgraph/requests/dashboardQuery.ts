@@ -20,7 +20,7 @@ export const dashboardRequest = async (
     if (memberAddress.toLowerCase() === '0x0000000000000000000000000000000000000000')
       throw new Error('Zero address not allowed')
 
-    const data = await Promise.all(
+    const results = await Promise.allSettled(
       PUBLIC_DEFAULT_CHAINS.map((chain) =>
         SDK.connect(chain.id)
           .daosForDashboard({
@@ -30,6 +30,22 @@ export const dashboardRequest = async (
           .then((x) => ({ ...x, chainId: chain.id }))
       )
     )
+
+    const data = results
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => result.value)
+
+    // If all requests failed, throw an error instead of returning empty results
+    if (data.length === 0 && results.length > 0) {
+      const rejectedReasons = results
+        .filter((result) => result.status === 'rejected')
+        .map((result) => result.reason)
+
+      const firstError = rejectedReasons[0]
+      throw new Error(
+        firstError?.message || 'All dashboard queries failed across default chains'
+      )
+    }
 
     return data
       .map((queries) =>

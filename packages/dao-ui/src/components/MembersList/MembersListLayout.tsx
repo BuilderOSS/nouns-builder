@@ -1,29 +1,36 @@
 import { Box, Flex, Grid, Text } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 
-import { cardSkeleton, row } from './MembersList.css'
+import { cardSkeleton, identityColumn, row } from './MembersList.css'
 
 export const MembersPanel = ({
   children,
   tableRuler = true,
   exportButton,
+  filterControl,
 }: {
   children: ReactNode
   tableRuler?: boolean
   exportButton?: ReactNode
+  filterControl?: ReactNode
 }) => {
   return (
     <>
       <Flex
         justify="space-between"
         align="center"
+        wrap="wrap"
+        gap="x2"
         mb={{ '@initial': 'x4', '@768': 'x6' }}
         mt={{ '@initial': 'x4', '@768': 'x10' }}
       >
         <Text variant="heading-xs" style={{ fontWeight: 800 }}>
           Delegates
         </Text>
-        {exportButton}
+        <Flex align="center" gap="x2">
+          {filterControl}
+          {exportButton}
+        </Flex>
       </Flex>
       <Box
         borderRadius={'phat'}
@@ -48,7 +55,7 @@ const TableHeader = () => {
       mb={{ '@initial': 'x4', '@768': 'x12' }}
       display={{ '@initial': 'none', '@768': 'flex' }}
     >
-      <Text fontWeight={'label'} style={{ width: '35%' }}>
+      <Text fontWeight={'label'} className={identityColumn}>
         Delegate
       </Text>
 

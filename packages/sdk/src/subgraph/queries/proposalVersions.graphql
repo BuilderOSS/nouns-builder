@@ -1,0 +1,9 @@
+query proposalVersions($where: Proposal_filter) {
+  proposals(
+    where: $where
+    orderBy: updateCount
+    orderDirection: asc
+  ) {
+    ...Proposal
+  }
+}

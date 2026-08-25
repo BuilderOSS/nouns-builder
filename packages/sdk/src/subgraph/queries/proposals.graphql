@@ -3,7 +3,7 @@ query proposals($where: Proposal_filter, $first: Int!, $skip: Int) {
     where: $where
     first: $first
     skip: $skip
-    orderBy: timeCreated
+    orderBy: proposalNumber
     orderDirection: desc
   ) {
     ...Proposal

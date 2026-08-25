@@ -15,7 +15,7 @@ import {
   useEthUsdPrice,
 } from '@buildeross/hooks'
 import { ClankerTokenFragment } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { type AddressType, TransactionType } from '@buildeross/types'
 import {
   ClankerCoinFormFields,
@@ -55,6 +55,7 @@ import {
 import { useBalance } from 'wagmi'
 import { ZodError } from 'zod'
 
+import { useTransactionComposer } from '../../shared'
 import { CreatorCoinPreviewDisplay } from './CreatorCoinPreviewDisplay'
 
 const schemaEncoder = new SchemaEncoder(TREASURY_ASSET_PIN_SCHEMA)
@@ -366,8 +367,7 @@ const CreatorCoinEconomicsPreview: React.FC<CreatorCoinEconomicsPreviewProps> = 
 
 export const CreatorCoin: React.FC = () => {
   const { treasury, token: daoTokenAddress } = useDaoStore((state) => state.addresses)
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const { chain } = useChainStore()
 
   const [submitError, setSubmitError] = useState<string | undefined>()

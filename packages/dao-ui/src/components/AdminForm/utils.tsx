@@ -134,6 +134,18 @@ export const formValuesToTransactionMap: FormValuesTransactionMap = {
         args: [BigInt(toSeconds(value))],
       }),
   },
+  proposalUpdatablePeriod: {
+    functionSignature: 'updateProposalUpdatablePeriod',
+    getTarget: (addresses) => addresses.governor as AddressType,
+    constructCalldata: (value) =>
+      value
+        ? encodeFunctionData({
+            abi: governorAbi,
+            functionName: 'updateProposalUpdatablePeriod',
+            args: [BigInt(toSeconds(value))],
+          })
+        : undefined,
+  },
   founderAllocation: {
     functionSignature: 'updateFounders',
     getTarget: (addresses) => addresses.token as AddressType,

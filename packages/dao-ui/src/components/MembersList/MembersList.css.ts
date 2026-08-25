@@ -5,6 +5,15 @@ export const row = style({
   width: '100%',
 })
 
+export const identityColumn = style({
+  width: '100%',
+  '@media': {
+    'screen and (min-width: 768px)': {
+      width: '35%',
+    },
+  },
+})
+
 export const cardSkeleton = style({
   width: '100%',
   animation: skeletonAnimation,

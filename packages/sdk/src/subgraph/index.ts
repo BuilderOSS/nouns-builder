@@ -2,7 +2,12 @@
 export { SDK as SubgraphSDK } from './client'
 export * from './requests/auctionHistory'
 export * from './requests/averageWinningBid'
+export * from './requests/candidateCommentsQuery'
+export * from './requests/candidateGroupQuery'
+export * from './requests/candidateGroupsQuery'
+export * from './requests/candidateSponsorSignaturesQuery'
 export * from './requests/clankerTokenQuery'
+export * from './requests/daoActivity'
 export * from './requests/daoMembership'
 export * from './requests/daoMetadata'
 export * from './requests/daoOGMetadataQuery'
@@ -16,11 +21,13 @@ export * from './requests/getBids'
 export * from './requests/getEscrowDelegate'
 export * from './requests/getPropDates'
 export * from './requests/getTreasuryAssetPins'
+export * from './requests/getUserCandidateSignal'
 export * from './requests/homepageQuery'
 export * from './requests/memberSnapshot'
 export * from './requests/proposalByExecutionTxHashQuery'
 export * from './requests/proposalQuery'
 export * from './requests/proposalsQuery'
+export * from './requests/proposalVersionsQuery'
 export * from './requests/swapRouteQuery'
 export * from './requests/sync'
 export * from './requests/tokensQuery'
@@ -32,6 +39,12 @@ export {
   type AuctionBidFragment,
   type AuctionFragment,
   type AuctionHistoryQuery,
+  type CandidateCommentFragmentFragment,
+  type CandidateGroupDetailFragmentFragment,
+  type CandidateGroupFragmentFragment,
+  type CandidateSponsorSignatureFragmentFragment,
+  type CandidateVersionFragmentFragment,
+  CandidateVoteSupport,
   ClankerToken_OrderBy,
   type ClankerTokenCardFragment,
   type ClankerTokenFragment,

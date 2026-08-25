@@ -1,4 +1,4 @@
-import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
+import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Button, Flex, Heading, Icon, Stack, Text } from '@buildeross/zord'
 import Head from 'next/head'
@@ -11,11 +11,6 @@ import { useAccount, useBalance } from 'wagmi'
 import { NextPageWithLayout } from './_app'
 
 const networks = [
-  {
-    chainId: CHAIN_ID.ZORA,
-    bridgeURL: 'https://bridge.zora.energy/',
-    bridgeLogo: '/chains/zora_wordmark.svg',
-  },
   {
     chainId: CHAIN_ID.BASE,
     bridgeURL: 'https://bridge.base.org/',
@@ -76,7 +71,7 @@ const NetworkCard: React.FC<{
     chainId,
   })
 
-  const chain = PUBLIC_ALL_CHAINS.find((x) => x.id === chainId)
+  const chain = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId)
 
   if (!chain) return null
 

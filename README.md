@@ -228,16 +228,44 @@ REDIS_URL=<REDIS_URL>
 
 ## Running tests
 
-> Note: to run tests you need to [install anvil](https://github.com/foundry-rs/foundry/blob/master/README.md#installation).
+The test suite is split into two types:
 
-Once anvil is installed, you can now locally run anvil (from the root directory in the monorepo) in a separate terminal session to start a local ethereum node:
-`pnpm run anvil`
+### Unit Tests (no external dependencies)
 
-Now you can run the tests in a separate terminal session:
-`pnpm run test`
+Unit tests run quickly without requiring any external services. To run all unit tests:
 
-You can also run the tests in watchmode, which will react to any source code or test files changing. To do that, run:
-`pnpm run test:watch`
+```bash
+pnpm test:unit
+```
+
+Or in watch mode:
+```bash
+pnpm test:watch
+```
+
+### Integration Tests (requires Anvil fork)
+
+Some tests (`*.fork.test.tsx` files) require a forked Ethereum network and use real contract interactions. To run these:
+
+1. [Install Anvil](https://github.com/foundry-rs/foundry/blob/master/README.md#installation) if you haven't already
+2. Start Anvil in a separate terminal session from the root directory:
+   ```bash
+   pnpm run anvil
+   ```
+3. Run the integration tests:
+   ```bash
+   pnpm test:fork
+   ```
+
+### Running All Tests
+
+To run both unit and integration tests together:
+
+```bash
+pnpm test
+```
+
+**Note:** CI only runs unit tests for faster feedback. Integration tests should be run locally before submitting PRs.
 
 ## Deployments
 
@@ -256,7 +284,6 @@ The Nouns Builder subgraph is deployed for the following networks:
 - [Optimism](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-optimism-mainnet/latest/gn)
 - [Optimism Sepolia](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-optimism-sepolia/latest/gn)
 - [Zora](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-zora-mainnet/latest/gn)
-- [Zora Sepolia](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-zora-sepolia/latest/gn)
 
 ## Contributions
 

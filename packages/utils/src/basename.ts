@@ -27,7 +27,7 @@ export const BASENAME_L2_RESOLVER_ADDRESS_UPGRADEABLE_PROXY =
   '0x426fA03fB86E510d0Dd9F70335Cf102a98b10875'
 export const L2_REVERSE_REGISTRAR_ADDRESS = '0x0000000000D8e504002cC26E3Ec46D81971C1664'
 
-const baseProvider = getProvider(CHAIN_ID.BASE)
+const getBaseProvider = () => getProvider(CHAIN_ID.BASE)
 
 /**
  * Converts a chain ID to its coin type for ENS resolution
@@ -69,9 +69,11 @@ const basenameCache = new Map<Address, string | null>()
  */
 export async function getBasename(
   address: Address,
-  provider: PublicClient | undefined = baseProvider
+  provider?: PublicClient
 ): Promise<string | null> {
   if (!address || !isAddress(address, { strict: false })) return null
+
+  const resolvedProvider = provider ?? getBaseProvider()
 
   const checksummedAddress = getAddress(address)
 
@@ -87,7 +89,7 @@ export async function getBasename(
     )
 
     // Priority 1: Upgradeable Proxy
-    const proxyBasename = await provider.readContract({
+    const proxyBasename = await resolvedProvider.readContract({
       abi: L2ResolverAbi,
       address: BASENAME_L2_RESOLVER_ADDRESS_UPGRADEABLE_PROXY,
       functionName: 'name',
@@ -101,7 +103,7 @@ export async function getBasename(
     }
 
     // Priority 2: L2 Resolver
-    const basename = (await provider.readContract({
+    const basename = (await resolvedProvider.readContract({
       abi: L2ResolverAbi,
       address: BASENAME_L2_RESOLVER_ADDRESS,
       functionName: 'name',
@@ -126,9 +128,11 @@ const basenameReverseNameCache = new Map<string, string | null>()
  */
 export async function getReverseBasename(
   address: Address,
-  provider: PublicClient | undefined = baseProvider
+  provider?: PublicClient
 ): Promise<string | null> {
   if (!address || !isAddress(address, { strict: false })) return null
+
+  const resolvedProvider = provider ?? getBaseProvider()
 
   const checksummedAddress = getAddress(address)
 
@@ -138,7 +142,7 @@ export async function getReverseBasename(
   }
 
   try {
-    const reverseBasename = (await provider.readContract({
+    const reverseBasename = (await resolvedProvider.readContract({
       abi: L2ReverseRegistrarAbi,
       address: L2_REVERSE_REGISTRAR_ADDRESS,
       functionName: 'nameForAddr',
@@ -162,9 +166,11 @@ const basenameAddressCache = new Map<string, Address | null>()
  */
 export async function getBasenameAddress(
   basename: string,
-  provider: PublicClient | undefined = baseProvider
+  provider?: PublicClient
 ): Promise<Address | null> {
   if (!basename) return null
+
+  const resolvedProvider = provider ?? getBaseProvider()
 
   const normalizedBasename = normalize(basename)
 
@@ -175,7 +181,7 @@ export async function getBasenameAddress(
 
   try {
     // Priority 1: Upgradeable Proxy
-    const proxyAddress = await provider.readContract({
+    const proxyAddress = await resolvedProvider.readContract({
       abi: L2ResolverAbi,
       address: BASENAME_L2_RESOLVER_ADDRESS_UPGRADEABLE_PROXY,
       functionName: 'addr',
@@ -189,7 +195,7 @@ export async function getBasenameAddress(
     }
 
     // Priority 2: L2 Resolver
-    const resolved = (await provider.readContract({
+    const resolved = (await resolvedProvider.readContract({
       abi: L2ResolverAbi,
       address: BASENAME_L2_RESOLVER_ADDRESS,
       args: [namehash(normalizedBasename)],
@@ -218,9 +224,11 @@ const basenameAvatarCache = new Map<string, string | null>()
  */
 export async function getBasenameAvatar(
   basename: string,
-  provider: PublicClient | undefined = baseProvider
+  provider?: PublicClient
 ): Promise<string | null> {
   if (!basename) return null
+
+  const resolvedProvider = provider ?? getBaseProvider()
 
   const normalizedBasename = normalize(basename)
 
@@ -231,7 +239,7 @@ export async function getBasenameAvatar(
 
   try {
     // Priority 1: Upgradeable Proxy
-    const proxyAvatarRecord = await provider.readContract({
+    const proxyAvatarRecord = await resolvedProvider.readContract({
       abi: L2ResolverAbi,
       address: BASENAME_L2_RESOLVER_ADDRESS_UPGRADEABLE_PROXY,
       functionName: 'text',
@@ -239,14 +247,16 @@ export async function getBasenameAvatar(
     })
 
     if (proxyAvatarRecord) {
-      const avatar = await parseAvatarRecord(provider, { record: proxyAvatarRecord })
+      const avatar = await parseAvatarRecord(resolvedProvider, {
+        record: proxyAvatarRecord,
+      })
       const result = avatar || null
       basenameAvatarCache.set(normalizedBasename, result)
       return result
     }
 
     // Priority 2: L2 Resolver
-    const avatarRecord = (await provider.readContract({
+    const avatarRecord = (await resolvedProvider.readContract({
       abi: L2ResolverAbi,
       address: BASENAME_L2_RESOLVER_ADDRESS,
       args: [namehash(normalizedBasename), 'avatar'],
@@ -258,7 +268,7 @@ export async function getBasenameAvatar(
       return null
     }
 
-    const avatar = await parseAvatarRecord(provider, { record: avatarRecord })
+    const avatar = await parseAvatarRecord(resolvedProvider, { record: avatarRecord })
     const result = avatar || null
     basenameAvatarCache.set(normalizedBasename, result)
     return result

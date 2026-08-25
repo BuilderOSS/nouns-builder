@@ -3,6 +3,7 @@
   "description": "SDK for interacting with Nouns Builder contracts and subgraphs",
   "version": "0.3.2",
   "dependencies": {
+    "@ethereum-attestation-service/eas-sdk": "^2.7.0",
     "graphql": "^16.11.0",
     "graphql-request": "^7.1.2",
     "graphql-tag": "^2.12.6"

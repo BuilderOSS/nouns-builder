@@ -8,4 +8,6 @@ export enum ProposalState {
   Expired = 6,
   Executed = 7,
   Vetoed = 8,
+  Updatable = 9,
+  Replaced = 10,
 }

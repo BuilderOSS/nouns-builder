@@ -1,11 +1,12 @@
-import { useProposalStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 
+import { useTransactionComposer } from '../shared'
 import { TransactionCard } from '../TransactionCard'
 import { ConfirmRemove } from './ConfirmRemove'
+import { queueInfoBox, queueInfoIcon, queueInfoText } from './Queue.css'
 
 interface QueueProps {
   setQueueModalOpen?: (value: boolean) => void
@@ -13,9 +14,14 @@ interface QueueProps {
 }
 
 export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = false }) => {
-  const transactions = useProposalStore((state) => state.transactions)
-  const removeTransaction = useProposalStore((state) => state.removeTransaction)
-  const removeAllTransactions = useProposalStore((state) => state.removeAllTransactions)
+  const { transactions, removeTransaction, removeAllTransactions } =
+    useTransactionComposer()
+
+  const isRemovableTransaction = (transaction: (typeof transactions)[number]) =>
+    transaction.type !== TransactionType.UPGRADE &&
+    transaction.type !== TransactionType.UPDATE_MINTER
+
+  const hasRemovableTransactions = transactions.some(isRemovableTransaction)
 
   const [openConfirm, setOpenConfirm] = React.useState<boolean>(false)
   const [removeIndex, setRemoveIndex] = React.useState<number | null>(null)
@@ -78,19 +84,20 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = fals
       </Flex>
 
       <Stack gap={'x4'}>
-        {transactions
-          ? transactions.map((transaction, i) => (
-              <TransactionCard
-                key={`${transaction.type}-${i}`}
-                handleRemove={() => confirmRemoveTransaction(i)}
-                disabled={
-                  transaction.type === TransactionType.UPGRADE ||
-                  transaction.type === TransactionType.UPDATE_MINTER
-                }
-                transaction={transaction}
-              />
-            ))
-          : null}
+        {transactions?.length > 0 ? (
+          transactions.map((transaction, i) => (
+            <TransactionCard
+              key={`${transaction.type}-${i}`}
+              handleRemove={() => confirmRemoveTransaction(i)}
+              disabled={!isRemovableTransaction(transaction)}
+              transaction={transaction}
+            />
+          ))
+        ) : (
+          <Text size="sm" color="text3">
+            No transactions in queue
+          </Text>
+        )}
       </Stack>
       <Stack
         borderWidth={'thin'}
@@ -99,7 +106,20 @@ export const Queue: React.FC<QueueProps> = ({ setQueueModalOpen, embedded = fals
         mt={'x6'}
         mb={'x8'}
       />
-      <Button variant="outline" onClick={handleClearAll}>
+      {hasRemovableTransactions && (
+        <Flex className={queueInfoBox} align="center" gap="x2">
+          <Icon id="question" size="sm" fill="text3" className={queueInfoIcon} />
+          <Text color="text3" className={queueInfoText}>
+            Queued transactions can&apos;t be edited. Remove one and add a replacement
+            instead.
+          </Text>
+        </Flex>
+      )}
+      <Button
+        variant="outline"
+        onClick={handleClearAll}
+        disabled={transactions.length === 0}
+      >
         Clear queue
       </Button>
       <AnimatedModal close={() => setOpenConfirm(false)} open={openConfirm}>

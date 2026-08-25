@@ -7,8 +7,6 @@ export const ALCHEMY_NETWORKS: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.OPTIMISM_SEPOLIA]: 'opt-sepolia',
   [CHAIN_ID.BASE]: 'base-mainnet',
   [CHAIN_ID.BASE_SEPOLIA]: 'base-sepolia',
-  [CHAIN_ID.ZORA]: 'zora-mainnet',
-  [CHAIN_ID.ZORA_SEPOLIA]: 'zora-sepolia',
 }
 
 export const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY

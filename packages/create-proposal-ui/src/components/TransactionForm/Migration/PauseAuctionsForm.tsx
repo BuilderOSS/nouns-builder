@@ -1,5 +1,5 @@
 import { auctionAbi, governorAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { defaultHelperTextStyle } from '@buildeross/ui/styles'
 import { toSeconds } from '@buildeross/utils/helpers'
@@ -8,12 +8,12 @@ import { useState } from 'react'
 import { encodeFunctionData } from 'viem'
 import { useReadContract } from 'wagmi'
 
+import { useTransactionComposer } from '../../shared'
 import { checkboxStyleVariants } from '../ReplaceArtwork/ReplaceArtworkForm.css'
 
 export const PauseAuctionsForm: React.FC = () => {
   const { auction, governor } = useDaoStore((state) => state.addresses)
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
   const chain = useChainStore((x) => x.chain)
   const { data: paused } = useReadContract({
     abi: auctionAbi,

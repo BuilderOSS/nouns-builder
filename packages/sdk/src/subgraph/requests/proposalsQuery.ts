@@ -18,42 +18,52 @@ export const getProposals = async (
   page?: number
 ): Promise<ProposalsResponse> => {
   try {
+    // Fetch one extra result to determine if there's a next page
     const data = await SDK.connect(chainId).proposals({
       where: {
         dao: token.toLowerCase(),
+        replacedBy: null,
       },
-      first: limit,
+      first: limit + 1,
       skip: page ? (page - 1) * limit : 0,
     })
 
+    // Derive hasNextPage from raw result count before enrichment
+    const hasNextPage = data.proposals.length > limit
+    const proposalsToEnrich = hasNextPage ? data.proposals.slice(0, limit) : data.proposals
+
+    // Enrich only the proposals we're returning (not the extra one used for pagination)
+    const proposals = await Promise.all(
+      proposalsToEnrich.map(async (p) => {
+        const { executableFrom, expiresAt, calldatas, updatePeriodEnd, ...proposal } = p
+
+        const baseProposal = {
+          ...proposal,
+          calldatas: calldatas ? calldatas.split(':') : [],
+          state: await getProposalState(
+            chainId,
+            proposal.dao.governorAddress,
+            proposal.proposalId
+          ),
+          ...(updatePeriodEnd ? { updatePeriodEnd: Number(updatePeriodEnd) } : {}),
+        }
+
+        // executableFrom and expiresAt will always either be both defined, or neither defined
+        if (executableFrom && expiresAt) {
+          return {
+            ...baseProposal,
+            executableFrom,
+            expiresAt,
+          }
+        }
+        return baseProposal
+      })
+    )
+
     return {
-      proposals: await Promise.all(
-        data?.proposals.map(async (p) => {
-          const { executableFrom, expiresAt, calldatas, ...proposal } = p
-
-          const baseProposal = {
-            ...proposal,
-            calldatas: calldatas ? calldatas.split(':') : [],
-            state: await getProposalState(
-              chainId,
-              proposal.dao.governorAddress,
-              proposal.proposalId
-            ),
-          }
-
-          // executableFrom and expiresAt will always either be both defined, or neither defined
-          if (executableFrom && expiresAt) {
-            return {
-              ...baseProposal,
-              executableFrom,
-              expiresAt,
-            }
-          }
-          return baseProposal
-        })
-      ),
+      proposals,
       pageInfo: {
-        hasNextPage: data.proposals.reverse()[0].proposalNumber !== 1,
+        hasNextPage,
       },
     }
   } catch (e) {

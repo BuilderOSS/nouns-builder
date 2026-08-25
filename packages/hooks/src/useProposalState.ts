@@ -28,6 +28,8 @@ interface ProposalStateData {
   isCanceled: boolean
   isVetoed: boolean
   isExpired: boolean
+  isUpdatable: boolean
+  isReplaced: boolean
   isLoading: boolean
   error?: Error
 }
@@ -70,6 +72,8 @@ export const useProposalState = ({
       isCanceled: state === ProposalState.Canceled,
       isVetoed: state === ProposalState.Vetoed,
       isExpired: state === ProposalState.Expired,
+      isUpdatable: state === ProposalState.Updatable,
+      isReplaced: state === ProposalState.Replaced,
       isLoading,
       error,
     }

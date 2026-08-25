@@ -19,8 +19,8 @@
     "dayjs": "^1.11.13",
     "formik": "^2.4.6",
     "framer-motion": "^12.12.1",
-    "lanyard": "^1.1.2",
     "lodash": "^4.17.21",
+    "merkletreejs": "^0.6.0",
     "papaparse": "^5.5.3",
     "sablier": "^2.0.1",
     "swr": "^2.3.3",
@@ -109,6 +109,8 @@
     "clean": "rm -rf .turbo dist",
     "lint": "pnpm type-check && eslint src --fix",
     "test": "vitest run",
+    "test:unit": "vitest run --exclude '**/*.fork.test.{ts,tsx}'",
+    "test:fork": "FORK_TESTS=only vitest run",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },

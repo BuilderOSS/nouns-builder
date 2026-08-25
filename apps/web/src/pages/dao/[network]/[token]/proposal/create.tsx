@@ -16,14 +16,18 @@ import {
   ProposalDraftForm,
   ProposalStageIndicator,
   Queue,
+  ResetConfirmationModal,
   TRANSACTION_FORM_OPTIONS,
+  TransactionComposerProvider,
   TransactionForm,
+  TransactionStageColumn,
   TwoColumnLayout,
+  UpdatingProposalBanner,
 } from '@buildeross/create-proposal-ui'
 import { useClankerTokens } from '@buildeross/hooks/useClankerTokens'
 import { useDelayedGovernance } from '@buildeross/hooks/useDelayedGovernance'
+import { useProposal } from '@buildeross/hooks/useProposal'
 import { useRendererBaseFix } from '@buildeross/hooks/useRendererBaseFix'
-import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import { useVotes } from '@buildeross/hooks/useVotes'
 import {
   TRANSACTION_TYPES,
@@ -33,21 +37,21 @@ import {
 import { auctionAbi, getDAOAddresses } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
-import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { isChainIdSupportedByCoining } from '@buildeross/utils/coining'
 import { isChainIdSupportedByDroposal } from '@buildeross/utils/droposal'
 import { isChainIdSupportedByEAS } from '@buildeross/utils/eas'
 import { getEnsAddress } from '@buildeross/utils/ens'
+import { generateProposalSalt } from '@buildeross/utils/proposalMetadata'
 import { getProvider } from '@buildeross/utils/provider'
 import { isChainIdSupportedBySablier } from '@buildeross/utils/sablier/constants'
-import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { Formik, FormikProps } from 'formik'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo } from 'react'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
-import { notFoundWrap } from 'src/styles/404.css'
 import * as styles from 'src/styles/create.css'
 import { getAddress, isAddress, isAddressEqual } from 'viem'
 import { useAccount, useReadContract } from 'wagmi'
@@ -150,16 +154,24 @@ const CreateProposalPage: NextPageWithLayout = () => {
   const addresses = useDaoStore((x) => x.addresses)
   const { auction, token } = addresses
   const chain = useChainStore((x) => x.chain)
+
   const {
     transactionType,
     setTransactionType,
     resetTransactionType,
+    addTransaction,
+    addTransactions,
+    removeTransaction,
+    removeAllTransactions,
     transactions,
     title,
     summary,
     representedAddress,
     discussionUrl,
     representedAddressEnabled,
+    updateProposalId,
+    setUpdateProposalId,
+    setProposalSalt,
     setTitle,
     setSummary,
     setRepresentedAddress,
@@ -171,12 +183,19 @@ const CreateProposalPage: NextPageWithLayout = () => {
       transactionType: state.transactionType,
       setTransactionType: state.setTransactionType,
       resetTransactionType: state.resetTransactionType,
+      addTransaction: state.addTransaction,
+      addTransactions: state.addTransactions,
+      removeTransaction: state.removeTransaction,
+      removeAllTransactions: state.removeAllTransactions,
       transactions: state.transactions,
       title: state.title,
       summary: state.summary,
       representedAddress: state.representedAddress,
       discussionUrl: state.discussionUrl,
       representedAddressEnabled: state.representedAddressEnabled,
+      updateProposalId: state.updateProposalId,
+      setUpdateProposalId: state.setUpdateProposalId,
+      setProposalSalt: state.setProposalSalt,
       setTitle: state.setTitle,
       setSummary: state.setSummary,
       setRepresentedAddress: state.setRepresentedAddress,
@@ -185,6 +204,24 @@ const CreateProposalPage: NextPageWithLayout = () => {
       clearProposal: state.clearProposal,
     }))
   )
+
+  // Check if we're updating an existing proposal
+  const isUpdatingProposal = !!updateProposalId
+  const [showCreateNewProposalModal, setShowCreateNewProposalModal] =
+    React.useState(false)
+
+  const onCreateNewProposal = useCallback(() => {
+    setUpdateProposalId(undefined)
+    setProposalSalt(generateProposalSalt())
+    setShowCreateNewProposalModal(false)
+  }, [setProposalSalt, setUpdateProposalId])
+
+  // Fetch proposal details if updating
+  const { proposal: updatingProposal } = useProposal({
+    chainId: chain.id,
+    proposalId: updateProposalId,
+    enabled: !!updateProposalId,
+  })
 
   const initialStageFromQuery = query?.stage === 'transactions' ? 'transactions' : 'draft'
   const [createStage, setCreateStage] = React.useState<'draft' | 'transactions'>(() =>
@@ -215,7 +252,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
   })
 
   const { address } = useAccount()
-  const scrollDirection = useScrollDirection()
+  const { openConnectModal } = useConnectModal()
 
   const { isLoading, hasThreshold } = useVotes({
     chainId: chain.id,
@@ -310,6 +347,29 @@ const CreateProposalPage: NextPageWithLayout = () => {
     return TRANSACTION_FORM_OPTIONS_FILTERED.map(createSelectOption)
   }, [TRANSACTION_FORM_OPTIONS_FILTERED])
 
+  const transactionComposer = useMemo(
+    () => ({
+      transactionType,
+      setTransactionType,
+      resetTransactionType,
+      transactions,
+      addTransaction,
+      addTransactions,
+      removeTransaction,
+      removeAllTransactions,
+    }),
+    [
+      transactionType,
+      setTransactionType,
+      resetTransactionType,
+      transactions,
+      addTransaction,
+      addTransactions,
+      removeTransaction,
+      removeAllTransactions,
+    ]
+  )
+
   const missingDraftRequirements = useMemo(() => {
     const requirements: string[] = []
 
@@ -401,11 +461,6 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
     return `To continue, ${joinRequirements(missingReviewRequirements)}.`
   }, [createStage, hasDraftBlockers, missingDraftRequirements, missingReviewRequirements])
-
-  // Keep the right queue column below both sticky top nav and sticky create header row.
-  // - nav visible: 80px nav + ~96px heading row
-  // - nav hidden: ~96px heading row
-  const queueStickyTopOffset = scrollDirection === 'down' ? 120 : 200
 
   React.useEffect(() => {
     if (transactionType) {
@@ -576,292 +631,296 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
   if (isLoading) return null
 
-  if (!address)
+  if (!address) {
     return (
-      <Flex className={notFoundWrap}>Please connect your wallet to access this page</Flex>
+      <Flex
+        direction="column"
+        align="flex-start"
+        gap="x4"
+        p="x6"
+        w={'100%'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
+      >
+        <Text fontSize={20} fontWeight="display">
+          Proposal creation is restricted
+        </Text>
+        <Text color="text3">
+          You need to connect a wallet before you can create a proposal.
+        </Text>
+        <Button onClick={() => openConnectModal?.()}>Connect Wallet</Button>
+      </Flex>
     )
+  }
 
   if (!hasThreshold || isGovernanceDelayed) {
     return (
-      <Flex className={notFoundWrap}>
-        Access Restricted - You don’t have permission to access this page
+      <Flex
+        direction="column"
+        align="flex-start"
+        gap="x4"
+        p="x6"
+        w={'100%'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
+      >
+        <Text fontSize={20} fontWeight="display">
+          Proposal creation is restricted
+        </Text>
+        <Text color="text3">
+          {!hasThreshold
+            ? "You don't have enough voting power to create proposals. You need to hold enough tokens to meet the proposal threshold."
+            : 'Proposal creation is currently delayed for this DAO. Please try again later.'}
+        </Text>
       </Flex>
     )
   }
 
   return (
-    <Stack
-      mb={'x8'}
-      pb={{ '@initial': 'x30', '@768': 'x0' }}
-      w={'100%'}
-      px={'x3'}
-      style={{ maxWidth: 1060 }}
-      mx="auto"
-    >
-      <CreateProposalHeading
-        title={createStage === 'draft' ? 'Write Proposal' : 'Add Transactions'}
-        handleBack={openDaoActivityPage}
-        showHelpLinks
-        showQueue={
-          createStage === 'transactions' &&
-          (!!transactionType || (!transactionType && transactions.length > 0))
-        }
-        showContinue
-        showStepBack
-        onStepBack={onBackStep}
-        backDisabled={createStage === 'draft'}
-        showReset
-        onReset={onResetProposal}
-        continueDisabled={!canContinueFromCurrentStage}
-        onContinue={onContinueStep}
-        hideActionsOnMobile
-        queueButtonClassName={!transactionType ? styles.showOnMobile : undefined}
-      />
-
-      <ProposalStageIndicator
-        currentStage={createStage === 'draft' ? 'draft' : 'transactions'}
-        showOnboardingCallout
-        onStageSelect={onStageSelect}
-        isStageClickable={(stage) => {
-          if (stage === 'draft') return createStage !== 'draft'
-          if (stage === 'transactions') {
-            return createStage !== 'transactions' && canEnterStage.transactions
+    <TransactionComposerProvider value={transactionComposer}>
+      <Stack
+        mb={'x8'}
+        pb={{ '@initial': 'x30', '@768': 'x0' }}
+        px={'x3'}
+        w={'100%'}
+        style={{ maxWidth: 1060 }}
+        mx="auto"
+      >
+        <CreateProposalHeading
+          title={createStage === 'draft' ? 'Write Proposal' : 'Add Transactions'}
+          handleBack={openDaoActivityPage}
+          showHelpLinks
+          showQueue={
+            createStage === 'transactions' &&
+            (!!transactionType || (!transactionType && transactions.length > 0))
           }
-          if (stage === 'review') {
-            return createStage === 'transactions' && canEnterStage.review
-          }
-          return false
-        }}
-      />
+          showContinue
+          showStepBack
+          onStepBack={onBackStep}
+          backDisabled={createStage === 'draft'}
+          showReset
+          onReset={onResetProposal}
+          continueDisabled={!canContinueFromCurrentStage}
+          onContinue={onContinueStep}
+          hideActionsOnMobile
+          queueButtonClassName={!transactionType ? styles.showOnMobile : undefined}
+        />
 
-      {continueHelperText && (
-        <Flex align={'center'} gap={'x2'} mb={'x4'}>
-          <Text variant={'paragraph-sm'} color={'text3'}>
-            {continueHelperText}
-          </Text>
-          {createStage === 'transactions' && hasDraftBlockers && (
-            <Button
-              variant={'ghost'}
-              size={'sm'}
-              onClick={() => setCreateStage('draft')}
-              style={{
-                minHeight: 'auto',
-                height: 'auto',
-                padding: 0,
-                textDecoration: 'underline',
-              }}
-            >
-              <Text variant={'paragraph-sm'} color={'text3'}>
-                {hasTitleDraftBlocker
-                  ? 'Fix title in Write Proposal'
-                  : 'Go to Write Proposal'}
-              </Text>
-            </Button>
-          )}
-        </Flex>
-      )}
+        {isUpdatingProposal && (
+          <UpdatingProposalBanner
+            updateProposalId={updateProposalId}
+            updatingProposal={updatingProposal}
+            onCreateNew={() => setShowCreateNewProposalModal(true)}
+          />
+        )}
 
-      {createStage === 'draft' ? (
-        <Stack
-          w={'100%'}
-          p={'x4'}
-          mb={'x8'}
-          borderColor={'border'}
-          borderStyle={'solid'}
-          borderWidth={'normal'}
-          borderRadius={'curved'}
-          gap={'x2'}
-        >
-          <Formik<DraftFormValues>
-            initialValues={{
-              title: title || '',
-              summary: summary || '',
-              representedAddress: representedAddress || '',
-              discussionUrl: discussionUrl || '',
-              representedAddressEnabled,
-            }}
-            enableReinitialize
-            validateOnBlur
-            validateOnChange
-            validate={(values) => {
-              const errors: Partial<Record<keyof DraftFormValues, string>> = {}
-              const titleValidationError = validateTitle(values.title)
-              if (titleValidationError) errors.title = titleValidationError
+        <ResetConfirmationModal
+          open={showCreateNewProposalModal}
+          onCancel={() => setShowCreateNewProposalModal(false)}
+          onConfirm={onCreateNewProposal}
+          title="Create a new proposal?"
+          description="This will stop editing the existing proposal. Your title, summary, metadata, and queued transactions will stay in the draft."
+          confirmLabel="Create new proposal"
+        />
 
-              const summaryValidationError = validateSummary(values.summary)
-              if (summaryValidationError) errors.summary = summaryValidationError
-
-              const representedAddressValidationError = validateRepresentedAddress(
-                values.representedAddress,
-                values.representedAddressEnabled
-              )
-              if (representedAddressValidationError) {
-                errors.representedAddress = representedAddressValidationError
-              }
-
-              const discussionUrlValidationError = validateDiscussionUrl(
-                values.discussionUrl
-              )
-              if (discussionUrlValidationError) {
-                errors.discussionUrl = discussionUrlValidationError
-              }
-
-              return errors
-            }}
-            onSubmit={() => undefined}
-          >
-            {(formik) =>
-              (() => {
-                draftFormikRef.current = formik
-
-                return (
-                  <ProposalDraftForm
-                    formik={formik}
-                    onTitleChange={(value) => {
-                      setTitle(value)
-                    }}
-                    onSummaryChange={(value) => {
-                      setSummary(value)
-                    }}
-                    onRepresentedAddressChange={(value) => {
-                      setDraftRepresentedAddressInput(value)
-                    }}
-                    onDiscussionUrlChange={(value) => {
-                      setDiscussionUrl(value)
-                    }}
-                    onRepresentedAddressEnabledChange={(value) => {
-                      setRepresentedAddressEnabled(value)
-                      if (!value) {
-                        setRepresentedAddress(undefined)
-                        setDraftRepresentedAddressInput('')
-                        void formik.setFieldValue('representedAddress', '')
-                      }
-                    }}
-                    onRepresentedAddressBlur={async () => {
-                      await resolveAndStoreRepresentedAddress(formik)
-                    }}
-                  />
-                )
-              })()
+        <ProposalStageIndicator
+          currentStage={createStage === 'draft' ? 'draft' : 'transactions'}
+          showOnboardingCallout
+          onStageSelect={onStageSelect}
+          isStageClickable={(stage) => {
+            if (stage === 'draft') return createStage !== 'draft'
+            if (stage === 'transactions') {
+              return createStage !== 'transactions' && canEnterStage.transactions
             }
-          </Formik>
-        </Stack>
-      ) : (
-        <TwoColumnLayout
-          leftColumn={
-            <Stack gap={'x0'}>
-              <Stack>
-                <Text variant={'heading-xs'} mb={'x5'}>
-                  Select Transaction Type
-                </Text>
-                {transactionType ? (
-                  <Flex gap={'x2'} align={'flex-start'}>
-                    <Box style={{ flex: 1, minWidth: 0 }}>
-                      <DropdownSelect
-                        value={transactionType}
-                        options={options}
-                        customLabel={TRANSACTION_TYPES[transactionType].title}
-                        onChange={(value: TransactionType) => setTransactionType(value)}
-                        positioning="absolute"
-                      />
-                    </Box>
-                    <Button
-                      variant="secondary"
-                      h={'x19'}
-                      minH={'x19'}
-                      px={'x4'}
-                      aria-label={'Cancel editing transaction'}
-                      onClick={resetTransactionType}
-                    >
-                      <Icon id={'cross'} />
-                    </Button>
-                  </Flex>
-                ) : (
-                  <DropdownSelect
-                    value={undefined}
-                    options={options}
-                    customLabel={'Select transaction type'}
-                    onChange={(value: TransactionType) => setTransactionType(value)}
-                  />
-                )}
-              </Stack>
+            if (stage === 'review') {
+              return createStage === 'transactions' && canEnterStage.review
+            }
+            return false
+          }}
+        />
 
-              <Flex
-                borderWidth={'thin'}
-                borderStyle={'solid'}
-                borderColor={'ghostHover'}
-                mt={'x2'}
-                mb={'x8'}
-              />
-
-              {!transactionType && (
-                <Stack gap={'x2'}>
-                  <Flex
-                    w={'100%'}
-                    justify={'flex-start'}
-                    p={'x6'}
-                    borderWidth={'normal'}
-                    borderStyle={'solid'}
-                    borderColor={'ghostHover'}
-                    style={{ borderRadius: 12 }}
-                    gap={'x2'}
-                    cursor={'pointer'}
-                    onClick={() => void openDaoAdminPage()}
-                  >
-                    <Stack>
-                      <Text variant="label-lg" mb={'x1'}>
-                        Configure DAO Settings
-                      </Text>
-                      <Text variant="paragraph-md" color={'text3'}>
-                        Change all the main DAO settings in the Admin Tab
-                      </Text>
-                    </Stack>
-                    <Icon
-                      id={'external-16'}
-                      fill={'text4'}
-                      size={'sm'}
-                      alignSelf={'center'}
-                      ml={'auto'}
-                    />
-                  </Flex>
-                </Stack>
-              )}
-
-              {transactionType && <TransactionForm />}
-            </Stack>
-          }
-          rightColumn={
-            transactions.length > 0 && !transactionType ? (
-              <Box
-                className={styles.hideOnMobile}
-                position={'sticky'}
+        {continueHelperText && (
+          <Flex align={'center'} gap={'x2'} mb={'x4'}>
+            <Text variant={'paragraph-sm'} color={'text3'}>
+              {continueHelperText}
+            </Text>
+            {createStage === 'transactions' && hasDraftBlockers && (
+              <Button
+                variant={'ghost'}
+                size={'sm'}
+                onClick={() => setCreateStage('draft')}
                 style={{
-                  top: `${queueStickyTopOffset}px`,
-                  transition: 'top 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  minHeight: 'auto',
+                  height: 'auto',
+                  padding: 0,
+                  textDecoration: 'underline',
                 }}
               >
-                <Queue embedded />
-              </Box>
-            ) : undefined
-          }
-        />
-      )}
+                <Text variant={'paragraph-sm'} color={'text3'}>
+                  {hasTitleDraftBlocker
+                    ? 'Fix title in Write Proposal'
+                    : 'Go to Write Proposal'}
+                </Text>
+              </Button>
+            )}
+          </Flex>
+        )}
 
-      <MobileProposalActionBar
-        showBack
-        onBack={onBackStep}
-        backDisabled={createStage === 'draft'}
-        showQueue={createStage === 'transactions'}
-        showReset
-        onReset={onResetProposal}
-        showContinue
-        onContinue={() => {
-          void onContinueStep()
-        }}
-        continueDisabled={!canContinueFromCurrentStage}
-        continueLabel={'Continue'}
-      />
-    </Stack>
+        {createStage === 'draft' ? (
+          <Stack
+            w={'100%'}
+            p={'x4'}
+            mb={'x8'}
+            borderColor={'border'}
+            borderStyle={'solid'}
+            borderWidth={'normal'}
+            borderRadius={'curved'}
+            gap={'x2'}
+          >
+            <Formik<DraftFormValues>
+              initialValues={{
+                title: title || '',
+                summary: summary || '',
+                representedAddress: representedAddress || '',
+                discussionUrl: discussionUrl || '',
+                representedAddressEnabled,
+              }}
+              enableReinitialize
+              validateOnBlur
+              validateOnChange
+              validate={(values) => {
+                const errors: Partial<Record<keyof DraftFormValues, string>> = {}
+                const titleValidationError = validateTitle(values.title)
+                if (titleValidationError) errors.title = titleValidationError
+
+                const summaryValidationError = validateSummary(values.summary)
+                if (summaryValidationError) errors.summary = summaryValidationError
+
+                const representedAddressValidationError = validateRepresentedAddress(
+                  values.representedAddress,
+                  values.representedAddressEnabled
+                )
+                if (representedAddressValidationError) {
+                  errors.representedAddress = representedAddressValidationError
+                }
+
+                const discussionUrlValidationError = validateDiscussionUrl(
+                  values.discussionUrl
+                )
+                if (discussionUrlValidationError) {
+                  errors.discussionUrl = discussionUrlValidationError
+                }
+
+                return errors
+              }}
+              onSubmit={() => undefined}
+            >
+              {(formik) =>
+                (() => {
+                  draftFormikRef.current = formik
+
+                  return (
+                    <ProposalDraftForm
+                      formik={formik}
+                      onTitleChange={(value) => {
+                        setTitle(value)
+                      }}
+                      onSummaryChange={(value) => {
+                        setSummary(value)
+                      }}
+                      onRepresentedAddressChange={(value) => {
+                        setDraftRepresentedAddressInput(value)
+                      }}
+                      onDiscussionUrlChange={(value) => {
+                        setDiscussionUrl(value)
+                      }}
+                      onRepresentedAddressEnabledChange={(value) => {
+                        setRepresentedAddressEnabled(value)
+                        if (!value) {
+                          setRepresentedAddress(undefined)
+                          setDraftRepresentedAddressInput('')
+                          void formik.setFieldValue('representedAddress', '')
+                        }
+                      }}
+                      onRepresentedAddressBlur={async () => {
+                        await resolveAndStoreRepresentedAddress(formik)
+                      }}
+                    />
+                  )
+                })()
+              }
+            </Formik>
+          </Stack>
+        ) : (
+          <TwoColumnLayout
+            stickyRightColumn
+            stickyRightColumnTopOffset={200}
+            hideRightColumnOnMobile
+            leftColumn={
+              <TransactionStageColumn
+                transactionType={transactionType}
+                options={options}
+                onSelectTransactionType={(value: TransactionType) =>
+                  setTransactionType(value)
+                }
+                onResetTransactionType={resetTransactionType}
+                emptyState={
+                  <Stack gap={'x2'}>
+                    <Flex
+                      w={'100%'}
+                      justify={'flex-start'}
+                      p={'x6'}
+                      borderWidth={'normal'}
+                      borderStyle={'solid'}
+                      borderColor={'ghostHover'}
+                      style={{ borderRadius: 12 }}
+                      gap={'x2'}
+                      cursor={'pointer'}
+                      onClick={() => void openDaoAdminPage()}
+                    >
+                      <Stack>
+                        <Text variant="label-lg" mb={'x1'}>
+                          Configure DAO Settings
+                        </Text>
+                        <Text variant="paragraph-md" color={'text3'}>
+                          Change all the main DAO settings in the Admin Tab
+                        </Text>
+                      </Stack>
+                      <Icon
+                        id={'external-16'}
+                        fill={'text4'}
+                        size={'sm'}
+                        alignSelf={'center'}
+                        ml={'auto'}
+                      />
+                    </Flex>
+                  </Stack>
+                }
+                form={<TransactionForm />}
+              />
+            }
+            rightColumn={
+              transactions.length > 0 && !transactionType ? <Queue embedded /> : <div />
+            }
+          />
+        )}
+
+        <MobileProposalActionBar
+          showBack
+          onBack={onBackStep}
+          backDisabled={createStage === 'draft'}
+          showQueue={createStage === 'transactions'}
+          showReset
+          onReset={onResetProposal}
+          showContinue
+          onContinue={() => {
+            void onContinueStep()
+          }}
+          continueDisabled={!canContinueFromCurrentStage}
+          continueLabel={'Continue'}
+        />
+      </Stack>
+    </TransactionComposerProvider>
   )
 }
 

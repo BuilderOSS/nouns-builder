@@ -8,7 +8,5 @@ export const ETHERSCAN_BASE_URL: Record<CHAIN_ID, string> = {
   [CHAIN_ID.OPTIMISM_SEPOLIA]: 'https://sepolia-optimism.etherscan.io',
   [CHAIN_ID.BASE]: 'https://basescan.org',
   [CHAIN_ID.BASE_SEPOLIA]: 'https://sepolia.basescan.org',
-  [CHAIN_ID.ZORA]: 'https://explorer.zora.energy',
-  [CHAIN_ID.ZORA_SEPOLIA]: 'https://sepolia.explorer.zora.energy',
   [CHAIN_ID.FOUNDRY]: '',
 }

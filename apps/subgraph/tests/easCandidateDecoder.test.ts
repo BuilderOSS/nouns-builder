@@ -1,0 +1,182 @@
+import { BigInt, Bytes } from '@graphprotocol/graph-ts'
+import { assert, describe, test } from 'matchstick-as'
+
+import {
+  decodeCandidateComment,
+  decodeCandidateSponsorSignature,
+  decodeProposalCandidate,
+} from '../src/utils/eas'
+
+const PROPOSAL_CANDIDATE_RAW =
+  '0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000017546573742070726f706f73616c2063616e646964617465000000000000000000'
+
+const CANDIDATE_COMMENT_RAW =
+  '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000195465737420636f6d6d656e74206f6e2063616e64696461746500000000000000'
+
+// Updated for new schema: (bytes32 candidateId, bytes32 proposalId, uint256 nonce, uint256 deadline, bytes signature)
+const CANDIDATE_SIGNATURE_RAW =
+  '0x' +
+  '1111111111111111111111111111111111111111111111111111111111111111' + // candidateId
+  '2222222222222222222222222222222222222222222222222222222222222222' + // proposalId
+  '0000000000000000000000000000000000000000000000000000000000000001' + // nonce = 1
+  '0000000000000000000000000000000000000000000000000000000067748580' + // deadline = 1735689600
+  '00000000000000000000000000000000000000000000000000000000000000a0' + // offset to signature (160 bytes)
+  '0000000000000000000000000000000000000000000000000000000000000000' // signature length = 0
+
+const PROPOSAL_CANDIDATE_WITH_TX_DATA_RAW =
+  '0x8e124a97a6417a42fce38daaf359c57c5ca02842e277bd067798fef527dfbc5ffd606512beb0f83fcdf7a98e1439d427bf168f723974eaae9577f01c443ede9400000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000000180000000000000000000000000000000000000000000000000000000000000028000000000000000000000000000000000000000000000000000000000000000020000000000000000000000001234567890123456789012345678901234567890000000000000000000000000abcdefabcdefabcdefabcdefabcdefabcdefabcd00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000de0b6b3a7640000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000044a9059cbb00000000000000000000000099999999999999999999999999999999999999990000000000000000000000000000000000000000000000056bc75e2d631000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000847b227469746c65223a22547265617375727920646976657273696669636174696f6e207632222c2273756d6d617279223a224f6e6520455448207472616e7366657220706c757320616e204552433230207472616e736665722063616c6c222c227363656e6172696f223a2270726f706f73616c2d776974682d63616c6c64617461227d00000000000000000000000000000000000000000000000000000000'
+
+describe('EAS candidate decoder robustness', () => {
+  test('decodes ProposalCandidate real test vector', () => {
+    const decoded = decodeProposalCandidate(Bytes.fromHexString(PROPOSAL_CANDIDATE_RAW))
+    assert.assertNotNull(decoded)
+    if (!decoded) return
+
+    assert.bytesEquals(
+      decoded.candidateId,
+      Bytes.fromHexString(
+        '0x0000000000000000000000000000000000000000000000000000000000000000'
+      )
+    )
+    assert.bytesEquals(
+      decoded.salt,
+      Bytes.fromHexString(
+        '0x0000000000000000000000000000000000000000000000000000000000000000'
+      )
+    )
+    assert.i32Equals(decoded.targets.length, 0)
+    assert.i32Equals(decoded.values.length, 0)
+    assert.i32Equals(decoded.calldatas.length, 0)
+    assert.stringEquals(decoded.description, 'Test proposal candidate')
+  })
+
+  test('decodes CandidateComment real test vector', () => {
+    const decoded = decodeCandidateComment(Bytes.fromHexString(CANDIDATE_COMMENT_RAW))
+    assert.assertNotNull(decoded)
+    if (!decoded) return
+
+    assert.i32Equals(decoded.support, 1)
+    assert.stringEquals(decoded.comment, 'Test comment on candidate')
+  })
+
+  test('decodes CandidateSponsorSignature real test vector', () => {
+    const decoded = decodeCandidateSponsorSignature(
+      Bytes.fromHexString(CANDIDATE_SIGNATURE_RAW)
+    )
+    assert.assertNotNull(decoded)
+    if (!decoded) return
+
+    assert.bytesEquals(
+      decoded.candidateId,
+      Bytes.fromHexString(
+        '0x1111111111111111111111111111111111111111111111111111111111111111'
+      )
+    )
+    assert.bytesEquals(
+      decoded.proposalId,
+      Bytes.fromHexString(
+        '0x2222222222222222222222222222222222222222222222222222222222222222'
+      )
+    )
+    assert.bigIntEquals(decoded.nonce, BigInt.fromI32(1))
+    assert.bigIntEquals(decoded.deadline, BigInt.fromI64(1735689600))
+    assert.bytesEquals(decoded.signature, Bytes.fromHexString('0x'))
+  })
+
+  test('decodes ProposalCandidate test 1b with transaction data', () => {
+    const decoded = decodeProposalCandidate(
+      Bytes.fromHexString(PROPOSAL_CANDIDATE_WITH_TX_DATA_RAW)
+    )
+    assert.assertNotNull(decoded)
+    if (!decoded) return
+
+    assert.bytesEquals(
+      decoded.candidateId,
+      Bytes.fromHexString(
+        '0x8e124a97a6417a42fce38daaf359c57c5ca02842e277bd067798fef527dfbc5f'
+      )
+    )
+    assert.bytesEquals(
+      decoded.salt,
+      Bytes.fromHexString(
+        '0xfd606512beb0f83fcdf7a98e1439d427bf168f723974eaae9577f01c443ede94'
+      )
+    )
+    assert.i32Equals(decoded.targets.length, 2)
+    assert.i32Equals(decoded.values.length, 2)
+    assert.i32Equals(decoded.calldatas.length, 2)
+    assert.bigIntEquals(decoded.values[0], BigInt.fromString('1000000000000000000'))
+    assert.bigIntEquals(decoded.values[1], BigInt.fromI32(0))
+    assert.bytesEquals(decoded.calldatas[0], Bytes.fromHexString('0x'))
+    assert.assertTrue(decoded.description.indexOf('Treasury diversification v2') >= 0)
+    assert.assertTrue(
+      decoded.description.indexOf('One ETH transfer plus an ERC20 transfer call') >= 0
+    )
+    assert.assertTrue(decoded.description.indexOf('proposal-with-calldata') >= 0)
+  })
+
+  test('test 1.4 non-empty arrays include transfer selector', () => {
+    const decoded = decodeProposalCandidate(
+      Bytes.fromHexString(PROPOSAL_CANDIDATE_WITH_TX_DATA_RAW)
+    )
+    assert.assertNotNull(decoded)
+    if (!decoded) return
+
+    assert.stringEquals(
+      decoded.targets[0].toHexString().toLowerCase(),
+      '0x1234567890123456789012345678901234567890'
+    )
+    assert.stringEquals(
+      decoded.targets[1].toHexString().toLowerCase(),
+      '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
+    )
+    assert.stringEquals(decoded.calldatas[1].toHexString().slice(0, 10), '0xa9059cbb')
+  })
+
+  test('test 1.5 description JSON decodes expected fields', () => {
+    const decoded = decodeProposalCandidate(
+      Bytes.fromHexString(PROPOSAL_CANDIDATE_WITH_TX_DATA_RAW)
+    )
+    assert.assertNotNull(decoded)
+    if (!decoded) return
+
+    assert.assertTrue(decoded.description.indexOf('Treasury diversification v2') >= 0)
+    assert.assertTrue(
+      decoded.description.indexOf('One ETH transfer plus an ERC20 transfer call') >= 0
+    )
+    assert.assertTrue(decoded.description.indexOf('proposal-with-calldata') >= 0)
+  })
+
+  test('returns null for truncated ProposalCandidate payload', () => {
+    const truncated =
+      '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+    const decoded = decodeProposalCandidate(Bytes.fromHexString(truncated))
+    assert.assertTrue(decoded == null)
+  })
+
+  test('returns null for CandidateComment with out-of-bounds offset', () => {
+    const invalidOffset =
+      '0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000'
+    const decoded = decodeCandidateComment(Bytes.fromHexString(invalidOffset))
+    assert.assertTrue(decoded == null)
+  })
+
+  test('returns null for CandidateComment with invalid support value', () => {
+    const invalidSupport =
+      '0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000195465737420636f6d6d656e74206f6e2063616e64696461746500000000000000'
+    const decoded = decodeCandidateComment(Bytes.fromHexString(invalidSupport))
+    assert.assertTrue(decoded == null)
+  })
+
+  test('returns null for CandidateSponsorSignature with bad offset', () => {
+    const invalidOffset =
+      '0x' +
+      '1111111111111111111111111111111111111111111111111111111111111111' + // candidateId
+      '2222222222222222222222222222222222222222222222222222222222222222' + // proposalId
+      '0000000000000000000000000000000000000000000000000000000000000001' + // nonce
+      '0000000000000000000000000000000000000000000000000000000067748580' + // deadline
+      'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff' // bad offset
+    const decoded = decodeCandidateSponsorSignature(Bytes.fromHexString(invalidOffset))
+    assert.assertTrue(decoded == null)
+  })
+})

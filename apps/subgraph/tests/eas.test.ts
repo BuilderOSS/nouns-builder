@@ -1,7 +1,13 @@
 import { Address, Bytes } from '@graphprotocol/graph-ts'
 import { assert, describe, test } from 'matchstick-as'
 
-import { decodeDaoMultisig, decodePropdate } from '../src/utils/eas'
+import {
+  decodeCandidateComment,
+  decodeCandidateSponsorSignature,
+  decodeDaoMultisig,
+  decodeProfileLink,
+  decodePropdate,
+} from '../src/utils/eas'
 
 describe('Eas Decode Tests', () => {
   test('decode propdate test - message type 0', () => {
@@ -147,5 +153,70 @@ describe('Eas Decode Tests', () => {
       decoded,
       Address.fromString('0x19a8eb80c1483ceaa1278b16c5d5ef0104f85905')
     )
+  })
+
+  test('decode profile link', () => {
+    const data = Bytes.fromHexString(
+      '0x0000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000077765627369746500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001768747470733a2f2f6275696c6465726f73732e636f6d2f000000000000000000'
+    )
+    const decoded = decodeProfileLink(data)
+    assert.assertNotNull(decoded)
+
+    if (!decoded) {
+      assert.assertTrue(false, 'decoded should not be null')
+      return
+    }
+
+    assert.stringEquals(decoded.key, 'website')
+    assert.stringEquals(decoded.value, 'https://buildeross.com/')
+  })
+
+  test('decode candidate comment', () => {
+    const data = Bytes.fromHexString(
+      '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000568656c6c6f000000000000000000000000000000000000000000000000000000'
+    )
+    const decoded = decodeCandidateComment(data)
+    assert.assertNotNull(decoded)
+    if (!decoded) {
+      assert.assertTrue(false, 'decoded should not be null')
+      return
+    }
+    assert.i32Equals(decoded.support, 1)
+    assert.stringEquals(decoded.comment, 'hello')
+  })
+
+  test('decode candidate sponsor signature', () => {
+    // New schema: (bytes32 candidateId, bytes32 proposalId, uint256 nonce, uint256 deadline, bytes signature)
+    const data = Bytes.fromHexString(
+      '0x' +
+        '1111111111111111111111111111111111111111111111111111111111111111' + // candidateId
+        'dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd' + // proposalId
+        '0000000000000000000000000000000000000000000000000000000000000005' + // nonce = 5
+        '00000000000000000000000000000000000000000000000000000000000f423f' + // deadline = 999999
+        '00000000000000000000000000000000000000000000000000000000000000a0' + // offset to signature (160 bytes)
+        '0000000000000000000000000000000000000000000000000000000000000002' + // signature length = 2
+        'abcd000000000000000000000000000000000000000000000000000000000000' // signature = 0xabcd
+    )
+    const decoded = decodeCandidateSponsorSignature(data)
+    assert.assertNotNull(decoded)
+    if (!decoded) {
+      assert.assertTrue(false, 'decoded should not be null')
+      return
+    }
+    assert.bytesEquals(
+      decoded.candidateId,
+      Bytes.fromHexString(
+        '0x1111111111111111111111111111111111111111111111111111111111111111'
+      )
+    )
+    assert.bytesEquals(
+      decoded.proposalId,
+      Bytes.fromHexString(
+        '0xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'
+      )
+    )
+    assert.i32Equals(decoded.nonce.toI32(), 5)
+    assert.i32Equals(decoded.deadline.toI32(), 999999)
+    assert.bytesEquals(decoded.signature, Bytes.fromHexString('0xabcd'))
   })
 })

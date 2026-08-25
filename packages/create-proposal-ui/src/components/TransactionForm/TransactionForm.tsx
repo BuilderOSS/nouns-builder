@@ -1,6 +1,6 @@
-import { useProposalStore } from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 
+import { useTransactionComposer } from '../shared'
 import { AddArtwork } from './AddArtwork'
 import { AirdropTokens } from './AirdropTokens'
 import { ContentCoin } from './ContentCoin'
@@ -68,7 +68,7 @@ const FORMS: Record<TransactionFormType, React.FC> = {
 } as const
 
 export const TransactionForm: React.FC = () => {
-  const transactionType = useProposalStore((state) => state.transactionType)
+  const { transactionType } = useTransactionComposer()
   const Component = FORMS[transactionType as TransactionFormType]
 
   if (!Component) {

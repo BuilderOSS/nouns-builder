@@ -1,5 +1,5 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID, TransactionType } from '@buildeross/types'
 import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { defaultHelperTextStyle, defaultInputLabelStyle } from '@buildeross/ui/styles'
@@ -9,6 +9,7 @@ import { useState } from 'react'
 import { useReadContract } from 'wagmi'
 
 import { usePrepareMigration } from '../../../hooks/usePrepareMigration'
+import { useTransactionComposer } from '../../shared'
 
 const chainOptions = [{ label: 'Base', value: CHAIN_ID.BASE }]
 
@@ -18,8 +19,7 @@ export const MigrateDAOForm: React.FC = () => {
   const [migratingToChainId, setMigratingToChainId] = useState<CHAIN_ID>(
     chainOptions[0].value
   )
-  const addTransaction = useProposalStore((state) => state.addTransaction)
-  const resetTransactionType = useProposalStore((state) => state.resetTransactionType)
+  const { addTransaction, resetTransactionType } = useTransactionComposer()
 
   const { data: auction } = useReadContract({
     abi: auctionAbi,
