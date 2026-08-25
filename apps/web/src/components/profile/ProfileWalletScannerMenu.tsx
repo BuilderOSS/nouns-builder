@@ -1,20 +1,21 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import type { AddressType } from '@buildeross/types'
-import { isOwnProfileAddress } from 'src/utils/profileDashboard'
 import { Icon, Text } from '@buildeross/zord'
 import React from 'react'
 import { useDropdownDismiss } from 'src/hooks/useDropdownDismiss'
-import { DelegateToProfileModal } from './DelegateToProfileModal'
-import { ProfileLinksEditModal } from './ProfileLinksEditModal'
-import type { ProfileIdentity } from 'src/utils/profileIdentity'
 import {
   walletScannerMenu,
   walletScannerMenuButton,
   walletScannerMenuItem,
   walletScannerMenuRoot,
 } from 'src/styles/profile.css'
+import { isOwnProfileAddress } from 'src/utils/profileDashboard'
+import type { ProfileIdentity } from 'src/utils/profileIdentity'
 import { useAccount } from 'wagmi'
+
+import { DelegateToProfileModal } from './DelegateToProfileModal'
+import { ProfileLinksEditModal } from './ProfileLinksEditModal'
 
 type ProfileWalletScannerMenuProps = {
   address: AddressType

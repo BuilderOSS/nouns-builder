@@ -46,7 +46,6 @@ import {
   encodeFunctionData,
   formatEther,
   getAddress,
-  type Hex,
   isAddressEqual,
   parseEther,
   zeroHash,
