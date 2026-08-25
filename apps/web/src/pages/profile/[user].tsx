@@ -372,7 +372,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
                       <span className={profileStatValue}>{stat.value}</span>
                       <Text className={profileStatLabel}>{stat.label}</Text>
                       {stat.isPartial ? (
-                        <Text color="text3" fontSize="11">
+                        <Text color="text3" fontSize="12">
                           Unavailable
                         </Text>
                       ) : null}
