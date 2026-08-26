@@ -1,43 +1,136 @@
 'use client'
 
+import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
+import { useEnrichedPinnedAssets } from '@buildeross/hooks/useEnrichedPinnedAssets'
+import { useNFTBalance } from '@buildeross/hooks/useNFTBalance'
+import { usePinnedAssets } from '@buildeross/hooks/usePinnedAssets'
 import { tokensQuery } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
-import { Box, Flex, Text } from '@buildeross/zord'
-import React from 'react'
+import { Box, Button, Flex, Text } from '@buildeross/zord'
+import React, { useMemo, useState } from 'react'
 import useSWR from 'swr'
 
 import { card, cardLabel, emptyBox, grid, image } from './TreasuryNfts.css'
 
+interface NftCard {
+  key: string
+  name: string
+  image?: string
+  isPinned: boolean
+}
+
 /**
- * The DAO's own NFTs held in the treasury, read natively from the Builder
- * subgraph (`tokensQuery` filtered by owner = treasury). Unlike the Alchemy
- * NFT path this needs no API key, isn't spam-flagged, and can't 500 on large
- * treasuries — the subgraph already indexes every token the DAO mints.
+ * Every NFT the treasury holds, via Alchemy (spam-filtered by default) merged
+ * with the DAO's pinned NFTs. When Alchemy has nothing to say — no API key, or
+ * a chain it doesn't cover — this falls back to the Builder subgraph, which
+ * indexes the DAO's own tokens and needs no key.
  */
 export const TreasuryNfts = () => {
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const treasury = addresses.treasury as AddressType | undefined
+  const token = addresses.token as AddressType | undefined
 
-  const { data, isValidating, error } = useSWR(
-    treasury && chain.id ? (['treasury-dao-nfts', chain.id, treasury] as const) : null,
+  const [showSpamNfts, setShowSpamNfts] = useState(PUBLIC_IS_TESTNET)
+
+  const {
+    nfts,
+    isLoading: nftsLoading,
+    error: nftsError,
+  } = useNFTBalance(chain.id, treasury, { filterSpam: !showSpamNfts })
+
+  const { pinnedAssets } = usePinnedAssets(chain.id, token)
+  const pinnedNfts = useMemo(
+    () =>
+      pinnedAssets?.filter(
+        (p) => (p.tokenType === 1 || p.tokenType === 2) && !p.revoked
+      ) ?? [],
+    [pinnedAssets]
+  )
+  const { enrichedPinnedAssets } = useEnrichedPinnedAssets(chain.id, treasury, pinnedNfts)
+
+  const alchemyCards = useMemo<NftCard[]>(() => {
+    if (!nfts && !enrichedPinnedAssets) return []
+
+    const byKey = new Map<string, NftCard>()
+
+    nfts?.forEach((nft) => {
+      const key = `${nft.contract.address.toLowerCase()}-${nft.tokenId}`
+      byKey.set(key, {
+        key,
+        name: nft.name || nft.collection?.name || `#${nft.tokenId}`,
+        image: nft.image?.originalUrl || undefined,
+        isPinned: false,
+      })
+    })
+
+    enrichedPinnedAssets?.forEach((asset) => {
+      if (asset.isCollection) {
+        // A pinned collection marks everything already listed from it.
+        byKey.forEach((entry, key) => {
+          if (key.startsWith(`${asset.token.toLowerCase()}-`)) {
+            byKey.set(key, { ...entry, isPinned: true })
+          }
+        })
+        return
+      }
+      const key = `${asset.token.toLowerCase()}-${asset.tokenId}`
+      const existing = byKey.get(key)
+      byKey.set(key, {
+        key,
+        name: asset.nftName || existing?.name || `#${asset.tokenId}`,
+        image: asset.nftImage || existing?.image,
+        isPinned: true,
+      })
+    })
+
+    // Pinned first, otherwise Alchemy's order.
+    return Array.from(byKey.values()).sort((a, b) =>
+      a.isPinned === b.isPinned ? 0 : a.isPinned ? -1 : 1
+    )
+  }, [nfts, enrichedPinnedAssets])
+
+  const useAlchemy = alchemyCards.length > 0
+
+  // Fallback source: the DAO's own tokens held by the treasury.
+  const {
+    data: subgraphData,
+    isValidating: subgraphValidating,
+    error: subgraphError,
+  } = useSWR(
+    !useAlchemy && !nftsLoading && treasury && chain.id
+      ? (['treasury-dao-nfts', chain.id, treasury] as const)
+      : null,
     ([, _chainId, _treasury]) => tokensQuery(_chainId, _treasury),
     { revalidateOnFocus: false }
   )
 
-  const tokens = data?.tokens ?? []
+  const subgraphCards = useMemo<NftCard[]>(
+    () =>
+      (subgraphData?.tokens ?? []).map((t) => ({
+        key: `${t.tokenContract}-${t.tokenId}`,
+        name: t.name || `#${t.tokenId}`,
+        image: t.image ?? undefined,
+        isPinned: false,
+      })),
+    [subgraphData]
+  )
+
+  const cards = useAlchemy ? alchemyCards : subgraphCards
 
   if (!treasury) return null
 
-  // A subgraph/network failure must read as an error, not "no NFTs" — otherwise
-  // a fetch failure is indistinguishable from a legitimately empty treasury.
-  const emptyMessage = error
+  const isLoading = nftsLoading || (!useAlchemy && subgraphValidating)
+  // A fetch failure must read as an error, not "no NFTs" — otherwise it's
+  // indistinguishable from a legitimately empty treasury.
+  const failed = !!nftsError && !!subgraphError
+  const emptyMessage = failed
     ? "Couldn't load treasury NFTs. Please try again later."
-    : isValidating
+    : isLoading
       ? 'Loading…'
-      : 'No DAO NFTs held in the treasury.'
+      : 'No NFTs held in the treasury.'
 
   return (
     <Flex direction={'column'} width={'100%'} mb={'x8'}>
@@ -45,30 +138,38 @@ export const TreasuryNfts = () => {
         <Text fontSize={20} fontWeight={'display'}>
           NFTs
         </Text>
-        {tokens.length > 0 && (
-          <Text variant="paragraph-md" color={'tertiary'}>
-            {tokens.length}
-            {data?.hasNextPage ? '+' : ''} in treasury
-          </Text>
-        )}
+        <Flex align={'center'} gap={'x3'}>
+          {cards.length > 0 && (
+            <Text variant="paragraph-md" color={'tertiary'}>
+              {cards.length}
+              {!useAlchemy && subgraphData?.hasNextPage ? '+' : ''} in treasury
+            </Text>
+          )}
+          {/* Alchemy answered (even with an empty list) → the filter is live. */}
+          {nfts !== undefined && (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShowSpamNfts((x) => !x)}
+            >
+              {showSpamNfts ? 'Hide spam' : 'Show spam'}
+            </Button>
+          )}
+        </Flex>
       </Flex>
 
-      {tokens.length === 0 ? (
+      {cards.length === 0 ? (
         <Box className={emptyBox}>
-          <Text variant="paragraph-md" color={error ? 'negative' : 'tertiary'}>
+          <Text variant="paragraph-md" color={failed ? 'negative' : 'tertiary'}>
             {emptyMessage}
           </Text>
         </Box>
       ) : (
         <Box className={grid}>
-          {tokens.map((t) => (
-            <Box key={`${t.tokenContract}-${t.tokenId}`} className={card}>
-              <FallbackImage
-                src={t.image ?? undefined}
-                alt={t.name || `#${t.tokenId}`}
-                className={image}
-              />
-              <div className={cardLabel}>{t.name || `#${t.tokenId}`}</div>
+          {cards.map((nft) => (
+            <Box key={nft.key} className={card}>
+              <FallbackImage src={nft.image} alt={nft.name} className={image} />
+              <div className={cardLabel}>{nft.name}</div>
             </Box>
           ))}
         </Box>
