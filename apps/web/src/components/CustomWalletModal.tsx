@@ -1,5 +1,6 @@
 'use client'
 
+import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import {
@@ -12,14 +13,7 @@ import { getConnectors } from '@wagmi/core'
 import { useEffect, useState } from 'react'
 import type { Address } from 'viem'
 import { createSiweMessage } from 'viem/siwe'
-import {
-  type Connector,
-  useAccount,
-  useConfig,
-  useConnect,
-  useDisconnect,
-  useSignMessage,
-} from 'wagmi'
+import { type Connector, useAccount, useConfig, useConnect, useSignMessage } from 'wagmi'
 
 import { useWalletConnectors } from '../hooks/useWalletConnectors'
 import { addRecentWalletId } from '../utils/recentWalletIds'
@@ -44,35 +38,22 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
   const [pendingSafeInfo, setPendingSafeInfo] = useState<SafeInfo | null>(null)
   const { signMessageAsync } = useSignMessage()
   const { connectAsync } = useConnect()
-  const { disconnectAsync } = useDisconnect()
+  const disconnect = useWalletDisconnect()
 
   // Get wallet connectors from our hook (similar to RainbowKit's useWalletConnectors)
   const wallets = useWalletConnectors()
 
-  // Show sign prompt when wallet connects (only for non-Safe connectors)
+  // Show sign prompt when wallet connects (for non-Safe connectors) or after Safe connector switch completes
   useEffect(() => {
     if (
       isConnected &&
-      !safeModeActive &&
       !showSignPrompt &&
       !isAuthenticating &&
-      activeConnector?.id !== 'safeOwner'
+      (activeConnector?.id === 'safeOwner' || !safeModeActive)
     ) {
       setShowSignPrompt(true)
     }
   }, [isConnected, safeModeActive, showSignPrompt, isAuthenticating, activeConnector?.id])
-
-  // Show sign prompt after Safe connector switch completes
-  useEffect(() => {
-    if (
-      isConnected &&
-      activeConnector?.id === 'safeOwner' &&
-      !showSignPrompt &&
-      !isAuthenticating
-    ) {
-      setShowSignPrompt(true)
-    }
-  }, [isConnected, activeConnector?.id, showSignPrompt, isAuthenticating])
 
   // Reset authentication states when disconnected
   useEffect(() => {
@@ -148,7 +129,6 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
     address,
     activeConnector,
     connectAsync,
-    disconnectAsync,
     wagmiConfig,
   ])
 
@@ -217,7 +197,6 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
 
         // Close modal immediately
         onClose()
-        setIsAuthenticating(false)
         setShowSignPrompt(false)
 
         // Trigger session re-verification after modal closes
@@ -226,7 +205,6 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
         }, 100)
       } else {
         setAuthError(verifyBody.message || 'Verification failed')
-        setIsAuthenticating(false)
         setShowSignPrompt(true) // Show sign prompt again for retry
       }
     } catch (error) {
@@ -241,8 +219,9 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
         setAuthError(errorMessage)
       }
 
-      setIsAuthenticating(false)
       setShowSignPrompt(true) // Show sign prompt again for retry
+    } finally {
+      setIsAuthenticating(false)
     }
   }
 
@@ -333,9 +312,14 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
     }
   }
 
-  const handleSafeCancel = () => {
+  const handleCancel = () => {
+    onClose()
+    setShowSignPrompt(false)
+    setAuthError(null)
+    setSafeValidationError(null)
     setShowSafeFlow(false)
     setSafeModeActive(false)
+    disconnect()
   }
 
   // Create consolidated wallet list: Installed first, then Popular, then Safe (unless in Safe mode)
@@ -358,10 +342,10 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
 
   if (showSafeFlow) {
     return (
-      <AnimatedModal open={isOpen} close={handleSafeCancel} size="small">
+      <AnimatedModal open={isOpen} close={handleCancel} size="small">
         <SafeAddressModal
           onSubmit={handleSafeSubmit}
-          onCancel={handleSafeCancel}
+          onCancel={handleCancel}
           isValidating={isValidatingSafe}
           error={safeValidationError}
         />
@@ -369,14 +353,28 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
     )
   }
 
+  const isSafeMode = activeConnector?.id === 'safeOwner'
+  const signingConnectorName = isSafeMode
+    ? (activeConnector as any)?.cachedEOAConnector?.name
+    : activeConnector?.name
+  const signingAddress = isSafeMode ? (activeConnector as any)?.cachedEOAAddress : address
+
   // Show sign prompt (wallet connected, waiting for user to click sign)
   if (showSignPrompt && !isAuthenticating) {
     return (
-      <AnimatedModal open={isOpen} close={onClose} size="small">
+      <AnimatedModal open={isOpen} close={handleCancel} size="small">
         <Box p="x5" style={{ width: '90vw', maxWidth: '380px' }}>
           <Stack gap="x5">
             <Stack gap="x2">
-              <Text variant="heading-sm">Sign Message</Text>
+              <Text variant="heading-sm">
+                Sign In{isSafeMode ? ' as Safe Owner' : ''}
+              </Text>
+              {signingAddress && signingConnectorName && (
+                <Text variant="label-sm" color="text3">
+                  Connected via {signingConnectorName} as {signingAddress.slice(0, 6)}...
+                  {signingAddress.slice(-4)}
+                </Text>
+              )}
               <Text variant="paragraph-sm" color="text3">
                 To complete authentication, you need to sign a message with your wallet.
                 {activeConnector?.id === 'safeOwner' && address && (
@@ -411,14 +409,7 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
               <Button onClick={handleSignMessage} w="100%" variant="primary">
                 Sign Message
               </Button>
-              <Button
-                onClick={() => {
-                  setShowSignPrompt(false)
-                  setAuthError(null)
-                }}
-                variant="ghost"
-                w="100%"
-              >
+              <Button onClick={handleCancel} variant="ghost" w="100%">
                 Cancel
               </Button>
             </Stack>
@@ -431,13 +422,14 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
   // Show authenticating state (after user clicks sign button)
   if (isAuthenticating) {
     return (
-      <AnimatedModal open={isOpen} close={onClose} size="small">
+      <AnimatedModal open={isOpen} close={handleCancel} size="small">
         <Box p="x5" style={{ width: '90vw', maxWidth: '380px' }}>
           <Stack gap="x5" align="center">
             <Stack gap="x2" align="center">
               <Text variant="heading-sm">Sign Message</Text>
               <Text variant="paragraph-sm" color="text3" style={{ textAlign: 'center' }}>
-                Please check your wallet and approve the signature request.
+                Please check your wallet and approve the signature request. Do not close
+                this window.
               </Text>
             </Stack>
             <Box
@@ -458,7 +450,7 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
   }
 
   return (
-    <AnimatedModal open={isOpen} close={onClose} size="small">
+    <AnimatedModal open={isOpen} close={handleCancel} size="small">
       <Box p="x5" style={{ width: '90vw', maxWidth: '380px' }}>
         <Stack gap="x4">
           <Stack gap="x1">

@@ -43,6 +43,7 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
   let safeInfo_: SafeInfo | null = null
   let publicClient_: PublicClient | null = null
   let eoaConnector_: Connector | null = null
+  let eoaAddress_: `0x${string}` | null = null
 
   return createConnector<Provider, Properties>((config) => {
     /**
@@ -72,6 +73,7 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
       safeInfo_ = null
       publicClient_ = null
       eoaConnector_ = null
+      eoaAddress_ = null
     }
 
     return {
@@ -171,6 +173,10 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
         if (!eoaAuthorized) {
           throw new Error('EOA wallet is not authorized. Please reconnect.')
         }
+
+        // Cache EOA address for synchronous access
+        const eoaAccounts = await eoaConnector_.getAccounts()
+        eoaAddress_ = eoaAccounts?.[0] || null
 
         // Load Safe info from cache if not already loaded
         if (!safeInfo_) {
@@ -336,8 +342,30 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
         return safeInfo_
       },
 
+      // Synchronous getter for cached EOA connector
+      get cachedEOAConnector(): Connector | null {
+        return eoaConnector_
+      },
+
+      // Synchronous getter for cached EOA address
+      get cachedEOAAddress(): `0x${string}` | null {
+        return eoaAddress_
+      },
+
+      // Custom method to get EOA connector
+      async getEOAConnector(): Promise<Connector | null> {
+        const saved = loadSafeConfig()
+        if (!saved) return null
+
+        if (!eoaConnector_) {
+          eoaConnector_ = findEOAConnector(saved.eoaConnectorId)
+        }
+        if (!eoaConnector_) return null
+        return eoaConnector_
+      },
+
       // Custom method to get EOA address for signing
-      async getEOAAddress() {
+      async getEOAAddress(): Promise<`0x${string}` | null> {
         const saved = loadSafeConfig()
         if (!saved) return null
 
