@@ -77,8 +77,8 @@ export const deriveRecentTransactions = (
       tag: 'Auction settle',
       amountEth: Number(formatEther(BigInt(a.winningBid!.amount!))),
       timestamp: Number(a.endTime),
-      // The winning bid is the tx that moved this ETH; the subgraph exposes no
-      // settlement hash on `Auction` yet.
+      // The winning bid is the tx that moved this ETH. `Auction.settledTransactionHash`
+      // would be the more precise target, but no deployed subgraph carries it yet.
       txHash: a.winningBid?.transactionHash ?? undefined,
     }))
 

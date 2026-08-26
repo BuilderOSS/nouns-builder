@@ -1,7 +1,6 @@
 'use client'
 
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants'
-import { Auction_OrderBy, OrderDirection, SubgraphSDK } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
@@ -10,7 +9,10 @@ import { useMemo } from 'react'
 import useSWR from 'swr'
 
 import { deriveRecentTransactions } from './recentTransactions.helper'
+import { fetchTreasuryFeed } from './treasuryFeed.query'
 import * as styles from './TreasuryRecentTransactions.css'
+
+const FEED_LIMIT = 12
 
 /**
  * Treasury "Recent transactions" feed: executed proposals (ETH out, amount =
@@ -27,33 +29,16 @@ export const TreasuryRecentTransactions = () => {
   // Query the subgraph directly — the getProposals helper resolves each
   // proposal's on-chain state (an RPC call per proposal) and returns an empty
   // list if any of those fail; we only need the subgraph fields here.
-  const { data: proposals } = useSWR(
-    token && chain.id ? (['treasury-recent-proposals', chain.id, token] as const) : null,
-    ([, chainId, t]) =>
-      SubgraphSDK.connect(chainId)
-        .proposals({ where: { dao: t.toLowerCase() }, first: 100 })
-        .then((d) => d.proposals),
-    { revalidateOnFocus: false }
-  )
-
-  const { data: auctions } = useSWR(
-    token && chain.id ? (['treasury-recent-auctions', chain.id, token] as const) : null,
-    ([, chainId, t]) =>
-      SubgraphSDK.connect(chainId)
-        .auctionHistory({
-          daoId: t.toLowerCase(),
-          startTime: 0,
-          orderBy: Auction_OrderBy.EndTime,
-          orderDirection: OrderDirection.Desc,
-          first: 20,
-        })
-        .then((d) => d.dao?.auctions ?? []),
+  const { data } = useSWR(
+    token && chain.id ? (['treasury-recent-feed', chain.id, token] as const) : null,
+    ([, chainId, t]) => fetchTreasuryFeed(chainId, t, FEED_LIMIT),
     { revalidateOnFocus: false }
   )
 
   const txs = useMemo(
-    () => deriveRecentTransactions(proposals ?? [], auctions ?? [], 12),
-    [proposals, auctions]
+    () =>
+      deriveRecentTransactions(data?.proposals ?? [], data?.auctions ?? [], FEED_LIMIT),
+    [data]
   )
 
   const explorerUrl = ETHERSCAN_BASE_URL[chain.id]

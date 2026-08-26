@@ -16,7 +16,6 @@ query auctionHistory(
       endTime
       winningBid {
         amount
-        transactionHash
       }
       settled
     }
