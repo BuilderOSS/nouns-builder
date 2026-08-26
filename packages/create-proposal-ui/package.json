@@ -3,6 +3,7 @@
   "description": "Create Proposal UI components for BuilderOSS apps",
   "version": "0.3.2",
   "dependencies": {
+    "@0xsplits/splits-sdk": "^4.0.0",
     "@ethereum-attestation-service/eas-sdk": "^2.7.0",
     "@openzeppelin/merkle-tree": "^1.0.8",
     "@smartinvoicexyz/types": "^0.1.27",
