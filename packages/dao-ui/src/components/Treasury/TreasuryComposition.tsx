@@ -83,9 +83,13 @@ export const TreasuryComposition = () => {
 
   // Every ERC-20 the treasury holds, priced by Alchemy — not just the ones in
   // the registry below.
-  const { balances: alchemyBalances } = useTokenBalances(chain.id, treasury, {
-    filterLowValue: !showLowValueTokens,
-  })
+  const { balances: alchemyBalances, error: alchemyError } = useTokenBalances(
+    chain.id,
+    treasury,
+    {
+      filterLowValue: !showLowValueTokens,
+    }
+  )
 
   // Assets the DAO pinned on-chain are shown even when they'd be filtered out
   // as low value.
@@ -325,8 +329,9 @@ export const TreasuryComposition = () => {
               {slices.length !== 1 ? 's' : ''}
             </Text>
           )}
-          {/* Alchemy answered (even with an empty list) → the filter is live. */}
-          {alchemyBalances !== undefined && (
+          {/* Shown once Alchemy has answered either way — on error too, so the
+              filter stays reachable instead of vanishing with the data. */}
+          {(alchemyBalances !== undefined || !!alchemyError) && (
             <Button
               variant="secondary"
               size="sm"

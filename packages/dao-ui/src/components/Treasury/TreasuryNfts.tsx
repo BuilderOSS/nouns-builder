@@ -145,8 +145,10 @@ export const TreasuryNfts = () => {
               {!useAlchemy && subgraphData?.hasNextPage ? '+' : ''} in treasury
             </Text>
           )}
-          {/* Alchemy answered (even with an empty list) → the filter is live. */}
-          {nfts !== undefined && (
+          {/* Keep the toggle reachable when the request failed: spam filtering is
+              itself what a restricted Alchemy plan rejects, so hiding it on
+              error strands the viewer with no way to retry unfiltered. */}
+          {(nfts !== undefined || !!nftsError) && (
             <Button
               variant="secondary"
               size="sm"
