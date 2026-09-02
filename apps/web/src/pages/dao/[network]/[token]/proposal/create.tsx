@@ -749,26 +749,20 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
         {continueHelperText && (
           <Flex align={'center'} gap={'x2'} mb={'x4'}>
-            <Text variant={'paragraph-sm'} color={'text3'}>
+            <Text variant={'paragraph-sm'} color={'negative'}>
               {continueHelperText}
             </Text>
             {createStage === 'transactions' && hasDraftBlockers && (
               <Button
-                variant={'ghost'}
-                size={'sm'}
+                variant={'secondaryOutline'}
+                size={'xs'}
+                pill
                 onClick={() => setCreateStage('draft')}
-                style={{
-                  minHeight: 'auto',
-                  height: 'auto',
-                  padding: 0,
-                  textDecoration: 'underline',
-                }}
+                style={{ fontSize: 12 }}
               >
-                <Text variant={'paragraph-sm'} color={'text3'}>
-                  {hasTitleDraftBlocker
-                    ? 'Fix title in Write Proposal'
-                    : 'Go to Write Proposal'}
-                </Text>
+                {hasTitleDraftBlocker
+                  ? 'Fix title in Write Proposal'
+                  : 'Go to Write Proposal'}
               </Button>
             )}
           </Flex>

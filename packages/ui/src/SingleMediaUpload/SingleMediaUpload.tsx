@@ -5,7 +5,7 @@ import {
   type UploadType,
 } from '@buildeross/ipfs-service'
 import { Box, Flex, Spinner, Stack, Text } from '@buildeross/zord'
-import { FormikProps } from 'formik'
+import { type FormikProps, getIn } from 'formik'
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 
 import { defaultHelperTextStyle, defaultInputLabelStyle } from '../styles'
@@ -50,7 +50,7 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
   // A required field with nothing uploaded fails validation with no visible
   // reason otherwise: submit just does nothing, since this component only ever
   // rendered its own upload failures.
-  const rawError = formik.errors[id]
+  const rawError = getIn(formik.errors, id)
   const validationError =
     formik.submitCount > 0 && typeof rawError === 'string'
       ? rawError === '*'

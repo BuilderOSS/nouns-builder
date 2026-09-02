@@ -8,6 +8,14 @@ import { SingleMediaUpload } from './SingleMediaUpload'
 
 const schema = yup.object({ mediaUrl: yup.string().required('*') })
 
+const nestedSchema = yup.object({
+  milestones: yup.array().of(
+    yup.object({
+      mediaUrl: yup.string().required('*'),
+    })
+  ),
+})
+
 const Harness: React.FC = () => (
   <Formik
     initialValues={{ mediaUrl: '' }}
@@ -21,6 +29,27 @@ const Harness: React.FC = () => (
           id="mediaUrl"
           inputLabel="Media"
           value={formik.values.mediaUrl}
+          helperText="Upload a file"
+        />
+        <button type="submit">Add Transaction to Queue</button>
+      </Form>
+    )}
+  </Formik>
+)
+
+const NestedHarness: React.FC = () => (
+  <Formik
+    initialValues={{ milestones: [{ mediaUrl: '' }] }}
+    validationSchema={nestedSchema}
+    onSubmit={() => undefined}
+  >
+    {(formik) => (
+      <Form>
+        <SingleMediaUpload
+          formik={formik}
+          id="milestones.0.mediaUrl"
+          inputLabel="Milestone media"
+          value={formik.values.milestones[0].mediaUrl}
           helperText="Upload a file"
         />
         <button type="submit">Add Transaction to Queue</button>
@@ -45,6 +74,17 @@ describe('SingleMediaUpload', () => {
     const error = await screen.findByTestId('error-msg')
     // The schema's bare '*' would be meaningless on its own here.
     expect(error.textContent).toContain('Media is required')
+    expect(screen.queryByText('Upload a file')).toBeNull()
+  })
+
+  it('shows nested field errors from formik paths', async () => {
+    render(<NestedHarness />)
+    await act(async () => {
+      screen.getByRole('button', { name: 'Add Transaction to Queue' }).click()
+    })
+
+    const error = await screen.findByTestId('error-msg')
+    expect(error.textContent).toContain('Milestone media is required')
     expect(screen.queryByText('Upload a file')).toBeNull()
   })
 })
