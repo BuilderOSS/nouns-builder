@@ -5,6 +5,9 @@ export const grid = style({
   display: 'grid',
   gridTemplateColumns: 'repeat(4, 1fr)',
   gap: '1rem',
+  maxHeight: '50rem',
+  overflowY: 'auto',
+  paddingRight: '0.25rem',
   '@media': {
     'screen and (max-width: 900px)': { gridTemplateColumns: 'repeat(3, 1fr)' },
     'screen and (max-width: 560px)': { gridTemplateColumns: 'repeat(2, 1fr)' },

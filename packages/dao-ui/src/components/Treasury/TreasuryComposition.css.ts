@@ -75,6 +75,9 @@ export const rows = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '0.75rem',
+  maxHeight: '30rem',
+  overflowY: 'auto',
+  paddingRight: '0.25rem',
 })
 
 export const row = style({

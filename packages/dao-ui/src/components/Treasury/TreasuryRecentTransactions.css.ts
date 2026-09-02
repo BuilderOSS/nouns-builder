@@ -22,18 +22,31 @@ export const row = style({
   gridTemplateColumns: '26px 1fr auto auto',
   alignItems: 'center',
   gap: '0.75rem',
+  position: 'relative',
   paddingTop: '0.7rem',
   paddingBottom: '0.7rem',
-  borderBottomStyle: 'solid',
-  borderBottomWidth: '1px',
-  borderBottomColor: vars.color.border,
+  selectors: {
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: '1px',
+      backgroundColor: vars.color.border,
+    },
+  },
 })
 
 /**
  * Last row has no divider. Set explicitly rather than with `:last-of-type` —
  * linked rows render as <a>, same element type as the "View all" link below.
  */
-export const rowLast = style({ borderBottom: 'none' })
+export const rowLast = style({
+  selectors: {
+    '&::after': { display: 'none' },
+  },
+})
 
 /** Rows that carry a tx hash link out to the block explorer. */
 export const rowLink = style({
