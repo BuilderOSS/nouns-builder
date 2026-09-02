@@ -5,7 +5,7 @@ import {
   type UploadType,
 } from '@buildeross/ipfs-service'
 import { Box, Flex, Spinner, Stack, Text } from '@buildeross/zord'
-import { FormikProps } from 'formik'
+import { type FormikProps, getIn } from 'formik'
 import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 
 import { defaultHelperTextStyle, defaultInputLabelStyle } from '../styles'
@@ -46,6 +46,17 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // A required field with nothing uploaded fails validation with no visible
+  // reason otherwise: submit just does nothing, since this component only ever
+  // rendered its own upload failures.
+  const rawError = getIn(formik.errors, id)
+  const validationError =
+    formik.submitCount > 0 && typeof rawError === 'string'
+      ? rawError === '*'
+        ? `${typeof inputLabel === 'string' ? inputLabel : 'This field'} is required`
+        : rawError
+      : undefined
 
   const truncate = (value: string) => {
     return value.length > 40 ? `${value.substring(0, 40)}...` : value
@@ -166,14 +177,14 @@ export const SingleMediaUpload: React.FC<SingleMediaUploadProps> = ({
             handleFileUpload(event.currentTarget.files)
           }}
         />
-        {helperText && !uploadMediaError && (
+        {helperText && !uploadMediaError && !validationError && (
           <Box className={defaultHelperTextStyle}>{helperText}</Box>
         )}
 
-        {uploadMediaError && (
+        {(uploadMediaError || validationError) && (
           <Box data-testid="error-msg" p={'x4'} fontSize={12} className={uploadErrorBox}>
             <Box as={'ul'} m={'x0'}>
-              <li>{uploadMediaError.message}</li>
+              <li>{uploadMediaError?.message ?? validationError}</li>
             </Box>
           </Box>
         )}

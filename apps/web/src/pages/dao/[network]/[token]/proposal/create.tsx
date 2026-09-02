@@ -456,7 +456,15 @@ const CreateProposalPage: NextPageWithLayout = () => {
     if (!missingReviewRequirements.length) return null
 
     if (hasDraftBlockers) {
-      return `To continue, fix proposal metadata (${joinRequirements(missingDraftRequirements)}) and queue at least one transaction if needed.`
+      // Only name the queue when it is actually empty — telling someone to queue
+      // a transaction while their queue is on screen buries the real blocker.
+      const outstanding = missingReviewRequirements.filter(
+        (requirement) => !missingDraftRequirements.includes(requirement)
+      )
+      return `To continue, ${joinRequirements([
+        `fix proposal metadata (${joinRequirements(missingDraftRequirements)})`,
+        ...outstanding,
+      ])}.`
     }
 
     return `To continue, ${joinRequirements(missingReviewRequirements)}.`
@@ -741,26 +749,20 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
         {continueHelperText && (
           <Flex align={'center'} gap={'x2'} mb={'x4'}>
-            <Text variant={'paragraph-sm'} color={'text3'}>
+            <Text variant={'paragraph-sm'} color={'negative'}>
               {continueHelperText}
             </Text>
             {createStage === 'transactions' && hasDraftBlockers && (
               <Button
-                variant={'ghost'}
-                size={'sm'}
+                variant={'secondaryOutline'}
+                size={'xs'}
+                pill
                 onClick={() => setCreateStage('draft')}
-                style={{
-                  minHeight: 'auto',
-                  height: 'auto',
-                  padding: 0,
-                  textDecoration: 'underline',
-                }}
+                style={{ fontSize: 12 }}
               >
-                <Text variant={'paragraph-sm'} color={'text3'}>
-                  {hasTitleDraftBlocker
-                    ? 'Fix title in Write Proposal'
-                    : 'Go to Write Proposal'}
-                </Text>
+                {hasTitleDraftBlocker
+                  ? 'Fix title in Write Proposal'
+                  : 'Go to Write Proposal'}
               </Button>
             )}
           </Flex>
