@@ -4,9 +4,9 @@ import { AddressType, CHAIN_ID } from '@buildeross/types'
 import {
   Alchemy,
   Network,
-  NftFilters,
   NftTokenType,
   OwnedNft,
+  type OwnedNftsResponse,
   TokenBalanceType,
 } from 'alchemy-sdk'
 import axios from 'axios'
@@ -249,6 +249,12 @@ export type NFTBalanceOptions = {
   useCache?: boolean
 }
 
+/** Pages of 100 to walk before giving up on refilling a spam-heavy wallet. */
+const NFT_PAGE_LIMIT = 3
+const NFT_TARGET_COUNT = 100
+
+const isNotSpam = (nft: OwnedNft): boolean => nft.contract?.isSpam !== true
+
 export const getCachedNFTBalance = async (
   chainId: CHAIN_ID,
   address: AddressType,
@@ -277,13 +283,25 @@ export const getCachedNFTBalance = async (
   }
 
   try {
-    // Fetch from Alchemy API
-    const nfts = await alchemy.nft.getNftsForOwner(address, {
-      excludeFilters: filterSpam ? [NftFilters.SPAM] : [],
-    })
+    // Alchemy's `excludeFilters: [SPAM]` is gated behind the growth plan and 403s
+    // on anything below it, which took the whole section down. The per-contract
+    // `isSpam` flag — the same classification — ships with the unfiltered
+    // response on every plan, so filter here instead. Spam is dropped after the
+    // fact, so walk a few pages to refill what gets removed.
+    const owned: OwnedNft[] = []
+    let pageKey: string | undefined = undefined
+    for (let page = 0; page < NFT_PAGE_LIMIT; page++) {
+      const res: OwnedNftsResponse = await alchemy.nft.getNftsForOwner(address, {
+        pageKey,
+      })
+      owned.push(...res.ownedNfts)
+      pageKey = res.pageKey
+      if (!pageKey) break
+      if (owned.filter(isNotSpam).length >= NFT_TARGET_COUNT) break
+    }
 
     // Parse and cache the result (15 minutes TTL)
-    const parsedNfts = parseNftData(nfts.ownedNfts)
+    const parsedNfts = parseNftData(filterSpam ? owned.filter(isNotSpam) : owned)
 
     // Cache the result (15 minutes TTL)
     await redis?.setex(cacheKey, 900, JSON.stringify(parsedNfts))
