@@ -456,7 +456,15 @@ const CreateProposalPage: NextPageWithLayout = () => {
     if (!missingReviewRequirements.length) return null
 
     if (hasDraftBlockers) {
-      return `To continue, fix proposal metadata (${joinRequirements(missingDraftRequirements)}) and queue at least one transaction if needed.`
+      // Only name the queue when it is actually empty — telling someone to queue
+      // a transaction while their queue is on screen buries the real blocker.
+      const outstanding = missingReviewRequirements.filter(
+        (requirement) => !missingDraftRequirements.includes(requirement)
+      )
+      return `To continue, ${joinRequirements([
+        `fix proposal metadata (${joinRequirements(missingDraftRequirements)})`,
+        ...outstanding,
+      ])}.`
     }
 
     return `To continue, ${joinRequirements(missingReviewRequirements)}.`
