@@ -1,12 +1,17 @@
 import { Box, Icon, PopUp } from '@buildeross/zord'
 import { useRef, useState } from 'react'
 
+type PopUpProps = React.ComponentProps<typeof PopUp>
+type Placement = PopUpProps['placement']
+
 export const Tooltip = ({
   children,
   label = 'Help',
+  placement = 'top',
 }: {
   children: string
   label?: string
+  placement?: Placement
 }) => {
   const [showTooltip, setShowTooltip] = useState(false)
   const triggerRef = useRef<HTMLDivElement | null>(null)
@@ -31,7 +36,7 @@ export const Tooltip = ({
         open={showTooltip}
         triggerRef={triggerRef.current}
         showBackdrop={false}
-        placement="top"
+        placement={placement}
       >
         <Box maxWidth="x64">{children}</Box>
       </PopUp>

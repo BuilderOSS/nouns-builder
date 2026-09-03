@@ -6,6 +6,7 @@ import {
 } from '@buildeross/sdk/subgraph'
 import { AddressType, BytesType } from '@buildeross/types'
 import { executeConcurrently } from '@buildeross/utils/concurrent'
+import { withTimeout } from '@buildeross/utils/withTimeout'
 import { keccak256 } from 'viem'
 
 import { getRedisConnection } from './redisConnection'
@@ -35,6 +36,16 @@ function log(message: string, data?: any) {
   }
 }
 
+function formatErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error)
+
+  if (message.includes('Status: 429') || message.includes('over rate limit')) {
+    return 'RPC rate limited (429)'
+  }
+
+  return message.split('\n')[0] || message
+}
+
 /**
  * Generate cache key for user dashboard
  */
@@ -50,17 +61,33 @@ async function fetchProposalStateWithRetry(
   chainId: number,
   governorAddress: AddressType,
   proposalId: BytesType,
-  retries = 2
+  signal: AbortSignal,
+  retries = 1
 ): Promise<ProposalState> {
   for (let attempt = 0; attempt <= retries; attempt++) {
+    signal.throwIfAborted()
     try {
-      return await getProposalState(chainId, governorAddress, proposalId)
+      return await getProposalState(chainId, governorAddress, proposalId, signal)
     } catch (error: any) {
+      if (signal.aborted) throw error
       if (attempt === retries) {
         throw error
       }
-      // Exponential backoff: 100ms, 200ms
-      await new Promise((resolve) => setTimeout(resolve, 100 * Math.pow(2, attempt)))
+      // Exponential backoff between the initial attempt and the single retry.
+      await new Promise<void>((resolve, reject) => {
+        const handleAbort = () => {
+          clearTimeout(timer)
+          reject(signal.reason)
+        }
+        const timer = setTimeout(
+          () => {
+            signal.removeEventListener('abort', handleAbort)
+            resolve()
+          },
+          100 * Math.pow(2, attempt)
+        )
+        signal.addEventListener('abort', handleAbort, { once: true })
+      })
     }
   }
   throw new Error('Failed to fetch proposal state')
@@ -74,55 +101,97 @@ export type DashboardDaoWithState = Omit<DashboardDaoBase, 'proposals'> & {
   >
 }
 
+function emptyProposalStateDao(dao: DashboardDaoBase): DashboardDaoWithState {
+  return {
+    ...dao,
+    proposals: [],
+  }
+}
+
 /**
  * Fetch DAO proposal states with controlled concurrency
  */
 async function fetchDaoProposalState(
-  dao: DashboardDaoBase
-): Promise<DashboardDaoWithState> {
-  try {
-    // Use controlled concurrency to avoid overwhelming RPC
-    const proposalTasks = dao.proposals.map(
-      (proposal) => () =>
-        fetchProposalStateWithRetry(
-          dao.chainId,
-          proposal.dao.governorAddress,
-          proposal.proposalId
-        ).then((state) => ({ ...proposal, state }))
-    )
+  dao: DashboardDaoBase,
+  signal: AbortSignal
+): Promise<{ dao: DashboardDaoWithState; degraded: boolean }> {
+  // Use serial proposal-state reads per DAO to avoid overwhelming public RPCs.
+  const proposalTasks = dao.proposals.map((proposal) => async () => {
+    try {
+      const state = await fetchProposalStateWithRetry(
+        dao.chainId,
+        proposal.dao.governorAddress,
+        proposal.proposalId,
+        signal
+      )
 
-    const proposals = await executeConcurrently(proposalTasks)
+      return { ...proposal, state }
+    } catch (error) {
+      if (signal.aborted) throw error
+      console.warn('Dashboard proposal state unavailable:', {
+        chainId: dao.chainId,
+        dao: dao.tokenAddress,
+        proposalId: proposal.proposalId,
+        error: formatErrorMessage(error),
+      })
 
-    return {
-      ...dao,
-      proposals: proposals.filter((proposal) =>
-        ACTIVE_PROPOSAL_STATES.includes(proposal.state)
-      ),
+      return null
     }
-  } catch (error: any) {
-    throw new Error(
-      error?.message
-        ? `RPC Error: ${error.message}`
-        : 'Error fetch Dashboard data from RPC'
-    )
+  })
+
+  const proposals = await executeConcurrently(proposalTasks, 1)
+
+  return {
+    dao: {
+      ...dao,
+      proposals: proposals.filter(
+        (proposal): proposal is NonNullable<(typeof proposals)[number]> =>
+          !!proposal && ACTIVE_PROPOSAL_STATES.includes(proposal.state)
+      ),
+    },
+    degraded: proposals.some((proposal) => proposal === null),
   }
+}
+
+type DashboardFetchResult = {
+  data: DashboardDaoWithState[]
+  degraded: boolean
 }
 
 /**
  * Fetch dashboard data (main logic)
  */
-async function fetchDashboardData(
-  address: AddressType
-): Promise<DashboardDaoWithState[]> {
+async function fetchDashboardData(address: AddressType): Promise<DashboardFetchResult> {
   try {
     const userDaos = await dashboardRequest(address)
     if (!userDaos) throw new Error('Dashboard DAO query returned undefined')
 
-    // Use controlled concurrency for DAO proposal state fetching
-    const daoTasks = userDaos.map((dao) => () => fetchDaoProposalState(dao))
-    const resolved = await executeConcurrently(daoTasks)
+    // Bound each DAO independently so a slow RPC does not discard successful DAOs.
+    const daoTasks = userDaos.map((dao) => async () => {
+      const label = `Dashboard proposal state enrichment for DAO ${dao.tokenAddress}`
+      const controller = new AbortController()
+      return withTimeout(
+        () => fetchDaoProposalState(dao, controller.signal),
+        8_000,
+        label,
+        () => controller.abort(new Error(`${label} aborted`))
+      ).catch((error) => {
+        console.warn('Dashboard proposal state enrichment unavailable:', {
+          address,
+          chainId: dao.chainId,
+          dao: dao.tokenAddress,
+          error: formatErrorMessage(error),
+        })
 
-    return resolved
+        return { dao: emptyProposalStateDao(dao), degraded: true }
+      })
+    })
+    const resolved = await executeConcurrently(daoTasks, 1)
+
+    return {
+      data: resolved.map((result) => result.dao),
+      degraded: resolved.some((result) => result.degraded),
+    }
   } catch (error: any) {
     throw new Error(error?.message || 'Error fetching dashboard data')
   }
@@ -184,17 +253,21 @@ export async function fetchDashboardDataService(
 
   // Fetch fresh data
   log('Dashboard cache miss, fetching', { address })
-  const data = await fetchDashboardData(address)
+  const { data, degraded } = await fetchDashboardData(address)
 
   // Store in cache
   if (redis) {
     try {
-      await redis.setex(cacheKey, CACHE_CONFIG.USER_DASHBOARD_TTL, JSON.stringify(data))
-      log('Dashboard cached', {
-        address,
-        daoCount: data.length,
-        ttl: CACHE_CONFIG.USER_DASHBOARD_TTL,
-      })
+      if (degraded) {
+        log('Dashboard cache skipped for degraded enrichment', { address })
+      } else {
+        await redis.setex(cacheKey, CACHE_CONFIG.USER_DASHBOARD_TTL, JSON.stringify(data))
+        log('Dashboard cached', {
+          address,
+          daoCount: data.length,
+          ttl: CACHE_CONFIG.USER_DASHBOARD_TTL,
+        })
+      }
     } catch (err) {
       console.warn('Redis cache write error:', err)
     } finally {

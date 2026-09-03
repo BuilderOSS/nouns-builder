@@ -2,13 +2,11 @@ import {
   AttestationParams,
   EAS_CONTRACT_ADDRESS,
   easAbi,
-  PROPOSAL_CANDIDATE_SCHEMA,
   PROPOSAL_CANDIDATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { CHAIN_ID } from '@buildeross/types'
-import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import type { Hex } from 'viem'
-import { getAddress, zeroHash } from 'viem'
+import { encodeAbiParameters, getAddress, zeroHash } from 'viem'
 import type { Config } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -57,16 +55,17 @@ export async function attestCandidate(
     throw new Error(`EAS not supported on chain ${chainId}`)
   }
 
-  // 1. Encode data using SchemaEncoder
-  const schemaEncoder = new SchemaEncoder(PROPOSAL_CANDIDATE_SCHEMA)
-  const encodedData = schemaEncoder.encodeData([
-    { name: 'candidateId', value: candidateId, type: 'bytes32' },
-    { name: 'salt', value: salt, type: 'bytes32' },
-    { name: 'targets', value: targets, type: 'address[]' },
-    { name: 'values', value: values, type: 'uint256[]' },
-    { name: 'calldatas', value: calldatas, type: 'bytes[]' },
-    { name: 'description', value: description, type: 'string' },
-  ]) as Hex
+  const encodedData = encodeAbiParameters(
+    [
+      { name: 'candidateId', type: 'bytes32' },
+      { name: 'salt', type: 'bytes32' },
+      { name: 'targets', type: 'address[]' },
+      { name: 'values', type: 'uint256[]' },
+      { name: 'calldatas', type: 'bytes[]' },
+      { name: 'description', type: 'string' },
+    ],
+    [candidateId, salt, targets.map(getAddress), values, calldatas, description]
+  )
 
   // 2. Create attestation params
   const attestParams: AttestationParams = {

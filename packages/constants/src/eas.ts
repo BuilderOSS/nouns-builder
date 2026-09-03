@@ -1,6 +1,8 @@
 import { CHAIN_ID } from '@buildeross/types'
 import { zeroAddress } from 'viem'
 
+import { PUBLIC_IS_TESTNET } from './chains'
+
 export const EAS_CONTRACT_ADDRESS: Partial<Record<CHAIN_ID, `0x${string}`>> = {
   [CHAIN_ID.ETHEREUM]: '0xA1207F3BBa224E2c9c3c6D5aF63D0eb1582Ce587',
   [CHAIN_ID.SEPOLIA]: '0xC2679fBD37d54388Ce493F1DB75320D236e1815e',
@@ -38,6 +40,14 @@ export const ESCROW_DELEGATE_SCHEMA = `address daoMultiSig`
 export const TREASURY_ASSET_PIN_SCHEMA_UID = `0xc384fd4fdacb670667c07759423132a193053742b58d5a056b61d72ba1a09e26`
 
 export const TREASURY_ASSET_PIN_SCHEMA = `uint8 tokenType, address token, bool isCollection, uint256 tokenId`
+
+export const PROFILE_LINK_SCHEMA_UID = `0xa784c12c8d2e33ae2c50cc797a04f8852aea77d51a1a37ff117c3b4de0159593`
+
+export const PROFILE_LINK_SCHEMA = `string key,string value`
+
+export const PROFILE_LINK_EAS_CHAIN_ID = PUBLIC_IS_TESTNET
+  ? CHAIN_ID.BASE_SEPOLIA
+  : CHAIN_ID.BASE
 
 export const PROPOSAL_CANDIDATE_SCHEMA_UID = `0xc3315fb5b910e904d24f56c5b37dd5a5d06392bb040ba8ad669a9f7b3bbe2e4f`
 

@@ -19,7 +19,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       if (deployer === zeroAddress) return []
       return readContract(serverConfig, {
-        address: deployer,
+        address: deployer as `0x${string}`,
         chainId: chainId,
         abi: l2DeployerAbi,
         functionName: 'crossDomainDeployerToMigration',

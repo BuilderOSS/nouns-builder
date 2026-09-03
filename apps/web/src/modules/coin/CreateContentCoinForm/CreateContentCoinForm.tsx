@@ -136,7 +136,7 @@ const CreateContentCoinEconomicsPreview: React.FC<
 
   // Call coinAddress view function on ZoraFactory
   const { data: predictedAddress } = useReadContract({
-    address: ZORA_COIN_FACTORY_ADDRESS,
+    address: ZORA_COIN_FACTORY_ADDRESS as `0x${string}`,
     abi: coinFactoryConfig.abi,
     functionName: 'coinAddress',
     args:

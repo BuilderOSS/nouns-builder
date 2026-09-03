@@ -13,7 +13,6 @@ export default defineConfig({
   clean: true,
   minify: 'terser',
   external: [
-    '@ethereum-attestation-service/eas-sdk',
     '@buildeross/constants',
     '@buildeross/types',
     '@buildeross/utils',
