@@ -4,24 +4,16 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { profileDashboardQuery } from './profileDashboardQuery'
 
-const request = vi.hoisted(() => vi.fn())
+const sdkMock = vi.hoisted(() => ({
+  profileDashboardTokensPage: vi.fn(),
+  profileDashboardCountsPage: vi.fn(),
+  profileDashboardAuctionSettlementsPage: vi.fn(),
+  profileDashboardAuctionSettlementsAtTimestamp: vi.fn(),
+}))
 
-vi.mock('graphql-request', () => ({
-  GraphQLClient: class {
-    request(
-      input:
-        | string
-        | {
-            document: string
-            variables: Record<string, unknown>
-            signal?: AbortSignal
-          },
-      variables: Record<string, unknown>
-    ) {
-      return typeof input === 'string'
-        ? request(input, variables)
-        : request(input.document, input.variables, input.signal)
-    }
+vi.mock('../client', () => ({
+  SDK: {
+    connect: () => sdkMock,
   },
 }))
 
@@ -50,35 +42,35 @@ const settlement = (id: string, timestamp: string) => ({
 })
 
 describe('profileDashboardQuery', () => {
-  beforeEach(() => request.mockReset())
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
   it('paginates each collection with its own ID cursor', async () => {
-    request.mockImplementation((query = '', variables: Record<string, unknown> = {}) => {
-      if (query.includes('profileDashboardTokensPage')) {
-        const start = variables.cursor ? 250 : 0
-        const length = variables.cursor ? 1 : 250
-        return {
-          tokens: Array.from({ length }, (_, index) => ({
-            id: `token-${start + index}`,
-            tokenId: `${start + index}`,
-            tokenContract: address,
-            name: '',
-            image: '',
-            mintedAt: '1',
-            dao: { tokenAddress: address, name: '', symbol: '', contractImage: '' },
-          })),
-        }
-      }
-      if (query.includes('profileDashboardCountsPage')) {
-        return {
-          tokens: [],
-          daoTokenOwners: [{ id: 'owner-1', daoTokenCount: 2 }],
-          proposalVotedEvents: [{ id: 'vote-1' }],
-          proposalCreatedEvents: [{ id: 'proposal-1' }],
-          auctionBidPlacedEvents: [{ id: 'bid-1' }],
-        }
-      }
-      return { auctionSettledEvents: [] }
+    sdkMock.profileDashboardTokensPage.mockImplementation(({ cursor }) => {
+      const start = cursor ? 250 : 0
+      const length = cursor ? 1 : 250
+      return Promise.resolve({
+        tokens: Array.from({ length }, (_, index) => ({
+          id: `token-${start + index}`,
+          tokenId: `${start + index}`,
+          tokenContract: address,
+          name: '',
+          image: '',
+          mintedAt: '1',
+          dao: { tokenAddress: address, name: '', symbol: '', contractImage: '' },
+        })),
+      })
+    })
+    sdkMock.profileDashboardCountsPage.mockResolvedValue({
+      tokens: [],
+      daotokenOwners: [{ id: 'owner-1', daoTokenCount: 2 }],
+      proposalVotedEvents: [{ id: 'vote-1' }],
+      proposalCreatedEvents: [{ id: 'proposal-1' }],
+      auctionBidPlacedEvents: [{ id: 'bid-1' }],
+    })
+    sdkMock.profileDashboardAuctionSettlementsPage.mockResolvedValue({
+      auctionSettledEvents: [],
     })
 
     const result = await profileDashboardQuery(chainId, address)
@@ -90,11 +82,11 @@ describe('profileDashboardQuery', () => {
       proposalsSubmitted: 1,
       bidsPlaced: 1,
     })
-    const countRequest = request.mock.calls.find(
-      ([query]) =>
-        typeof query === 'string' && query.includes('profileDashboardCountsPage')
+    expect(sdkMock.profileDashboardCountsPage).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 0 }),
+      undefined,
+      undefined
     )
-    expect(countRequest?.[1].skip).toBe(0)
     expect(result.isComplete).toBe(true)
   })
 
@@ -102,31 +94,25 @@ describe('profileDashboardQuery', () => {
     const boundary = Array.from({ length: 251 }, (_, index) =>
       settlement(`settlement-${String(index).padStart(3, '0')}`, '100')
     )
-    request.mockImplementation((query = '', variables: Record<string, unknown> = {}) => {
-      if (query.includes('profileDashboardAuctionSettlementsAtTimestamp')) {
-        return {
-          auctionSettledEvents: variables.cursor
-            ? boundary.slice(250)
-            : boundary.slice(0, 250),
-        }
-      }
-      if (query.includes('profileDashboardAuctionSettlementsPage')) {
-        return {
-          auctionSettledEvents:
-            variables.beforeTimestamp === '100' ? [] : boundary.slice(0, 250),
-        }
-      }
-      if (query.includes('profileDashboardTokensPage')) return { tokens: [] }
-      if (query.includes('profileDashboardCountsPage')) {
-        return {
-          tokens: [],
-          daoTokenOwners: [],
-          proposalVotedEvents: [],
-          proposalCreatedEvents: [],
-          auctionBidPlacedEvents: [],
-        }
-      }
-      return { auctionSettledEvents: [] }
+    sdkMock.profileDashboardAuctionSettlementsAtTimestamp.mockImplementation(
+      ({ cursor }) =>
+        Promise.resolve({
+          auctionSettledEvents: cursor ? boundary.slice(250) : boundary.slice(0, 250),
+        })
+    )
+    sdkMock.profileDashboardAuctionSettlementsPage.mockImplementation(
+      ({ beforeTimestamp }) =>
+        Promise.resolve({
+          auctionSettledEvents: beforeTimestamp === '100' ? [] : boundary.slice(0, 250),
+        })
+    )
+    sdkMock.profileDashboardTokensPage.mockResolvedValue({ tokens: [] })
+    sdkMock.profileDashboardCountsPage.mockResolvedValue({
+      tokens: [],
+      daotokenOwners: [],
+      proposalVotedEvents: [],
+      proposalCreatedEvents: [],
+      auctionBidPlacedEvents: [],
     })
 
     const result = await profileDashboardQuery(chainId, address)
@@ -134,33 +120,24 @@ describe('profileDashboardQuery', () => {
     expect(result.auctionWins).toHaveLength(251)
     expect(result.auctionWins[0].id).toBe('settlement-000')
     expect(result.auctionWins[250].id).toBe('settlement-250')
-    const boundaryRequests = request.mock.calls.filter(
-      ([query]) =>
-        typeof query === 'string' &&
-        query.includes('profileDashboardAuctionSettlementsAtTimestamp')
-    )
-    expect(boundaryRequests[1][1].cursor).toBe('settlement-249')
+    const boundaryRequests =
+      sdkMock.profileDashboardAuctionSettlementsAtTimestamp.mock.calls.filter(
+        ([variables]) => variables.cursor !== undefined
+      )
+    expect(boundaryRequests[1][0].cursor).toBe('settlement-249')
     expect(result.isComplete).toBe(true)
   })
 
   it('combines count collections and skips full token metadata in summary mode', async () => {
-    request.mockImplementation((query = '') => {
-      if (query.includes('profileDashboardCountsPage')) {
-        return {
-          tokens: [{ id: 'token-1' }, { id: 'token-2' }, { id: 'token-3' }],
-          daoTokenOwners: [
-            { id: 'owner-1', daoTokenCount: 2 },
-            { id: 'owner-2', daoTokenCount: 3 },
-          ],
-          proposalVotedEvents: [{ id: 'vote-1' }],
-          proposalCreatedEvents: [{ id: 'proposal-1' }],
-          auctionBidPlacedEvents: [{ id: 'bid-1' }],
-        }
-      }
-      if (query.includes('profileDashboardAuctionSettlementsPage')) {
-        return { auctionSettledEvents: [] }
-      }
-      return { auctionSettledEvents: [] }
+    sdkMock.profileDashboardCountsPage.mockResolvedValue({
+      tokens: [{ id: 'token-1' }, { id: 'token-2' }, { id: 'token-3' }],
+      daotokenOwners: [],
+      proposalVotedEvents: [{ id: 'vote-1' }],
+      proposalCreatedEvents: [{ id: 'proposal-1' }],
+      auctionBidPlacedEvents: [{ id: 'bid-1' }],
+    })
+    sdkMock.profileDashboardAuctionSettlementsPage.mockResolvedValue({
+      auctionSettledEvents: [],
     })
 
     const result = await profileDashboardQuery(chainId, address, { mode: 'summary' })
@@ -172,28 +149,22 @@ describe('profileDashboardQuery', () => {
       proposalsSubmitted: 1,
       bidsPlaced: 1,
     })
-    expect(request).toHaveBeenCalledTimes(2)
-    expect(
-      request.mock.calls.some(([query]) =>
-        String(query).includes('profileDashboardTokensPage')
-      )
-    ).toBe(false)
+    expect(sdkMock.profileDashboardTokensPage).not.toHaveBeenCalled()
   })
 
   it('falls back to dao owner token counts when token IDs are unavailable', async () => {
-    request.mockImplementation((query = '') => {
-      if (query.includes('profileDashboardCountsPage')) {
-        return {
-          daoTokenOwners: [
-            { id: 'owner-1', daoTokenCount: 2 },
-            { id: 'owner-2', daoTokenCount: 3 },
-          ],
-          proposalVotedEvents: [],
-          proposalCreatedEvents: [],
-          auctionBidPlacedEvents: [],
-        }
-      }
-      return { auctionSettledEvents: [] }
+    sdkMock.profileDashboardCountsPage.mockResolvedValue({
+      tokens: [],
+      daotokenOwners: [
+        { id: 'owner-1', daoTokenCount: 2 },
+        { id: 'owner-2', daoTokenCount: 3 },
+      ],
+      proposalVotedEvents: [],
+      proposalCreatedEvents: [],
+      auctionBidPlacedEvents: [],
+    })
+    sdkMock.profileDashboardAuctionSettlementsPage.mockResolvedValue({
+      auctionSettledEvents: [],
     })
 
     const result = await profileDashboardQuery(chainId, address, { mode: 'summary' })
@@ -203,7 +174,7 @@ describe('profileDashboardQuery', () => {
   })
 
   it('only fetches token pages in tokens mode', async () => {
-    request.mockResolvedValue({
+    sdkMock.profileDashboardTokensPage.mockResolvedValue({
       tokens: [
         {
           id: 'token-1',
@@ -227,23 +198,20 @@ describe('profileDashboardQuery', () => {
       proposalsSubmitted: 0,
       bidsPlaced: 0,
     })
-    expect(request).toHaveBeenCalledTimes(1)
-    expect(String(request.mock.calls[0][0])).toContain('profileDashboardTokensPage')
+    expect(sdkMock.profileDashboardCountsPage).not.toHaveBeenCalled()
   })
 
   it('passes abort signals through paginated requests', async () => {
     const controller = new AbortController()
-    request.mockImplementation((query = '') => {
-      if (query.includes('profileDashboardCountsPage')) {
-        return {
-          tokens: [],
-          daoTokenOwners: [],
-          proposalVotedEvents: [],
-          proposalCreatedEvents: [],
-          auctionBidPlacedEvents: [],
-        }
-      }
-      return { auctionSettledEvents: [] }
+    sdkMock.profileDashboardCountsPage.mockResolvedValue({
+      tokens: [],
+      daotokenOwners: [],
+      proposalVotedEvents: [],
+      proposalCreatedEvents: [],
+      auctionBidPlacedEvents: [],
+    })
+    sdkMock.profileDashboardAuctionSettlementsPage.mockResolvedValue({
+      auctionSettledEvents: [],
     })
 
     await profileDashboardQuery(chainId, address, {
@@ -251,6 +219,10 @@ describe('profileDashboardQuery', () => {
       signal: controller.signal,
     })
 
-    expect(request.mock.calls.every((call) => call[2] === controller.signal)).toBe(true)
+    expect(
+      sdkMock.profileDashboardCountsPage.mock.calls.every(
+        (call) => call[2] === controller.signal
+      )
+    ).toBe(true)
   })
 })

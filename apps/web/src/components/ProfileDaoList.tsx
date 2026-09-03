@@ -2,6 +2,7 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { CHAIN_ID } from '@buildeross/types'
 import { DaoAvatar } from '@buildeross/ui/Avatar'
 import { StatBadge } from '@buildeross/ui/StatBadge'
+import { Tooltip } from '@buildeross/ui/Tooltip'
 import { isTestnetChain } from '@buildeross/utils'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import NextImage from 'next/image'
@@ -25,15 +26,11 @@ import {
   daoEditorSpacerActive,
   daoEditorSpacerLabel,
   daoSelectorHeaderActions,
-  daoSelectorInfo,
-  daoSelectorInfoButton,
-  daoSelectorInfoTooltip,
   profileDaoFilterButton,
   profileDaoFilterContainer,
   profileDaoFilterContent,
   profileDaoLink,
   profileDaoLinkActive,
-  profileDaoListFooter,
   profileDaoListRoot,
   profileDaoListRow,
   profileDaoListRowContent,
@@ -796,26 +793,27 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
             DAOs
           </Text>
           {onDaoClick ? (
-            <span className={daoSelectorInfo}>
-              <button
-                type="button"
-                className={daoSelectorInfoButton}
-                aria-label="How DAO cards work"
-                aria-describedby="profile-dao-info-tooltip"
-              >
-                i
-              </button>
-              <span
-                id="profile-dao-info-tooltip"
-                role="tooltip"
-                className={daoSelectorInfoTooltip}
-              >
+            <>
+              <Tooltip placement="bottom">
                 Click a card to filter Activity. Click the DAO name to open its DAO page.
-              </span>
-            </span>
+              </Tooltip>
+            </>
           ) : null}
         </Flex>
-        <div className={daoSelectorHeaderActions}>{headerAction}</div>
+        <div className={daoSelectorHeaderActions}>
+          {headerAction}
+          {isOwnProfile && daos.length > 0 ? (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={activeDragKey !== null}
+              onClick={() => setIsEditingDaos((current) => !current)}
+            >
+              <Icon id={isEditingDaos ? 'check' : 'pencil'} size="sm" />
+              {isEditingDaos ? 'Done' : 'Edit'}
+            </Button>
+          ) : null}
+        </div>
       </div>
 
       <Flex
@@ -975,20 +973,6 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
           </HiddenDaoDisclosure>
         ) : null}
       </Flex>
-
-      {isOwnProfile && daos.length > 0 ? (
-        <div className={profileDaoListFooter}>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={activeDragKey !== null}
-            onClick={() => setIsEditingDaos((current) => !current)}
-          >
-            <Icon id={isEditingDaos ? 'check' : 'pencil'} size="sm" />
-            {isEditingDaos ? 'Done' : 'Edit'}
-          </Button>
-        </div>
-      ) : null}
 
       {dragOverlay && draggedDao
         ? typeof document !== 'undefined'

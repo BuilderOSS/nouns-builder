@@ -1,4 +1,5 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
+import Image from 'next/image'
 import React, { useState } from 'react'
 import { profileChainFallback, profileChainIcon } from 'src/styles/profile.css'
 
@@ -117,12 +118,13 @@ export const ProfileChainIcon: React.FC<ProfileChainIconProps> = ({
   }
 
   return (
-    <img
+    <Image
       className={`${profileChainIcon}${imageClassName ? ` ${imageClassName}` : ''}`}
       src={icon}
       alt={`${chain.name} network`}
       title={chain.name}
-      loading="lazy"
+      width={18}
+      height={18}
       onError={() => setLoadFailed(true)}
     />
   )

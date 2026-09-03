@@ -29,8 +29,10 @@ type ProfileWalletScannerMenuProps = {
 const getScannerLabel = (baseUrl: string, chainName: string) => {
   const host = baseUrl.replace(/^https?:\/\//, '')
 
-  if (host.includes('etherscan')) return chainName === 'Ethereum' ? 'Etherscan' : host
-  if (host.includes('basescan')) return chainName === 'Base' ? 'Basescan' : host
+  if (host.includes('etherscan'))
+    return chainName === 'Ethereum' ? 'Etherscan' : `${chainName} Etherscan`
+  if (host.includes('basescan'))
+    return chainName === 'Base' ? 'Basescan' : 'Sepolia Basescan'
   if (host.includes('zora')) return 'Zora Explorer'
 
   return host || `${chainName} scanner`
@@ -75,6 +77,7 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
           chainName: chain.name,
           href: `${baseUrl}/address/${address}`,
           label: getScannerLabel(baseUrl, chain.name),
+          icon: chain.icon,
         }
       }).filter((link): link is NonNullable<typeof link> => link !== null),
     [address]
@@ -113,7 +116,9 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
                 setIsEditLinksModalOpen(true)
               }}
             >
-              <Text as="span">Edit links</Text>
+              <Text as="span" textAlign="left">
+                Edit links
+              </Text>
               <Icon id="pencil" size="sm" />
             </button>
           ) : (
@@ -125,7 +130,9 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
                 setIsDelegateModalOpen(true)
               }}
             >
-              <Text as="span">Delegate</Text>
+              <Text as="span" textAlign="left">
+                Delegate
+              </Text>
               <Icon id="pencil" size="sm" />
             </button>
           )}
@@ -134,7 +141,9 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
             className={walletScannerMenuItem}
             onClick={() => copyText(profileLink, true)}
           >
-            <Text as="span">Copy profile URL</Text>
+            <Text as="span" textAlign="left">
+              Copy profile URL
+            </Text>
             <Icon id="copy" size="sm" />
           </button>
           <button
@@ -142,7 +151,9 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
             className={walletScannerMenuItem}
             onClick={() => copyText(address, true)}
           >
-            <Text as="span">Copy wallet address</Text>
+            <Text as="span" textAlign="left">
+              Copy wallet address
+            </Text>
             <Icon id="copy" size="sm" />
           </button>
           {scannerLinks.map((link) => (
@@ -153,7 +164,9 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
               rel="noopener noreferrer"
               className={walletScannerMenuItem}
             >
-              <Text as="span">{link.label}</Text>
+              <Text as="span" textAlign="left">
+                {link.label}
+              </Text>
               <Icon id="external-16" size="sm" />
             </a>
           ))}

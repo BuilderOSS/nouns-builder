@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
-import { profileDaoListFooter, profileDaoListViewport } from 'src/styles/profile.css'
+import { profileDaoListViewport } from 'src/styles/profile.css'
 
 import { ProfileDaoList } from './ProfileDaoList'
 
@@ -102,10 +102,7 @@ describe('ProfileDaoList', () => {
 
     const viewport = screen.getByTestId('profile-dao-list-viewport')
     expect(viewport).toHaveClass(profileDaoListViewport)
-    expect(viewport).not.toContainElement(screen.getByRole('button', { name: 'Done' }))
-    expect(screen.getByRole('button', { name: 'Done' }).parentElement).toHaveClass(
-      profileDaoListFooter
-    )
+    expect(screen.getByRole('button', { name: 'Done' })).toBeVisible()
 
     fireEvent.click(screen.getByRole('button', { name: 'Hide Test DAO' }))
     fireEvent.keyDown(screen.getByRole('button', { name: 'Drag to reorder Test DAO' }), {

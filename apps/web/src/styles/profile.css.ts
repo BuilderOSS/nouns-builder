@@ -134,13 +134,13 @@ export const profileDaoListRowContent = style({
   alignItems: 'center',
   minHeight: '64px',
   gap: '12px',
-  padding: '8px 0',
+  padding: '4px',
 })
 
 export const daoEditorButtonGroup = style({
   display: 'flex',
   alignItems: 'center',
-  gap: '8px',
+  gap: '4px',
   flexShrink: 0,
 })
 
@@ -299,7 +299,7 @@ export const compactFilterControl = style({
   fontSize: '14px',
   selectors: {
     '&:focus-visible': {
-      outline: `3px solid ${color.positive}`,
+      outline: `3px solid ${color.focusRing}`,
       outlineOffset: '2px',
     },
     'html[data-theme-mode="dark"] &': {
@@ -545,7 +545,7 @@ export const walletScannerMenu = style({
   right: 0,
   zIndex: 100,
   display: 'block',
-  minWidth: '190px',
+  minWidth: '240px',
   padding: '6px',
   border: `1px solid ${color.border}`,
   borderRadius: '8px',
@@ -578,7 +578,7 @@ export const walletScannerMenuItem = style({
       backgroundColor: color.background2,
     },
     '&:focus-visible': {
-      outline: `3px solid ${color.positive}`,
+      outline: `3px solid ${color.focusRing}`,
       outlineOffset: '2px',
       borderRadius: '6px',
     },
@@ -694,7 +694,7 @@ export const profileDaoFilterButton = style({
   selectors: {
     '&:focus-visible': {
       zIndex: 3,
-      outline: `3px solid ${color.positive}`,
+      outline: `3px solid ${color.focusRing}`,
       outlineOffset: '2px',
     },
   },
@@ -719,8 +719,7 @@ export const profileDaoNameLink = style({
   textDecoration: 'none',
   pointerEvents: 'auto',
   selectors: {
-    '&:hover': { textDecoration: 'underline' },
-    '&:focus-visible': { outline: `3px solid ${color.positive}`, outlineOffset: '2px' },
+    '&:focus-visible': { outline: `3px solid ${color.focusRing}`, outlineOffset: '2px' },
   },
 })
 
@@ -932,7 +931,7 @@ export const profileHeaderCopyLinkButton = style({
       borderColor: color.text3,
     },
     '&:focus-visible': {
-      outline: `2px solid ${color.positive}`,
+      outline: `2px solid ${color.focusRing}`,
       outlineOffset: '2px',
     },
     '&:disabled': {
@@ -1103,7 +1102,7 @@ export const daoSelectorFilterButton = style({
   cursor: 'pointer',
   selectors: {
     '&:focus-visible': {
-      outline: `3px solid ${color.positive}`,
+      outline: `3px solid ${color.focusRing}`,
       outlineOffset: '2px',
     },
   },
@@ -1125,9 +1124,9 @@ export const daoSelectorNameLink = style({
   color: 'inherit',
   textDecoration: 'none',
   selectors: {
-    '&:hover': { textDecoration: 'underline' },
+    '&:hover': { textDecoration: 'none' },
     '&:focus-visible': {
-      outline: `2px solid ${color.positive}`,
+      outline: `2px solid ${color.focusRing}`,
       outlineOffset: '2px',
       borderRadius: '2px',
     },
@@ -1200,7 +1199,7 @@ export const daoSelectorInfoButton = style({
   fontWeight: 700,
   selectors: {
     '&:focus-visible': {
-      outline: `3px solid ${color.positive}`,
+      outline: `3px solid ${color.focusRing}`,
       outlineOffset: '2px',
     },
     'html[data-theme-mode="dark"] &': {
@@ -1257,20 +1256,6 @@ export const profileDaoListRoot = style({
     '(min-width: 768px)': {
       flex: 1,
       minHeight: 0,
-    },
-  },
-})
-
-export const profileDaoListFooter = style({
-  display: 'flex',
-  justifyContent: 'center',
-  flexShrink: 0,
-  marginTop: '16px',
-  paddingTop: '16px',
-  borderTop: `1px solid ${color.border}`,
-  selectors: {
-    'html[data-theme-mode="dark"] &': {
-      borderColor: vars.color.border,
     },
   },
 })
@@ -1360,7 +1345,6 @@ export const profileDaoListViewport = style({
   maxHeight: '324px',
   overflowY: 'auto',
   padding: '2px',
-  paddingRight: '6px',
   scrollbarWidth: 'thin',
   scrollbarColor: 'transparent transparent',
   scrollbarGutter: 'stable',
@@ -1370,7 +1354,6 @@ export const profileDaoListViewport = style({
       minHeight: 0,
       maxHeight: 'none',
       overflowY: 'auto',
-      paddingRight: '6px',
     },
   },
   selectors: {
@@ -1416,7 +1399,6 @@ export const profileDaoListViewport = style({
 export const activityViewport = style({
   maxHeight: '548px',
   overflowY: 'auto',
-  paddingRight: '6px',
   scrollbarWidth: 'thin',
   scrollbarColor: 'transparent transparent',
   scrollbarGutter: 'stable',
@@ -1483,23 +1465,39 @@ export const activityList = style({
 
 export const activityRow = style({
   minHeight: '64px',
-  padding: '10px 0',
+  padding: '4px',
   display: 'grid',
   gridTemplateColumns: '48px minmax(0, 1fr) auto',
   alignItems: 'center',
   columnGap: '8px',
   rowGap: '2px',
-  borderBottom: `1px solid ${color.border}`,
+  borderRadius: '8px',
   color: color.text1,
   textDecoration: 'none',
+  position: 'relative',
   selectors: {
-    '&:hover': { color: color.text1 },
-    '&:focus-visible': { outline: `3px solid ${color.positive}`, outlineOffset: '2px' },
+    '&:hover': { color: color.text1, backgroundColor: color.background2 },
+    '&:focus-visible': { outline: `3px solid ${color.focusRing}`, outlineOffset: '2px' },
     '&:last-child': { borderBottom: 'none' },
     'html[data-theme-mode="dark"] &': {
       color: vars.color.text1,
       borderColor: vars.color.border,
-      borderBottom: `1px solid ${vars.color.border}`,
+    },
+    'html[data-theme-mode="dark"] &:hover': {
+      color: vars.color.text1,
+      backgroundColor: vars.color.background2,
+    },
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: '1px',
+      backgroundColor: vars.color.border,
+    },
+    '&:last-child::after': {
+      content: 'none',
     },
   },
   '@media': {
@@ -1712,7 +1710,7 @@ export const tokenGalleryToggle = style({
       boxShadow: 'none',
     },
     '&:focus-visible': {
-      outline: `2px solid ${color.positive}`,
+      outline: `2px solid ${color.focusRing}`,
       outlineOffset: '2px',
     },
     'html[data-theme-mode="dark"] &': {
@@ -1774,7 +1772,7 @@ export const tokenGridViewportLocked = style({
   scrollbarGutter: 'stable',
   selectors: {
     '&:focus-visible': {
-      outline: `3px solid ${color.positive}`,
+      outline: `3px solid ${color.focusRing}`,
       outlineOffset: '3px',
     },
   },
@@ -1795,7 +1793,7 @@ export const tokenCard = style({
   transition: 'border-color 0.12s ease, transform 0.12s ease',
   selectors: {
     '&:hover': { borderColor: color.text3, transform: 'translateY(-2px)' },
-    '&:focus-visible': { outline: `3px solid ${color.positive}`, outlineOffset: '2px' },
+    '&:focus-visible': { outline: `3px solid ${color.focusRing}`, outlineOffset: '2px' },
     'html[data-theme-mode="dark"] &': {
       color: vars.color.text1,
       borderColor: vars.color.border,
@@ -1862,12 +1860,12 @@ export const tokenCardChainBadge = style({
 })
 
 export const tokenCardSelected = style({
-  borderColor: color.positive,
-  boxShadow: `0 0 0 2px ${color.positive}`,
+  borderColor: color.focusRing,
+  boxShadow: `0 0 0 2px ${color.focusRing}`,
   selectors: {
     'html[data-theme-mode="dark"] &': {
-      borderColor: vars.color.positive,
-      boxShadow: `0 0 0 2px ${vars.color.positive}`,
+      borderColor: vars.color.focusRing,
+      boxShadow: `0 0 0 2px ${vars.color.focusRing}`,
     },
   },
 })
@@ -1933,13 +1931,13 @@ export const tokenCardSelectionButton = style({
 })
 
 export const tokenCardSelectionBadgeActive = style({
-  backgroundColor: color.positive,
-  borderColor: color.positive,
+  backgroundColor: color.focusRing,
+  borderColor: color.focusRing,
   color: color.background1,
   selectors: {
     'html[data-theme-mode="dark"] &': {
-      backgroundColor: vars.color.positive,
-      borderColor: vars.color.positive,
+      backgroundColor: vars.color.focusRing,
+      borderColor: vars.color.focusRing,
       color: vars.color.background1,
     },
   },
@@ -2067,7 +2065,7 @@ export const tokenTransferInput = style({
   fontSize: '14px',
   selectors: {
     '&:focus-visible': {
-      outline: `3px solid ${color.positive}`,
+      outline: `3px solid ${color.focusRing}`,
       outlineOffset: '2px',
     },
     'html[data-theme-mode="dark"] &': {

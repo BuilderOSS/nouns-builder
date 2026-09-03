@@ -1,0 +1,157 @@
+query profileDashboardTokensPage(
+  $address: Bytes!
+  $first: Int!
+  $cursor: ID!
+) {
+  tokens(
+    first: $first
+    orderBy: id
+    orderDirection: asc
+    where: { owner: $address, id_gt: $cursor }
+  ) {
+    id
+    tokenId
+    tokenContract
+    name
+    image
+    mintedAt
+    dao {
+      tokenAddress
+      name
+      symbol
+      contractImage
+    }
+  }
+}
+
+query profileDashboardCountsPage(
+  $address: Bytes!
+  $first: Int!
+  $skip: Int!
+) {
+  tokens(
+    first: $first
+    skip: $skip
+    orderBy: id
+    orderDirection: asc
+    where: { owner: $address }
+  ) {
+    id
+  }
+  daotokenOwners(
+    first: $first
+    skip: $skip
+    orderBy: id
+    orderDirection: asc
+    where: { owner: $address }
+  ) {
+    id
+    daoTokenCount
+  }
+  proposalVotedEvents(
+    first: $first
+    skip: $skip
+    orderBy: id
+    orderDirection: asc
+    where: { actor: $address }
+  ) {
+    id
+  }
+  proposalCreatedEvents(
+    first: $first
+    skip: $skip
+    orderBy: id
+    orderDirection: asc
+    where: { actor: $address }
+  ) {
+    id
+  }
+  auctionBidPlacedEvents(
+    first: $first
+    skip: $skip
+    orderBy: id
+    orderDirection: asc
+    where: { actor: $address }
+  ) {
+    id
+  }
+}
+
+query profileDashboardAuctionSettlementsPage(
+  $address: Bytes!
+  $first: Int!
+  $beforeTimestamp: BigInt!
+) {
+  auctionSettledEvents(
+    first: $first
+    orderBy: timestamp
+    orderDirection: desc
+    where: { winner: $address, timestamp_lt: $beforeTimestamp }
+  ) {
+    id
+    timestamp
+    blockNumber
+    transactionHash
+    actor
+    winner
+    amount
+    dao {
+      tokenAddress
+      auctionAddress
+      governorAddress
+      metadataAddress
+      treasuryAddress
+      name
+      symbol
+      contractImage
+    }
+    auction {
+      id
+      token {
+        tokenId
+        name
+        image
+      }
+    }
+  }
+}
+
+query profileDashboardAuctionSettlementsAtTimestamp(
+  $address: Bytes!
+  $first: Int!
+  $timestamp: BigInt!
+  $cursor: ID!
+) {
+  auctionSettledEvents(
+    first: $first
+    orderBy: id
+    orderDirection: asc
+    where: { winner: $address, timestamp: $timestamp, id_gt: $cursor }
+  ) {
+    id
+    timestamp
+    blockNumber
+    transactionHash
+    actor
+    winner
+    amount
+    dao {
+      tokenAddress
+      auctionAddress
+      governorAddress
+      metadataAddress
+      treasuryAddress
+      name
+      symbol
+      contractImage
+    }
+    auction {
+      id
+      token {
+        tokenId
+        name
+        image
+      }
+    }
+  }
+}

@@ -12883,6 +12883,124 @@ export type SyncStatusQuery = {
   } | null
 }
 
+export type ProfileDashboardTokensPageQueryVariables = Exact<{
+  address: Scalars['Bytes']['input']
+  first: Scalars['Int']['input']
+  cursor: Scalars['ID']['input']
+}>
+
+export type ProfileDashboardTokensPageQuery = {
+  __typename?: 'Query'
+  tokens: Array<{
+    __typename?: 'Token'
+    id: string
+    tokenId: any
+    tokenContract: any
+    name: string
+    image?: string | null
+    mintedAt: any
+    dao: {
+      __typename?: 'DAO'
+      tokenAddress: any
+      name: string
+      symbol: string
+      contractImage: string
+    }
+  }>
+}
+
+export type ProfileDashboardCountsPageQueryVariables = Exact<{
+  address: Scalars['Bytes']['input']
+  first: Scalars['Int']['input']
+  skip: Scalars['Int']['input']
+}>
+
+export type ProfileDashboardCountsPageQuery = {
+  __typename?: 'Query'
+  tokens: Array<{ __typename?: 'Token'; id: string }>
+  daotokenOwners: Array<{
+    __typename?: 'DAOTokenOwner'
+    id: string
+    daoTokenCount: number
+  }>
+  proposalVotedEvents: Array<{ __typename?: 'ProposalVotedEvent'; id: string }>
+  proposalCreatedEvents: Array<{ __typename?: 'ProposalCreatedEvent'; id: string }>
+  auctionBidPlacedEvents: Array<{ __typename?: 'AuctionBidPlacedEvent'; id: string }>
+}
+
+export type ProfileDashboardAuctionSettlementsPageQueryVariables = Exact<{
+  address: Scalars['Bytes']['input']
+  first: Scalars['Int']['input']
+  beforeTimestamp: Scalars['BigInt']['input']
+}>
+
+export type ProfileDashboardAuctionSettlementsPageQuery = {
+  __typename?: 'Query'
+  auctionSettledEvents: Array<{
+    __typename?: 'AuctionSettledEvent'
+    id: string
+    timestamp: any
+    blockNumber: any
+    transactionHash: any
+    actor: any
+    winner: any
+    amount: any
+    dao: {
+      __typename?: 'DAO'
+      tokenAddress: any
+      auctionAddress: any
+      governorAddress: any
+      metadataAddress: any
+      treasuryAddress: any
+      name: string
+      symbol: string
+      contractImage: string
+    }
+    auction: {
+      __typename?: 'Auction'
+      id: string
+      token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
+    }
+  }>
+}
+
+export type ProfileDashboardAuctionSettlementsAtTimestampQueryVariables = Exact<{
+  address: Scalars['Bytes']['input']
+  first: Scalars['Int']['input']
+  timestamp: Scalars['BigInt']['input']
+  cursor: Scalars['ID']['input']
+}>
+
+export type ProfileDashboardAuctionSettlementsAtTimestampQuery = {
+  __typename?: 'Query'
+  auctionSettledEvents: Array<{
+    __typename?: 'AuctionSettledEvent'
+    id: string
+    timestamp: any
+    blockNumber: any
+    transactionHash: any
+    actor: any
+    winner: any
+    amount: any
+    dao: {
+      __typename?: 'DAO'
+      tokenAddress: any
+      auctionAddress: any
+      governorAddress: any
+      metadataAddress: any
+      treasuryAddress: any
+      name: string
+      symbol: string
+      contractImage: string
+    }
+    auction: {
+      __typename?: 'Auction'
+      id: string
+      token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
+    }
+  }>
+}
+
 export type PropdatesQueryVariables = Exact<{
   proposalId: Scalars['String']['input']
   first: Scalars['Int']['input']
@@ -14911,6 +15029,160 @@ export const SyncStatusDocument = gql`
     }
   }
 `
+export const ProfileDashboardTokensPageDocument = gql`
+  query profileDashboardTokensPage($address: Bytes!, $first: Int!, $cursor: ID!) {
+    tokens(
+      first: $first
+      orderBy: id
+      orderDirection: asc
+      where: { owner: $address, id_gt: $cursor }
+    ) {
+      id
+      tokenId
+      tokenContract
+      name
+      image
+      mintedAt
+      dao {
+        tokenAddress
+        name
+        symbol
+        contractImage
+      }
+    }
+  }
+`
+export const ProfileDashboardCountsPageDocument = gql`
+  query profileDashboardCountsPage($address: Bytes!, $first: Int!, $skip: Int!) {
+    tokens(
+      first: $first
+      skip: $skip
+      orderBy: id
+      orderDirection: asc
+      where: { owner: $address }
+    ) {
+      id
+    }
+    daotokenOwners(
+      first: $first
+      skip: $skip
+      orderBy: id
+      orderDirection: asc
+      where: { owner: $address }
+    ) {
+      id
+      daoTokenCount
+    }
+    proposalVotedEvents(
+      first: $first
+      skip: $skip
+      orderBy: id
+      orderDirection: asc
+      where: { actor: $address }
+    ) {
+      id
+    }
+    proposalCreatedEvents(
+      first: $first
+      skip: $skip
+      orderBy: id
+      orderDirection: asc
+      where: { actor: $address }
+    ) {
+      id
+    }
+    auctionBidPlacedEvents(
+      first: $first
+      skip: $skip
+      orderBy: id
+      orderDirection: asc
+      where: { actor: $address }
+    ) {
+      id
+    }
+  }
+`
+export const ProfileDashboardAuctionSettlementsPageDocument = gql`
+  query profileDashboardAuctionSettlementsPage(
+    $address: Bytes!
+    $first: Int!
+    $beforeTimestamp: BigInt!
+  ) {
+    auctionSettledEvents(
+      first: $first
+      orderBy: timestamp
+      orderDirection: desc
+      where: { winner: $address, timestamp_lt: $beforeTimestamp }
+    ) {
+      id
+      timestamp
+      blockNumber
+      transactionHash
+      actor
+      winner
+      amount
+      dao {
+        tokenAddress
+        auctionAddress
+        governorAddress
+        metadataAddress
+        treasuryAddress
+        name
+        symbol
+        contractImage
+      }
+      auction {
+        id
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+    }
+  }
+`
+export const ProfileDashboardAuctionSettlementsAtTimestampDocument = gql`
+  query profileDashboardAuctionSettlementsAtTimestamp(
+    $address: Bytes!
+    $first: Int!
+    $timestamp: BigInt!
+    $cursor: ID!
+  ) {
+    auctionSettledEvents(
+      first: $first
+      orderBy: id
+      orderDirection: asc
+      where: { winner: $address, timestamp: $timestamp, id_gt: $cursor }
+    ) {
+      id
+      timestamp
+      blockNumber
+      transactionHash
+      actor
+      winner
+      amount
+      dao {
+        tokenAddress
+        auctionAddress
+        governorAddress
+        metadataAddress
+        treasuryAddress
+        name
+        symbol
+        contractImage
+      }
+      auction {
+        id
+        token {
+          tokenId
+          name
+          image
+        }
+      }
+    }
+  }
+`
 export const PropdatesDocument = gql`
   query propdates($proposalId: String!, $first: Int!, $skip: Int!) {
     proposalUpdates(
@@ -14992,7 +15264,7 @@ export const ProposalsDocument = gql`
       where: $where
       first: $first
       skip: $skip
-      orderBy: timeCreated
+      orderBy: proposalNumber
       orderDirection: desc
     ) {
       ...Proposal
@@ -15839,6 +16111,78 @@ export function getSdk(
             signal,
           }),
         'syncStatus',
+        'query',
+        variables
+      )
+    },
+    profileDashboardTokensPage(
+      variables: ProfileDashboardTokensPageQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ProfileDashboardTokensPageQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ProfileDashboardTokensPageQuery>({
+            document: ProfileDashboardTokensPageDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'profileDashboardTokensPage',
+        'query',
+        variables
+      )
+    },
+    profileDashboardCountsPage(
+      variables: ProfileDashboardCountsPageQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ProfileDashboardCountsPageQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ProfileDashboardCountsPageQuery>({
+            document: ProfileDashboardCountsPageDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'profileDashboardCountsPage',
+        'query',
+        variables
+      )
+    },
+    profileDashboardAuctionSettlementsPage(
+      variables: ProfileDashboardAuctionSettlementsPageQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ProfileDashboardAuctionSettlementsPageQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ProfileDashboardAuctionSettlementsPageQuery>({
+            document: ProfileDashboardAuctionSettlementsPageDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'profileDashboardAuctionSettlementsPage',
+        'query',
+        variables
+      )
+    },
+    profileDashboardAuctionSettlementsAtTimestamp(
+      variables: ProfileDashboardAuctionSettlementsAtTimestampQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ProfileDashboardAuctionSettlementsAtTimestampQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ProfileDashboardAuctionSettlementsAtTimestampQuery>({
+            document: ProfileDashboardAuctionSettlementsAtTimestampDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'profileDashboardAuctionSettlementsAtTimestamp',
         'query',
         variables
       )

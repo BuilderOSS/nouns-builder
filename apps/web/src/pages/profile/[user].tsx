@@ -167,7 +167,7 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
     ? (router.query.tokenSort as TokenSortOption)
     : 'newest'
 
-  const profileLink = `https://nouns.build/profile/${userAddress}`
+  const profileLink = `${BASE_URL}/profile/${userAddress}`
   const isOwnProfile = isOwnProfileAddress(connectedAddress, userAddress)
 
   const updateQuery = React.useCallback(
