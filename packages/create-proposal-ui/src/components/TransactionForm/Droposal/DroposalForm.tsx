@@ -55,6 +55,22 @@ const editionSizeOptions = [
 
 type SplitState = 'none' | 'creating' | 'active'
 
+const droposalFieldLabels: Partial<Record<keyof DroposalFormValues, string>> = {
+  name: 'Name',
+  symbol: 'Symbol',
+  description: 'Description',
+  mediaUrl: 'Media',
+  coverUrl: 'Cover',
+  pricePerMint: 'Price',
+  maxPerAddress: 'Mint limit per address',
+  maxSupply: 'Edition size',
+  royaltyPercentage: 'Royalty',
+  fundsRecipient: 'Payout address',
+  defaultAdmin: 'Default admin address',
+  publicSaleStart: 'Start time',
+  publicSaleEnd: 'End time',
+}
+
 export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }) => {
   const [editionType, setEditionType] = useState<EditionType>('open')
   const [isIPFSUploading, setIsIPFSUploading] = useState(false)
@@ -105,53 +121,29 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
             formik.setFieldValue('mediaType', media.type)
           }
 
+          const flattenErrorMessages = (value: unknown): string[] => {
+            if (!value) return []
+            if (typeof value === 'string') return [value]
+            if (Array.isArray(value)) {
+              return value.flatMap((item) => flattenErrorMessages(item))
+            }
+            if (typeof value === 'object') {
+              return Object.values(value as Record<string, unknown>).flatMap((item) =>
+                flattenErrorMessages(item)
+              )
+            }
+            return []
+          }
+
           const formErrors = Object.entries(
             formik.errors as Record<string, unknown>
-          ).reduce(
-            (acc, [key, error]) => {
-              if (typeof error === 'string') {
-                acc.push({ key, message: error })
-                return acc
-              }
-
-              if (Array.isArray(error)) {
-                error.forEach((item, index) => {
-                  if (typeof item === 'string') {
-                    acc.push({ key: `${key}-${index}`, message: item })
-                    return
-                  }
-
-                  if (item && typeof item === 'object') {
-                    Object.entries(item as Record<string, unknown>).forEach(
-                      ([field, value]) => {
-                        if (typeof value === 'string') {
-                          acc.push({
-                            key: `${key}-${index}-${field}`,
-                            message: `${field}: ${value}`,
-                          })
-                        }
-                      }
-                    )
-                  }
-                })
-
-                return acc
-              }
-
-              if (error && typeof error === 'object') {
-                Object.entries(error as Record<string, unknown>).forEach(
-                  ([field, value]) => {
-                    if (typeof value === 'string') {
-                      acc.push({ key: `${key}-${field}`, message: `${field}: ${value}` })
-                    }
-                  }
-                )
-              }
-
-              return acc
-            },
-            [] as Array<{ key: string; message: string }>
-          )
+          ).flatMap(([key, error]) => {
+            const label = droposalFieldLabels[key as keyof DroposalFormValues] || key
+            return flattenErrorMessages(error).map((message, index) => ({
+              key: `${key}-${index}`,
+              message: `${label}: ${message === '*' ? 'Required' : message}`,
+            }))
+          })
 
           const handleEditionTypeChanged = (value: string) => {
             value === 'open'
