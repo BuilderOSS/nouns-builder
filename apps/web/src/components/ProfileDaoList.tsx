@@ -794,7 +794,7 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
           </Text>
           {onDaoClick ? (
             <>
-              <Tooltip placement="bottom">
+              <Tooltip label="How DAO cards work" placement="bottom">
                 Click a card to filter Activity. Click the DAO name to open its DAO page.
               </Tooltip>
             </>

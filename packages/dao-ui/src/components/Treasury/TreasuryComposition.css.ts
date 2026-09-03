@@ -5,7 +5,7 @@ export const layout = style({
   display: 'grid',
   gridTemplateColumns: '320px 1fr',
   gap: '1rem',
-  alignItems: 'start',
+  alignItems: 'stretch',
   '@media': {
     'screen and (max-width: 900px)': {
       gridTemplateColumns: '1fr',
@@ -17,6 +17,11 @@ export const donutCard = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
+  justifyContent: 'space-between',
+  height: '100%',
+  minHeight: '26rem',
+  maxHeight: '32rem',
+  overflowY: 'auto',
   borderStyle: 'solid',
   borderWidth: '1px',
   borderColor: vars.color.border,
@@ -75,7 +80,8 @@ export const rows = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '0.75rem',
-  maxHeight: '30rem',
+  height: '100%',
+  maxHeight: '32rem',
   overflowY: 'auto',
   paddingRight: '0.25rem',
 })

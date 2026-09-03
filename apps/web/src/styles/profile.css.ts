@@ -1124,7 +1124,7 @@ export const daoSelectorNameLink = style({
   color: 'inherit',
   textDecoration: 'none',
   selectors: {
-    '&:hover': { textDecoration: 'none' },
+    '&:hover': { textDecoration: 'underline' },
     '&:focus-visible': {
       outline: `2px solid ${color.focusRing}`,
       outlineOffset: '2px',

@@ -66,11 +66,14 @@ describe('ProfileDaoList', () => {
     expect(onDaoClick).toHaveBeenCalledTimes(1)
 
     expect(screen.getByRole('heading', { name: 'DAOs', level: 2 })).toBeVisible()
-    const infoButton = screen.getByRole('button', { name: 'How DAO cards work' })
-    expect(infoButton).toHaveAttribute('aria-describedby', 'profile-dao-info-tooltip')
-    expect(screen.getByRole('tooltip')).toHaveTextContent(
-      'Click a card to filter Activity. Click the DAO name to open its DAO page.'
-    )
+    const infoButton = screen.getByLabelText('How DAO cards work')
+    expect(infoButton).toHaveAttribute('tabindex', '0')
+    fireEvent.focus(infoButton)
+    expect(
+      screen.getByText(
+        'Click a card to filter Activity. Click the DAO name to open its DAO page.'
+      )
+    ).toBeVisible()
     expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
   })
 

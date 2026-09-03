@@ -55,6 +55,22 @@ const editionSizeOptions = [
 
 type SplitState = 'none' | 'creating' | 'active'
 
+const droposalFieldLabels: Partial<Record<keyof DroposalFormValues, string>> = {
+  name: 'Name',
+  symbol: 'Symbol',
+  description: 'Description',
+  mediaUrl: 'Media',
+  coverUrl: 'Cover',
+  pricePerMint: 'Price',
+  maxPerAddress: 'Mint limit per address',
+  maxSupply: 'Edition size',
+  royaltyPercentage: 'Royalty',
+  fundsRecipient: 'Payout address',
+  defaultAdmin: 'Default admin address',
+  publicSaleStart: 'Start time',
+  publicSaleEnd: 'End time',
+}
+
 export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }) => {
   const [editionType, setEditionType] = useState<EditionType>('open')
   const [isIPFSUploading, setIsIPFSUploading] = useState(false)
@@ -104,6 +120,30 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
             setIsIPFSUploading(true)
             formik.setFieldValue('mediaType', media.type)
           }
+
+          const flattenErrorMessages = (value: unknown): string[] => {
+            if (!value) return []
+            if (typeof value === 'string') return [value]
+            if (Array.isArray(value)) {
+              return value.flatMap((item) => flattenErrorMessages(item))
+            }
+            if (typeof value === 'object') {
+              return Object.values(value as Record<string, unknown>).flatMap((item) =>
+                flattenErrorMessages(item)
+              )
+            }
+            return []
+          }
+
+          const formErrors = Object.entries(
+            formik.errors as Record<string, unknown>
+          ).flatMap(([key, error]) => {
+            const label = droposalFieldLabels[key as keyof DroposalFormValues] || key
+            return flattenErrorMessages(error).map((message, index) => ({
+              key: `${key}-${index}`,
+              message: `${label}: ${message === '*' ? 'Required' : message}`,
+            }))
+          })
 
           const handleEditionTypeChanged = (value: string) => {
             value === 'open'
@@ -460,6 +500,15 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                     )}
                   </Box>
 
+                  {!formik.isValidating && formErrors.length > 0 && (
+                    <Box mt="x2">
+                      {formErrors.map(({ key, message }) => (
+                        <Text key={key} color="negative" textAlign="left">
+                          - {message}
+                        </Text>
+                      ))}
+                    </Box>
+                  )}
                   <Button
                     variant={'outline'}
                     borderRadius={'curved'}
