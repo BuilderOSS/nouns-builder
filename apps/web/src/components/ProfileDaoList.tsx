@@ -809,7 +809,11 @@ export const ProfileDaoList: React.FC<ProfileDaoListProps> = ({
               disabled={activeDragKey !== null}
               onClick={() => setIsEditingDaos((current) => !current)}
             >
-              <Icon id={isEditingDaos ? 'check' : 'pencil'} size="sm" />
+              <Icon
+                id={isEditingDaos ? 'check' : 'pencil'}
+                size="sm"
+                style={{ marginRight: '-8px' }}
+              />
               {isEditingDaos ? 'Done' : 'Edit'}
             </Button>
           ) : null}

@@ -3,6 +3,7 @@ import type { FeedEventType } from '@buildeross/sdk/subgraph'
 import type { AddressType, CHAIN_ID, FeedItem } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
+import { bgForAddress } from '@buildeross/utils'
 import { formatTimeAgo } from '@buildeross/utils/formatTime'
 import { Button, Text } from '@buildeross/zord'
 import Link from 'next/link'
@@ -265,6 +266,12 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
                     : 'tokenId' in item
                       ? getAuctionLink(item.chainId, item.daoId, item.tokenId).href
                       : `/dao/${chain?.slug}/${item.daoId}`
+                const daoImage =
+                  'tokenImage' in item && item.tokenImage
+                    ? item.tokenImage
+                    : item.daoImage
+                const bg = bgForAddress(item.daoId)
+
                 return (
                   <Link
                     key={`${item.chainId}:${item.id}`}
@@ -278,17 +285,10 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
                         flexShrink: 0,
                         overflow: 'hidden',
                         borderRadius: 8,
+                        background: daoImage ? undefined : bg,
                       }}
                     >
-                      <FallbackImage
-                        src={
-                          'tokenImage' in item && item.tokenImage
-                            ? item.tokenImage
-                            : item.daoImage
-                        }
-                        alt=""
-                        sizes="48px"
-                      />
+                      {daoImage && <FallbackImage src={daoImage} alt="" sizes="48px" />}
                     </span>
                     <span className={activityRowContent}>
                       <span className={activityRowTitleRow}>
