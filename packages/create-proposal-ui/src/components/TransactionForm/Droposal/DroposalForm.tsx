@@ -105,6 +105,54 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
             formik.setFieldValue('mediaType', media.type)
           }
 
+          const formErrors = Object.entries(
+            formik.errors as Record<string, unknown>
+          ).reduce(
+            (acc, [key, error]) => {
+              if (typeof error === 'string') {
+                acc.push({ key, message: error })
+                return acc
+              }
+
+              if (Array.isArray(error)) {
+                error.forEach((item, index) => {
+                  if (typeof item === 'string') {
+                    acc.push({ key: `${key}-${index}`, message: item })
+                    return
+                  }
+
+                  if (item && typeof item === 'object') {
+                    Object.entries(item as Record<string, unknown>).forEach(
+                      ([field, value]) => {
+                        if (typeof value === 'string') {
+                          acc.push({
+                            key: `${key}-${index}-${field}`,
+                            message: `${field}: ${value}`,
+                          })
+                        }
+                      }
+                    )
+                  }
+                })
+
+                return acc
+              }
+
+              if (error && typeof error === 'object') {
+                Object.entries(error as Record<string, unknown>).forEach(
+                  ([field, value]) => {
+                    if (typeof value === 'string') {
+                      acc.push({ key: `${key}-${field}`, message: `${field}: ${value}` })
+                    }
+                  }
+                )
+              }
+
+              return acc
+            },
+            [] as Array<{ key: string; message: string }>
+          )
+
           const handleEditionTypeChanged = (value: string) => {
             value === 'open'
               ? formik.setFieldValue('maxSupply', 0)
@@ -460,6 +508,15 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
                     )}
                   </Box>
 
+                  {!formik.isValidating && formErrors.length > 0 && (
+                    <Box mt="x2">
+                      {formErrors.map(({ key, message }) => (
+                        <Text key={key} color="negative" textAlign="left">
+                          - {message}
+                        </Text>
+                      ))}
+                    </Box>
+                  )}
                   <Button
                     variant={'outline'}
                     borderRadius={'curved'}
