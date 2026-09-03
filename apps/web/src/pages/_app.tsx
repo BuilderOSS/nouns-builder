@@ -49,7 +49,7 @@ import { LinksProvider } from 'src/components/LinksProvider'
 import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { SWRConfig } from 'swr'
-import { createSiweMessage } from 'viem/siwe'
+import { createSiweMessage, parseSiweMessage, type SiweMessage } from 'viem/siwe'
 import { useConfig, WagmiProvider } from 'wagmi'
 
 const queryClient = new QueryClient({
@@ -77,6 +77,8 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
 
   const fetchingStatusRef = useRef(false)
   const verifyingRef = useRef(false)
+  const authenticatedAddressRef = useRef<string | undefined>(undefined)
+  const authenticatedConnectorUidRef = useRef<string | undefined>(undefined)
   const [rainbowKitAuthStatus, setRainbowKitAuthStatus] =
     useState<AuthenticationStatus>('unauthenticated')
   const { state: safeState, clearSafe } = useSafeAuth()
@@ -99,6 +101,9 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
         const currentAccount = config.state.current
           ? config.state.connections.get(config.state.current)?.accounts?.[0]
           : undefined
+        const currentConnectorUid = config.state.current
+          ? config.state.connections.get(config.state.current)?.connector.uid
+          : undefined
 
         // Authenticated if:
         // 1. Session has an address
@@ -109,8 +114,18 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
             : 'unauthenticated'
 
         setRainbowKitAuthStatus(newStatus)
+        if (newStatus === 'authenticated') {
+          authenticatedAddressRef.current = json.address
+          authenticatedConnectorUidRef.current = currentConnectorUid
+        } else {
+          authenticatedAddressRef.current = undefined
+          authenticatedConnectorUidRef.current = undefined
+        }
       } catch (_error) {
+        console.log('error in verifySession', _error)
         setRainbowKitAuthStatus('unauthenticated')
+        authenticatedAddressRef.current = undefined
+        authenticatedConnectorUidRef.current = undefined
       } finally {
         fetchingStatusRef.current = false
       }
@@ -136,8 +151,11 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           current: null,
           status: 'disconnected',
         }))
+        console.log('clearing storage')
         // Also clear auth status
         setRainbowKitAuthStatus('unauthenticated')
+        authenticatedAddressRef.current = undefined
+        authenticatedConnectorUidRef.current = undefined
       }
     }
 
@@ -187,7 +205,17 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           const authenticated = response.ok && body.ok === true
 
           if (authenticated) {
+            const siweMessage = parseSiweMessage(message) as SiweMessage
+            const currentConnectorUid = config.state.current
+              ? config.state.connections.get(config.state.current)?.connector.uid
+              : undefined
+
+            authenticatedAddressRef.current = siweMessage.address
+            authenticatedConnectorUidRef.current = currentConnectorUid
             setRainbowKitAuthStatus('authenticated')
+          } else {
+            authenticatedAddressRef.current = undefined
+            authenticatedConnectorUidRef.current = undefined
           }
 
           return authenticated
@@ -200,12 +228,38 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
       },
 
       signOut: async () => {
+        const currentAddress = config.state.current
+          ? config.state.connections.get(config.state.current)?.accounts?.[0]
+          : undefined
+        const currentConnector = config.state.current
+          ? config.state.connections.get(config.state.current)
+          : undefined
+
+        if (
+          currentAddress?.toLowerCase() ===
+            authenticatedAddressRef.current?.toLowerCase() &&
+          currentConnector?.connector.uid !== authenticatedConnectorUidRef.current
+        ) {
+          return
+        }
+
+        console.log('signing out')
         setRainbowKitAuthStatus('unauthenticated')
         clearSafe()
         await fetch('/api/siwe/logout', { method: 'POST' })
+        authenticatedAddressRef.current = undefined
+        authenticatedConnectorUidRef.current = undefined
       },
     })
-  }, [setRainbowKitAuthStatus, safeState.safeAddress, safeState.chainId, clearSafe])
+  }, [
+    setRainbowKitAuthStatus,
+    safeState.safeAddress,
+    safeState.chainId,
+    clearSafe,
+    config,
+  ])
+
+  console.log({ rainbowKitAuthStatus })
 
   return (
     <AuthStatusContext.Provider value={rainbowKitAuthStatus}>
