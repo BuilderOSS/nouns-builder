@@ -20,6 +20,7 @@ import { useConnectModal } from '@rainbow-me/rainbowkit'
 import React, { ReactNode, useMemo } from 'react'
 import { zeroAddress as ZERO_ADDRESS } from 'viem'
 
+import { ErrorBoundary } from '../../components/ErrorBoundary'
 import { SafeTransactionHandler } from '../../components/SafeTransactionHandler'
 import { Nav as DefaultLayoutNav } from '../DefaultLayout/Nav'
 
@@ -60,7 +61,9 @@ export function BaseLayout({
               </Box>
               {footer}
             </Box>
-            <SafeTransactionHandler />
+            <ErrorBoundary>
+              <SafeTransactionHandler />
+            </ErrorBoundary>
           </DraftStoreProviders>
         </DaoStoreProvider>
       </ChainStoreProvider>

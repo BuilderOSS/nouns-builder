@@ -1,8 +1,11 @@
 import { SAFE_SERVICE_URL } from '@buildeross/constants/safe'
 import { CHAIN_ID } from '@buildeross/types'
+import debug from 'debug'
 import type { Address } from 'viem'
 
 import type { SafeInfo } from './providers/types'
+
+const debugSafe = debug('app:safe')
 
 // Re-export SafeInfo for backwards compatibility
 export type { SafeInfo }
@@ -63,7 +66,7 @@ export async function isDelegateForSafe(
     const response = await fetch(url)
 
     if (!response.ok) {
-      console.error(`Safe API error: ${response.status}`, await response.text())
+      debugSafe(`Safe API error: ${response.status}`, await response.text())
       return false
     }
 
@@ -75,7 +78,7 @@ export async function isDelegateForSafe(
 
     return isDelegate
   } catch (error) {
-    console.error('Error checking delegate status:', error)
+    debugSafe('Error checking delegate status:', error)
     return false
   }
 }
@@ -98,14 +101,14 @@ export async function getSafesForDelegate(
     const response = await fetch(url)
 
     if (!response.ok) {
-      console.error(`Safe API error: ${response.status}`, await response.text())
+      debugSafe(`Safe API error: ${response.status}`, await response.text())
       return []
     }
 
     const data: DelegatesResponse = await response.json()
     return data.results.map((d) => d.safe as Address)
   } catch (error) {
-    console.error('Error fetching Safes for delegate:', error)
+    debugSafe('Error fetching Safes for delegate:', error)
     return []
   }
 }
@@ -131,7 +134,7 @@ export async function getSafeInfo(
       if (response.status === 404) {
         return null
       }
-      console.error(`Safe API error: ${response.status}`, await response.text())
+      debugSafe(`Safe API error: ${response.status}`, await response.text())
       return null
     }
 
@@ -148,7 +151,7 @@ export async function getSafeInfo(
       version: data.version,
     }
   } catch (error) {
-    console.error('Error fetching Safe info:', error)
+    debugSafe('Error fetching Safe info:', error)
     return null
   }
 }

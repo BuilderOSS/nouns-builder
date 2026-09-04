@@ -2,33 +2,26 @@
 
 import { SafeTransactionModal } from '@buildeross/ui'
 import {
-  proposeSafeTransaction,
   registerSafeTransactionHandler,
-  type SafeTransactionParams,
   unregisterSafeTransactionHandler,
 } from '@buildeross/utils'
-import { useEffect, useState } from 'react'
+import { useMachine } from '@xstate/react'
+import { useEffect } from 'react'
+
+import { safeTransactionMachine } from '../machines/safeTransactionMachine'
+import { debugSafeTx } from '../utils/debug'
 
 export function SafeTransactionHandler() {
-  const [modalState, setModalState] = useState<{
-    isOpen: boolean
-    params: SafeTransactionParams | null
-    resolve: ((result: { safeTxHash: string }) => void) | null
-    reject: ((error: Error) => void) | null
-  }>({
-    isOpen: false,
-    params: null,
-    resolve: null,
-    reject: null,
-  })
+  const [state, send] = useMachine(safeTransactionMachine)
 
   // Register global handler on mount
   useEffect(() => {
     registerSafeTransactionHandler(async (params) => {
+      debugSafeTx('Handler called with params: %O', params)
       // Show modal and wait for user interaction
       return new Promise((resolve, reject) => {
-        setModalState({
-          isOpen: true,
+        send({
+          type: 'PROPOSE',
           params,
           resolve,
           reject,
@@ -39,63 +32,47 @@ export function SafeTransactionHandler() {
     return () => {
       unregisterSafeTransactionHandler()
     }
-  }, [])
+  }, [send])
 
   const handleConfirm = async () => {
-    if (!modalState.params) {
-      return { safeTxHash: '0x' }
-    }
-
-    try {
-      // Actually propose to Safe Service
-      const safeTxHash = await proposeSafeTransaction(
-        modalState.params.safeInfo,
-        modalState.params.transaction,
-        modalState.params.eoaProvider
-      )
-
-      // Resolve the promise that SafeOwnerProvider is waiting on
-      // Return empty hash so wagmi's waitForTransactionReceipt fails quickly
-      // (Safe transactions are only proposed, not executed yet, so no on-chain tx to wait for)
-      modalState.resolve?.({ safeTxHash: '0x' })
-
-      return { safeTxHash }
-    } catch (error) {
-      // Reject the promise
-      modalState.reject?.(error as Error)
-      throw error
-    }
+    send({ type: 'CONFIRM' })
+    // The promise will be resolved by the state machine with the actual safeTxHash
+    // Return a dummy promise that resolves with the current safeTxHash
+    return { safeTxHash: state.context.safeTxHash || '0x' }
   }
 
   const handleClose = () => {
-    // Only reject if transaction wasn't confirmed yet
-    // (if it was confirmed, promise is already resolved)
-    if (modalState.reject) {
-      modalState.reject(new Error('User cancelled Safe transaction'))
+    if (state.matches('error')) {
+      send({ type: 'CLOSE' })
+    } else if (state.matches('success')) {
+      send({ type: 'CLOSE' })
+    } else {
+      send({ type: 'CANCEL' })
     }
-    setModalState({
-      isOpen: false,
-      params: null,
-      resolve: null,
-      reject: null,
-    })
   }
 
-  if (!modalState.params) {
+  // Don't render if not in a state that needs the modal
+  if (state.matches('idle')) {
     return null
   }
 
+  if (!state.context.params) {
+    return null
+  }
+
+  const isOpen = !state.matches('idle')
+
   return (
     <SafeTransactionModal
-      isOpen={modalState.isOpen}
+      isOpen={isOpen}
       onClose={handleClose}
-      safeAddress={modalState.params.safeInfo.safeAddress}
-      threshold={modalState.params.safeInfo.threshold}
-      ownersCount={modalState.params.safeInfo.owners.length}
-      chainId={modalState.params.safeInfo.chainId}
-      targetAddress={modalState.params.transaction.to}
-      txValue={modalState.params.transaction.value}
-      txData={modalState.params.transaction.data}
+      safeAddress={state.context.params.safeInfo.safeAddress}
+      threshold={state.context.params.safeInfo.threshold}
+      ownersCount={state.context.params.safeInfo.owners.length}
+      chainId={state.context.params.safeInfo.chainId}
+      targetAddress={state.context.params.transaction.to}
+      txValue={state.context.params.transaction.value}
+      txData={state.context.params.transaction.data}
       onConfirm={handleConfirm}
     />
   )

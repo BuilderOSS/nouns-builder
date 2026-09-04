@@ -3,7 +3,6 @@ import { MOBILE_PROFILE_MENU_LAYER, NAV_BUTTON_LAYER } from '@buildeross/constan
 import { SAFE_HOME_URL } from '@buildeross/constants/safe'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useUserDaos } from '@buildeross/hooks/useUserDaos'
-import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { Avatar, DaoAvatar } from '@buildeross/ui/Avatar'
@@ -17,6 +16,7 @@ import NextImage from 'next/image'
 import Link from 'next/link'
 import React from 'react'
 import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
+import { useAppDisconnect } from 'src/hooks/useAppDisconnect'
 import { useDaoListPreferences } from 'src/hooks/useDaoListPreferences'
 import { profileStatBadge } from 'src/styles/profile.css'
 import { type Address, formatUnits } from 'viem'
@@ -218,13 +218,18 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const [isMobile, setIsMobile] = React.useState(false)
 
   React.useEffect(() => {
+    // Check if window is defined (SSR safety)
+    if (typeof window === 'undefined') return
+
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768)
     }
-    if (!!window) {
-      window.addEventListener('resize', handleResize)
-      handleResize()
-    }
+
+    // Set initial value
+    handleResize()
+
+    // Add listener
+    window.addEventListener('resize', handleResize)
 
     return () => {
       window.removeEventListener('resize', handleResize)
@@ -243,7 +248,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     }
   }, [isMobile, activeDropdown])
 
-  const onDisconnect = useWalletDisconnect()
+  const onDisconnect = useAppDisconnect()
 
   const renderConnectedUserCommon = ({ isStatic = false }: { isStatic?: boolean }) => (
     <>

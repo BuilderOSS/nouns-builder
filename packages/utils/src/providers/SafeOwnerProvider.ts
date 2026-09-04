@@ -1,3 +1,4 @@
+import debug from 'debug'
 import { EventEmitter } from 'events'
 import type { PublicClient } from 'viem'
 
@@ -10,6 +11,8 @@ import type {
   SafeInfo,
   SendTransactionParams,
 } from './types'
+
+const debugSafe = debug('app:safe')
 
 /**
  * Custom EIP-1193 provider that presents a Safe as the connected account
@@ -125,8 +128,19 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
 
       // Transaction methods - handle Safe transactions
       case 'eth_sendTransaction': {
+        // Validate transaction parameters before type assertion
+        if (!paramsArray || !paramsArray[0] || typeof paramsArray[0] !== 'object') {
+          throw new Error('eth_sendTransaction requires transaction parameters')
+        }
+
         const txParams = paramsArray[0] as SendTransactionParams
-        console.log('[SafeOwnerProvider] eth_sendTransaction called:', {
+
+        // Validate required transaction fields
+        if (!txParams.to) {
+          throw new Error('Transaction must have a "to" address')
+        }
+
+        debugSafe('✓ eth_sendTransaction called:', {
           to: txParams.to,
           value: txParams.value,
           safeAddress: this.safe.safeAddress,
@@ -135,21 +149,21 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
 
         // Auto-execute for 1-of-N Safes (no multi-sig needed)
         if (this.safe.threshold === 1) {
-          console.log('[SafeOwnerProvider] Threshold is 1, auto-executing transaction')
+          debugSafe(' Threshold is 1, auto-executing transaction')
           const txHash = await executeSafeTransaction(
             this.safe,
             txParams,
             this.eoaProvider
           )
-          console.log('[SafeOwnerProvider] Transaction executed:', txHash)
+          debugSafe(' Transaction executed:', txHash)
           return txHash
         }
 
         // Multi-sig: use instance handler or fall back to global handler
-        console.log('[SafeOwnerProvider] Multi-sig Safe, using handler')
+        debugSafe(' Multi-sig Safe, using handler')
         const handler = this.transactionHandler ?? getSafeTransactionHandler()
         if (!handler) {
-          console.error('[SafeOwnerProvider] No handler registered!')
+          debugSafe('ERROR:  No handler registered!')
           throw new Error(
             'Safe transaction handler not initialized. ' +
               'This is a multi-signature Safe transaction that requires approval from other owners. ' +
@@ -157,7 +171,7 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
           )
         }
 
-        console.log('[SafeOwnerProvider] Handler found, calling it...')
+        debugSafe(' Handler found, calling it...')
         // Handler will show modal and return safeTxHash
         const result = await handler({
           safeInfo: this.safe,
@@ -165,7 +179,7 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
           eoaProvider: this.eoaProvider,
         })
 
-        console.log('[SafeOwnerProvider] Handler returned result:', result)
+        debugSafe(' Handler returned result:', result)
         // Return safeTxHash (treated like txHash by wagmi)
         return result.safeTxHash
       }

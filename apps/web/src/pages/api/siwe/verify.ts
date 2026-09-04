@@ -4,6 +4,7 @@ import { getIronSession } from 'iron-session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 import { ironOptions, type IronSessionData } from 'src/utils/iron'
+import { SIWE_VERIFY_RATE_LIMIT_KEY_PREFIX } from 'src/utils/siweAuthFlow'
 import type { Address } from 'viem'
 import { verifyMessage } from 'viem'
 import { parseSiweMessage, type SiweMessage } from 'viem/siwe'
@@ -73,5 +74,5 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 export default withRateLimit({
   maxRequests: 10,
   windowSeconds: 60,
-  keyPrefix: 'siwe:verify',
+  keyPrefix: SIWE_VERIFY_RATE_LIMIT_KEY_PREFIX,
 })(handler)
