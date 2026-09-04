@@ -1,6 +1,7 @@
 'use client'
 
 import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
+import { useAuthStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui'
 import {
@@ -11,6 +12,12 @@ import {
 import { Box, Button, Stack, Text } from '@buildeross/zord'
 import { getConnectors } from '@wagmi/core'
 import { useEffect, useState } from 'react'
+import {
+  beginSiweAuthFlow,
+  cancelSiweAuthFlow,
+  markSiweAuthVerified,
+  shouldSuppressSiwePrompt,
+} from 'src/utils/siweAuthFlow'
 import type { Address } from 'viem'
 import { createSiweMessage } from 'viem/siwe'
 import { type Connector, useAccount, useConfig, useConnect, useSignMessage } from 'wagmi'
@@ -27,6 +34,7 @@ interface CustomWalletModalProps {
 
 export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
   const { address, isConnected, connector: activeConnector, chainId } = useAccount()
+  const { isAuthenticated } = useAuthStore()
   const wagmiConfig = useConfig()
   const [showSafeFlow, setShowSafeFlow] = useState(false)
   const [safeModeActive, setSafeModeActive] = useState(false)
@@ -47,13 +55,23 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
   useEffect(() => {
     if (
       isConnected &&
+      !isAuthenticated &&
+      !shouldSuppressSiwePrompt() &&
       !showSignPrompt &&
       !isAuthenticating &&
       (activeConnector?.id === 'safeOwner' || !safeModeActive)
     ) {
+      beginSiweAuthFlow()
       setShowSignPrompt(true)
     }
-  }, [isConnected, safeModeActive, showSignPrompt, isAuthenticating, activeConnector?.id])
+  }, [
+    isConnected,
+    isAuthenticated,
+    safeModeActive,
+    showSignPrompt,
+    isAuthenticating,
+    activeConnector?.id,
+  ])
 
   // Reset authentication states when disconnected
   useEffect(() => {
@@ -61,6 +79,7 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
       setShowSignPrompt(false)
       setAuthError(null)
       setIsAuthenticating(false)
+      cancelSiweAuthFlow()
     }
   }, [isConnected])
 
@@ -191,6 +210,8 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
       const verifyBody = await verifyResponse.json()
 
       if (verifyResponse.ok && verifyBody.ok) {
+        markSiweAuthVerified()
+
         // Clear Safe mode state
         setSafeModeActive(false)
         setPendingSafeInfo(null)
@@ -198,11 +219,10 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
         // Close modal immediately
         onClose()
         setShowSignPrompt(false)
+        cancelSiweAuthFlow()
 
         // Trigger session re-verification after modal closes
-        setTimeout(() => {
-          window.dispatchEvent(new Event('focus'))
-        }, 100)
+        window.dispatchEvent(new Event('siwe:refresh'))
       } else {
         setAuthError(verifyBody.message || 'Verification failed')
         setShowSignPrompt(true) // Show sign prompt again for retry
@@ -319,6 +339,7 @@ export function CustomWalletModal({ isOpen, onClose }: CustomWalletModalProps) {
     setSafeValidationError(null)
     setShowSafeFlow(false)
     setSafeModeActive(false)
+    cancelSiweAuthFlow()
     disconnect()
   }
 

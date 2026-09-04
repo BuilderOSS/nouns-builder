@@ -38,8 +38,8 @@ import NextNProgress from 'nextjs-progressbar'
 import {
   type ReactElement,
   type ReactNode,
+  useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -48,6 +48,11 @@ import { FrameProvider } from 'src/components/FrameProvider'
 import { LinksProvider } from 'src/components/LinksProvider'
 import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
+import {
+  cancelSiweAuthFlow,
+  markSiweAuthVerified,
+  shouldSuppressSiweLogout,
+} from 'src/utils/siweAuthFlow'
 import { SWRConfig } from 'swr'
 import { createSiweMessage, parseSiweMessage, type SiweMessage } from 'viem/siwe'
 import { useConfig, WagmiProvider } from 'wagmi'
@@ -75,7 +80,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page)
   const fallback = pageProps?.fallback ?? {}
 
-  const fetchingStatusRef = useRef(false)
+  const sessionSyncRequestIdRef = useRef(0)
   const verifyingRef = useRef(false)
   const authenticatedAddressRef = useRef<string | undefined>(undefined)
   const authenticatedConnectorUidRef = useRef<string | undefined>(undefined)
@@ -84,60 +89,56 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const { state: safeState, clearSafe } = useSafeAuth()
   const config = useConfig()
 
-  // Simple session verification (RainbowKit pattern)
-  useEffect(() => {
-    const verifySession = async () => {
-      if (fetchingStatusRef.current || verifyingRef.current) {
+  const syncAuthSession = useCallback(async () => {
+    const requestId = ++sessionSyncRequestIdRef.current
+
+    try {
+      const response = await fetch('/api/siwe/me', { cache: 'no-store' })
+      const json = (await response.json()) as { address?: string }
+      const currentConnectorUid = config.state.current
+        ? config.state.connections.get(config.state.current)?.connector.uid
+        : undefined
+
+      if (requestId !== sessionSyncRequestIdRef.current) {
         return
       }
 
-      fetchingStatusRef.current = true
-
-      try {
-        const response = await fetch('/api/siwe/me')
-        const json = await response.json()
-
-        // Get current wagmi account
-        const currentAccount = config.state.current
-          ? config.state.connections.get(config.state.current)?.accounts?.[0]
-          : undefined
-        const currentConnectorUid = config.state.current
-          ? config.state.connections.get(config.state.current)?.connector.uid
-          : undefined
-
-        // Authenticated if:
-        // 1. Session has an address
-        // 2. That address matches the current wagmi account (or no account connected)
-        const newStatus =
-          json.address && (!currentAccount || json.address === currentAccount)
-            ? 'authenticated'
-            : 'unauthenticated'
-
-        setRainbowKitAuthStatus(newStatus)
-        if (newStatus === 'authenticated') {
-          authenticatedAddressRef.current = json.address
-          authenticatedConnectorUidRef.current = currentConnectorUid
-        } else {
-          authenticatedAddressRef.current = undefined
-          authenticatedConnectorUidRef.current = undefined
-        }
-      } catch (_error) {
-        console.log('error in verifySession', _error)
-        setRainbowKitAuthStatus('unauthenticated')
+      if (json.address) {
+        authenticatedAddressRef.current = json.address
+        authenticatedConnectorUidRef.current = currentConnectorUid
+        setRainbowKitAuthStatus('authenticated')
+      } else {
         authenticatedAddressRef.current = undefined
         authenticatedConnectorUidRef.current = undefined
-      } finally {
-        fetchingStatusRef.current = false
+        setRainbowKitAuthStatus('unauthenticated')
       }
+    } catch (_error) {
+      if (requestId !== sessionSyncRequestIdRef.current) {
+        return
+      }
+
+      authenticatedAddressRef.current = undefined
+      authenticatedConnectorUidRef.current = undefined
+      setRainbowKitAuthStatus('unauthenticated')
+    }
+  }, [config])
+
+  // Session sync for mount, focus, and successful SIWE verification.
+  useEffect(() => {
+    void syncAuthSession()
+
+    const handleAuthRefresh = () => {
+      void syncAuthSession()
     }
 
-    // Verify on mount
-    verifySession()
+    window.addEventListener('focus', handleAuthRefresh)
+    window.addEventListener('siwe:refresh', handleAuthRefresh)
 
-    // Verify on window focus (in case user logs out of another window)
-    window.addEventListener('focus', verifySession)
-    return () => window.removeEventListener('focus', verifySession)
-  }, [config])
+    return () => {
+      window.removeEventListener('focus', handleAuthRefresh)
+      window.removeEventListener('siwe:refresh', handleAuthRefresh)
+    }
+  }, [syncAuthSession])
 
   // Cross-tab synchronization: detect when another tab clears wagmi storage
   useEffect(() => {
@@ -156,6 +157,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
         setRainbowKitAuthStatus('unauthenticated')
         authenticatedAddressRef.current = undefined
         authenticatedConnectorUidRef.current = undefined
+        cancelSiweAuthFlow()
       }
     }
 
@@ -163,101 +165,85 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
     return () => window.removeEventListener('storage', handleStorageChange)
   }, [config])
 
-  const authAdapter = useMemo(() => {
-    return createAuthenticationAdapter({
-      getNonce: async () => {
-        const response = await fetch('/api/siwe/nonce')
-        const nonce = await response.text()
-        return nonce
-      },
+  const authAdapter = createAuthenticationAdapter({
+    getNonce: async () => {
+      const response = await fetch('/api/siwe/nonce')
+      const nonce = await response.text()
+      return nonce
+    },
 
-      createMessage: ({ nonce, address, chainId: msgChainId }) => {
-        const message = createSiweMessage({
-          domain: window.location.host,
-          address,
-          statement: safeState.safeAddress
-            ? `Sign in as owner for Safe ${safeState.safeAddress}`
-            : 'Sign in with Ethereum to Nouns Builder',
-          uri: window.location.origin,
-          version: '1',
-          chainId: msgChainId,
-          nonce,
+    createMessage: ({ nonce, address, chainId: msgChainId }) => {
+      const message = createSiweMessage({
+        domain: window.location.host,
+        address,
+        statement: safeState.safeAddress
+          ? `Sign in as owner for Safe ${safeState.safeAddress}`
+          : 'Sign in with Ethereum to Nouns Builder',
+        uri: window.location.origin,
+        version: '1',
+        chainId: msgChainId,
+        nonce,
+      })
+      return message
+    },
+
+    verify: async ({ message, signature }) => {
+      verifyingRef.current = true
+
+      try {
+        const response = await fetch('/api/siwe/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message,
+            signature,
+            safeAddress: safeState.safeAddress,
+            safeChainId: safeState.chainId,
+          }),
         })
-        return message
-      },
 
-      verify: async ({ message, signature }) => {
-        verifyingRef.current = true
+        const body = (await response.json()) as { ok?: boolean }
+        const authenticated = response.ok && body.ok === true
 
-        try {
-          const response = await fetch('/api/siwe/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              message,
-              signature,
-              safeAddress: safeState.safeAddress,
-              safeChainId: safeState.chainId,
-            }),
-          })
+        if (authenticated) {
+          const siweMessage = parseSiweMessage(message) as SiweMessage
+          const currentConnectorUid = config.state.current
+            ? config.state.connections.get(config.state.current)?.connector.uid
+            : undefined
 
-          const body = (await response.json()) as { ok?: boolean }
-          const authenticated = response.ok && body.ok === true
-
-          if (authenticated) {
-            const siweMessage = parseSiweMessage(message) as SiweMessage
-            const currentConnectorUid = config.state.current
-              ? config.state.connections.get(config.state.current)?.connector.uid
-              : undefined
-
-            authenticatedAddressRef.current = siweMessage.address
-            authenticatedConnectorUidRef.current = currentConnectorUid
-            setRainbowKitAuthStatus('authenticated')
-          } else {
-            authenticatedAddressRef.current = undefined
-            authenticatedConnectorUidRef.current = undefined
-          }
-
-          return authenticated
-        } catch (error) {
-          console.error('[Auth] Error verifying signature', error)
-          return false
-        } finally {
-          verifyingRef.current = false
-        }
-      },
-
-      signOut: async () => {
-        const currentAddress = config.state.current
-          ? config.state.connections.get(config.state.current)?.accounts?.[0]
-          : undefined
-        const currentConnector = config.state.current
-          ? config.state.connections.get(config.state.current)
-          : undefined
-
-        if (
-          currentAddress?.toLowerCase() ===
-            authenticatedAddressRef.current?.toLowerCase() &&
-          currentConnector?.connector.uid !== authenticatedConnectorUidRef.current
-        ) {
-          return
+          authenticatedAddressRef.current = siweMessage.address
+          authenticatedConnectorUidRef.current = currentConnectorUid
+          setRainbowKitAuthStatus('authenticated')
+          markSiweAuthVerified()
+        } else {
+          authenticatedAddressRef.current = undefined
+          authenticatedConnectorUidRef.current = undefined
+          cancelSiweAuthFlow()
         }
 
-        console.log('signing out')
-        setRainbowKitAuthStatus('unauthenticated')
-        clearSafe()
-        await fetch('/api/siwe/logout', { method: 'POST' })
-        authenticatedAddressRef.current = undefined
-        authenticatedConnectorUidRef.current = undefined
-      },
-    })
-  }, [
-    setRainbowKitAuthStatus,
-    safeState.safeAddress,
-    safeState.chainId,
-    clearSafe,
-    config,
-  ])
+        return authenticated
+      } catch (error) {
+        console.error('[Auth] Error verifying signature', error)
+        return false
+      } finally {
+        verifyingRef.current = false
+      }
+    },
+
+    signOut: async () => {
+      if (shouldSuppressSiweLogout()) {
+        return
+      }
+
+      console.log('signing out')
+      setRainbowKitAuthStatus('unauthenticated')
+      clearSafe()
+      await fetch('/api/siwe/logout', { method: 'POST' })
+      authenticatedAddressRef.current = undefined
+      authenticatedConnectorUidRef.current = undefined
+      cancelSiweAuthFlow()
+    },
+  })
 
   console.log({ rainbowKitAuthStatus })
 
