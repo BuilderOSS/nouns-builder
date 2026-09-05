@@ -22,7 +22,6 @@ vi.mock('wagmi', async (importOriginal) => {
   return {
     ...actual,
     useAccount: () => ({
-      address: '0x1234',
       chain: { id: CHAIN_ID.ETHEREUM },
     }),
     useBalance: () => ({ data: { value: mockBalanceValue } }),
@@ -30,6 +29,10 @@ vi.mock('wagmi', async (importOriginal) => {
     useReadContracts: () => ({ data: [parseEther('1'), 10n] }),
   }
 })
+
+vi.mock('@buildeross/stores', () => ({
+  useAuthStore: () => ({ address: '0x1234' }),
+}))
 
 vi.mock('wagmi/actions', () => ({
   simulateContract: vi.fn(),
@@ -84,7 +87,7 @@ describe('PlaceBid', () => {
     mockBalanceValue = parseEther('1')
     vi.mocked(simulateContract).mockResolvedValue({ request: {} as any } as any)
     vi.mocked(writeContract).mockResolvedValue('0x1234' as `0x${string}`)
-    vi.mocked(waitForTransactionReceipt).mockResolvedValue({} as any)
+    vi.mocked(waitForTransactionReceipt).mockResolvedValue({ status: 'success' } as any)
   })
 
   it('shows insufficient balance error while typing a higher bid', async () => {

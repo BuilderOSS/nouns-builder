@@ -22,8 +22,10 @@ describe('simulationService', () => {
   })
 
   describe('simulate', () => {
+    const tokenAddress: Address = '0x1234567890123456789012345678901234567890'
     const treasuryAddress: Address = '0xbcdfd67cce7bf4f49c0631ddd14eadff4d5ca15d'
     const request: SimulationRequestBody = {
+      tokenAddress,
       treasuryAddress,
       chainId: CHAIN_ID.ETHEREUM,
       targets: [
@@ -50,6 +52,7 @@ describe('simulationService', () => {
     it('fails with mismatched input array lengths', async () => {
       await expect(
         simulate({
+          tokenAddress,
           treasuryAddress,
           chainId: CHAIN_ID.ETHEREUM,
           targets: [
@@ -64,6 +67,7 @@ describe('simulationService', () => {
 
       await expect(
         simulate({
+          tokenAddress,
           treasuryAddress,
           chainId: CHAIN_ID.ETHEREUM,
           targets: ['0x1111111111111111111111111111111111111111'],
@@ -74,6 +78,7 @@ describe('simulationService', () => {
 
       await expect(
         simulate({
+          tokenAddress,
           treasuryAddress,
           chainId: CHAIN_ID.ETHEREUM,
           targets: ['0x1111111111111111111111111111111111111111'],

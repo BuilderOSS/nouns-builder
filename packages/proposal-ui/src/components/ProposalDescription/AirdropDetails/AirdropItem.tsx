@@ -2,6 +2,8 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { AirdropInstanceData } from '@buildeross/hooks/useAirdropData'
 import { useEthUsdPrice } from '@buildeross/hooks/useEthUsdPrice'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
+import { useAuthStore } from '@buildeross/stores'
 import { type CHAIN_ID, TokenMetadata } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -19,8 +21,8 @@ import {
   isAddressEqual,
   parseAbi,
 } from 'viem'
-import { useAccount, useConfig, useReadContracts } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { useConfig, useReadContracts } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 import { formatFeeDisplay } from '../utils/feeDisplay'
 
@@ -80,7 +82,7 @@ export const AirdropItem = ({
   chainId,
   tokenMetadata,
 }: AirdropItemProps) => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const config = useConfig()
   const { price: ethUsdPrice } = useEthUsdPrice()
   const [isClaiming, setIsClaiming] = useState(false)
@@ -226,12 +228,17 @@ export const AirdropItem = ({
         value: minFeeWei,
       })
 
-      const hash = await writeContract(config, simulation.request)
-      await waitForTransactionReceipt(config, { hash, chainId })
+      const result = await executeAppTransaction({
+        config,
+        request: simulation.request,
+        chainId,
+      })
+      if (result.kind === 'safe-proposed') return
 
       await refetchClaimState()
     } catch (error) {
       console.error('Failed to claim airdrop:', error)
+      throw error
     } finally {
       setIsClaiming(false)
     }

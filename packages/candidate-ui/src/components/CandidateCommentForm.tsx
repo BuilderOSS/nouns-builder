@@ -6,7 +6,7 @@ import {
 } from '@buildeross/sdk'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { CandidateVoteSupport } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton, TextArea, Toggle, WalletIdentity } from '@buildeross/ui'
 import { getErrorMessage } from '@buildeross/utils/errors'
 import { walletSnippet } from '@buildeross/utils/helpers'
@@ -14,7 +14,7 @@ import type { IconType } from '@buildeross/zord'
 import { Box, Flex, Icon, Stack, Text, theme, vars } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { type Hex } from 'viem'
-import { useAccount, useConfig, useReadContract, useWalletClient } from 'wagmi'
+import { useConfig, useReadContract, useWalletClient } from 'wagmi'
 
 import {
   CANDIDATE_SIGNATURE_VALIDITY_DAYS,
@@ -78,7 +78,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
 }) => {
   const config = useConfig()
   const { data: walletClient } = useWalletClient()
-  const { address } = useAccount()
+  const { address, isAuthenticated } = useAuthStore()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
   const { ensName: replyToEnsName, ensAvatar: replyToEnsAvatar } = useEnsData(
@@ -155,6 +155,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
   const canSubmit = useMemo(() => {
     return (
       !!address &&
+      isAuthenticated &&
       !!addresses.token &&
       // When replying, comment is required (no signals allowed)
       // When not replying, either comment OR signal is required
@@ -163,7 +164,16 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
         : comment.trim().length > 0 || signalEnabled) &&
       (!shouldSign || nonce !== undefined)
     )
-  }, [address, addresses.token, comment, signalEnabled, shouldSign, nonce, replyTo])
+  }, [
+    address,
+    isAuthenticated,
+    addresses.token,
+    comment,
+    signalEnabled,
+    shouldSign,
+    nonce,
+    replyTo,
+  ])
 
   const canSign = useMemo(() => {
     return (
@@ -184,9 +194,10 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
     const actualSupport = signalEnabled ? support : CandidateVoteSupportEnum.NONE
 
     try {
+      let result
       if (withSignature) {
         // Submit signal/comment + signature in one transaction
-        await attestCommentWithSignature({
+        result = await attestCommentWithSignature({
           config,
           chainId: chain.id,
           walletClient: walletClient!,
@@ -205,7 +216,7 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
         })
       } else {
         // Submit only comment/signal
-        await attestCandidateComment({
+        result = await attestCandidateComment({
           config,
           chainId: chain.id,
           daoTokenAddress: addresses.token!,
@@ -214,6 +225,11 @@ export const CandidateCommentForm: React.FC<CandidateCommentFormProps> = ({
           comment: comment.trim(),
           parentCommentUID,
         })
+      }
+
+      // Don't reset form or show success for Safe proposals - user needs to execute via Safe UI
+      if (result.kind === 'safe-proposed') {
+        return
       }
 
       // Reset form

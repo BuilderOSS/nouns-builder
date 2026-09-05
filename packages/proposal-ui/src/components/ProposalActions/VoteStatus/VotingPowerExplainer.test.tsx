@@ -35,9 +35,9 @@ let mockMembershipReturn: {
   mutate: () => void
 }
 
-vi.mock('wagmi', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('wagmi')>()
-  return { ...actual, useAccount: () => mockAccount }
+vi.mock('@buildeross/stores', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@buildeross/stores')>()
+  return { ...actual, useAuthStore: () => mockAccount }
 })
 
 vi.mock('@buildeross/hooks/useVotes', () => ({

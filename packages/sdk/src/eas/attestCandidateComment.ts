@@ -8,9 +8,10 @@ import { CHAIN_ID } from '@buildeross/types'
 import type { Hex } from 'viem'
 import { encodeAbiParameters, getAddress, zeroHash } from 'viem'
 import type { Config } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
-import { awaitSubgraphSync } from '../subgraph/requests/sync'
+import { executeAppTransaction } from '../transaction'
+import { extractSingleAttestationUID } from './utils'
 
 export enum CandidateVoteSupportEnum {
   FOR = 0,
@@ -29,10 +30,16 @@ export interface CandidateCommentParams {
   parentCommentUID?: Hex
 }
 
-export interface CandidateCommentResult {
-  attestationUID: Hex
-  transactionHash: Hex
-}
+export type CandidateCommentResult =
+  | {
+      kind: 'mined'
+      attestationUID: Hex
+      transactionHash: Hex
+    }
+  | {
+      kind: 'safe-proposed'
+      transactionHash: Hex
+    }
 
 /**
  * Submits a candidate comment/vote attestation to EAS
@@ -92,22 +99,26 @@ export async function attestCandidateComment(
   })
 
   // 4. Write the transaction
-  const txHash = await writeContract(config, simulation.request)
-
-  // 5. Wait for confirmation
-  const receipt = await waitForTransactionReceipt(config, {
-    hash: txHash,
-    chainId: chainId,
+  const result = await executeAppTransaction({
+    config,
+    request: simulation.request,
+    chainId,
   })
 
-  // 6. Sync with subgraph
-  await awaitSubgraphSync(chainId, receipt.blockNumber)
+  // Handle Safe proposals vs mined transactions
+  if (result.kind === 'safe-proposed') {
+    return {
+      kind: 'safe-proposed',
+      transactionHash: result.hash,
+    }
+  }
 
-  // 7. Use transaction hash as attestation UID
-  const attestationUID = txHash
+  // Extract attestation UID from logs for mined transactions
+  const attestationUID = extractSingleAttestationUID(result.receipt, easAddress)
 
   return {
+    kind: 'mined',
     attestationUID,
-    transactionHash: txHash,
+    transactionHash: result.hash,
   }
 }

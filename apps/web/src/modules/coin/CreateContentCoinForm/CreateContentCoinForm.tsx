@@ -5,8 +5,9 @@ import {
 } from '@buildeross/constants'
 import { useClankerTokenPrice } from '@buildeross/hooks'
 import { uploadFile } from '@buildeross/ipfs-service'
-import { awaitSubgraphSync, ClankerTokenFragment } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { ClankerTokenFragment } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import {
   CoinFormFields,
@@ -37,8 +38,8 @@ import { Form, Formik, type FormikHelpers, useFormikContext } from 'formik'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import { type Address, decodeEventLog, zeroAddress, zeroHash } from 'viem'
-import { useAccount, useConfig, useReadContract } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { useConfig, useReadContract } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 import { NoCreatorCoinWarning } from './NoCreatorCoinWarning'
 
@@ -91,7 +92,7 @@ const CreateContentCoinEconomicsPreview: React.FC<
   CreateContentCoinEconomicsPreviewProps
 > = ({ chainId, latestClankerToken, clankerTokenPriceUsd }) => {
   const formik = useFormikContext<CoinFormValues>()
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useAuthStore()
 
   // Prepare arguments for coinAddress call
   const { encodedPoolConfig, shouldFetch } = React.useMemo(() => {
@@ -212,7 +213,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
 }) => {
   const router = useRouter()
   const config = useConfig()
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useAuthStore()
   const [submitError, setSubmitError] = useState<string | undefined>()
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
   const [isDeploying, setIsDeploying] = useState(false)
@@ -301,14 +302,7 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       })
 
       // Execute the transaction
-      const txHash = await writeContract(config, simulation.request)
-
-      // Wait for confirmation
-      if (txHash) {
-        await waitForTransactionReceipt(config, { hash: txHash, chainId })
-      }
-
-      return txHash
+      return executeAppTransaction({ config, request: simulation.request, chainId })
     },
     [config, userAddress, treasury, chainId]
   )
@@ -423,15 +417,9 @@ export const CreateContentCoinForm: React.FC<CreateContentCoinFormProps> = ({
       )
 
       // Success! Parse transaction and navigate to coin page
-      if (txHash) {
+      if (txHash?.kind === 'mined') {
         try {
-          // Wait for transaction receipt to get logs
-          const receipt = await waitForTransactionReceipt(config, {
-            hash: txHash,
-            chainId,
-          })
-
-          await awaitSubgraphSync(chainId, receipt.blockNumber)
+          const receipt = txHash.receipt
 
           // Parse logs to find the coin address from CoinCreatedV4 event
           let coinAddress: Address | null = null

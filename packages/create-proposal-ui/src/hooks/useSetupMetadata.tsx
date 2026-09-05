@@ -1,11 +1,13 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { metadataAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { AddressType, CHAIN_ID, Property } from '@buildeross/types'
 import { useCallback, useState } from 'react'
 import useSWRImmutable from 'swr/immutable'
 import { decodeFunctionData, encodeFunctionData } from 'viem'
-import { usePublicClient, useWriteContract } from 'wagmi'
+import { useConfig } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 export const MAX_ITEMS_PER_CHUNK = 50
 
@@ -201,9 +203,9 @@ export const useSetupMetadata = (
   )
   const [txHashes, setTxHashes] = useState<`0x${string}`[]>(persistedTxHashes || [])
   const [addError, setAddError] = useState<string>()
+  const [isAddingProperties, setIsAddingProperties] = useState(false)
 
-  const { writeContractAsync, isPending } = useWriteContract()
-  const publicClient = usePublicClient({ chainId: targetChainId })
+  const config = useConfig()
 
   // Combine fetch error and add error
   const error = fetchError?.message || addError
@@ -219,6 +221,7 @@ export const useSetupMetadata = (
     }
 
     setAddError(undefined)
+    setIsAddingProperties(true)
     const hashes: `0x${string}`[] = []
 
     try {
@@ -232,7 +235,7 @@ export const useSetupMetadata = (
           data: properties[i] as `0x${string}`,
         })
 
-        const hash = await writeContractAsync({
+        const { request } = await simulateContract(config, {
           abi: metadataAbi,
           address: targetMetadataAddress,
           functionName: 'addProperties',
@@ -240,17 +243,27 @@ export const useSetupMetadata = (
           chainId: targetChainId,
         })
 
+        const result = await executeAppTransaction({
+          config,
+          chainId: targetChainId!,
+          request,
+        })
+        const hash = result.hash
+
+        if (result.kind === 'safe-proposed') {
+          hashes.push(hash)
+          setTxHashes([...hashes])
+          onTxHashAdded?.(hash)
+          return
+        }
+
         hashes.push(hash)
         setTxHashes([...hashes])
         onTxHashAdded?.(hash)
 
         // Wait for transaction receipt before continuing
-        if (publicClient) {
-          const receipt = await publicClient.waitForTransactionReceipt({ hash })
-
-          if (receipt.status !== 'success') {
-            throw new Error(`Transaction failed for property ${i + 1}`)
-          }
+        if (result.kind === 'mined' && result.receipt.status !== 'success') {
+          throw new Error(`Transaction failed for property ${i + 1}`)
         }
       }
 
@@ -265,13 +278,14 @@ export const useSetupMetadata = (
       })
       setAddError(errorMsg)
       throw err
+    } finally {
+      setIsAddingProperties(false)
     }
   }, [
     targetMetadataAddress,
     targetChainId,
     properties,
-    writeContractAsync,
-    publicClient,
+    config,
     currentPropertyIndex,
     onProgressUpdate,
     onTxHashAdded,
@@ -281,7 +295,7 @@ export const useSetupMetadata = (
     properties: properties || [],
     isLoadingProperties,
     addAllProperties,
-    isAddingProperties: isPending,
+    isAddingProperties,
     progress: {
       current: persistedProgress?.current ?? currentPropertyIndex,
       total: persistedProgress?.total ?? (properties?.length || 0),

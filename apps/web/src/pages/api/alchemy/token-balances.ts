@@ -3,7 +3,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getEnrichedTokenBalances } from 'src/services/alchemyService'
 import { withCors } from 'src/utils/api/cors'
-import { withRateLimit } from 'src/utils/api/rateLimit'
+import { withTieredRateLimit } from 'src/utils/api/rateLimit'
 
 const parseBooleanParam = (value: string | string[] | undefined): boolean | undefined => {
   if (typeof value !== 'string') return undefined
@@ -55,7 +55,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export default withCors()(
-  withRateLimit({
+  withTieredRateLimit({
     keyPrefix: 'alchemy:tokenBalances',
+    anonymousMaxRequests: 5,
+    anonymousWindowSeconds: 60,
+    authenticatedMaxRequests: 60,
+    authenticatedWindowSeconds: 60,
   })(handler)
 )

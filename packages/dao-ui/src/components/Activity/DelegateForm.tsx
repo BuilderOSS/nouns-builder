@@ -1,4 +1,5 @@
 import { tokenAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { SmartInput } from '@buildeross/ui/Fields'
@@ -8,7 +9,7 @@ import { Field, Form as FormikForm, Formik } from 'formik'
 import React, { useState } from 'react'
 import { Address } from 'viem'
 import { useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { proposalFormTitle } from './Activity.css'
 import { delegateValidationSchema } from './DelegateForm.schema'
@@ -41,9 +42,18 @@ export const DelegateForm = ({ handleBack, handleUpdate }: DelegateFormProps) =>
         functionName: 'delegate',
         args: [delegate],
       })
-      const hash = await writeContract(config, data.request)
-      await waitForTransactionReceipt(config, { hash, chainId: chain.id })
+      const result = await executeAppTransaction({
+        config,
+        request: data.request,
+        chainId: chain.id,
+      })
 
+      // Don't update UI for Safe proposals - user needs to execute via Safe UI
+      if (result.kind === 'safe-proposed') {
+        return
+      }
+
+      // Only update delegate for mined transactions
       handleUpdate(values.address)
     } catch (e) {
       console.error(e)

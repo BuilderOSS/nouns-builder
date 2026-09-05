@@ -1,13 +1,13 @@
 import { governorAbi } from '@buildeross/sdk/contract'
-import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AnimatedModal, ContractButton, SuccessModalContent } from '@buildeross/ui'
 import { getErrorMessage } from '@buildeross/utils/errors'
 import { Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { type Hex } from 'viem'
-import { useAccount, useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { useConfig } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 export interface ProposerSignature {
   signer: `0x${string}`
@@ -44,7 +44,7 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
   onSuccess,
 }) => {
   const config = useConfig()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
 
@@ -98,17 +98,13 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
         ],
       })
 
-      // 2. Write the transaction
-      const txHash = await writeContract(config, simulation.request)
-
-      // 3. Wait for confirmation
-      const receipt = await waitForTransactionReceipt(config, {
-        hash: txHash,
+      const result = await executeAppTransaction({
+        config,
+        request: simulation.request,
         chainId: chain.id,
       })
-
-      // 4. Wait for subgraph to sync
-      await awaitSubgraphSync(chain.id, receipt.blockNumber)
+      if (result.kind === 'safe-proposed') return
+      const txHash = result.hash
 
       // 5. Use txHash as proposal identifier
       setIsTxSuccess(true)

@@ -18,6 +18,10 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      '@wagmi/core':
+        specifier: ^2.22.1
+        version: 2.22.1(@tanstack/query-core@5.90.3)(@types/react@19.2.2)(react@19.2.1)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.1))(viem@2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))
     devDependencies:
       '@buildeross/eslint-config-custom':
         specifier: workspace:*
@@ -188,6 +192,12 @@ importers:
       '@vercel/og':
         specifier: ^0.6.8
         version: 0.6.8
+      '@wagmi/core':
+        specifier: ^2.22.1
+        version: 2.22.1(@tanstack/query-core@5.90.3)(@types/react@19.2.2)(react@19.2.1)(typescript@5.9.3)(use-sync-external-store@1.4.0(react@19.2.1))(viem@2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))
+      '@xstate/react':
+        specifier: ^6.1.0
+        version: 6.1.0(@types/react@19.2.2)(react@19.2.1)(xstate@5.32.6)
       '@zoralabs/coins-sdk':
         specifier: ^0.4.3
         version: 0.4.3(abitype@1.2.3(typescript@5.9.3)(zod@4.1.12))(viem@2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))
@@ -199,13 +209,16 @@ importers:
         version: 5.0.76(zod@4.1.12)
       alchemy-sdk:
         specifier: ^3.6.0
-        version: 3.6.5(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10)
+        version: 3.6.5(bufferutil@4.0.9)(debug@4.4.3)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10)
       axios:
         specifier: ^1.12.2
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
+      debug:
+        specifier: ^4.4.3
+        version: 4.4.3(supports-color@8.1.1)
       flatpickr:
         specifier: ^4.6.13
         version: 4.6.13
@@ -221,6 +234,9 @@ importers:
       ioredis:
         specifier: ^5.8.1
         version: 5.8.1
+      iron-session:
+        specifier: ^8.0.4
+        version: 8.0.4
       next:
         specifier: ^15.5.9
         version: 15.5.9(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(babel-plugin-macros@3.1.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -257,6 +273,9 @@ importers:
       wagmi:
         specifier: ^2.18.1
         version: 2.18.1(@tanstack/query-core@5.90.3)(@tanstack/react-query@5.90.3(react@19.2.1))(@types/react@19.2.2)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(react@19.2.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12)
+      xstate:
+        specifier: ^5.32.6
+        version: 5.32.6
       zustand:
         specifier: ^5.0.4
         version: 5.0.8(@types/react@19.2.2)(react@19.2.1)(use-sync-external-store@1.4.0(react@19.2.1))
@@ -288,6 +307,9 @@ importers:
       '@testing-library/user-event':
         specifier: ^14.6.1
         version: 14.6.1(@testing-library/dom@10.4.1)
+      '@types/debug':
+        specifier: ^4.1.13
+        version: 4.1.13
       '@types/lodash':
         specifier: ^4.17.17
         version: 4.17.20
@@ -315,6 +337,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.5.0
         version: 4.7.0(vite@6.3.7(@types/node@22.18.10)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.1))
+      '@xstate/inspect':
+        specifier: ^0.8.0
+        version: 0.8.0(@types/ws@8.18.1)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(xstate@5.32.6)
       dotenv:
         specifier: ^16.5.0
         version: 16.6.1
@@ -390,7 +415,7 @@ importers:
         version: 1.17.4(babel-plugin-macros@3.1.0)
       axios:
         specifier: ^1.12.2
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
@@ -667,7 +692,7 @@ importers:
         version: 1.17.4(babel-plugin-macros@3.1.0)
       axios:
         specifier: ^1.12.2
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
@@ -818,7 +843,7 @@ importers:
         version: 0.7.2
       axios:
         specifier: ^1.12.2
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
@@ -963,7 +988,7 @@ importers:
         version: 1.17.4(babel-plugin-macros@3.1.0)
       axios:
         specifier: ^1.12.2
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
@@ -1236,6 +1261,9 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
+      debug:
+        specifier: ^4.4.3
+        version: 4.4.3(supports-color@8.1.1)
       react:
         specifier: ^19.2.1
         version: 19.2.1
@@ -1273,6 +1301,9 @@ importers:
       '@testing-library/react':
         specifier: ^16.3.0
         version: 16.3.0(@testing-library/dom@10.4.1)(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@types/debug':
+        specifier: ^4.1.13
+        version: 4.1.13
       '@types/node':
         specifier: ^22.15.21
         version: 22.18.10
@@ -1354,7 +1385,7 @@ importers:
         version: 1.17.4(babel-plugin-macros@3.1.0)
       axios:
         specifier: ^1.12.2
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
@@ -1476,6 +1507,12 @@ importers:
 
   packages/sdk:
     dependencies:
+      '@buildeross/types':
+        specifier: workspace:*
+        version: link:../types
+      '@buildeross/utils':
+        specifier: workspace:*
+        version: link:../utils
       '@sentry/nextjs':
         specifier: ^9.22.0
         version: 9.46.0(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@15.5.9(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(react@19.2.1)(webpack@5.102.1)
@@ -1504,12 +1541,6 @@ importers:
       '@buildeross/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
-      '@buildeross/types':
-        specifier: workspace:*
-        version: link:../types
-      '@buildeross/utils':
-        specifier: workspace:*
-        version: link:../utils
       '@graphql-codegen/cli':
         specifier: ^5.0.6
         version: 5.0.7(@types/node@22.18.10)(bufferutil@4.0.9)(crossws@0.3.5)(encoding@0.1.13)(enquirer@2.4.1)(graphql@16.11.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
@@ -1546,6 +1577,9 @@ importers:
 
   packages/stores:
     dependencies:
+      wagmi:
+        specifier: ^2.18.1
+        version: 2.18.1(@tanstack/query-core@5.90.3)(@tanstack/react-query@5.90.3(react@19.2.1))(@types/react@19.2.2)(bufferutil@4.0.9)(encoding@0.1.13)(ioredis@5.8.1)(react@19.2.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))(zod@4.1.12)
       zustand:
         specifier: ^5.0.4
         version: 5.0.8(@types/react@19.2.2)(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1))
@@ -1838,9 +1872,21 @@ importers:
 
   packages/utils:
     dependencies:
+      '@safe-global/api-kit':
+        specifier: ^5.0.2
+        version: 5.0.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+      '@safe-global/protocol-kit':
+        specifier: ^8.0.5
+        version: 8.0.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+      '@safe-global/safe-core-sdk-types':
+        specifier: ^5.1.0
+        version: 5.1.0(typescript@5.9.3)(zod@4.1.12)
       bignumber.js:
         specifier: ^9.3.0
         version: 9.3.1
+      debug:
+        specifier: ^4.4.3
+        version: 4.4.3(supports-color@8.1.1)
       decimal.js:
         specifier: ^10.6.0
         version: 10.6.0
@@ -1881,6 +1927,9 @@ importers:
       '@buildeross/types':
         specifier: workspace:*
         version: link:../types
+      '@types/debug':
+        specifier: ^4.1.13
+        version: 4.1.13
       '@types/node':
         specifier: ^22.15.21
         version: 22.18.10
@@ -4715,15 +4764,35 @@ packages:
   '@rushstack/eslint-patch@1.14.0':
     resolution: {integrity: sha512-WJFej426qe4RWOm9MMtP4V3CV4AucXolQty+GRgAWLgQXmpCuwzs7hEpxxhSc/znXUSxum9d/P/32MW0FlAAlA==}
 
+  '@safe-global/api-kit@5.0.2':
+    resolution: {integrity: sha512-KhsqqUT5Ixn5WjvbAysjpaEHH68+nUYbppR0nFiWzclWfDUdScGzi0TnimlUu+0YoSRG1ekOfTaVs8Dkdpjrgg==}
+
+  '@safe-global/protocol-kit@8.0.5':
+    resolution: {integrity: sha512-Tl5SqM+JZPrguf30seXaheV0CD3MmIXnL6ziRyvgY/bkNAEB+gGeI24xuxsYFHWbEuG9FiEr4VTVu/NxRz5tRg==}
+
   '@safe-global/safe-apps-provider@0.18.6':
     resolution: {integrity: sha512-4LhMmjPWlIO8TTDC2AwLk44XKXaK6hfBTWyljDm0HQ6TWlOEijVWNrt2s3OCVMSxlXAcEzYfqyu1daHZooTC2Q==}
 
   '@safe-global/safe-apps-sdk@9.1.0':
     resolution: {integrity: sha512-N5p/ulfnnA2Pi2M3YeWjULeWbjo7ei22JwU/IXnhoHzKq3pYCN6ynL9mJBOlvDVv892EgLPCWCOwQk/uBT2v0Q==}
 
+  '@safe-global/safe-core-sdk-types@5.1.0':
+    resolution: {integrity: sha512-UzXR4zWmVzux25FcIm4H049QhZZpVpIBL5HE+V0p5gHpArZROL+t24fZmsKUf403CtBxIJM5zZSVQL0nFJi+IQ==}
+    deprecated: 'WARNING: This project has been renamed to @safe-global/types-kit. Please, migrate from @safe-global/safe-core-sdk-types@5.1.0 to @safe-global/types-kit@1.0.0.'
+
+  '@safe-global/safe-deployments@1.37.61':
+    resolution: {integrity: sha512-bPjznEFWFN698CJupwGd+ZNI5aBslylV6FjnGt7CBodZs9rZPLfKT/HhI+ppTvMgh+Tgn/KJNGMwKW9aPVIBng==}
+    engines: {node: '>=22.0.0', pnpm: '>=10.16.0'}
+
   '@safe-global/safe-gateway-typescript-sdk@3.23.1':
     resolution: {integrity: sha512-6ORQfwtEJYpalCeVO21L4XXGSdbEMfyp2hEv6cP82afKXSwvse6d3sdelgaPWUxHIsFRkWvHDdzh8IyyKHZKxw==}
     engines: {node: '>=16'}
+
+  '@safe-global/safe-modules-deployments@3.0.9':
+    resolution: {integrity: sha512-tgW/ln4if6dLohAQVUT51/a+tTUMuTm3dKvGPgXmHaLUFS8P3f28+cs671rsyMlMa4A/zXJKOdFgBsfCTyfw0A==}
+
+  '@safe-global/types-kit@4.0.1':
+    resolution: {integrity: sha512-zmIYyAH9mcBcqHszPgcfNjOJYuPSvWCcc/f8zeznh7N1HSA7jEoFErO06O4QDfwAAS4aEyoyjhPyfHbVYRheZg==}
 
   '@scure/base@1.1.9':
     resolution: {integrity: sha512-8YKhl8GHiNI/pU2VMaofa2Tor7PJRAjwQLBBuilkJ9L5+13yVbC7JO/wS7piioAvPSwR3JKM1IJ/u4xQzbcXKg==}
@@ -5265,9 +5334,6 @@ packages:
 
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
-
-  '@types/debug@4.1.12':
-    resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
 
   '@types/debug@4.1.13':
     resolution: {integrity: sha512-KSVgmQmzMwPlmtljOomayoR89W4FynCAi3E8PPs7vmDVPe84hT+vGPKkJfThkmXs0x0jAaa9U8uW8bbfyS2fWw==}
@@ -5982,6 +6048,25 @@ packages:
   '@wry/trie@0.5.0':
     resolution: {integrity: sha512-FNoYzHawTMk/6KMQoEG5O4PuioX19UbwdQKF44yw0nLfOypfQdjtfZzo/UIJWAJ23sNIFbD1Ug9lbaDGMwbqQA==}
     engines: {node: '>=8'}
+
+  '@xstate/inspect@0.8.0':
+    resolution: {integrity: sha512-wSkFeOnp+7dhn+zTThO0M4D2FEqZN9lGIWowJu5JLa2ojjtlzRwK8SkjcHZ4rLX8VnMev7kGjgQLrGs8kxy+hw==}
+    peerDependencies:
+      '@types/ws': ^8.0.0
+      ws: ^8.0.0
+      xstate: ^4.37.0
+    peerDependenciesMeta:
+      '@types/ws':
+        optional: true
+
+  '@xstate/react@6.1.0':
+    resolution: {integrity: sha512-ep9F0jGTI63B/jE8GHdMpUqtuz7yRebNaKv8EMUaiSi29NOglywc2X2YSOV/ygbIK+LtmgZ0q9anoEA2iBSEOw==}
+    peerDependencies:
+      react: ^19.2.1
+      xstate: ^5.28.0
+    peerDependenciesMeta:
+      xstate:
+        optional: true
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -6912,6 +6997,10 @@ packages:
 
   cookie@0.7.1:
     resolution: {integrity: sha512-6DnInpx7SJ2AK3+CTUE/ZM0vWTUboZCegxhC2xiIydHR9jNuTAASBrfEpHhiGOZw/nX51bHt6YQl8jsGo4y/0w==}
+    engines: {node: '>= 0.6'}
+
+  cookie@0.7.2:
+    resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
 
   copy-to-clipboard@3.3.3:
@@ -8704,6 +8793,9 @@ packages:
   ipfs-utils@9.0.14:
     resolution: {integrity: sha512-zIaiEGX18QATxgaS0/EOQNoo33W0islREABAcxXE8n7y2MGAlB+hdsxXn4J0hGZge8IqVQhW8sWIb+oJz2yEvg==}
     engines: {node: '>=16.0.0', npm: '>=7.0.0'}
+
+  iron-session@8.0.4:
+    resolution: {integrity: sha512-9ivNnaKOd08osD0lJ3i6If23GFS2LsxyMU8Gf/uBUEgm8/8CC1hrrCHFDpMo3IFbpBgwoo/eairRsaD3c5itxA==}
 
   iron-webcrypto@1.2.1:
     resolution: {integrity: sha512-feOM6FaSr6rEABp/eDfVseKyTMDt+KGpeB35SkVn9Tyn0CqvVsY3EwI0v5i8nMHyJnzCIQf7nsy3p41TPkJZhg==}
@@ -10996,6 +11088,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.8.5:
+    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   send@0.19.0:
     resolution: {integrity: sha512-dW41u5VfLXu8SJh5bwRmyYUbAoSB3c9uQh6L8h/KtsFREPWpbX1lrljJo186Jc4nmci/sGUZ9a0a0J2zgfq2hw==}
     engines: {node: '>= 0.8.0'}
@@ -12000,6 +12097,15 @@ packages:
       '@types/react':
         optional: true
 
+  use-isomorphic-layout-effect@1.2.1:
+    resolution: {integrity: sha512-tpZZ+EX0gaghDAiFR37hj5MgY6ZN55kLiPkJsKxBMZ6GZdOSPJXiOzPM984oPYZ5AnehYx5WQp1+ME8I/P/pRA==}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^19.2.1
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
   use-sidecar@1.1.3:
     resolution: {integrity: sha512-Fedw0aZvkhynoPYlA5WXrMCAMm+nSWdZt6lzJQ7Ok8S6Q+VsHmHpRWndVRJ8Be0ZbkfPc5LRYH+5XrzXcEeLRQ==}
     engines: {node: '>=10'}
@@ -12410,6 +12516,9 @@ packages:
   xmlhttprequest-ssl@2.1.2:
     resolution: {integrity: sha512-TEU+nJVUUnA4CYJFLvK5X9AOeH4KvDvhIfm0vV1GaQRtchnG0hgK5p8hw/xjv8cunWYCsiPCSDzObPyhEwq3KQ==}
     engines: {node: '>=0.4.0'}
+
+  xstate@5.32.6:
+    resolution: {integrity: sha512-WfA8WNrh6r9osuGwVm+aIPM4jmMW2LKHV1Yv9thYpOtL4HVF/kobh95K/O8v2jDCpDmP2EoY+6uvuqHXCZ6ZLw==}
 
   xtend@4.0.2:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
@@ -15439,7 +15548,7 @@ snapshots:
       '@metamask/superstruct': 3.2.1
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
-      '@types/debug': 4.1.12
+      '@types/debug': 4.1.13
       '@types/lodash': 4.17.20
       debug: 4.4.3(supports-color@8.1.1)
       lodash: 4.17.21
@@ -15454,7 +15563,7 @@ snapshots:
       '@ethereumjs/tx': 4.2.0
       '@types/debug': 4.1.13
       debug: 4.4.3(supports-color@8.1.1)
-      semver: 7.7.4
+      semver: 7.8.5
       superstruct: 1.0.4
     transitivePeerDependencies:
       - supports-color
@@ -15479,7 +15588,7 @@ snapshots:
       '@metamask/superstruct': 3.2.1
       '@noble/hashes': 1.8.0
       '@scure/base': 1.2.6
-      '@types/debug': 4.1.12
+      '@types/debug': 4.1.13
       debug: 4.4.3(supports-color@8.1.1)
       pony-cause: 2.1.11
       semver: 7.7.3
@@ -16435,6 +16544,36 @@ snapshots:
 
   '@rushstack/eslint-patch@1.14.0': {}
 
+  '@safe-global/api-kit@5.0.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)':
+    dependencies:
+      '@safe-global/protocol-kit': 8.0.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+      '@safe-global/types-kit': 4.0.1(typescript@5.9.3)(zod@4.1.12)
+      node-fetch: 2.7.0(encoding@0.1.13)
+      viem: 2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@safe-global/protocol-kit@8.0.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)':
+    dependencies:
+      '@safe-global/safe-deployments': 1.37.61
+      '@safe-global/safe-modules-deployments': 3.0.9
+      '@safe-global/types-kit': 4.0.1(typescript@5.9.3)(zod@4.1.12)
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.1.12)
+      semver: 7.8.5
+      viem: 2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+    optionalDependencies:
+      '@noble/curves': 1.9.7
+      '@peculiar/asn1-schema': 2.5.0
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
+
   '@safe-global/safe-apps-provider@0.18.6(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)':
     dependencies:
       '@safe-global/safe-apps-sdk': 9.1.0(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
@@ -16455,7 +16594,27 @@ snapshots:
       - utf-8-validate
       - zod
 
+  '@safe-global/safe-core-sdk-types@5.1.0(typescript@5.9.3)(zod@4.1.12)':
+    dependencies:
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.1.12)
+    transitivePeerDependencies:
+      - typescript
+      - zod
+
+  '@safe-global/safe-deployments@1.37.61':
+    dependencies:
+      semver: 7.8.5
+
   '@safe-global/safe-gateway-typescript-sdk@3.23.1': {}
+
+  '@safe-global/safe-modules-deployments@3.0.9': {}
+
+  '@safe-global/types-kit@4.0.1(typescript@5.9.3)(zod@4.1.12)':
+    dependencies:
+      abitype: 1.2.3(typescript@5.9.3)(zod@4.1.12)
+    transitivePeerDependencies:
+      - typescript
+      - zod
 
   '@scure/base@1.1.9': {}
 
@@ -17282,10 +17441,6 @@ snapshots:
     dependencies:
       '@types/node': 22.19.15
 
-  '@types/debug@4.1.12':
-    dependencies:
-      '@types/ms': 2.1.0
-
   '@types/debug@4.1.13':
     dependencies:
       '@types/ms': 2.1.0
@@ -17944,6 +18099,21 @@ snapshots:
       mipd: 0.0.7(typescript@5.9.3)
       viem: 2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
       zustand: 5.0.0(@types/react@19.2.2)(react@19.2.1)(use-sync-external-store@1.4.0(react@19.2.1))
+    optionalDependencies:
+      '@tanstack/query-core': 5.90.3
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - react
+      - use-sync-external-store
+
+  '@wagmi/core@2.22.1(@tanstack/query-core@5.90.3)(@types/react@19.2.2)(react@19.2.1)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.1))(viem@2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))':
+    dependencies:
+      eventemitter3: 5.0.1
+      mipd: 0.0.7(typescript@5.9.3)
+      viem: 2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+      zustand: 5.0.0(@types/react@19.2.2)(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1))
     optionalDependencies:
       '@tanstack/query-core': 5.90.3
       typescript: 5.9.3
@@ -18875,6 +19045,24 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  '@xstate/inspect@0.8.0(@types/ws@8.18.1)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))(xstate@5.32.6)':
+    dependencies:
+      fast-safe-stringify: 2.1.1
+      ws: 8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      xstate: 5.32.6
+    optionalDependencies:
+      '@types/ws': 8.18.1
+
+  '@xstate/react@6.1.0(@types/react@19.2.2)(react@19.2.1)(xstate@5.32.6)':
+    dependencies:
+      react: 19.2.1
+      use-isomorphic-layout-effect: 1.2.1(@types/react@19.2.2)(react@19.2.1)
+      use-sync-external-store: 1.6.0(react@19.2.1)
+    optionalDependencies:
+      xstate: 5.32.6
+    transitivePeerDependencies:
+      - '@types/react'
+
   '@xtuc/ieee754@1.2.0': {}
 
   '@xtuc/long@4.2.2': {}
@@ -19002,7 +19190,7 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alchemy-sdk@3.6.5(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10):
+  alchemy-sdk@3.6.5(bufferutil@4.0.9)(debug@4.4.3)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10):
     dependencies:
       '@ethersproject/abi': 5.8.0
       '@ethersproject/abstract-provider': 5.8.0
@@ -19016,7 +19204,7 @@ snapshots:
       '@ethersproject/wallet': 5.8.0
       '@ethersproject/web': 5.8.0
       '@solana/web3.js': 1.98.4(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10)
-      axios: 1.12.2
+      axios: 1.12.2(debug@4.4.3)
       sturdy-websocket: 0.2.1
       websocket: 1.0.35
     transitivePeerDependencies:
@@ -19269,7 +19457,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  axios@1.12.2:
+  axios@1.12.2(debug@4.4.3):
     dependencies:
       follow-redirects: 1.15.11(debug@4.4.3)
       form-data: 4.0.4
@@ -19954,6 +20142,8 @@ snapshots:
   cookie@0.4.2: {}
 
   cookie@0.7.1: {}
+
+  cookie@0.7.2: {}
 
   copy-to-clipboard@3.3.3:
     dependencies:
@@ -22337,6 +22527,12 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  iron-session@8.0.4:
+    dependencies:
+      cookie: 0.7.2
+      iron-webcrypto: 1.2.1
+      uncrypto: 0.1.3
+
   iron-webcrypto@1.2.1: {}
 
   is-absolute@1.0.0:
@@ -23401,7 +23597,7 @@ snapshots:
 
   micromark@4.0.2:
     dependencies:
-      '@types/debug': 4.1.12
+      '@types/debug': 4.1.13
       debug: 4.4.3(supports-color@8.1.1)
       decode-named-character-reference: 1.2.0
       devlop: 1.1.0
@@ -24937,6 +25133,8 @@ snapshots:
 
   semver@7.7.4: {}
 
+  semver@7.8.5: {}
+
   send@0.19.0:
     dependencies:
       debug: 2.6.9
@@ -26052,6 +26250,12 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.2
 
+  use-isomorphic-layout-effect@1.2.1(@types/react@19.2.2)(react@19.2.1):
+    dependencies:
+      react: 19.2.1
+    optionalDependencies:
+      '@types/react': 19.2.2
+
   use-sidecar@1.1.3(@types/react@19.2.2)(react@19.2.1):
     dependencies:
       detect-node-es: 1.1.0
@@ -26649,6 +26853,8 @@ snapshots:
 
   xmlhttprequest-ssl@2.1.2: {}
 
+  xstate@5.32.6: {}
+
   xtend@4.0.2: {}
 
   y18n@4.0.3: {}
@@ -26761,6 +26967,12 @@ snapshots:
       '@types/react': 19.2.2
       react: 19.2.1
       use-sync-external-store: 1.4.0(react@19.2.1)
+
+  zustand@5.0.0(@types/react@19.2.2)(react@19.2.1)(use-sync-external-store@1.6.0(react@19.2.1)):
+    optionalDependencies:
+      '@types/react': 19.2.2
+      react: 19.2.1
+      use-sync-external-store: 1.6.0(react@19.2.1)
 
   zustand@5.0.3(@types/react@19.2.2)(react@19.2.1)(use-sync-external-store@1.4.0(react@19.2.1)):
     optionalDependencies:

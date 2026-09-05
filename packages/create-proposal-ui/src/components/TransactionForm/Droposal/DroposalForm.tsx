@@ -1,4 +1,4 @@
-import { useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useDaoStore } from '@buildeross/stores'
 import { DropdownSelect } from '@buildeross/ui/DropdownSelect'
 import { DatePicker, FIELD_TYPES, SmartInput, TextArea } from '@buildeross/ui/Fields'
 import { SingleMediaUpload } from '@buildeross/ui/SingleMediaUpload'
@@ -6,7 +6,6 @@ import { defaultHelperTextStyle } from '@buildeross/ui/styles'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { Form, Formik, FormikHelpers } from 'formik'
 import { useCallback, useState } from 'react'
-import { useAccount } from 'wagmi'
 
 import { defaultInputLabelStyle } from './Droposal.css'
 import droposalFormSchema, { DroposalFormValues } from './DroposalForm.schema'
@@ -77,7 +76,7 @@ export const DroposalForm: React.FC<DroposalFormProps> = ({ onSubmit, disabled }
   const [splitState, setSplitState] = useState<SplitState>('none')
   const [activeSplitAddress, setActiveSplitAddress] = useState<string | null>(null)
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const { address: user } = useAccount()
+  const { address: user } = useAuthStore()
   const { treasury } = useDaoStore((x) => x.addresses)
 
   const initialValues: DroposalFormValues = {

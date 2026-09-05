@@ -8,7 +8,12 @@ import {
   ProposalSection,
 } from '@buildeross/proposal-ui'
 import { attestCandidate, type CandidateAttestationParams } from '@buildeross/sdk'
-import { useCandidateStore, useChainStore, useDaoStore } from '@buildeross/stores'
+import {
+  useAuthStore,
+  useCandidateStore,
+  useChainStore,
+  useDaoStore,
+} from '@buildeross/stores'
 import { type ProposalDescriptionMetadataV1 } from '@buildeross/types'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
@@ -18,7 +23,7 @@ import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import useSWR from 'swr'
 import { type Hex, toHex } from 'viem'
-import { useAccount, useConfig } from 'wagmi'
+import { useConfig } from 'wagmi'
 
 import { buildCandidateDescription } from '../utils/buildCandidateDescription'
 import { getCandidateId } from '../utils/candidateProposal'
@@ -36,7 +41,7 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
   onBack,
 }) => {
   const config = useConfig()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { displayName, ensAvatar } = useEnsData(address)
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
@@ -197,6 +202,11 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
       }
 
       const result = await attestCandidate(params)
+
+      // Don't show success for Safe proposals - user needs to execute via Safe UI
+      if (result.kind === 'safe-proposed') {
+        return
+      }
 
       setIsTxSuccess(true)
       clearCandidate()

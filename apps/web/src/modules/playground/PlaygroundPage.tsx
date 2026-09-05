@@ -1,7 +1,7 @@
+import { useAuthStore } from '@buildeross/stores'
 import { Box } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import type { DaoListItem } from 'src/modules/dashboard/SingleDaoSelector'
-import { useAccount } from 'wagmi'
 
 import { CustomArtworkUpload } from './components/CustomArtworkUpload'
 import { DaoSelector } from './components/DaoSelector'
@@ -12,7 +12,7 @@ import { PlaygroundLanding } from './components/PlaygroundLanding'
 export type PlaygroundView = 'landing' | 'dao' | 'custom'
 
 export const PlaygroundPage: React.FC = () => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const [view, setView] = useState<PlaygroundView>('landing')
   const [selectedDao, setSelectedDao] = useState<DaoListItem | undefined>()
 

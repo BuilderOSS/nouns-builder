@@ -1,11 +1,11 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import { useWalletDisconnect } from '@buildeross/hooks/useWalletDisconnect'
 import { useChainStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { Box, Flex, Icon, PopUp, Stack, Text, vars } from '@buildeross/zord'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo } from 'react'
+import { useAppDisconnect } from 'src/hooks/useAppDisconnect'
 import { useAccount, useSwitchChain } from 'wagmi'
 
 import {
@@ -30,9 +30,9 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
 }) => {
   const [isChainInitialized, setIsChainInitialized] = React.useState(false)
   const router = useRouter()
-  const { address, chain: wagmiChain, connector } = useAccount()
+  const { isConnected, chain: wagmiChain } = useAccount()
   const { switchChain } = useSwitchChain()
-  const onDisconnect = useWalletDisconnect()
+  const onDisconnect = useAppDisconnect()
 
   const { chain: selectedChain, setChain, hasHydrated } = useChainStore()
 
@@ -40,17 +40,21 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
 
   const onSwitchChain = useCallback(
     (chainId: number) => {
-      if (!connector?.getChainId) return onDisconnect()
       switchChain(
         { chainId },
         {
           onError(error) {
             console.error(`Failed to switch chain:`, error)
+            // Only disconnect if critical error (not user rejection)
+            if (error.message?.includes('User rejected') === false) {
+              console.warn('Chain switch failed critically, disconnecting')
+              onDisconnect()
+            }
           },
         }
       )
     },
-    [switchChain, onDisconnect, connector]
+    [switchChain, onDisconnect]
   )
 
   const onChainChange = useCallback(
@@ -61,11 +65,11 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
       onSetActiveDropdown(undefined)
       const selected = PUBLIC_DEFAULT_CHAINS.find((x) => x.id === chainId)
       if (selected) setChain(selected)
-      if (address) {
+      if (isConnected) {
         onSwitchChain(chainId)
       }
     },
-    [onSetActiveDropdown, setChain, hasNetwork, onSwitchChain, address]
+    [onSetActiveDropdown, setChain, hasNetwork, onSwitchChain, isConnected]
   )
 
   const isSelectedChain = useCallback(
@@ -74,8 +78,8 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
   )
 
   const isWrongNetwork = useMemo(
-    () => hasNetwork && !!address && wagmiChain?.id !== selectedChain.id,
-    [address, wagmiChain?.id, selectedChain.id, hasNetwork]
+    () => hasNetwork && !!isConnected && wagmiChain?.id !== selectedChain.id,
+    [isConnected, wagmiChain?.id, selectedChain.id, hasNetwork]
   )
 
   // Handle route change start events
@@ -98,25 +102,45 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
 
     const handleRouteChangeComplete = () => {
       if (selectedChain) {
-        switchChain(
-          { chainId: selectedChain.id },
-          {
-            onError(error) {
-              console.error(`Failed to automatically switch chain:`, error)
-            },
-          }
-        )
+        setIsChainInitialized(true)
       }
-      setIsChainInitialized(true)
     }
 
+    // Only run on mount when hydrated (initial setup)
     handleRouteChangeComplete()
+
     router.events.on('routeChangeComplete', handleRouteChangeComplete)
 
     return () => {
       router.events.off('routeChangeComplete', handleRouteChangeComplete)
     }
-  }, [router, hasHydrated, selectedChain, switchChain])
+    // Only depend on hasHydrated and router, not selectedChain or switchChain
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router, hasHydrated])
+
+  // Separate effect to handle chain switching when needed
+  useEffect(() => {
+    if (!hasHydrated || !isChainInitialized) return
+
+    // Only switch if connected and on wrong chain
+    if (isConnected && wagmiChain?.id !== selectedChain?.id) {
+      switchChain(
+        { chainId: selectedChain.id },
+        {
+          onError(error) {
+            console.error(`Failed to automatically switch chain:`, error)
+          },
+        }
+      )
+    }
+  }, [
+    hasHydrated,
+    isChainInitialized,
+    isConnected,
+    wagmiChain?.id,
+    selectedChain?.id,
+    switchChain,
+  ])
 
   if (!hasHydrated || !isChainInitialized) {
     return null

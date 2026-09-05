@@ -2,6 +2,7 @@ import { votersRequest } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { withCors } from 'src/utils/api/cors'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { collectionId, chainId, page, limit } = req.query
@@ -84,4 +85,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
-export default withCors()(handler)
+export default withCors()(
+  withRateLimit({
+    maxRequests: 5,
+    windowSeconds: 60,
+    keyPrefix: 'members-list',
+  })(handler)
+)

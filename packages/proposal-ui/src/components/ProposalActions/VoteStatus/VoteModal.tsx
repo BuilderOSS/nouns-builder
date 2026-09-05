@@ -1,6 +1,7 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
-import { awaitSubgraphSync, getProposal } from '@buildeross/sdk/subgraph'
+import { getProposal } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { BytesType, CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
@@ -21,7 +22,7 @@ import { Field, Formik } from 'formik'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import {
   voteModalFieldset,
@@ -179,14 +180,13 @@ export const SubmitVoteForm: React.FC<{
           functionName: hasReason ? 'castVoteWithReason' : 'castVote',
           args: hasReason ? [proposalId, choice, values.reason] : [proposalId, choice],
         })
-        const txHash = await writeContract(config, data.request)
-
-        const receipt = await waitForTransactionReceipt(config, {
-          hash: txHash,
-          chainId: chainId,
+        const result = await executeAppTransaction({
+          config,
+          request: data.request,
+          chainId,
         })
 
-        await awaitSubgraphSync(chainId, receipt.blockNumber)
+        if (result.kind === 'safe-proposed') return
 
         await mutate(
           [SWR_KEYS.PROPOSAL, chainId, proposalId.toLowerCase()],
@@ -196,6 +196,7 @@ export const SubmitVoteForm: React.FC<{
         onSuccess()
       } catch (err) {
         console.error('Error casting vote:', err)
+        throw err
       }
     },
     [governorAddress, chainId, proposalId, config, mutate, onSuccess]

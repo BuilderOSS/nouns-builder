@@ -1,16 +1,16 @@
+import { useAuthStore } from '@buildeross/stores'
 import { Box, Grid, Text } from '@buildeross/zord'
 import React from 'react'
 import { FAVORITE_DAO_LIMIT, useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
 import { type FavoriteDao, getFavoriteDaoKey } from 'src/stores/favoriteDaosStore'
 import useSWR from 'swr'
-import { useAccount } from 'wagmi'
 
 import { exploreGrid } from './Explore.css'
 import { ExploreDaoCard } from './ExploreDaoCard'
 import { ExploreToolbar } from './ExploreToolbar'
 
 export const ExploreFavorites = () => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { favoriteCount, favorites, isDaoFavorited, toggleFavorite } =
     useFavoriteDaos(address)
 

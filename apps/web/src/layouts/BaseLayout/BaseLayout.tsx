@@ -9,6 +9,7 @@ import {
   getCandidateStore,
   getProposalStore,
   ProposalStoreProvider,
+  useAuthStore,
   useChainStore,
   useDaoStore,
 } from '@buildeross/stores'
@@ -18,8 +19,9 @@ import { Box } from '@buildeross/zord'
 import { useConnectModal } from '@rainbow-me/rainbowkit'
 import React, { ReactNode, useMemo } from 'react'
 import { zeroAddress as ZERO_ADDRESS } from 'viem'
-import { useAccount } from 'wagmi'
 
+import { ErrorBoundary } from '../../components/ErrorBoundary'
+import { SafeTransactionHandler } from '../../components/SafeTransactionHandler'
 import { Nav as DefaultLayoutNav } from '../DefaultLayout/Nav'
 
 type BoxProps = React.ComponentProps<typeof Box>
@@ -59,6 +61,9 @@ export function BaseLayout({
               </Box>
               {footer}
             </Box>
+            <ErrorBoundary>
+              <SafeTransactionHandler />
+            </ErrorBoundary>
           </DraftStoreProviders>
         </DaoStoreProvider>
       </ChainStoreProvider>
@@ -69,7 +74,7 @@ export function BaseLayout({
 function DraftStoreProviders({ children }: { children: ReactNode }) {
   const chain = useChainStore((state) => state.chain)
   const addresses = useDaoStore((state) => state.addresses)
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   const walletAddress = address ?? ZERO_ADDRESS
   const tokenAddress = addresses.token ?? ZERO_ADDRESS

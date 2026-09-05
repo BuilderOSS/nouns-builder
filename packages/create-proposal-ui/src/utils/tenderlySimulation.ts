@@ -18,6 +18,7 @@ const CHAINS_TO_SIMULATE = [
 ]
 
 export interface SimulateTransactionsParams {
+  tokenAddress: AddressType
   treasuryAddress: AddressType
   chainId: CHAIN_ID
   calldatas: string[]
@@ -28,7 +29,7 @@ export interface SimulateTransactionsParams {
 export async function simulateTransactions(
   params: SimulateTransactionsParams
 ): Promise<SimulationResult> {
-  const { treasuryAddress, chainId, calldatas, values, targets } = params
+  const { tokenAddress, treasuryAddress, chainId, calldatas, values, targets } = params
 
   if (!CHAINS_TO_SIMULATE.includes(chainId)) {
     throw new Error(`Chain ${chainId} is not supported for simulation`)
@@ -36,6 +37,7 @@ export async function simulateTransactions(
 
   try {
     const response = await axios.post<SimulationResult>(`/api/simulate`, {
+      tokenAddress,
       treasuryAddress,
       chainId,
       calldatas,

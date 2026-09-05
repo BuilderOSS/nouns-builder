@@ -3,15 +3,20 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 import { ProfileLinksEditModal } from './ProfileLinksEditModal'
 
-const { readContractMock, waitForTransactionReceiptMock, writeContractMock } = vi.hoisted(
-  () => ({
-    readContractMock: vi.fn(),
-    waitForTransactionReceiptMock: vi.fn(),
-    writeContractMock: vi.fn(),
-  })
-)
+const {
+  readContractMock,
+  simulateContractMock,
+  waitForTransactionReceiptMock,
+  writeContractMock,
+} = vi.hoisted(() => ({
+  readContractMock: vi.fn(),
+  simulateContractMock: vi.fn(),
+  waitForTransactionReceiptMock: vi.fn(),
+  writeContractMock: vi.fn(),
+}))
 
-vi.mock('wagmi', () => ({
+vi.mock('wagmi', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('wagmi')>()),
   useAccount: () => ({ chainId: 8453 }),
   useConfig: () => ({}),
   useSwitchChain: () => ({ switchChainAsync: vi.fn() }),
@@ -19,6 +24,7 @@ vi.mock('wagmi', () => ({
 
 vi.mock('wagmi/actions', () => ({
   readContract: readContractMock,
+  simulateContract: simulateContractMock,
   waitForTransactionReceipt: waitForTransactionReceiptMock,
   writeContract: writeContractMock,
 }))
@@ -32,6 +38,7 @@ describe('ProfileLinksEditModal', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     writeContractMock.mockResolvedValue(`0x${'1'.repeat(64)}`)
+    simulateContractMock.mockImplementation((_config, request) => ({ request }))
     waitForTransactionReceiptMock.mockResolvedValue({ status: 'success' })
   })
 

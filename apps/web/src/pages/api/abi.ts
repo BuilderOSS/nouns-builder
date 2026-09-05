@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { ContractABIResult, getContractABIByAddress } from 'src/services/abiService'
 import { InvalidRequestError, NotFoundError } from 'src/services/errors'
 import { withCors } from 'src/utils/api/cors'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 
 const handler = async (
   req: NextApiRequest,
@@ -35,4 +36,10 @@ const handler = async (
   }
 }
 
-export default withCors()(handler)
+export default withCors()(
+  withRateLimit({
+    maxRequests: 30,
+    windowSeconds: 60,
+    keyPrefix: 'abi',
+  })(handler)
+)
