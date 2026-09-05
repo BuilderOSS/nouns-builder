@@ -7,7 +7,7 @@ import {
 } from '@buildeross/proposal-ui'
 import { governorAbi, treasuryAbi } from '@buildeross/sdk/contract'
 import { type Proposal } from '@buildeross/sdk/subgraph'
-import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import {
   useAuthStore,
   useChainStore,
@@ -36,7 +36,7 @@ import { Formik, type FormikProps } from 'formik'
 import React, { useState } from 'react'
 import { decodeEventLog, getAddress, type Hex, isAddress } from 'viem'
 import { useConfig, useReadContracts } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { prepareProposalTransactions } from '../../utils/prepareTransactions'
 import {
@@ -363,7 +363,7 @@ export const ReviewProposalForm = ({
           return
         }
 
-        let hash: Hex
+        let result
         if (isUpdate) {
           const data = await simulateContract(config, {
             abi: governorAbi,
@@ -379,7 +379,11 @@ export const ReviewProposalForm = ({
               values.updateMessage || '', // updateMessage - optional message about what changed
             ],
           })
-          hash = await writeContract(config, data.request)
+          result = await executeAppTransaction({
+            config,
+            request: data.request,
+            chainId: chain.id,
+          })
         } else {
           const data = await simulateContract(config, {
             abi: governorAbi,
@@ -388,15 +392,15 @@ export const ReviewProposalForm = ({
             chainId: chain.id,
             args: [params.targets, params.values, params.calldatas, params.description],
           })
-          hash = await writeContract(config, data.request)
+          result = await executeAppTransaction({
+            config,
+            request: data.request,
+            chainId: chain.id,
+          })
         }
 
-        const receipt = await waitForTransactionReceipt(config, {
-          hash,
-          chainId: chain.id,
-        })
-
-        await awaitSubgraphSync(chain.id, receipt.blockNumber)
+        if (result.kind === 'safe-proposed') return
+        const receipt = result.receipt
 
         // Parse logs to find the proposal ID
         let proposalId: string | null = null
@@ -493,12 +497,12 @@ export const ReviewProposalForm = ({
           chainId: chain.id,
           args: [updateProposalId as Hex],
         })
-        const cancelHash = await writeContract(config, cancelData.request)
-
-        await waitForTransactionReceipt(config, {
-          hash: cancelHash,
+        const cancelResult = await executeAppTransaction({
+          config,
+          request: cancelData.request,
           chainId: chain.id,
         })
+        if (cancelResult.kind === 'safe-proposed') return
       }
 
       // Clear the updateProposalId so the form submits as a new proposal

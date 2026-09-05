@@ -87,7 +87,7 @@ describe('PlaceBid', () => {
     mockBalanceValue = parseEther('1')
     vi.mocked(simulateContract).mockResolvedValue({ request: {} as any } as any)
     vi.mocked(writeContract).mockResolvedValue('0x1234' as `0x${string}`)
-    vi.mocked(waitForTransactionReceipt).mockResolvedValue({} as any)
+    vi.mocked(waitForTransactionReceipt).mockResolvedValue({ status: 'success' } as any)
   })
 
   it('shows insufficient balance error while typing a higher bid', async () => {

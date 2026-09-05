@@ -3,6 +3,7 @@ import type { EIP1193Provider, SafeInfo, SendTransactionParams } from '../provid
 export interface SafeTransactionParams {
   safeInfo: SafeInfo
   transaction: SendTransactionParams
+  transactions?: SendTransactionParams[]
   eoaProvider: EIP1193Provider
 }
 

@@ -1,5 +1,5 @@
 import { ZORA_COMMENTS } from '@buildeross/constants'
-import { zoraCommentsAbi } from '@buildeross/sdk'
+import { executeAppTransaction, zoraCommentsAbi } from '@buildeross/sdk'
 import { useAuthStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { TextArea } from '@buildeross/ui/Fields'
@@ -7,7 +7,7 @@ import { Box, Flex, Text } from '@buildeross/zord'
 import React, { useCallback, useState } from 'react'
 import { Address, erc20Abi, parseEther, zeroAddress } from 'viem'
 import { useConfig, useReadContract } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import {
   commentFormContainer,
@@ -90,24 +90,29 @@ export const CoinCommentForm: React.FC<CoinCommentFormProps> = ({
       })
 
       // Execute the transaction
-      const txHash = await writeContract(config, simulation.request)
+      const result = await executeAppTransaction({
+        config,
+        request: simulation.request,
+        chainId,
+      })
 
-      // Wait for confirmation
-      if (txHash) {
-        await waitForTransactionReceipt(config, { hash: txHash, chainId })
-
-        // Clear the input and show success message
-        setCommentText('')
-        setSuccess('Comment posted successfully!')
-
-        // Call the callback to refresh comments
-        if (onCommentPosted) {
-          onCommentPosted()
-        }
-
-        // Clear success message after 3 seconds
-        setTimeout(() => setSuccess(undefined), 3000)
+      // Don't show success for Safe proposals - user needs to execute via Safe UI
+      if (result.kind === 'safe-proposed') {
+        setIsSubmitting(false)
+        return
       }
+
+      // Only show success for mined transactions
+      setCommentText('')
+      setSuccess('Comment posted successfully!')
+
+      // Call the callback to refresh comments
+      if (onCommentPosted) {
+        onCommentPosted()
+      }
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(undefined), 3000)
     } catch (err: any) {
       console.error('Error posting comment:', err)
 

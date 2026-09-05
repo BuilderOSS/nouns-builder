@@ -3,21 +3,35 @@
 import { SafeTransactionModal } from '@buildeross/ui'
 import {
   registerSafeTransactionHandler,
+  SafeTransactionError,
+  SafeTransactionErrorCode,
   unregisterSafeTransactionHandler,
 } from '@buildeross/utils'
 import { useMachine } from '@xstate/react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { safeTransactionMachine } from '../machines/safeTransactionMachine'
 import { debugSafeTx } from '../utils/debug'
 
 export function SafeTransactionHandler() {
   const [state, send] = useMachine(safeTransactionMachine)
+  const stateRef = useRef(state)
+  stateRef.current = state
 
   // Register global handler on mount
   useEffect(() => {
     registerSafeTransactionHandler(async (params) => {
       debugSafeTx('Handler called with params: %O', params)
+
+      // Reject new transactions if one is already in progress
+      if (!stateRef.current.matches('idle')) {
+        debugSafeTx('ERROR: Transaction already in progress, rejecting new transaction')
+        throw new SafeTransactionError(
+          'Another Safe transaction is already in progress. Please complete or cancel it first.',
+          SafeTransactionErrorCode.TRANSACTION_IN_PROGRESS
+        )
+      }
+
       // Show modal and wait for user interaction
       return new Promise((resolve, reject) => {
         send({
@@ -35,20 +49,18 @@ export function SafeTransactionHandler() {
   }, [send])
 
   const handleConfirm = async () => {
-    send({ type: 'CONFIRM' })
-    // The promise will be resolved by the state machine with the actual safeTxHash
-    // Return a dummy promise that resolves with the current safeTxHash
-    return { safeTxHash: state.context.safeTxHash || '0x' }
+    return new Promise<{ safeTxHash: string }>((resolve, reject) => {
+      send({ type: 'CONFIRM', resolve, reject })
+    })
   }
 
   const handleClose = () => {
-    if (state.matches('error')) {
-      send({ type: 'CLOSE' })
-    } else if (state.matches('success')) {
-      send({ type: 'CLOSE' })
-    } else {
-      send({ type: 'CANCEL' })
-    }
+    const event = state.matches('error') || state.matches('success') ? 'CLOSE' : 'CANCEL'
+    send({ type: event })
+  }
+
+  const handleRetry = () => {
+    send({ type: 'RETRY' })
   }
 
   // Don't render if not in a state that needs the modal
@@ -66,6 +78,7 @@ export function SafeTransactionHandler() {
     <SafeTransactionModal
       isOpen={isOpen}
       onClose={handleClose}
+      onRetry={handleRetry}
       safeAddress={state.context.params.safeInfo.safeAddress}
       threshold={state.context.params.safeInfo.threshold}
       ownersCount={state.context.params.safeInfo.owners.length}
@@ -73,6 +86,13 @@ export function SafeTransactionHandler() {
       targetAddress={state.context.params.transaction.to}
       txValue={state.context.params.transaction.value}
       txData={state.context.params.transaction.data}
+      transactions={(
+        state.context.params.transactions ?? [state.context.params.transaction]
+      ).map((transaction) => ({
+        to: transaction.to,
+        value: transaction.value,
+        data: transaction.data,
+      }))}
       onConfirm={handleConfirm}
     />
   )

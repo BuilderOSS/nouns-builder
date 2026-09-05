@@ -2,6 +2,7 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { AirdropInstanceData } from '@buildeross/hooks/useAirdropData'
 import { useEthUsdPrice } from '@buildeross/hooks/useEthUsdPrice'
 import { getFetchableUrls } from '@buildeross/ipfs-service'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useAuthStore } from '@buildeross/stores'
 import { type CHAIN_ID, TokenMetadata } from '@buildeross/types'
 import { AccordionItem } from '@buildeross/ui/Accordion'
@@ -21,7 +22,7 @@ import {
   parseAbi,
 } from 'viem'
 import { useConfig, useReadContracts } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { formatFeeDisplay } from '../utils/feeDisplay'
 
@@ -227,12 +228,17 @@ export const AirdropItem = ({
         value: minFeeWei,
       })
 
-      const hash = await writeContract(config, simulation.request)
-      await waitForTransactionReceipt(config, { hash, chainId })
+      const result = await executeAppTransaction({
+        config,
+        request: simulation.request,
+        chainId,
+      })
+      if (result.kind === 'safe-proposed') return
 
       await refetchClaimState()
     } catch (error) {
       console.error('Failed to claim airdrop:', error)
+      throw error
     } finally {
       setIsClaiming(false)
     }

@@ -1,11 +1,12 @@
 import { auctionAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useAuthStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Button, Flex } from '@buildeross/zord'
 import { useCallback, useState } from 'react'
 import { useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { auctionActionButtonVariants } from '../Auction.css'
 
@@ -43,10 +44,22 @@ export const Settle = ({
         chainId,
       })
 
-      const txHash = await writeContract(config, data.request)
-      await waitForTransactionReceipt(config, { hash: txHash, chainId })
+      const result = await executeAppTransaction({
+        config,
+        request: data.request,
+        chainId,
+      })
+
+      // Don't reset state for Safe proposals - user needs to execute via Safe UI
+      if (result.kind === 'safe-proposed') {
+        setSettling(false)
+        return
+      }
+
+      // Transaction mined successfully
     } catch (error) {
       console.error('Error settling auction', error)
+      throw error
     } finally {
       setSettling(false)
     }

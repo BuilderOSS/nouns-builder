@@ -1,11 +1,13 @@
 import { MERKLE_RESERVE_MINTER } from '@buildeross/constants/addresses'
 import { merkleReserveMinterAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useAuthStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { MerkleTree } from 'merkletreejs'
 import { useState } from 'react'
 import { encodeAbiParameters, keccak256, parseAbiParameters } from 'viem'
-import { usePublicClient, useReadContract, useWriteContract } from 'wagmi'
+import { useConfig, usePublicClient, useReadContract } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 import { DaoMemberSimplified } from './useGenerateMerkleRoots'
 
@@ -24,8 +26,9 @@ export const useMintReservedTokens = (
   const [tokensMinted, setTokensMinted] = useState<number[]>(alreadyMinted || [])
   const [txHashes, setTxHashes] = useState<`0x${string}`[]>([])
   const [error, setError] = useState<string>()
+  const [isMinting, setIsMinting] = useState(false)
 
-  const { writeContractAsync, isPending } = useWriteContract()
+  const config = useConfig()
   const publicClient = usePublicClient({ chainId: targetChainId })
   const { address } = useAuthStore()
 
@@ -65,6 +68,7 @@ export const useMintReservedTokens = (
     }
 
     setError(undefined)
+    setIsMinting(true)
 
     try {
       // Create merkle tree from member snapshot
@@ -165,7 +169,7 @@ export const useMintReservedTokens = (
           }
         }
 
-        const hash = await writeContractAsync({
+        const { request } = await simulateContract(config, {
           abi: merkleReserveMinterAbi,
           address: minterAddress,
           functionName: 'mintFromReserve',
@@ -174,17 +178,27 @@ export const useMintReservedTokens = (
           gas: gasLimit,
         })
 
+        const result = await executeAppTransaction({
+          config,
+          chainId: targetChainId,
+          request,
+        })
+        const hash = result.hash
+
+        if (result.kind === 'safe-proposed') {
+          hashes.push(hash)
+          setTxHashes([...hashes])
+          onTxHash?.(hash)
+          return { minted, hashes, calculatedRoot }
+        }
+
         hashes.push(hash)
         setTxHashes([...hashes])
         onTxHash?.(hash)
 
         // Wait for transaction receipt before continuing to next batch
-        if (publicClient) {
-          const receipt = await publicClient.waitForTransactionReceipt({ hash })
-
-          if (receipt.status !== 'success') {
-            throw new Error(`Transaction failed for batch ${i / batchSize + 1}`)
-          }
+        if (result.kind === 'mined' && result.receipt.status !== 'success') {
+          throw new Error(`Transaction failed for batch ${i / batchSize + 1}`)
         }
 
         const batchTokenIds = batch.map((claim) => Number(claim.tokenId))
@@ -198,6 +212,8 @@ export const useMintReservedTokens = (
       const message = err instanceof Error ? err.message : 'Failed to mint tokens'
       setError(message)
       throw new Error(message)
+    } finally {
+      setIsMinting(false)
     }
   }
 
@@ -205,7 +221,7 @@ export const useMintReservedTokens = (
 
   return {
     startMinting,
-    isMinting: isPending,
+    isMinting,
     totalTokens,
     tokensMinted,
     progress: totalTokens > 0 ? (tokensMinted.length / totalTokens) * 100 : 0,

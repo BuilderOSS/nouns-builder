@@ -1,4 +1,5 @@
 import { tokenAbi } from '@buildeross/sdk/contract'
+import { executeAppTransactions } from '@buildeross/sdk/transaction'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -55,9 +56,10 @@ import {
   type ProfileToken,
 } from 'src/utils/profileDashboard'
 import type { TokenSortOption } from 'src/utils/profileIdentity'
+import type { WriteContractParameters } from 'viem'
 import { isAddress } from 'viem'
 import { useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
 import { ProfileChainIcon } from './ProfileChainIcon'
 
@@ -154,6 +156,7 @@ const TokenTransferTray: React.FC<TokenTransferTrayProps> = ({
     const hashes: `0x${string}`[] = []
 
     try {
+      const requests: WriteContractParameters[] = []
       for (const token of selectedTokens) {
         const data = await simulateContract(config, {
           abi: tokenAbi,
@@ -162,10 +165,30 @@ const TokenTransferTray: React.FC<TokenTransferTrayProps> = ({
           functionName: 'safeTransferFrom',
           args: [profileAddress, resolvedRecipient, BigInt(token.tokenId)],
         })
-        const hash = await writeContract(config, data.request)
-        await waitForTransactionReceipt(config, { hash, chainId: token.chainId })
-        setTxHashes((current) => [...current, hash])
-        hashes.push(hash)
+        requests.push(data.request)
+      }
+
+      const result = await executeAppTransactions({
+        config,
+        requests,
+        chainId: selectedChainId,
+      })
+      if (!Array.isArray(result)) {
+        if (result.kind === 'safe-proposed') {
+          setError(
+            `${selectedTokens.length} transfer${selectedTokens.length === 1 ? '' : 's'} proposed to your Safe. Other owners must sign and execute it before the NFTs move.`
+          )
+          return
+        }
+        setTxHashes([result.hash])
+        hashes.push(result.hash)
+      } else {
+        result.forEach((item) => {
+          if (item.kind === 'mined') {
+            setTxHashes((current) => [...current, item.hash])
+            hashes.push(item.hash)
+          }
+        })
       }
       onTransferComplete?.()
     } catch (err) {

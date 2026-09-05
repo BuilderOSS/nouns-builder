@@ -19,10 +19,8 @@ export const Step3_DeployDAO: React.FC = () => {
     goToNextStep,
   } = useCrossChainMigration()
 
-  const { deploy, txHash, isDeploying, isConfirming, isSuccess } = useDeployDAO(
-    editedConfig as any,
-    targetChainId
-  )
+  const { deploy, txHash, isDeploying, isConfirming, isSuccess, isSafeProposal } =
+    useDeployDAO(editedConfig as any, targetChainId)
 
   const publicClient = usePublicClient({ chainId: targetChainId })
 
@@ -44,7 +42,7 @@ export const Step3_DeployDAO: React.FC = () => {
   // When deployment is successful, parse transaction receipt to extract addresses
   useEffect(() => {
     const extractAddresses = async () => {
-      if (!isSuccess || !txHash || !publicClient) return
+      if (!isSuccess || isSafeProposal || !txHash || !publicClient) return
 
       try {
         // Get transaction receipt
@@ -118,7 +116,7 @@ export const Step3_DeployDAO: React.FC = () => {
     }
 
     extractAddresses()
-  }, [isSuccess, txHash, publicClient, setTargetAddresses])
+  }, [isSuccess, isSafeProposal, txHash, publicClient, setTargetAddresses])
 
   const handleContinue = () => {
     // Addresses are already set via useEffect, just proceed to next step
@@ -181,7 +179,7 @@ export const Step3_DeployDAO: React.FC = () => {
         </Flex>
       )}
 
-      {(txHash || deployTxHash) && targetChainId && (
+      {(txHash || deployTxHash) && targetChainId && !isSafeProposal && (
         <Box p="x4" borderRadius="curved" backgroundColor="background2">
           <Text fontSize={14} color="text3" mb="x2">
             Transaction Hash:
@@ -201,6 +199,21 @@ export const Step3_DeployDAO: React.FC = () => {
             }}
           >
             {txHash || deployTxHash}
+          </Text>
+        </Box>
+      )}
+
+      {isSafeProposal && (
+        <Box p="x4" borderRadius="curved" backgroundColor="background2">
+          <Text fontSize={14} color="text3" mb="x2">
+            Safe Proposal Hash:
+          </Text>
+          <Text fontFamily="mono" fontSize={12} style={{ wordBreak: 'break-all' }}>
+            {txHash || deployTxHash}
+          </Text>
+          <Text color="text3">
+            Deployment proposed to Safe. Additional signatures are required before it can
+            be executed.
           </Text>
         </Box>
       )}
