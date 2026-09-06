@@ -1,8 +1,8 @@
+import { useAuthStore } from '@buildeross/stores'
 import { Button, Flex } from '@buildeross/zord'
 import { ConnectButton as RKConnectButton } from '@rainbow-me/rainbowkit'
 import dynamic from 'next/dynamic'
 import React, { useState } from 'react'
-import { useAccount } from 'wagmi'
 
 import { connectButtonWrapper } from './Nav.styles.css'
 
@@ -17,8 +17,7 @@ const WalletConnectDialog = dynamic(
 
 export const ConnectButton = () => {
   const [showModal, setShowModal] = useState(false)
-  const { connector } = useAccount()
-  const isSafeMode = connector?.id === 'safeOwner'
+  const { isSafeMode } = useAuthStore()
 
   return (
     <Flex

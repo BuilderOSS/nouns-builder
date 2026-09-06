@@ -1,4 +1,3 @@
-import { recordSafeProposalHash } from '@buildeross/utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { executeAppTransaction, executeAppTransactions } from './executeAppTransaction'
@@ -28,7 +27,11 @@ const request = (index: number) =>
     args: [],
   }) as any
 
-const config = (connector?: { id: string; getProvider: () => Promise<unknown> }) =>
+const config = (connector?: {
+  id: string
+  safeInfo?: { threshold?: number }
+  getProvider: () => Promise<unknown>
+}) =>
   ({
     state: {
       current: connector ? 'connection' : null,
@@ -52,10 +55,13 @@ describe('executeAppTransactions', () => {
 
   it('proposes all requests as one Safe transaction', async () => {
     const hash = `0x${'a'.repeat(64)}` as `0x${string}`
-    recordSafeProposalHash(hash)
     const provider = { request: vi.fn().mockResolvedValue(hash) }
     const result = await executeAppTransactions({
-      config: config({ id: 'safeOwner', getProvider: async () => provider }),
+      config: config({
+        id: 'safeOwner',
+        safeInfo: { threshold: 2 },
+        getProvider: async () => provider,
+      }),
       requests: [request(1), request(2)],
       chainId: 1 as any,
     })
@@ -65,6 +71,24 @@ describe('executeAppTransactions', () => {
     expect(provider.request.mock.calls[0][0].method).toBe('eth_sendTransaction')
     expect(provider.request.mock.calls[0][0].params[0].safeTransactions).toHaveLength(2)
     expect(writeContract).not.toHaveBeenCalled()
+  })
+
+  it('treats multisig Safe writes as proposals even without hash tracking', async () => {
+    const hash = `0x${'d'.repeat(64)}` as `0x${string}`
+    const provider = { request: vi.fn().mockResolvedValue(hash) }
+
+    const result = await executeAppTransactions({
+      config: config({
+        id: 'safeOwner',
+        safeInfo: { threshold: 2 },
+        getProvider: async () => provider,
+      }),
+      requests: [request(1)],
+      chainId: 1 as any,
+    })
+
+    expect(result).toEqual({ kind: 'safe-proposed', hash })
+    expect(waitForTransactionReceipt).not.toHaveBeenCalled()
   })
 
   it('sends EOA requests sequentially and waits for each receipt', async () => {
@@ -113,13 +137,43 @@ describe('executeAppTransactions', () => {
 })
 
 describe('executeAppTransaction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    waitForTransactionReceipt.mockResolvedValue({ status: 'success', blockNumber: 10n })
+  })
+
   it('does not wait for a receipt for a Safe proposal', async () => {
     const hash = `0x${'c'.repeat(64)}` as `0x${string}`
-    recordSafeProposalHash(hash)
     writeContract.mockResolvedValue(hash)
 
     await expect(
-      executeAppTransaction({ config: config(), request: request(1), chainId: 1 as any })
+      executeAppTransaction({
+        config: config({
+          id: 'safeOwner',
+          safeInfo: { threshold: 2 },
+          getProvider: async () => ({ request: vi.fn() }),
+        }),
+        request: request(1),
+        chainId: 1 as any,
+      })
+    ).resolves.toEqual({ kind: 'safe-proposed', hash })
+    expect(waitForTransactionReceipt).not.toHaveBeenCalled()
+  })
+
+  it('treats multisig Safe writes as proposals even without hash tracking', async () => {
+    const hash = `0x${'e'.repeat(64)}` as `0x${string}`
+    writeContract.mockResolvedValue(hash)
+
+    await expect(
+      executeAppTransaction({
+        config: config({
+          id: 'safeOwner',
+          safeInfo: { threshold: 2 },
+          getProvider: async () => ({ request: vi.fn() }),
+        }),
+        request: request(1),
+        chainId: 1 as any,
+      })
     ).resolves.toEqual({ kind: 'safe-proposed', hash })
     expect(waitForTransactionReceipt).not.toHaveBeenCalled()
   })

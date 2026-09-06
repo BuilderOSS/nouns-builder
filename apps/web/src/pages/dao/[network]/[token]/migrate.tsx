@@ -14,7 +14,7 @@ import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback } from 'react'
-import { useAccount, useReadContracts } from 'wagmi'
+import { useReadContracts } from 'wagmi'
 
 import { getDaoLayout } from '../../../../layouts/DaoLayout'
 import { NextPageWithLayout } from '../../../_app'
@@ -39,8 +39,7 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
   addresses,
   chainId,
 }) => {
-  const { address: walletAddress, isConnected } = useAuthStore()
-  const { connector } = useAccount()
+  const { address: walletAddress, isConnected, isSafeMode } = useAuthStore()
   const router = useRouter()
 
   const onNavigateToReview = useCallback(() => {
@@ -104,7 +103,7 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
     return false
   }, [walletAddress, founders, builderBalance])
 
-  if (isConnected && connector?.id === 'safeOwner') {
+  if (isConnected && isSafeMode) {
     return (
       <Flex justify="center" align="center" py="x32" px="x4">
         <Stack gap="x6" align="center" style={{ maxWidth: 600 }}>

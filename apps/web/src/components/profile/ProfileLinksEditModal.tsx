@@ -22,7 +22,7 @@ import {
   validateWebsiteUrl,
 } from 'src/utils/profileIdentity'
 import { encodeAbiParameters, zeroHash } from 'viem'
-import { useAccount, useConfig, useSwitchChain } from 'wagmi'
+import { useAccount, useConfig } from 'wagmi'
 import { simulateContract } from 'wagmi/actions'
 
 type ProfileLinkKey = 'website' | 'x' | 'farcaster'
@@ -49,7 +49,6 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
 }) => {
   const config = useConfig()
   const { chainId } = useAccount()
-  const { switchChainAsync } = useSwitchChain()
   const [website, setWebsite] = React.useState('')
   const [xHandle, setXHandle] = React.useState('')
   const [farcasterHandle, setFarcasterHandle] = React.useState('')
@@ -184,8 +183,8 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
     setIsSaving(true)
 
     try {
-      if (chainId !== PROFILE_LINK_EAS_CHAIN_ID && switchChainAsync) {
-        await switchChainAsync({ chainId: PROFILE_LINK_EAS_CHAIN_ID })
+      if (chainId !== PROFILE_LINK_EAS_CHAIN_ID) {
+        throw new Error(`Please switch to the supported network before saving links.`)
       }
 
       const profileLinkChainId =

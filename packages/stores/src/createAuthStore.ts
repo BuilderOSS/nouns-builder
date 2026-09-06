@@ -1,4 +1,4 @@
-import type { AddressType } from '@buildeross/types'
+import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { createContext, useContext } from 'react'
 import { useAccount } from 'wagmi'
 
@@ -27,6 +27,7 @@ export type AuthStoreState = {
   // Safe-specific fields (when user authenticated via Safe wallet)
   eoaAddress?: AddressType
   safeAddress?: AddressType
+  safeChainId?: CHAIN_ID
   isSafeMode: boolean
 
   // State flags
@@ -44,7 +45,7 @@ export interface SessionData {
   address?: AddressType
   eoaAddress?: AddressType
   safeAddress?: AddressType
-  safeChainId?: number
+  safeChainId?: CHAIN_ID
 }
 
 /**
@@ -87,6 +88,7 @@ export function useAuthStore(): AuthStoreState {
     // Safe-specific fields
     eoaAddress: session?.eoaAddress as AddressType | undefined,
     safeAddress: session?.safeAddress as AddressType | undefined,
+    safeChainId: session?.safeChainId as CHAIN_ID | undefined,
     isSafeMode: !!session?.safeAddress,
 
     isConnected: walletConnected,

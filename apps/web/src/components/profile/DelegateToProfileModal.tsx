@@ -4,6 +4,7 @@ import { useUserDaos } from '@buildeross/hooks/useUserDaos'
 import { tokenAbi } from '@buildeross/sdk/contract'
 import { daoMembershipRequest } from '@buildeross/sdk/subgraph'
 import { executeAppTransaction } from '@buildeross/sdk/transaction'
+import { useAuthStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
@@ -25,7 +26,7 @@ import {
   filterLabel,
 } from 'src/styles/profile.css'
 import useSWR from 'swr'
-import { useAccount, useConfig } from 'wagmi'
+import { useConfig } from 'wagmi'
 import { simulateContract } from 'wagmi/actions'
 
 type DelegateToProfileModalProps = {
@@ -53,7 +54,7 @@ export const DelegateToProfileModal: React.FC<DelegateToProfileModalProps> = ({
   profileName,
 }) => {
   const config = useConfig()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { daos, isLoading: isLoadingDaos } = useUserDaos({
     address,
     enabled: open && !!address,

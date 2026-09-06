@@ -18,8 +18,7 @@ const {
 vi.mock('wagmi', async (importOriginal) => ({
   ...(await importOriginal<typeof import('wagmi')>()),
   useAccount: () => ({ chainId: 8453 }),
-  useConfig: () => ({}),
-  useSwitchChain: () => ({ switchChainAsync: vi.fn() }),
+  useConfig: () => ({ state: { current: null, connections: new Map() } }),
 }))
 
 vi.mock('wagmi/actions', () => ({

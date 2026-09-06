@@ -19,18 +19,13 @@ import React from 'react'
 import { Meta } from 'src/components/Meta'
 import { getCreateDaoLayout } from 'src/layouts/CreateDaoLayout'
 import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/create.css'
-import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
 
 const CreatePage: NextPageWithLayout = () => {
   const { activeSection, isUploadingToIPFS, ipfsUploadProgress } = useFormStore()
-  const { address } = useAuthStore()
+  const { address, isSafeMode } = useAuthStore()
   const chain = useChainStore((x) => x.chain)
-  const { connector } = useAccount()
-
-  // Detect Safe mode - Safes cannot create DAOs due to multi-transaction flow requirements
-  const isSafeMode = connector?.id === 'safeOwner'
 
   const { push } = useRouter()
 

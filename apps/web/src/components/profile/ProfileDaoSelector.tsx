@@ -1,4 +1,5 @@
 import type { MyDaosResponse } from '@buildeross/sdk/subgraph'
+import { useAuthStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { Button, Text } from '@buildeross/zord'
 import React from 'react'
@@ -11,7 +12,6 @@ import {
   profileSurface,
 } from 'src/styles/profile.css'
 import { createDaoKey, isOwnProfileAddress } from 'src/utils/profileDashboard'
-import { useAccount } from 'wagmi'
 
 import { getProfileChainMetadata } from './ProfileChainIcon'
 
@@ -45,7 +45,7 @@ export const ProfileDaoSelector: React.FC<ProfileDaoSelectorProps> = ({
   onToggle,
   onClear,
 }) => {
-  const { address: connectedAddress } = useAccount()
+  const { address: connectedAddress } = useAuthStore()
 
   return (
     <section

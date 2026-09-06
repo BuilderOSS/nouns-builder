@@ -7,7 +7,7 @@ import {
   isUserCancellation,
   truncateAddress,
 } from '@buildeross/utils'
-import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Spinner, Stack, Text } from '@buildeross/zord'
 import { useState } from 'react'
 import type { Address } from 'viem'
 
@@ -101,7 +101,8 @@ export function SafeTransactionModal({
                     backgroundColor="background2"
                   >
                     <Text variant="label-sm" color="text3" style={{ fontSize: '12px' }}>
-                      {index + 1}. To: {truncateAddress(transaction.to)}
+                      {transactions.length > 1 ? `${index + 1}. ` : ''}To:{' '}
+                      {truncateAddress(transaction.to)}
                       {transaction.data && transaction.data !== '0x'
                         ? ` | Function: ${transaction.data.slice(0, 10)}`
                         : ''}
@@ -129,7 +130,7 @@ export function SafeTransactionModal({
         {/* Proposing State */}
         {state === 'proposing' && (
           <Stack gap="x3" align="center">
-            <Icon id="refresh" size="xl" />
+            <Spinner size="lg" />
             <Text variant="label-md" color="text1">
               Waiting for wallet signature...
             </Text>
