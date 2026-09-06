@@ -1,5 +1,4 @@
 import type { CHAIN_ID } from '@buildeross/types'
-import { isSafeProposalHash } from '@buildeross/utils'
 import {
   encodeFunctionData,
   type TransactionReceipt,
@@ -69,6 +68,16 @@ export async function executeAppTransactions({
     ? config.state.connections.get(config.state.current)
     : undefined
   const connector = connection?.connector
+  const safeConnector = connector as
+    | {
+        id?: string
+        safeInfo?: {
+          threshold?: number
+        } | null
+      }
+    | undefined
+  const isMultiSigSafe =
+    safeConnector?.id === 'safeOwner' && (safeConnector.safeInfo?.threshold ?? 0) > 1
   if (connector?.id === 'safeOwner') {
     const provider = (await connector.getProvider()) as {
       request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
@@ -86,7 +95,7 @@ export async function executeAppTransactions({
       method: 'eth_sendTransaction',
       params: [{ ...transactions[0], safeTransactions: transactions }],
     })) as `0x${string}`
-    if (isSafeProposalHash(hash)) return { kind: 'safe-proposed', hash }
+    if (isMultiSigSafe) return { kind: 'safe-proposed', hash }
     const receipt = await waitForTransactionReceipt(config, { hash, chainId })
     if (receipt.status !== 'success') throw new Error(`Transaction reverted: ${hash}`)
     let subgraphSynced = false
@@ -148,9 +157,24 @@ export async function executeAppTransaction({
   chainId,
   waitForSubgraphSync = true,
 }: ExecuteAppTransactionParams): Promise<AppTransactionResult> {
+  const connection = config.state.current
+    ? config.state.connections.get(config.state.current)
+    : undefined
+  const connector = connection?.connector
+  const safeConnector = connector as
+    | {
+        id?: string
+        safeInfo?: {
+          threshold?: number
+        } | null
+      }
+    | undefined
+  const isMultiSigSafe =
+    safeConnector?.id === 'safeOwner' && (safeConnector.safeInfo?.threshold ?? 0) > 1
+
   const hash = await writeContract(config, request)
 
-  if (isSafeProposalHash(hash)) {
+  if (isMultiSigSafe) {
     return { kind: 'safe-proposed', hash }
   }
 

@@ -93,19 +93,14 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
     const originalOff = this.eoaProvider.removeListener?.bind(this.eoaProvider)
 
     // Track event handlers for cleanup
-    const accountsHandler = (..._args: unknown[]) => {
-      const [accounts] = _args as [string[] | undefined]
-      // The Safe account is only usable while a backing owner EOA is connected.
-      this.emit(
-        'accountsChanged',
-        accounts && accounts.length > 0 ? [this.safe.safeAddress] : []
-      )
+    const accountsHandler = () => {
+      // Any backing EOA account change invalidates the Safe session.
+      this.emit('disconnect')
     }
 
-    const chainHandler = (...args: unknown[]) => {
-      // Forward chain changes
-      const [chainId] = args
-      this.emit('chainChanged', chainId as string)
+    const chainHandler = () => {
+      // Safes are chain-specific. Any backing EOA chain change invalidates the session.
+      this.emit('disconnect')
     }
 
     const disconnectHandler = () => {

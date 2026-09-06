@@ -1,6 +1,6 @@
 'use client'
 
-import { Stack, Text } from '@buildeross/zord'
+import { Button, Icon, Stack, Text } from '@buildeross/zord'
 
 import type { WalletInfo } from '../../types/auth'
 import { WalletOption } from '../WalletOption'
@@ -10,6 +10,8 @@ interface WalletListViewProps {
   onSelectWallet: (walletId: string) => void
   onSelectSafe: () => void
   showSafeOption?: boolean
+  title?: string
+  description?: string
 }
 
 export function WalletListView({
@@ -17,13 +19,22 @@ export function WalletListView({
   onSelectWallet,
   onSelectSafe,
   showSafeOption = true,
+  title = 'Connect Wallet',
+  description,
 }: WalletListViewProps) {
   const installedWallets = wallets.filter((w) => !w.isRainbowKitConnector)
   const popularWallets = wallets.filter((w) => w.isRainbowKitConnector)
 
   return (
     <Stack gap="x4">
-      <Text variant="heading-sm">Connect Wallet</Text>
+      <Stack gap="x2">
+        <Text variant="heading-sm">{title}</Text>
+        {description && (
+          <Text variant="paragraph-sm" color="text3">
+            {description}
+          </Text>
+        )}
+      </Stack>
 
       {installedWallets.length > 0 && (
         <Stack gap="x2">
@@ -100,6 +111,24 @@ export function WalletListView({
         </Text>
         .
       </Text>
+
+      <Button
+        as="a"
+        href="https://ethereum.org/wallets/find-wallet/#main-content"
+        target="_blank"
+        rel="noopener noreferrer"
+        align="center"
+        justify="center"
+        gap="x2"
+        p="x3"
+        style={{ textDecoration: 'none' }}
+        variant="secondary"
+      >
+        <Icon id="question" size="sm" />
+        <Text variant="label-sm" color="accent">
+          I don't have a wallet?
+        </Text>
+      </Button>
     </Stack>
   )
 }

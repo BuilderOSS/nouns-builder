@@ -118,30 +118,6 @@ export const ChainMenu: React.FC<ChainMenuProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, hasHydrated])
 
-  // Separate effect to handle chain switching when needed
-  useEffect(() => {
-    if (!hasHydrated || !isChainInitialized) return
-
-    // Only switch if connected and on wrong chain
-    if (isConnected && wagmiChain?.id !== selectedChain?.id) {
-      switchChain(
-        { chainId: selectedChain.id },
-        {
-          onError(error) {
-            console.error(`Failed to automatically switch chain:`, error)
-          },
-        }
-      )
-    }
-  }, [
-    hasHydrated,
-    isChainInitialized,
-    isConnected,
-    wagmiChain?.id,
-    selectedChain?.id,
-    switchChain,
-  ])
-
   if (!hasHydrated || !isChainInitialized) {
     return null
   }

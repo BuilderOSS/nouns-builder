@@ -1,6 +1,5 @@
 import { SAFE_SERVICE_URL } from '@buildeross/constants/safe'
 import type { CHAIN_ID } from '@buildeross/types'
-import SafeApiKit from '@safe-global/api-kit'
 import Safe from '@safe-global/protocol-kit'
 import type { MetaTransactionData } from '@safe-global/safe-core-sdk-types'
 import debug from 'debug'
@@ -9,7 +8,6 @@ import { getAddress } from 'viem'
 import type { EIP1193Provider, SafeInfo, SendTransactionParams } from '../providers/types'
 import { ensureCorrectChain } from './ensureCorrectChain'
 import { SafeTransactionError, SafeTransactionErrorCode } from './errors'
-import { recordSafeProposalHash } from './transactionResult'
 
 const debugSafeTx = debug('app:safe:tx')
 
@@ -69,16 +67,6 @@ export async function proposeSafeTransaction(
   // Verify provider is on the correct chain, switch if necessary
   await ensureCorrectChain(eoaProvider, safeInfo.chainId)
 
-  const apiKey = process.env.NEXT_PUBLIC_SAFE_API_KEY
-  if (!apiKey) {
-    debugSafeTx('ERROR: NEXT_PUBLIC_SAFE_API_KEY is not set!')
-    throw new SafeTransactionError(
-      'NEXT_PUBLIC_SAFE_API_KEY is required for Safe multi-sig transactions',
-      SafeTransactionErrorCode.API_ERROR
-    )
-  }
-  debugSafeTx('API key present')
-
   const serviceUrl = SAFE_SERVICE_URL[safeInfo.chainId as CHAIN_ID]
   if (!serviceUrl) {
     debugSafeTx('ERROR: No Safe Service URL for chain: %d', safeInfo.chainId)
@@ -103,13 +91,6 @@ export async function proposeSafeTransaction(
   }
   const senderAddress = getAddress(rawSenderAddress)
   debugSafeTx('EOA address (checksummed): %s', senderAddress)
-
-  // Create Safe API Kit with API key
-  debugSafeTx('Initializing Safe API Kit...')
-  const apiKit = new SafeApiKit({
-    chainId: BigInt(safeInfo.chainId),
-    apiKey,
-  })
 
   // Checksum addresses for Safe API
   const safeAddress = getAddress(safeInfo.safeAddress)
@@ -184,16 +165,27 @@ export async function proposeSafeTransaction(
   const senderSignature = await protocolKit.signHash(safeTxHash)
   debugSafeTx('Transaction hash signed')
 
-  // Propose to Safe Service
-  debugSafeTx('Proposing transaction to Safe Service...')
+  // Submit the signed proposal through the server so the Safe API key stays private.
+  debugSafeTx('Proposing transaction through the server...')
   try {
-    await apiKit.proposeTransaction({
-      safeAddress,
-      safeTransactionData: safeTx.data,
-      safeTxHash,
-      senderAddress,
-      senderSignature: senderSignature.data,
+    const response = await fetch('/api/safe/propose', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chainId: safeInfo.chainId,
+        safeAddress,
+        safeTransactionData: safeTx.data,
+        safeTxHash,
+        senderAddress,
+        senderSignature: senderSignature.data,
+      }),
     })
+    if (!response.ok) {
+      const data = (await response.json().catch(() => null)) as { error?: string } | null
+      throw new Error(
+        data?.error || `Safe proposal failed with status ${response.status}`
+      )
+    }
     debugSafeTx('Transaction successfully proposed to Safe Service')
   } catch (error) {
     debugSafeTx('ERROR: Failed to propose transaction to Safe Service: %O', error)
@@ -202,8 +194,6 @@ export async function proposeSafeTransaction(
       SafeTransactionErrorCode.API_ERROR
     )
   }
-
-  recordSafeProposalHash(safeTxHash as `0x${string}`)
 
   return safeTxHash
 }

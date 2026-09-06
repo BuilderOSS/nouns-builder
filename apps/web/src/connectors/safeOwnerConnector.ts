@@ -202,7 +202,7 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
       async disconnect() {
         // Clean up provider
         if (provider_) {
-          provider_.removeAllListeners()
+          provider_.destroy()
         }
 
         // Clear cached state
@@ -317,6 +317,9 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
       },
 
       onDisconnect() {
+        if (provider_) {
+          provider_.destroy()
+        }
         clearCache()
         clearSafeInfo()
         config.emitter.emit('disconnect')

@@ -534,6 +534,8 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           onSelectWallet={handleSelectWallet}
           onSelectSafe={() => {}}
           showSafeOption={false}
+          title="Connect Safe Owner Wallet"
+          description="Choose a wallet that is an owner of this Safe. Your connected wallet cannot be used unless it has owner permissions for the Safe."
         />
       )
     }

@@ -25,7 +25,7 @@ vi.mock('wagmi', async (importOriginal) => {
       chain: { id: CHAIN_ID.ETHEREUM },
     }),
     useBalance: () => ({ data: { value: mockBalanceValue } }),
-    useConfig: () => ({}),
+    useConfig: () => ({ state: { current: null, connections: new Map() } }),
     useReadContracts: () => ({ data: [parseEther('1'), 10n] }),
   }
 })

@@ -19,7 +19,7 @@ import { HiddenDaoDisclosure } from 'src/components/HiddenDaoDisclosure'
 import { useAppDisconnect } from 'src/hooks/useAppDisconnect'
 import { useDaoListPreferences } from 'src/hooks/useDaoListPreferences'
 import { profileStatBadge } from 'src/styles/profile.css'
-import { type Address, formatUnits } from 'viem'
+import { formatUnits } from 'viem'
 import { useAccount, useBalance } from 'wagmi'
 
 import { ConnectButton } from '../ConnectButton'
@@ -131,33 +131,9 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onOpenMenu,
   onSetActiveDropdown,
 }) => {
-  const { address, isAuthenticated } = useAuthStore()
+  const { address, isAuthenticated, isSafeMode, eoaAddress, safeChainId } = useAuthStore()
   const { chain: selectedChain } = useChainStore()
   const { connector } = useAccount()
-
-  // Detect Safe mode and get EOA address + Safe chainId
-  const isSafeMode = connector?.id === 'safeOwner'
-  const [eoaAddress, setEoaAddress] = React.useState<Address | null>(null)
-  const [safeChainId, setSafeChainId] = React.useState<CHAIN_ID | null>(null)
-
-  React.useEffect(() => {
-    if (isSafeMode && connector) {
-      // Fetch EOA address
-      if ('getEOAAddress' in connector) {
-        ;(connector as any).getEOAAddress().then((addr: Address) => setEoaAddress(addr))
-      }
-
-      // Fetch Safe's actual chainId
-      if ('getChainId' in connector) {
-        ;(connector as any)
-          .getChainId()
-          .then((chainId: number) => setSafeChainId(chainId as CHAIN_ID))
-      }
-    } else {
-      setEoaAddress(null)
-      setSafeChainId(null)
-    }
-  }, [isSafeMode, connector])
 
   const { displayName, ensAvatar } = useEnsData(address || '')
   const eoaEnsData = useEnsData(eoaAddress || '')
