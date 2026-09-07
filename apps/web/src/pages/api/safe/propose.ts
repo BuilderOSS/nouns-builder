@@ -23,6 +23,47 @@ interface ProposalRequest {
   senderSignature: string
 }
 
+type ProposalErrorCode =
+  | 'SAFE_SERVICE_REJECTED'
+  | 'SAFE_SERVICE_UNAVAILABLE'
+  | 'SAFE_SERVICE_CONFIG_ERROR'
+
+function getUpstreamError(error: unknown): { code: ProposalErrorCode; message: string } {
+  const status =
+    typeof error === 'object' && error !== null && 'response' in error
+      ? (error.response as { status?: number } | undefined)?.status
+      : undefined
+
+  if (status === 401 || status === 403) {
+    return {
+      code: 'SAFE_SERVICE_CONFIG_ERROR',
+      message: 'Safe Service is not configured correctly. Please try again later.',
+    }
+  }
+
+  if (status === 408 || status === 429 || !status || status >= 500) {
+    return {
+      code: 'SAFE_SERVICE_UNAVAILABLE',
+      message:
+        'Safe Service is temporarily unavailable. Check your connection and try again.',
+    }
+  }
+
+  if (status && status >= 400 && status < 500) {
+    return {
+      code: 'SAFE_SERVICE_REJECTED',
+      message:
+        'Safe Service rejected this proposal. Check the transaction details and try again.',
+    }
+  }
+
+  return {
+    code: 'SAFE_SERVICE_UNAVAILABLE',
+    message:
+      'Safe Service is temporarily unavailable. Check your connection and try again.',
+  }
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
@@ -69,8 +110,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({ safeTxHash: body.safeTxHash })
   } catch (error) {
     console.error('Failed to propose transaction to Safe Service', error)
-    return res
-      .status(502)
-      .json({ error: 'Failed to propose transaction to Safe Service' })
+    const upstreamError = getUpstreamError(error)
+    const statusCode =
+      upstreamError.code === 'SAFE_SERVICE_REJECTED'
+        ? 422
+        : upstreamError.code === 'SAFE_SERVICE_CONFIG_ERROR'
+          ? 500
+          : 502
+    return res.status(statusCode).json({
+      code: upstreamError.code,
+      error: upstreamError.message,
+    })
   }
 }

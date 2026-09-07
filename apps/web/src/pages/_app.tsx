@@ -57,6 +57,7 @@ import { sessionMachine } from 'src/machines/sessionMachine'
 import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
 import { debugSession } from 'src/utils/debug'
+import { resolveSigningAddress } from 'src/utils/signing'
 import {
   beginSiweLogout,
   cancelSiweAuthFlow,
@@ -71,7 +72,7 @@ import {
 } from 'src/utils/siweAuthFlow'
 import { SWRConfig } from 'swr'
 import { createSiweMessage } from 'viem/siwe'
-import { useConfig, WagmiProvider } from 'wagmi'
+import { useAccount, useConfig, WagmiProvider } from 'wagmi'
 
 // Cross-tab storage event debounce interval
 const CROSS_TAB_DEBOUNCE_MS = 100
@@ -102,6 +103,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const { state: safeState, clearSafe } = useSafeAuth()
   const resetApp = useAppDisconnect()
   const config = useConfig()
+  const { connector } = useAccount()
   const logoutInProgress = isSiweLogoutInProgress()
 
   // Use ref to always get latest safeState in auth adapter callbacks
@@ -227,12 +229,13 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           return nonce
         },
 
-        createMessage: ({ nonce, address, chainId: msgChainId }) => {
+        createMessage: async ({ nonce, address, chainId: msgChainId }) => {
           // Use ref to get latest safeState (prevents stale closure)
           const currentSafeState = safeStateRef.current
-          const message = createSiweMessage({
+          const signingAddress = await resolveSigningAddress(connector, address)
+          return createSiweMessage({
             domain: window.location.host,
-            address,
+            address: signingAddress,
             statement: currentSafeState.safeAddress
               ? `Sign in as owner for Safe ${currentSafeState.safeAddress}`
               : 'Sign in with Ethereum to Nouns Builder',
@@ -241,7 +244,6 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
             chainId: msgChainId,
             nonce,
           })
-          return message
         },
 
         verify: async ({ message, signature }) => {
@@ -289,7 +291,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           cancelSiweAuthFlow()
         },
       }),
-    [sendSession, clearSafe, refresh]
+    [sendSession, clearSafe, refresh, connector]
   )
 
   // RainbowKit auth status derived from XState machine

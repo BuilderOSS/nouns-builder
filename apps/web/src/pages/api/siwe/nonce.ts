@@ -5,6 +5,10 @@ import { ironOptions, type IronSessionData } from 'src/utils/iron'
 import { SIWE_NONCE_RATE_LIMIT_KEY_PREFIX } from 'src/utils/siweAuthFlow'
 import { generateSiweNonce } from 'viem/siwe'
 
+if (!process.env.IRON_PASSWORD) {
+  throw new Error('IRON_PASSWORD environment variable is required')
+}
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { method } = req
   switch (method) {

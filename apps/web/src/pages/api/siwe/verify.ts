@@ -55,9 +55,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           session.siwe = siweMessage
         } else {
           // Normal EOA authentication
+          delete session.eoaAddress
+          delete session.safeAddress
+          delete session.safeChainId
           session.siwe = siweMessage
         }
 
+        delete session.nonce
         await session.save()
         res.json({ ok: true })
       } catch (error) {

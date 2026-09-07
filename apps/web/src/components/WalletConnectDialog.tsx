@@ -1,18 +1,19 @@
 'use client'
 
 import { AnimatedModal } from '@buildeross/ui'
-import { getSafeInfo, setSafeInfo } from '@buildeross/utils'
+import { addRecentSafeWallet, clearSafeInfo, getSafeInfo } from '@buildeross/utils'
 import { getConnectors } from '@wagmi/core'
 import { useMachine } from '@xstate/react'
-import { useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { Address } from 'viem'
 import { createSiweMessage } from 'viem/siwe'
-import { useAccount, useConfig, useConnect, useSignMessage } from 'wagmi'
+import { useAccount, useConfig, useConnect, useDisconnect, useSignMessage } from 'wagmi'
 
 import { useWalletConnectors } from '../hooks/useWalletConnectors'
 import { walletModalMachine } from '../machines/walletModalMachine'
 import type { WalletInfo } from '../types/auth'
 import { debugWallet } from '../utils/debug'
+import { getCachedSigningAddress, resolveSigningAddress } from '../utils/signing'
 import { beginSiweAuthFlow, SIWE_NONCE_PATH } from '../utils/siweAuthFlow'
 import { ErrorView } from './wallet/ErrorView'
 import { LoadingView } from './wallet/LoadingView'
@@ -27,13 +28,35 @@ interface WalletConnectDialogProps {
 
 export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProps) {
   const [state, send] = useMachine(walletModalMachine)
-  const { address, connector: activeConnector, isConnected, chainId } = useAccount()
+  const { connector: activeConnector, chainId } = useAccount()
   const { connectAsync } = useConnect()
+  const { disconnectAsync } = useDisconnect()
   const { signMessageAsync } = useSignMessage()
   const wagmiConfig = useConfig()
 
   // Track if we just authenticated to prevent immediate reopening
   const justAuthenticatedRef = useRef(false)
+  const safeFlowStartedRef = useRef(false)
+  const flowCancelledRef = useRef(false)
+  const authAttemptRef = useRef(0)
+  const recordedRecentSafeRef = useRef<string | null>(null)
+
+  const cleanupCancelledSafeFlow = useCallback(async () => {
+    flowCancelledRef.current = true
+    authAttemptRef.current += 1
+    if (!safeFlowStartedRef.current) return
+
+    safeFlowStartedRef.current = false
+    clearSafeInfo()
+
+    if (activeConnector?.id === 'safeOwner') {
+      try {
+        await disconnectAsync()
+      } catch (error) {
+        debugWallet('Failed to disconnect cancelled Safe flow: %O', error)
+      }
+    }
+  }, [activeConnector, disconnectAsync])
 
   // Use proper wallet connector hook (handles deduplication)
   const walletConnectors = useWalletConnectors()
@@ -46,6 +69,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         name: wc.name,
         iconUrl: wc.iconUrl,
         isRainbowKitConnector: wc.isRainbowKitConnector,
+        recent: wc.recent,
         connector: wc.connector,
       })),
     [walletConnectors]
@@ -54,6 +78,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
   // Open modal handler
   useEffect(() => {
     if (isOpen && state.matches('closed') && !justAuthenticatedRef.current) {
+      flowCancelledRef.current = false
       send({ type: 'OPEN', wallets })
     }
     // Only react to isOpen and state changes, not wallets
@@ -64,24 +89,28 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
   // Close modal handler
   useEffect(() => {
     if (!isOpen && !state.matches('closed')) {
+      void cleanupCancelledSafeFlow()
       send({ type: 'CLOSE' })
     }
-  }, [isOpen, state, send])
+  }, [cleanupCancelledSafeFlow, isOpen, state, send])
 
-  // Handle wallet connection when wagmi connects
+  // Save recent Safe logins only after the flow fully succeeds.
   useEffect(() => {
-    const isWaitingForConnection =
-      state.matches('connectingWallet') || state.matches('switchingToSafe')
+    if (state.matches('authenticated') && state.context.safeInfo) {
+      const { safeAddress, chainId } = state.context.safeInfo
+      const recentKey = `${safeAddress.toLowerCase()}:${chainId}`
 
-    if (isWaitingForConnection && isConnected && address && activeConnector) {
-      debugWallet('Wallet connected: %s via %s', address, activeConnector.name)
-      send({
-        type: 'WALLET_CONNECTED',
-        address,
-        connector: activeConnector,
-      })
+      if (recordedRecentSafeRef.current !== recentKey) {
+        addRecentSafeWallet(safeAddress, chainId)
+        recordedRecentSafeRef.current = recentKey
+      }
+      return
     }
-  }, [state, isConnected, address, activeConnector, send])
+
+    if (state.matches('closed')) {
+      recordedRecentSafeRef.current = null
+    }
+  }, [state])
 
   // Handle Safe address validation
   useEffect(() => {
@@ -167,9 +196,6 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
             return
           }
 
-          // Store Safe info with EOA connector ID for persistence
-          setSafeInfo(state.context.safeInfo!, state.context.connector!.id)
-
           // Find SafeOwnerConnector from wagmi config
           const safeConnector = getConnectors(wagmiConfig).find(
             (c) => c.id === 'safeOwner'
@@ -186,19 +212,35 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           }
 
           debugWallet('Connecting to SafeOwnerConnector...')
-          await connectAsync({ connector: safeConnector })
+          const result = await connectAsync({ connector: safeConnector })
 
           // Check abort immediately after async operation (before state updates)
           if (abortController.signal.aborted) {
             debugWallet(
               'Safe connector switch aborted after connect (component unmounted)'
             )
+            await disconnectAsync({ connector: safeConnector })
+            return
+          }
+
+          if (flowCancelledRef.current) {
+            await disconnectAsync({ connector: safeConnector })
             return
           }
 
           debugWallet('Safe connector switch complete')
+          const connectedAddress = result.accounts?.[0]
+          const connectedConnector = safeConnector
 
-          // The existing useEffect will detect the new connection and send WALLET_CONNECTED
+          if (!connectedAddress) {
+            throw new Error('Safe connector did not return an address')
+          }
+
+          send({
+            type: 'WALLET_CONNECTED',
+            address: connectedAddress,
+            connector: connectedConnector,
+          })
         } catch (error) {
           // Check abort in catch block (before state updates)
           if (abortController.signal.aborted) {
@@ -206,6 +248,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
             return
           }
 
+          clearSafeInfo()
           debugWallet('Safe connector switch error: %O', error)
           send({
             type: 'ERROR',
@@ -222,7 +265,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         abortController.abort()
       }
     }
-  }, [state, send, wagmiConfig, connectAsync])
+  }, [state, send, wagmiConfig, connectAsync, disconnectAsync])
 
   // Debug state changes
   useEffect(() => {
@@ -233,6 +276,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
 
     // Log when authenticated
     if (state.matches('authenticated')) {
+      safeFlowStartedRef.current = false
       debugWallet('AUTHENTICATED STATE REACHED! Modal should close in 500ms')
     }
 
@@ -303,6 +347,8 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
       return
     }
 
+    flowCancelledRef.current = false
+    const attemptId = ++authAttemptRef.current
     send({ type: 'SELECT_WALLET', walletId })
 
     try {
@@ -313,8 +359,22 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         wallet.connector
       )
       const result = await connectAsync({ connector: wallet.connector })
+      if (attemptId !== authAttemptRef.current || flowCancelledRef.current) return
       debugWallet('Connected successfully: %O', result)
+      const connectedAddress = result.accounts?.[0]
+      const connectedConnector = wallet.connector
+
+      if (!connectedAddress) {
+        throw new Error('Wallet connection did not return an address')
+      }
+
+      send({
+        type: 'WALLET_CONNECTED',
+        address: connectedAddress,
+        connector: connectedConnector,
+      })
     } catch (error) {
+      if (attemptId !== authAttemptRef.current || flowCancelledRef.current) return
       debugWallet('Connection error: %O', error)
       send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
     }
@@ -322,6 +382,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
 
   // Handle Safe address submission
   const handleSubmitSafeAddress = (safeAddress: Address, chainId: number) => {
+    safeFlowStartedRef.current = true
     send({
       type: 'SUBMIT_SAFE_ADDRESS',
       address: safeAddress,
@@ -339,6 +400,8 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
     )
 
     send({ type: 'SIGN_MESSAGE' })
+    flowCancelledRef.current = false
+    const attemptId = ++authAttemptRef.current
 
     // Create AbortController with 60s timeout for signature request
     const abortController = new AbortController()
@@ -357,12 +420,20 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         throw new Error('No address available')
       }
 
+      const signingAddress = await resolveSigningAddress(
+        state.context.connector,
+        currentAddress
+      )
+
+      if (flowCancelledRef.current || attemptId !== authAttemptRef.current) return
+
       // Begin auth flow
       beginSiweAuthFlow()
 
       // Get nonce from API
       debugWallet('Fetching nonce from /api/siwe/nonce...')
       const nonceRes = await fetch(SIWE_NONCE_PATH)
+      if (flowCancelledRef.current || attemptId !== authAttemptRef.current) return
       debugWallet('Nonce response status: %d', nonceRes.status)
 
       // Get response as text first to see what we're receiving
@@ -399,7 +470,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
       // Create SIWE message
       const message = createSiweMessage({
         domain: window.location.host,
-        address: currentAddress,
+        address: signingAddress,
         statement: safeAddress
           ? `Sign in as owner of Safe ${safeAddress}`
           : 'Sign in with Ethereum to the app.',
@@ -431,6 +502,8 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         return
       }
 
+      if (flowCancelledRef.current || attemptId !== authAttemptRef.current) return
+
       debugWallet('Signature received successfully: %s', signature)
 
       send({
@@ -457,6 +530,8 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         return
       }
 
+      if (flowCancelledRef.current || attemptId !== authAttemptRef.current) return
+
       debugWallet('Signature error: %O', error)
       debugWallet(
         'Error name: %s, message: %s',
@@ -474,12 +549,18 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
   }
 
   // Handle cancel
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    flowCancelledRef.current = true
+    authAttemptRef.current += 1
+    await cleanupCancelledSafeFlow()
     send({ type: 'CANCEL' })
   }
 
   // Handle back navigation
-  const handleBack = () => {
+  const handleBack = async () => {
+    flowCancelledRef.current = true
+    authAttemptRef.current += 1
+    await cleanupCancelledSafeFlow()
     send({ type: 'BACK' })
   }
 
@@ -489,7 +570,9 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
   }
 
   // Handle close
-  const handleClose = () => {
+  const handleClose = async () => {
+    flowCancelledRef.current = true
+    await cleanupCancelledSafeFlow()
     if (!state.matches('closed')) {
       send({ type: 'CLOSE' })
     }
@@ -535,7 +618,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           onSelectSafe={() => {}}
           showSafeOption={false}
           title="Connect Safe Owner Wallet"
-          description="Choose a wallet that is an owner of this Safe. Your connected wallet cannot be used unless it has owner permissions for the Safe."
+          description="Choose a wallet that is an owner of this Safe to continue."
         />
       )
     }
@@ -560,10 +643,18 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         state.context.connector?.name ||
         wallets.find((w) => w.id === state.context.selectedWalletId)?.name ||
         'wallet'
+      const signingAddress =
+        state.context.connector?.id === 'safeOwner'
+          ? getCachedSigningAddress(state.context.connector, state.context.address!)
+          : state.context.address!
+
+      if (!signingAddress) {
+        return <LoadingView message="Preparing signature..." />
+      }
 
       return (
         <SignatureView
-          address={state.context.address!}
+          address={signingAddress}
           walletName={walletName}
           mode={state.context.safeInfo ? 'safe' : 'eoa'}
           safeAddress={state.context.safeInfo?.safeAddress}

@@ -37,6 +37,7 @@ export function AsyncImage({
         height,
         width,
         borderRadius,
+        border: `1px solid ${background}`,
       }}
       className={className}
     >

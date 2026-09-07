@@ -100,7 +100,7 @@ export function SafeTransactionModal({
                     borderRadius="curved"
                     backgroundColor="background2"
                   >
-                    <Text variant="label-sm" color="text3" style={{ fontSize: '12px' }}>
+                    <Text variant="label-sm" color="text3">
                       {transactions.length > 1 ? `${index + 1}. ` : ''}To:{' '}
                       {truncateAddress(transaction.to)}
                       {transaction.data && transaction.data !== '0x'
@@ -193,7 +193,7 @@ export function SafeTransactionModal({
                 <Box
                   p="x2"
                   borderRadius="curved"
-                  style={{ backgroundColor: 'rgba(255, 59, 48, 0.1)' }}
+                  backgroundColor="negativeDisabled"
                   w="100%"
                 >
                   <Text
