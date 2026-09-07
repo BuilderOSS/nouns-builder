@@ -141,7 +141,7 @@ export async function proposeSafeTransaction(
   // Build Safe transaction with checksummed address
   const safeTransactions: MetaTransactionData[] = transactions.map((tx) => ({
     to: getAddress(tx.to),
-    value: tx.value?.toString() || '0',
+    value: tx.value ? BigInt(tx.value).toString(10) : '0',
     data: tx.data || '0x',
   }))
   debugSafeTx('Creating Safe transaction...')
@@ -181,17 +181,27 @@ export async function proposeSafeTransaction(
       }),
     })
     if (!response.ok) {
-      const data = (await response.json().catch(() => null)) as { error?: string } | null
-      throw new Error(
-        data?.error || `Safe proposal failed with status ${response.status}`
+      const data = (await response.json().catch(() => null)) as {
+        code?: string
+        error?: string
+      } | null
+      const error = new SafeTransactionError(
+        data?.error || 'Safe proposal failed. Please try again.',
+        data?.code === 'SAFE_SERVICE_REJECTED'
+          ? SafeTransactionErrorCode.API_REJECTED
+          : data?.code === 'SAFE_SERVICE_CONFIG_ERROR'
+            ? SafeTransactionErrorCode.API_CONFIG_ERROR
+            : SafeTransactionErrorCode.API_UNAVAILABLE
       )
+      throw error
     }
     debugSafeTx('Transaction successfully proposed to Safe Service')
   } catch (error) {
     debugSafeTx('ERROR: Failed to propose transaction to Safe Service: %O', error)
+    if (error instanceof SafeTransactionError) throw error
     throw new SafeTransactionError(
-      `Failed to propose transaction to Safe Service: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      SafeTransactionErrorCode.API_ERROR
+      'Safe Service is temporarily unavailable. Check your connection and try again.',
+      SafeTransactionErrorCode.API_UNAVAILABLE
     )
   }
 
@@ -294,7 +304,7 @@ export async function executeSafeTransaction(
   // Build Safe transaction with checksummed address
   const safeTransactions: MetaTransactionData[] = transactions.map((tx) => ({
     to: getAddress(tx.to),
-    value: tx.value?.toString() || '0',
+    value: tx.value ? BigInt(tx.value).toString(10) : '0',
     data: tx.data || '0x',
   }))
   debugSafeTx('Creating Safe transaction...')

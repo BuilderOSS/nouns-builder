@@ -5,6 +5,7 @@ import {
   isOwnerOfSafe,
   type SafeInfo,
   SafeOwnerProvider,
+  setSafeInfo,
 } from '@buildeross/utils'
 import { getConnectors } from '@wagmi/core'
 import type { PublicClient } from 'viem'
@@ -178,6 +179,21 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
         const eoaAccounts = await eoaConnector_.getAccounts()
         eoaAddress_ = eoaAccounts?.[0] || null
 
+        // Persist the resolved EOA address so the signing UI can read it back later.
+        setSafeInfo(
+          {
+            safeAddress: saved.safeAddress,
+            chainId: saved.chainId,
+            threshold: saved.threshold,
+            owners: saved.owners,
+            isReadOnly: false,
+            nonce: saved.nonce,
+            version: saved.version,
+          },
+          saved.eoaConnectorId,
+          eoaAddress_
+        )
+
         // Load Safe info from cache if not already loaded
         if (!safeInfo_) {
           // Use cached SafeInfo from localStorage (already fetched during validation)
@@ -222,6 +238,18 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
         const saved = loadSafeConfig()
         if (!saved) {
           throw new Error('No Safe configuration found')
+        }
+
+        if (
+          provider_ &&
+          safeInfo_ &&
+          (safeInfo_.safeAddress.toLowerCase() !== saved.safeAddress.toLowerCase() ||
+            safeInfo_.chainId !== saved.chainId ||
+            !eoaConnector_ ||
+            eoaConnector_.id !== saved.eoaConnectorId)
+        ) {
+          provider_.destroy()
+          clearCache()
         }
 
         if (!provider_) {
@@ -352,7 +380,7 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
 
       // Synchronous getter for cached EOA address
       get cachedEOAAddress(): `0x${string}` | null {
-        return eoaAddress_
+        return eoaAddress_ ?? loadSafeConfig()?.eoaAddress ?? null
       },
 
       // Custom method to get EOA connector
@@ -371,6 +399,11 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
       async getEOAAddress(): Promise<`0x${string}` | null> {
         const saved = loadSafeConfig()
         if (!saved) return null
+
+        if (saved.eoaAddress) {
+          eoaAddress_ = saved.eoaAddress
+          return saved.eoaAddress
+        }
 
         if (!eoaConnector_) {
           eoaConnector_ = findEOAConnector(saved.eoaConnectorId)

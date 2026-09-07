@@ -26,6 +26,7 @@ export interface SafeInfo {
   threshold: number
   owners: Address[]
   isReadOnly: boolean
+  eoaAddress?: Address
   nonce?: number
   version?: string
 }
@@ -36,5 +37,6 @@ export interface WalletInfo {
   name: string
   iconUrl?: string
   isRainbowKitConnector: boolean
+  recent?: boolean
   connector?: Connector
 }

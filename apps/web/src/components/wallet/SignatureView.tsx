@@ -31,7 +31,7 @@ export function SignatureView({
       <Stack gap="x3">
         <Box>
           <Text variant="paragraph-sm" color="text3">
-            Wallet
+            {mode === 'safe' ? 'Signing wallet' : 'Wallet'}
           </Text>
           <Text variant="paragraph-sm">{walletName}</Text>
         </Box>

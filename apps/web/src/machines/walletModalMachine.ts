@@ -72,6 +72,7 @@ export const walletModalMachine = createMachine(
     },
     states: {
       closed: {
+        entry: 'resetContext',
         on: {
           OPEN: {
             target: 'selectingWallet',
@@ -197,6 +198,13 @@ export const walletModalMachine = createMachine(
       switchingToSafe: {
         entry: () =>
           debugWallet('State: switchingToSafe (waiting for wagmi connector switch)'),
+        invoke: {
+          src: 'switchToSafeConnector',
+          input: ({ context }) => ({
+            safeInfo: context.safeInfo!,
+            eoaConnectorId: context.connector!.id,
+          }),
+        },
         on: {
           WALLET_CONNECTED: {
             target: 'awaitingSignature',
@@ -214,7 +222,7 @@ export const walletModalMachine = createMachine(
         on: {
           SIGN_MESSAGE: 'signingMessage',
           CLOSE: 'disconnecting',
-          CANCEL: 'disconnecting',
+          CANCEL: { target: 'selectingWallet', actions: 'resetAttemptContext' },
         },
       },
       signingMessage: {
@@ -234,8 +242,8 @@ export const walletModalMachine = createMachine(
             target: 'awaitingSignature',
             actions: 'setSignatureError',
           },
-          CANCEL: 'awaitingSignature',
-          CLOSE: 'disconnecting',
+          CANCEL: { target: 'selectingWallet', actions: 'resetAttemptContext' },
+          CLOSE: { target: 'closed', actions: 'resetAttemptContext' },
         },
       },
       authenticating: {
@@ -261,6 +269,9 @@ export const walletModalMachine = createMachine(
             target: 'awaitingSignature',
             actions: 'setVerificationError',
           },
+        },
+        on: {
+          CLOSE: { target: 'closed', actions: 'resetAttemptContext' },
         },
       },
       authenticated: {
@@ -295,6 +306,32 @@ export const walletModalMachine = createMachine(
           }
           return []
         },
+      }),
+      resetContext: assign({
+        selectedWalletId: null,
+        address: null,
+        connector: null,
+        safeInfo: null,
+        pendingSafeInfo: null,
+        pendingSafeAddress: null,
+        pendingSafeChainId: null,
+        message: null,
+        signature: null,
+        error: null,
+        isSafeMode: false,
+      }),
+      resetAttemptContext: assign({
+        selectedWalletId: null,
+        address: null,
+        connector: null,
+        safeInfo: null,
+        pendingSafeInfo: null,
+        pendingSafeAddress: null,
+        pendingSafeChainId: null,
+        message: null,
+        signature: null,
+        error: null,
+        isSafeMode: false,
       }),
       setSelectedWallet: assign({
         selectedWalletId: ({ event }) => {
@@ -464,7 +501,7 @@ export const walletModalMachine = createMachine(
         void,
         { safeInfo: SafeInfo; eoaConnectorId: string }
       >(async ({ input }) => {
-        // Save Safe info to localStorage
+        // Save Safe info before the Safe connector switch begins.
         saveSafeInfo(input.safeInfo, input.eoaConnectorId)
         // Actual connector switch handled by component
       }),

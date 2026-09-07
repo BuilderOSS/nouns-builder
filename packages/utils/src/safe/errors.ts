@@ -16,6 +16,12 @@ export enum SafeTransactionErrorCode {
   NOT_SAFE_OWNER = 'NOT_SAFE_OWNER',
   /** Safe Service API error */
   API_ERROR = 'API_ERROR',
+  /** Safe Service rejected the proposal */
+  API_REJECTED = 'API_REJECTED',
+  /** Safe Service could not be reached */
+  API_UNAVAILABLE = 'API_UNAVAILABLE',
+  /** Safe Service credentials or configuration are invalid */
+  API_CONFIG_ERROR = 'API_CONFIG_ERROR',
   /** Transaction handler not initialized */
   HANDLER_NOT_INITIALIZED = 'HANDLER_NOT_INITIALIZED',
   /** Another transaction is already in progress */
@@ -76,7 +82,13 @@ export function getSafeErrorMessage(error: unknown): string {
       case SafeTransactionErrorCode.NOT_SAFE_OWNER:
         return 'Your connected wallet is not an owner of this Safe.'
       case SafeTransactionErrorCode.API_ERROR:
-        return 'Unable to connect to Safe Service. Please try again.'
+        return 'Safe Service returned an unexpected error. Please try again.'
+      case SafeTransactionErrorCode.API_REJECTED:
+        return error.message || 'Safe Service rejected this proposal.'
+      case SafeTransactionErrorCode.API_UNAVAILABLE:
+        return 'Safe Service is temporarily unavailable. Check your connection and try again.'
+      case SafeTransactionErrorCode.API_CONFIG_ERROR:
+        return 'Safe Service is not configured correctly. Please try again later.'
       case SafeTransactionErrorCode.HANDLER_NOT_INITIALIZED:
         return 'Safe transaction handler not initialized. Please refresh the page.'
       case SafeTransactionErrorCode.TRANSACTION_IN_PROGRESS:

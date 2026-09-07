@@ -27,7 +27,7 @@ export function WalletListView({
 
   return (
     <Stack gap="x4">
-      <Stack gap="x2">
+      <Stack gap="x1">
         <Text variant="heading-sm">{title}</Text>
         {description && (
           <Text variant="paragraph-sm" color="text3">
@@ -37,7 +37,7 @@ export function WalletListView({
       </Stack>
 
       {installedWallets.length > 0 && (
-        <Stack gap="x2">
+        <Stack gap="x0">
           <Text variant="label-sm" color="text3">
             Installed
           </Text>
@@ -47,13 +47,14 @@ export function WalletListView({
               name={wallet.name}
               icon={wallet.iconUrl || ''}
               iconBackground="#ffffff"
+              recent={wallet.recent}
               onClick={() => onSelectWallet(wallet.id)}
             />
           ))}
         </Stack>
       )}
 
-      <Stack gap="x2">
+      <Stack gap="x0">
         <Text variant="label-sm" color="text3">
           Popular
         </Text>
@@ -63,13 +64,14 @@ export function WalletListView({
             name={wallet.name}
             icon={wallet.iconUrl || ''}
             iconBackground="#ffffff"
+            recent={wallet.recent}
             onClick={() => onSelectWallet(wallet.id)}
           />
         ))}
       </Stack>
 
       {showSafeOption && (
-        <Stack gap="x2">
+        <Stack gap="x0">
           <Text variant="label-sm" color="text3">
             Multi-Sig
           </Text>
@@ -123,11 +125,12 @@ export function WalletListView({
         p="x3"
         style={{ textDecoration: 'none' }}
         variant="secondary"
+        size="sm"
       >
-        <Icon id="question" size="sm" />
-        <Text variant="label-sm" color="accent">
-          I don't have a wallet?
+        <Text variant="label-xs" color="accent">
+          I don't have a wallet
         </Text>
+        <Icon id="question" size="sm" />
       </Button>
     </Stack>
   )

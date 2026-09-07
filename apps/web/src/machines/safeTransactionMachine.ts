@@ -5,6 +5,7 @@ import type {
   SendTransactionParams,
 } from '@buildeross/utils'
 import {
+  getSafeErrorMessage,
   proposeSafeTransaction,
   SafeTransactionError,
   SafeTransactionErrorCode,
@@ -92,7 +93,7 @@ export const safeTransactionMachine = createMachine(
           },
           onError: {
             target: 'error',
-            actions: 'setError',
+            actions: ['setError', 'rejectConfirmation'],
           },
         },
       },
@@ -165,13 +166,18 @@ export const safeTransactionMachine = createMachine(
         error: ({ event }) => {
           if ('error' in event) {
             const err = event.error as Error
-            const message = err?.message || 'Failed to propose transaction'
+            const message = getSafeErrorMessage(err)
             debugSafeTx('Transaction error: %s', message)
             return message
           }
           return 'Failed to propose transaction'
         },
       }),
+      rejectConfirmation: ({ context, event }) => {
+        if ('error' in event) {
+          context.confirmReject?.(event.error as Error)
+        }
+      },
       clearError: assign({ error: null }),
       logSuccess: () => {
         debugSafeTx('State: success')

@@ -50,7 +50,7 @@ export function WalletOption({
             width={28}
             height={28}
             background={iconBackground}
-            borderRadius="6px"
+            borderRadius="8px"
           />
           <Stack gap="x0">
             <Text
@@ -64,7 +64,7 @@ export function WalletOption({
               <Text
                 variant="paragraph-xs"
                 color="text3"
-                style={{ lineHeight: 1, marginTop: -2 }}
+                style={{ lineHeight: 1, marginTop: -1 }}
               >
                 Recent
               </Text>
