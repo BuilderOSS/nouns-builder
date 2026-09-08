@@ -160,9 +160,13 @@ export function handleTransfer(event: TransferEvent): void {
   let toProfile = event.params.to.notEqual(ADDRESS_ZERO)
     ? getOrCreateProfile(event.params.to, event.block.timestamp)
     : null
-  let toDelegateProfile = toDelegate.notEqual(ADDRESS_ZERO)
-    ? getOrCreateProfile(toDelegate, event.block.timestamp)
-    : null
+  // Reuse toProfile if toDelegate is the same address
+  let toDelegateProfile =
+    toDelegate.notEqual(ADDRESS_ZERO) && toProfile && toDelegate.equals(event.params.to)
+      ? toProfile
+      : toDelegate.notEqual(ADDRESS_ZERO)
+        ? getOrCreateProfile(toDelegate, event.block.timestamp)
+        : null
   let fromProfile = event.params.from.notEqual(ADDRESS_ZERO)
     ? getOrCreateProfile(event.params.from, event.block.timestamp)
     : null
@@ -261,12 +265,7 @@ export function handleTransfer(event: TransferEvent): void {
     if (previousProfile.tokenCount > 0) {
       previousProfile.tokenCount = previousProfile.tokenCount - 1
     }
-    previousProfile.save()
   }
-
-  let fromDelegateProfile = fromDelegate.notEqual(ADDRESS_ZERO)
-    ? Profile.load(fromDelegate.toHexString())
-    : null
 
   // Handle loading from owner
   if (event.params.from.notEqual(ADDRESS_ZERO)) {
@@ -279,15 +278,24 @@ export function handleTransfer(event: TransferEvent): void {
       fromOwner.save()
 
       if (fromOwnerTokenCount == 0) {
-        if (previousProfile) {
+        if (previousProfile && previousProfile.ownerDaoCount > 0) {
           previousProfile.ownerDaoCount = previousProfile.ownerDaoCount - 1
-          previousProfile.save()
         }
         store.remove('DAOTokenOwner', fromOwnerId)
         dao.ownerCount = dao.ownerCount - 1
       }
     }
   }
+
+  // Save previous profile after all updates
+  if (previousProfile) {
+    previousProfile.save()
+  }
+
+  // Load fromDelegateProfile AFTER saving previousProfile to avoid overwriting
+  let fromDelegateProfile = fromDelegate.notEqual(ADDRESS_ZERO)
+    ? Profile.load(fromDelegate.toHexString())
+    : null
 
   if (fromDelegate.notEqual(ADDRESS_ZERO)) {
     let fromVoterId = `${event.address.toHexString()}:${fromDelegate.toHexString()}`
