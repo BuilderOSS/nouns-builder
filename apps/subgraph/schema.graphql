@@ -46,6 +46,24 @@ type DAOLink @entity {
   url: String!
 }
 
+type Profile @entity {
+  id: ID!
+  address: Bytes!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  lastActiveAt: BigInt!
+  tokenCount: Int!
+  ownerDaoCount: Int!
+  voterDaoCount: Int!
+  proposalVotesCount: Int!
+  proposalsSubmittedCount: Int!
+  bidsPlacedCount: Int!
+  auctionWinsCount: Int!
+  ownerDaos: [DAOTokenOwner!]! @derivedFrom(field: "profile")
+  voterDaos: [DAOVoter!]! @derivedFrom(field: "profile")
+  tokens: [Token!]! @derivedFrom(field: "profile")
+}
+
 type _Schema_
   @fulltext(
     name: "daoSearch"
@@ -68,6 +86,7 @@ type DAOTokenOwner @entity {
   id: ID!
   owner: Bytes!
   delegate: Bytes!
+  profile: Profile
   dao: DAO!
   daoTokenCount: Int!
   daoTokens: [Token!]! @derivedFrom(field: "ownerInfo")
@@ -76,6 +95,7 @@ type DAOTokenOwner @entity {
 type DAOVoter @entity {
   id: ID!
   voter: Bytes!
+  profile: Profile
   dao: DAO!
   daoTokenCount: Int!
   daoTokens: [Token!]! @derivedFrom(field: "voterInfo")
@@ -89,6 +109,7 @@ type Token @entity {
   tokenContract: Bytes!
   tokenId: BigInt!
   owner: Bytes!
+  profile: Profile
   ownerInfo: DAOTokenOwner!
   voterInfo: DAOVoter!
   mintedAt: BigInt!

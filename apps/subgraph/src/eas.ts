@@ -48,6 +48,7 @@ import {
   TREASURY_ASSET_PIN_SCHEMA_UID,
 } from './utils/eas'
 import { parseDescriptionFields } from './utils/proposalMetadata'
+import { getOrCreateProfile } from './utils/profile'
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
 
@@ -249,6 +250,8 @@ function handleProfileLinkAttestation(event: AttestedEvent): void {
     return
   }
 
+  getOrCreateProfile(event.params.recipient, event.block.timestamp).save()
+
   const data = getAttestation(event.address, event.params.uid)
   if (!data) {
     return
@@ -310,6 +313,8 @@ function handleProfileLinkRevoked(event: RevokedEvent): void {
   if (event.params.attester != event.params.recipient) {
     return
   }
+
+  getOrCreateProfile(event.params.recipient, event.block.timestamp).save()
 
   const data = getAttestation(event.address, event.params.uid)
   if (!data) {
