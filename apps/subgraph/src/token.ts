@@ -148,6 +148,7 @@ export function handleTransfer(event: TransferEvent): void {
 
   let tokenId = `${event.address.toHexString()}:${event.params.tokenId.toString()}`
   let token = Token.load(tokenId)
+  let previousTokenProfile = token ? token.profile : null
   let dao = DAO.load(event.address.toHexString())
   if (dao == null) {
     return
@@ -159,8 +160,11 @@ export function handleTransfer(event: TransferEvent): void {
   let toProfile = event.params.to.notEqual(ADDRESS_ZERO)
     ? getOrCreateProfile(event.params.to, event.block.timestamp)
     : null
+  let toDelegateProfile = toDelegate.notEqual(ADDRESS_ZERO)
+    ? getOrCreateProfile(toDelegate, event.block.timestamp)
+    : null
   let fromProfile = event.params.from.notEqual(ADDRESS_ZERO)
-    ? Profile.load(event.params.from.toHexString())
+    ? getOrCreateProfile(event.params.from, event.block.timestamp)
     : null
 
   // Handle loading token data on first transfer
@@ -227,15 +231,16 @@ export function handleTransfer(event: TransferEvent): void {
       toVoter.daoTokenCount = 1
       toVoter.dao = event.address.toHexString()
       toVoter.voter = toDelegate
-      toVoter.profile = toProfile ? toProfile.id : null
+      toVoter.profile = toDelegateProfile ? toDelegateProfile.id : null
       dao.voterCount = dao.voterCount + 1
-      if (toProfile) {
-        toProfile.voterDaoCount = toProfile.voterDaoCount + 1
+      if (toDelegateProfile) {
+        toDelegateProfile.voterDaoCount = toDelegateProfile.voterDaoCount + 1
       }
     } else toVoter.daoTokenCount = toVoter.daoTokenCount + 1
 
-    if (toProfile) {
-      toVoter.profile = toProfile.id
+    if (toDelegateProfile) {
+      toVoter.profile = toDelegateProfile.id
+      toDelegateProfile.save()
     }
     toVoter.save()
 
@@ -248,6 +253,21 @@ export function handleTransfer(event: TransferEvent): void {
 
   token.save()
 
+  let previousProfile = previousTokenProfile
+    ? Profile.load(previousTokenProfile!)
+    : fromProfile
+  if (previousProfile) {
+    touchProfile(previousProfile, event.block.timestamp)
+    if (previousProfile.tokenCount > 0) {
+      previousProfile.tokenCount = previousProfile.tokenCount - 1
+    }
+    previousProfile.save()
+  }
+
+  let fromDelegateProfile = fromDelegate.notEqual(ADDRESS_ZERO)
+    ? Profile.load(fromDelegate.toHexString())
+    : null
+
   // Handle loading from owner
   if (event.params.from.notEqual(ADDRESS_ZERO)) {
     let fromOwnerId = `${event.address.toHexString()}:${event.params.from.toHexString()}`
@@ -258,18 +278,10 @@ export function handleTransfer(event: TransferEvent): void {
       fromOwner.delegate = fromDelegate
       fromOwner.save()
 
-      if (fromProfile) {
-        touchProfile(fromProfile, event.block.timestamp)
-        if (fromProfile.tokenCount > 0) {
-          fromProfile.tokenCount = fromProfile.tokenCount - 1
-        }
-        fromProfile.save()
-      }
-
       if (fromOwnerTokenCount == 0) {
-        if (fromProfile) {
-          fromProfile.ownerDaoCount = fromProfile.ownerDaoCount - 1
-          fromProfile.save()
+        if (previousProfile) {
+          previousProfile.ownerDaoCount = previousProfile.ownerDaoCount - 1
+          previousProfile.save()
         }
         store.remove('DAOTokenOwner', fromOwnerId)
         dao.ownerCount = dao.ownerCount - 1
@@ -285,12 +297,12 @@ export function handleTransfer(event: TransferEvent): void {
       fromVoter.daoTokenCount = fromDelegateTokenCount
       fromVoter.save()
 
-      if (fromProfile) {
-        touchProfile(fromProfile, event.block.timestamp)
+      if (fromDelegateProfile) {
+        touchProfile(fromDelegateProfile, event.block.timestamp)
         if (fromDelegateTokenCount == 0) {
-          fromProfile.voterDaoCount = fromProfile.voterDaoCount - 1
+          fromDelegateProfile.voterDaoCount = fromDelegateProfile.voterDaoCount - 1
         }
-        fromProfile.save()
+        fromDelegateProfile.save()
       }
 
       if (fromDelegateTokenCount == 0) {

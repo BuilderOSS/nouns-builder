@@ -8,11 +8,15 @@ import {
   test,
 } from 'matchstick-as'
 
-import { AuctionConfig, DAO, DAOTokenOwner, DAOVoter, Profile, Token } from '../generated/schema'
 import {
-  DelegateChanged,
-  Transfer,
-} from '../generated/templates/Token/Token'
+  AuctionConfig,
+  DAO,
+  DAOTokenOwner,
+  DAOVoter,
+  Profile,
+  Token,
+} from '../generated/schema'
+import { DelegateChanged, Transfer } from '../generated/templates/Token/Token'
 import { handleDelegateChanged, handleTransfer } from '../src/token'
 
 const TOKEN_ADDRESS = '0x00000000000000000000000000000000000000aa'
@@ -57,7 +61,12 @@ function seedDao(): void {
   dao.save()
 }
 
-function seedProfile(address: string, tokenCount: i32, ownerDaoCount: i32, voterDaoCount: i32): void {
+function seedProfile(
+  address: string,
+  tokenCount: i32,
+  ownerDaoCount: i32,
+  voterDaoCount: i32
+): void {
   const profile = new Profile(address)
   profile.address = Address.fromString(address)
   profile.createdAt = BigInt.fromI32(TIMESTAMP)
@@ -137,7 +146,10 @@ function createTransferEvent(from: string, to: string): Transfer {
   event.parameters = [
     new ethereum.EventParam('from', ethereum.Value.fromAddress(Address.fromString(from))),
     new ethereum.EventParam('to', ethereum.Value.fromAddress(Address.fromString(to))),
-    new ethereum.EventParam('tokenId', ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(1))),
+    new ethereum.EventParam(
+      'tokenId',
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(1))
+    ),
   ]
   return event
 }
@@ -147,7 +159,10 @@ function createDelegateChangedEvent(from: string, to: string): DelegateChanged {
   event.address = Address.fromString(TOKEN_ADDRESS)
   event.block.timestamp = BigInt.fromI32(TIMESTAMP)
   event.parameters = [
-    new ethereum.EventParam('delegator', ethereum.Value.fromAddress(Address.fromString(from))),
+    new ethereum.EventParam(
+      'delegator',
+      ethereum.Value.fromAddress(Address.fromString(from))
+    ),
     new ethereum.EventParam('from', ethereum.Value.fromAddress(Address.fromString(from))),
     new ethereum.EventParam('to', ethereum.Value.fromAddress(Address.fromString(to))),
   ]
@@ -203,9 +218,19 @@ describe('Profile counts', () => {
     assert.fieldEquals('Profile', OWNER_B, 'tokenCount', '0')
 
     assert.fieldEquals('DAOTokenOwner', TOKEN_ADDRESS + ':' + OWNER_A, 'profile', OWNER_A)
-    assert.fieldEquals('DAOTokenOwner', TOKEN_ADDRESS + ':' + OWNER_A, 'delegate', OWNER_B)
+    assert.fieldEquals(
+      'DAOTokenOwner',
+      TOKEN_ADDRESS + ':' + OWNER_A,
+      'delegate',
+      OWNER_B
+    )
     assert.fieldEquals('DAOVoter', TOKEN_ADDRESS + ':' + OWNER_B, 'profile', OWNER_B)
     assert.fieldEquals('Token', TOKEN_ADDRESS + ':1', 'profile', OWNER_A)
-    assert.fieldEquals('Token', TOKEN_ADDRESS + ':1', 'voterInfo', TOKEN_ADDRESS + ':' + OWNER_B)
+    assert.fieldEquals(
+      'Token',
+      TOKEN_ADDRESS + ':1',
+      'voterInfo',
+      TOKEN_ADDRESS + ':' + OWNER_B
+    )
   })
 })
