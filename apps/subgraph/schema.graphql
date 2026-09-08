@@ -412,8 +412,6 @@ enum FeedEventType {
   AUCTION_BID_PLACED
   AUCTION_SETTLED
   CLANKER_TOKEN_CREATED
-  CLANKER_TOKEN_LINKED
-  CLANKER_TOKEN_UNLINKED
   ZORA_COIN_CREATED
   ZORA_DROP_CREATED
   CANDIDATE_VERSION_CREATED
@@ -537,30 +535,6 @@ type ClankerTokenCreatedEvent implements FeedEvent @entity {
   clankerToken: ClankerToken!
 }
 
-type ClankerTokenLinkedEvent implements FeedEvent @entity {
-  id: ID!
-  type: FeedEventType!
-  dao: DAO!
-  timestamp: BigInt!
-  blockNumber: BigInt!
-  transactionHash: Bytes!
-  actor: Bytes!
-  clankerToken: ClankerToken!
-  previousAdmin: Bytes!
-}
-
-type ClankerTokenUnlinkedEvent implements FeedEvent @entity {
-  id: ID!
-  type: FeedEventType!
-  dao: DAO!
-  timestamp: BigInt!
-  blockNumber: BigInt!
-  transactionHash: Bytes!
-  actor: Bytes!
-  clankerToken: ClankerToken!
-  newAdmin: Bytes!
-}
-
 type ZoraCoinCreatedEvent implements FeedEvent @entity {
   id: ID!
   type: FeedEventType!
@@ -659,9 +633,6 @@ type ClankerToken @entity {
 
   # Swap routing
   swapRoute: SwapRoute @derivedFrom(field: "clankerToken")
-
-  # Token holders
-  holders: [ClankerTokenHolder!]! @derivedFrom(field: "token")
 
   # Block metadata
   createdAt: BigInt!
@@ -891,24 +862,6 @@ type PaymentOption @entity {
 
   # Whether this is a direct swap (single hop)
   isDirectSwap: Boolean!
-}
-
-# Token holder entities
-
-type ClankerTokenHolder @entity {
-  # ID is: token-address-holder-address
-  id: ID!
-
-  # References
-  token: ClankerToken!
-  holder: Bytes!
-
-  # Balance held by this address
-  balance: BigInt!
-
-  # Metadata
-  updatedAt: BigInt!
-  updatedAtBlock: BigInt!
 }
 
 type ZoraCoinHolder @entity {
