@@ -36,6 +36,7 @@ import {
 } from '../generated/templates/Governor/Governor'
 import { Token as TokenContract } from '../generated/templates/Governor/Token'
 import { Treasury as TreasuryContract } from '../generated/templates/Governor/Treasury'
+import { getOrCreateProfile } from './utils/profile'
 import { parseDescriptionFields } from './utils/proposalMetadata'
 
 function buildCalldatas(calldatasBytes: Bytes[]): string | null {
@@ -59,6 +60,8 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   let context = dataSource.context()
   let dao = DAO.load(context.getString('tokenAddress'))
   if (dao == null) return
+
+  let proposerProfile = getOrCreateProfile(event.params.proposal.proposer, event.block.timestamp)
 
   let newProposalCount = dao.proposalCount + 1
 
@@ -119,6 +122,9 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
 
   dao.save()
   proposal.save()
+
+  proposerProfile.proposalsSubmittedCount = proposerProfile.proposalsSubmittedCount + 1
+  proposerProfile.save()
 
   // Note: Candidate version linking happens later after processing signers (see lines ~274-293)
   // This allows us to find the version through the signature lookup
@@ -393,6 +399,8 @@ export function handleVoteCast(event: VoteCastEvent): void {
     `${event.transaction.hash.toHexString()}:${event.logIndex.toString()}`
   )
 
+  let voterProfile = getOrCreateProfile(event.params.voter, event.block.timestamp)
+
   proposalVote.transactionHash = event.transaction.hash
   proposalVote.timestamp = event.block.timestamp
   proposalVote.voter = event.params.voter
@@ -422,6 +430,9 @@ export function handleVoteCast(event: VoteCastEvent): void {
 
   proposal.save()
   proposalVote.save()
+
+  voterProfile.proposalVotesCount = voterProfile.proposalVotesCount + 1
+  voterProfile.save()
 
   // Create feed event
   let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()

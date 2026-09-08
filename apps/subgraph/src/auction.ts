@@ -1,4 +1,4 @@
-import { dataSource } from '@graphprotocol/graph-ts'
+import { Address, dataSource } from '@graphprotocol/graph-ts'
 
 import {
   Auction,
@@ -19,6 +19,7 @@ import {
   TimeBufferUpdated as TimeBufferUpdatedEvent,
 } from '../generated/templates/Auction/Auction'
 import { parseAuctionBidComment } from './utils/parseAuctionBidComment'
+import { getOrCreateProfile } from './utils/profile'
 
 export function handleAuctionCreated(event: AuctionCreatedEvent): void {
   let context = dataSource.context()
@@ -71,6 +72,13 @@ export function handleAuctionSettled(event: AuctionSettledEvent): void {
   let dao = DAO.load(tokenAddress)
   if (dao == null) return
 
+  let winningBidEntity = auction.winningBid ? AuctionBid.load(auction.winningBid!) : null
+  let winnerAddress = winningBidEntity
+    ? Address.fromBytes(winningBidEntity.bidder)
+    : event.transaction.from
+  let winnerBytes = winningBidEntity ? winningBidEntity.bidder : event.transaction.from
+  let winnerProfile = getOrCreateProfile(winnerAddress, event.block.timestamp)
+
   dao.currentAuction = null
   if (auction.highestBid) {
     let bid = AuctionBid.load(auction.highestBid!)
@@ -91,12 +99,13 @@ export function handleAuctionSettled(event: AuctionSettledEvent): void {
   feedEvent.actor = event.transaction.from
   feedEvent.auction = auction.id
 
-  let winningBidEntity = auction.winningBid ? AuctionBid.load(auction.winningBid!) : null
-
-  feedEvent.winner = winningBidEntity ? winningBidEntity.bidder : event.transaction.from
+  feedEvent.winner = winnerBytes
 
   feedEvent.amount = winningBidEntity ? winningBidEntity.amount : event.params.amount
   feedEvent.save()
+
+  winnerProfile.auctionWinsCount = winnerProfile.auctionWinsCount + 1
+  winnerProfile.save()
 }
 
 export function handleAuctionBid(event: AuctionBidEvent): void {
@@ -119,6 +128,8 @@ export function handleAuctionBid(event: AuctionBidEvent): void {
   let auction = Auction.load(`${tokenAddress}:${event.params.tokenId.toString()}`)
   if (auction == null) return
 
+  let bidderProfile = getOrCreateProfile(event.params.bidder, event.block.timestamp)
+
   if (auction.bidCount == 0) auction.firstBidTime = event.block.timestamp
   auction.bidCount = auction.bidCount + 1
   auction.highestBid = bid.id
@@ -138,6 +149,9 @@ export function handleAuctionBid(event: AuctionBidEvent): void {
   feedEvent.auction = bid.auction
   feedEvent.bid = bid.id
   feedEvent.save()
+
+  bidderProfile.bidsPlacedCount = bidderProfile.bidsPlacedCount + 1
+  bidderProfile.save()
 }
 
 export function handleDurationUpdated(event: DurationUpdatedEvent): void {

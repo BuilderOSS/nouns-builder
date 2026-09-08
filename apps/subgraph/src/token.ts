@@ -1,12 +1,20 @@
 import { Bytes, ethereum, store } from '@graphprotocol/graph-ts'
 
-import { DAO, DAOTokenOwner, DAOVoter, Snapshot, Token } from '../generated/schema'
+import {
+  DAO,
+  DAOTokenOwner,
+  DAOVoter,
+  Profile,
+  Snapshot,
+  Token,
+} from '../generated/schema'
 import {
   DelegateChanged as DelegateChangedEvent,
   Token as TokenContract,
   Transfer as TransferEvent,
 } from '../generated/templates/Token/Token'
 import { ADDRESS_ZERO } from './utils/constants'
+import { getOrCreateProfile, touchProfile } from './utils/profile'
 import { setTokenMetadata } from './utils/setTokenMetadata'
 
 function getOrCreateZeroAddressOwner(daoAddress: Bytes): DAOTokenOwner {
@@ -56,31 +64,41 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
 
   let tokenContract = TokenContract.bind(event.address)
   let tokenOwner = DAOTokenOwner.load(tokenOwnerId)
+  let ownerProfile = getOrCreateProfile(owner, event.block.timestamp)
   if (!tokenOwner) {
     tokenOwner = new DAOTokenOwner(tokenOwnerId)
     tokenOwner.dao = event.address.toHexString()
     tokenOwner.owner = owner
+    tokenOwner.profile = ownerProfile.id
+    ownerProfile.ownerDaoCount = ownerProfile.ownerDaoCount + 1
   }
 
   tokenOwner.daoTokenCount = tokenContract.balanceOf(owner).toI32()
+  tokenOwner.profile = ownerProfile.id
   tokenOwner.delegate = newDelegate
   tokenOwner.save()
+  ownerProfile.save()
 
   let newDelegateVoterId = `${event.address.toHexString()}:${newDelegate.toHexString()}`
 
   let newDelegateVoter = DAOVoter.load(newDelegateVoterId)
   let isNewVoter = false
+  let newDelegateProfile = getOrCreateProfile(newDelegate, event.block.timestamp)
   if (!newDelegateVoter) {
     newDelegateVoter = new DAOVoter(newDelegateVoterId)
     newDelegateVoter.daoTokenCount = 0
     newDelegateVoter.dao = event.address.toHexString()
     newDelegateVoter.voter = newDelegate
+    newDelegateVoter.profile = newDelegateProfile.id
+    newDelegateProfile.voterDaoCount = newDelegateProfile.voterDaoCount + 1
     isNewVoter = true
   }
 
   let newTokenCount = newDelegateVoter.daoTokenCount + tokenOwner.daoTokenCount
   newDelegateVoter.daoTokenCount = newTokenCount
+  newDelegateVoter.profile = newDelegateProfile.id
   newDelegateVoter.save()
+  newDelegateProfile.save()
 
   let tokens = tokenOwner.daoTokens.load()
 
@@ -97,6 +115,15 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
     let prevTokenCount = prevDelegateVoter.daoTokenCount - tokenOwner.daoTokenCount
     prevDelegateVoter.daoTokenCount = prevTokenCount
     prevDelegateVoter.save()
+
+    let prevDelegateProfile = Profile.load(prevDelegate.toHexString())
+    if (prevDelegateProfile) {
+      touchProfile(prevDelegateProfile, event.block.timestamp)
+      if (prevTokenCount == 0) {
+        prevDelegateProfile.voterDaoCount = prevDelegateProfile.voterDaoCount - 1
+      }
+      prevDelegateProfile.save()
+    }
 
     if (prevTokenCount == 0) {
       store.remove('DAOVoter', prevDelegateVoterId)
@@ -129,6 +156,12 @@ export function handleTransfer(event: TransferEvent): void {
   let tokenContract = TokenContract.bind(event.address)
   let fromDelegate = tokenContract.delegates(event.params.from)
   let toDelegate = tokenContract.delegates(event.params.to)
+  let toProfile = event.params.to.notEqual(ADDRESS_ZERO)
+    ? getOrCreateProfile(event.params.to, event.block.timestamp)
+    : null
+  let fromProfile = event.params.from.notEqual(ADDRESS_ZERO)
+    ? Profile.load(event.params.from.toHexString())
+    : null
 
   // Handle loading token data on first transfer
   if (!token) {
@@ -160,17 +193,28 @@ export function handleTransfer(event: TransferEvent): void {
       toOwner.daoTokenCount = 1
       toOwner.dao = event.address.toHexString()
       toOwner.owner = event.params.to
+      toOwner.profile = toProfile ? toProfile.id : null
       dao.ownerCount = dao.ownerCount + 1
+      if (toProfile) {
+        toProfile.ownerDaoCount = toProfile.ownerDaoCount + 1
+      }
     } else toOwner.daoTokenCount = toOwner.daoTokenCount + 1
 
     toOwner.delegate = toDelegate
+    if (toProfile) {
+      toOwner.profile = toProfile.id
+      toProfile.tokenCount = toProfile.tokenCount + 1
+      toProfile.save()
+    }
     toOwner.save()
 
     token.ownerInfo = toOwnerId
+    token.profile = toProfile ? toProfile.id : null
   } else {
     // Handle burning - point to zero address owner
     let zeroOwner = getOrCreateZeroAddressOwner(event.address)
     token.ownerInfo = zeroOwner.id
+    token.profile = null
     dao.totalSupply = dao.totalSupply - 1
     // totalSupply decreases but tokensCount stays the same
   }
@@ -183,9 +227,16 @@ export function handleTransfer(event: TransferEvent): void {
       toVoter.daoTokenCount = 1
       toVoter.dao = event.address.toHexString()
       toVoter.voter = toDelegate
+      toVoter.profile = toProfile ? toProfile.id : null
       dao.voterCount = dao.voterCount + 1
+      if (toProfile) {
+        toProfile.voterDaoCount = toProfile.voterDaoCount + 1
+      }
     } else toVoter.daoTokenCount = toVoter.daoTokenCount + 1
 
+    if (toProfile) {
+      toVoter.profile = toProfile.id
+    }
     toVoter.save()
 
     token.voterInfo = toVoterId
@@ -207,7 +258,19 @@ export function handleTransfer(event: TransferEvent): void {
       fromOwner.delegate = fromDelegate
       fromOwner.save()
 
+      if (fromProfile) {
+        touchProfile(fromProfile, event.block.timestamp)
+        if (fromProfile.tokenCount > 0) {
+          fromProfile.tokenCount = fromProfile.tokenCount - 1
+        }
+        fromProfile.save()
+      }
+
       if (fromOwnerTokenCount == 0) {
+        if (fromProfile) {
+          fromProfile.ownerDaoCount = fromProfile.ownerDaoCount - 1
+          fromProfile.save()
+        }
         store.remove('DAOTokenOwner', fromOwnerId)
         dao.ownerCount = dao.ownerCount - 1
       }
@@ -221,6 +284,14 @@ export function handleTransfer(event: TransferEvent): void {
       let fromDelegateTokenCount = fromVoter.daoTokenCount - 1
       fromVoter.daoTokenCount = fromDelegateTokenCount
       fromVoter.save()
+
+      if (fromProfile) {
+        touchProfile(fromProfile, event.block.timestamp)
+        if (fromDelegateTokenCount == 0) {
+          fromProfile.voterDaoCount = fromProfile.voterDaoCount - 1
+        }
+        fromProfile.save()
+      }
 
       if (fromDelegateTokenCount == 0) {
         store.remove('DAOVoter', fromVoterId)
