@@ -115,14 +115,14 @@ describe('Profile link indexing', () => {
 
     handleAttested(createProfileLinkAttestedEvent())
 
-    const override = ProfileLinkOverride.load(PROFILE_LINK_UID)
+    const override = ProfileLinkOverride.load(PROFILE_ADDRESS + '-website')
     assert.assertNotNull(override)
     if (!override) return
 
     assert.bytesEquals(override.profile, Address.fromString(PROFILE_ADDRESS))
     assert.stringEquals(override.key, 'website')
     assert.stringEquals(override.value, 'https://example.com')
-    assert.assertFalse(override.revoked)
+    assert.assertTrue(override.revoked == false)
   })
 
   test('revokes a self-attested profile link without a DAO entity', () => {
@@ -132,7 +132,7 @@ describe('Profile link indexing', () => {
 
     handleRevoked(createProfileLinkRevokedEvent())
 
-    const override = ProfileLinkOverride.load(PROFILE_LINK_UID)
+    const override = ProfileLinkOverride.load(PROFILE_ADDRESS + '-x')
     assert.assertNotNull(override)
     if (!override) return
 

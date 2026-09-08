@@ -47,8 +47,8 @@ import {
   PROPOSAL_CANDIDATE_SCHEMA_UID,
   TREASURY_ASSET_PIN_SCHEMA_UID,
 } from './utils/eas'
-import { parseDescriptionFields } from './utils/proposalMetadata'
 import { getOrCreateProfile } from './utils/profile'
+import { parseDescriptionFields } from './utils/proposalMetadata'
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
 
@@ -246,7 +246,7 @@ function handleTreasuryAssetPinRevoked(event: RevokedEvent): void {
 
 function handleProfileLinkAttestation(event: AttestedEvent): void {
   // Self-attestation check
-  if (event.params.attester != event.params.recipient) {
+  if (event.params.attester.toHexString() != event.params.recipient.toHexString()) {
     return
   }
 
@@ -310,7 +310,7 @@ function handleProfileLinkAttestation(event: AttestedEvent): void {
 
 function handleProfileLinkRevoked(event: RevokedEvent): void {
   // Self-revocation check
-  if (event.params.attester != event.params.recipient) {
+  if (event.params.attester.toHexString() != event.params.recipient.toHexString()) {
     return
   }
 

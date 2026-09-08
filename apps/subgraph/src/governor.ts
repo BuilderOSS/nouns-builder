@@ -61,7 +61,10 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   let dao = DAO.load(context.getString('tokenAddress'))
   if (dao == null) return
 
-  let proposerProfile = getOrCreateProfile(event.params.proposal.proposer, event.block.timestamp)
+  let proposerProfile = getOrCreateProfile(
+    event.params.proposal.proposer,
+    event.block.timestamp
+  )
 
   let newProposalCount = dao.proposalCount + 1
 
