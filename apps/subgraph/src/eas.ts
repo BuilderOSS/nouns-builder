@@ -909,7 +909,7 @@ function handleCandidateSponsorSignatureRevoked(event: RevokedEvent): void {
 }
 
 export function handleAttested(event: AttestedEvent): void {
-  if (event.params.schema == PROFILE_LINK_SCHEMA_UID) {
+  if (event.params.schema.equals(PROFILE_LINK_SCHEMA_UID)) {
     handleProfileLinkAttestation(event)
     return
   }
@@ -917,23 +917,23 @@ export function handleAttested(event: AttestedEvent): void {
   const dao = DAO.load(event.params.recipient.toHexString())
   if (!dao) return
 
-  if (event.params.schema == DAO_MULTISIG_SCHEMA_UID) {
+  if (event.params.schema.equals(DAO_MULTISIG_SCHEMA_UID)) {
     handleDaoMultisigAttestation(event)
-  } else if (event.params.schema == PROPDATE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(PROPDATE_SCHEMA_UID)) {
     handlePropdateAttestation(event)
-  } else if (event.params.schema == TREASURY_ASSET_PIN_SCHEMA_UID) {
+  } else if (event.params.schema.equals(TREASURY_ASSET_PIN_SCHEMA_UID)) {
     handleTreasuryAssetPinAttestation(event)
-  } else if (event.params.schema == PROPOSAL_CANDIDATE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(PROPOSAL_CANDIDATE_SCHEMA_UID)) {
     handleProposalCandidateAttestation(event)
-  } else if (event.params.schema == CANDIDATE_COMMENT_SCHEMA_UID) {
+  } else if (event.params.schema.equals(CANDIDATE_COMMENT_SCHEMA_UID)) {
     handleCandidateCommentAttestation(event)
-  } else if (event.params.schema == CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID)) {
     handleCandidateSponsorSignatureAttestation(event)
   }
 }
 
 export function handleRevoked(event: RevokedEvent): void {
-  if (event.params.schema == PROFILE_LINK_SCHEMA_UID) {
+  if (event.params.schema.equals(PROFILE_LINK_SCHEMA_UID)) {
     handleProfileLinkRevoked(event)
     return
   }
@@ -941,17 +941,17 @@ export function handleRevoked(event: RevokedEvent): void {
   const dao = DAO.load(event.params.recipient.toHexString())
   if (!dao) return
 
-  if (event.params.schema == DAO_MULTISIG_SCHEMA_UID) {
+  if (event.params.schema.equals(DAO_MULTISIG_SCHEMA_UID)) {
     handleDaoMultisigAttestationRevoked(event)
-  } else if (event.params.schema == PROPDATE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(PROPDATE_SCHEMA_UID)) {
     handlePropdateAttestationRevoked(event)
-  } else if (event.params.schema == TREASURY_ASSET_PIN_SCHEMA_UID) {
+  } else if (event.params.schema.equals(TREASURY_ASSET_PIN_SCHEMA_UID)) {
     handleTreasuryAssetPinRevoked(event)
-  } else if (event.params.schema == PROPOSAL_CANDIDATE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(PROPOSAL_CANDIDATE_SCHEMA_UID)) {
     handleProposalCandidateRevoked(event)
-  } else if (event.params.schema == CANDIDATE_COMMENT_SCHEMA_UID) {
+  } else if (event.params.schema.equals(CANDIDATE_COMMENT_SCHEMA_UID)) {
     handleCandidateCommentRevoked(event)
-  } else if (event.params.schema == CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID)) {
     handleCandidateSponsorSignatureRevoked(event)
   }
 }
