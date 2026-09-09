@@ -1,11 +1,10 @@
 import { useDaoSearch, useExplore } from '@buildeross/hooks'
-import { useChainStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { Pagination } from '@buildeross/ui/Pagination'
 import { Box, Grid, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import { FAVORITE_DAO_LIMIT, useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
-import { useAccount } from 'wagmi'
 
 import { exploreGrid, searchContainer } from './Explore.css'
 import { ExploreDaoCard } from './ExploreDaoCard'
@@ -26,7 +25,7 @@ export const Explore: React.FC = () => {
   const orderBy = Array.isArray(urlOrderBy) ? urlOrderBy[0] : urlOrderBy
   const urlSearch = Array.isArray(rawUrlSearch) ? rawUrlSearch[0] : rawUrlSearch
   const chain = useChainStore((x) => x.chain)
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { hasReachedFavoriteLimit, isDaoFavorited, toggleFavorite } =
     useFavoriteDaos(address)
   const [searchInput, setSearchInput] = useState('')

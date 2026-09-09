@@ -5,7 +5,10 @@
   "dependencies": {
     "graphql": "^16.11.0",
     "graphql-request": "^7.1.2",
-    "graphql-tag": "^2.12.6"
+    "graphql-tag": "^2.12.6",
+    "@buildeross/utils": "workspace:*",
+    "@buildeross/types": "workspace:*",
+    "wagmi": "^2.18.1"
   },
   "devDependencies": {
     "@buildeross/constants": "workspace:*",
@@ -45,6 +48,11 @@
       "types": "./dist/eas/index.d.ts",
       "import": "./dist/eas/index.mjs",
       "require": "./dist/eas/index.js"
+    },
+    "./transaction": {
+      "types": "./dist/transaction/index.d.ts",
+      "import": "./dist/transaction/index.mjs",
+      "require": "./dist/transaction/index.js"
     },
     "./*": {
       "types": "./dist/*.d.ts",

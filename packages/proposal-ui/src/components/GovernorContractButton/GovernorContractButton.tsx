@@ -1,6 +1,7 @@
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { governorAbi } from '@buildeross/sdk/contract'
-import { awaitSubgraphSync, getProposal } from '@buildeross/sdk/subgraph'
+import { getProposal } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Box, ButtonProps } from '@buildeross/zord'
@@ -8,12 +9,7 @@ import { useCallback, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { ContractFunctionName, encodeFunctionData } from 'viem'
 import { useConfig, UseSimulateContractParameters } from 'wagmi'
-import {
-  estimateGas,
-  simulateContract,
-  waitForTransactionReceipt,
-  writeContract,
-} from 'wagmi/actions'
+import { estimateGas, simulateContract } from 'wagmi/actions'
 
 import { uploadingSpinnerWhite } from './GovernorContractButton.css'
 
@@ -51,7 +47,7 @@ export function GovernorContractButton({
 
     try {
       setIsPending(true)
-      await simulateContract(config, {
+      const { request } = await simulateContract(config, {
         address: addresses.governor,
         abi: governorAbi,
         functionName: functionName,
@@ -70,17 +66,15 @@ export function GovernorContractButton({
         chainId: chain.id,
       })
 
-      const hash = await writeContract(config, {
-        address: addresses.governor,
-        abi: governorAbi,
-        functionName: functionName,
-        args: args,
+      const result = await executeAppTransaction({
+        config,
+        request: {
+          ...request,
+          gas: (gas * 3n) / 2n, // add extra gas for safety
+        },
         chainId: chain.id,
-        gas: (gas * 3n) / 2n, // add extra gas for safety
       })
-      const receipt = await waitForTransactionReceipt(config, { hash, chainId: chain.id })
-
-      await awaitSubgraphSync(chain.id, receipt.blockNumber)
+      if (result.kind !== 'mined') return
 
       await mutate(
         [SWR_KEYS.PROPOSAL, chain.id, proposalId.toLowerCase()],

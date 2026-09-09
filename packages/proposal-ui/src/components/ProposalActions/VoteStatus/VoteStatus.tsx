@@ -3,12 +3,12 @@ import {
   ProposalVoteFragment as ProposalVote,
   ProposalVoteSupport as Support,
 } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Flex, Text } from '@buildeross/zord'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
 import { getAddress } from 'viem'
-import { useAccount, useWatchContractEvent } from 'wagmi'
+import { useWatchContractEvent } from 'wagmi'
 
 import { proposalActionButtonVariants } from '../ProposalActions.css'
 import Pending from './Pending'
@@ -51,7 +51,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
   candidateVersion,
 }) => {
   const chain = useChainStore((x) => x.chain)
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useAuthStore()
   const { governor } = useDaoStore((state) => state.addresses)
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false)
   const [vote, setVote] = useState<ProposalVote | undefined>(signerVote)

@@ -1,15 +1,19 @@
 import { useDelayedGovernance, useVotes } from '@buildeross/hooks'
-import { useChainStore, useDaoStore, useProposalStore } from '@buildeross/stores'
+import {
+  useAuthStore,
+  useChainStore,
+  useDaoStore,
+  useProposalStore,
+} from '@buildeross/stores'
 import { TransactionType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useAccount } from 'wagmi'
 
 export const NoCreatorCoinWarning: React.FC = () => {
   const router = useRouter()
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useAuthStore()
   const { startProposalDraft } = useProposalStore()
 
   // Get addresses and chain from stores

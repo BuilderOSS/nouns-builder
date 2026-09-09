@@ -1,9 +1,10 @@
+import { PROFILE_LINK_EAS_CHAIN_ID } from '@buildeross/constants'
+import { useAuthStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
-import { Button } from '@buildeross/zord'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import React from 'react'
 import { isOwnProfileAddress } from 'src/utils/profileDashboard'
 import type { ProfileIdentity } from 'src/utils/profileIdentity'
-import { useAccount } from 'wagmi'
 
 import { ProfileLinksEditModal } from './ProfileLinksEditModal'
 
@@ -18,7 +19,7 @@ export const ProfileLinksEditButton: React.FC<ProfileLinksEditButtonProps> = ({
   profileAddress,
   onSaved,
 }) => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const [isOpen, setIsOpen] = React.useState(false)
   const isOwnProfile = isOwnProfileAddress(address, profileAddress)
 
@@ -26,14 +27,15 @@ export const ProfileLinksEditButton: React.FC<ProfileLinksEditButtonProps> = ({
 
   return (
     <>
-      <Button
+      <ContractButton
         size="sm"
         variant="outline"
-        onClick={() => setIsOpen(true)}
+        handleClick={() => setIsOpen(true)}
+        chainId={PROFILE_LINK_EAS_CHAIN_ID}
         aria-label="Edit profile links"
       >
         Edit links
-      </Button>
+      </ContractButton>
       <ProfileLinksEditModal
         identity={identity}
         profileAddress={profileAddress}

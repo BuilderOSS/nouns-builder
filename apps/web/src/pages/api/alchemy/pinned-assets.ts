@@ -2,7 +2,7 @@ import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getEnrichedPinnedAssets, PinnedAssetInput } from 'src/services/alchemyService'
 import { withCors } from 'src/utils/api/cors'
-import { withRateLimit } from 'src/utils/api/rateLimit'
+import { withTieredRateLimit } from 'src/utils/api/rateLimit'
 import { isAddress } from 'viem'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -67,7 +67,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 export default withCors({
   allowedMethods: ['POST'],
 })(
-  withRateLimit({
+  withTieredRateLimit({
     keyPrefix: 'alchemy:pinnedAssets',
+    anonymousMaxRequests: 3,
+    anonymousWindowSeconds: 60,
+    authenticatedMaxRequests: 30,
+    authenticatedWindowSeconds: 60,
   })(handler)
 )

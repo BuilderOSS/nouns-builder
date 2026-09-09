@@ -1,6 +1,6 @@
+import { useAuthStore } from '@buildeross/stores'
 import { Button, Flex, Stack, Text } from '@buildeross/zord'
 import React from 'react'
-import { useAccount } from 'wagmi'
 
 type ProposalStage = 'draft' | 'transactions' | 'review'
 
@@ -43,7 +43,7 @@ export const ProposalStageIndicator: React.FC<ProposalStageIndicatorProps> = ({
   onStageSelect,
   isStageClickable,
 }) => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const [showCallout, setShowCallout] = React.useState(false)
   const currentStepIndex = STAGES.findIndex((stage) => stage.id === currentStage)
 

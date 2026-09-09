@@ -1,8 +1,8 @@
 import { useExploreUserDaos as useMyDaos } from '@buildeross/hooks/useExploreUserDaos'
+import { useAuthStore } from '@buildeross/stores'
 import { Grid } from '@buildeross/zord'
 import React from 'react'
 import { FAVORITE_DAO_LIMIT, useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
-import { useAccount } from 'wagmi'
 
 import { exploreGrid } from './Explore.css'
 import { ExploreDaoCard } from './ExploreDaoCard'
@@ -11,7 +11,7 @@ import { ExploreSkeleton } from './ExploreSkeleton'
 import { ExploreToolbar } from './ExploreToolbar'
 
 export const ExploreMyDaos = () => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const isWalletConnected = Boolean(address)
   const { hasReachedFavoriteLimit, isDaoFavorited, toggleFavorite } =
     useFavoriteDaos(address)

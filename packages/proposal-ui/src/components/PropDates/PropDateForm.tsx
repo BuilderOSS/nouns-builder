@@ -5,7 +5,8 @@ import {
   PROPDATE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
-import { awaitSubgraphSync, MessageType } from '@buildeross/sdk/subgraph'
+import { MessageType } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID, RequiredDaoContractAddresses } from '@buildeross/types'
 import { WalletIdentity } from '@buildeross/ui'
@@ -23,7 +24,7 @@ import { Field, FieldProps, Form, Formik } from 'formik'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { encodeAbiParameters, getAddress, type Hex, zeroHash } from 'viem'
 import { useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 import * as Yup from 'yup'
 
 import { proposalDescription as messageStyle } from '../ProposalDescription/ProposalDescription.css'
@@ -172,12 +173,12 @@ export const PropDateForm = ({
           chainId: chainId,
           args: [attestParams],
         })
-        const txHash = await writeContract(config, data.request)
-        const receipt = await waitForTransactionReceipt(config, {
-          hash: txHash,
-          chainId: chainId,
+        const result = await executeAppTransaction({
+          config,
+          request: data.request,
+          chainId,
         })
-        await awaitSubgraphSync(chainId, receipt.blockNumber)
+        if (result.kind === 'safe-proposed') return
         setIsTxSuccess(true)
       } catch (err: unknown) {
         console.error('Error submitting propdate (signing):', err)

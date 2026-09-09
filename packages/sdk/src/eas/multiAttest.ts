@@ -2,9 +2,10 @@ import { EAS_CONTRACT_ADDRESS, easAbi } from '@buildeross/constants/eas'
 import { CHAIN_ID } from '@buildeross/types'
 import type { Hex } from 'viem'
 import type { Config } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
-import { awaitSubgraphSync } from '../subgraph/requests/sync'
+import { executeAppTransaction } from '../transaction'
+import { extractAttestationUIDs } from './utils'
 
 export interface MultiAttestationRequest {
   schema: Hex
@@ -24,10 +25,16 @@ export interface MultiAttestParams {
   requests: MultiAttestationRequest[]
 }
 
-export interface MultiAttestResult {
-  attestationUIDs: Hex[]
-  transactionHash: Hex
-}
+export type MultiAttestResult =
+  | {
+      kind: 'mined'
+      attestationUIDs: Hex[]
+      transactionHash: Hex
+    }
+  | {
+      kind: 'safe-proposed'
+      transactionHash: Hex
+    }
 
 /**
  * Submit multiple attestations in a single transaction using multiAttest
@@ -60,23 +67,34 @@ export async function multiAttest(params: MultiAttestParams): Promise<MultiAttes
   })
 
   // 2. Write the transaction
-  const txHash = await writeContract(config, simulation.request)
-
-  // 3. Wait for confirmation
-  const receipt = await waitForTransactionReceipt(config, {
-    hash: txHash,
-    chainId: chainId,
+  const result = await executeAppTransaction({
+    config,
+    request: simulation.request,
+    chainId,
   })
 
-  // 4. Sync with subgraph
-  await awaitSubgraphSync(chainId, receipt.blockNumber)
+  // Handle Safe proposals vs mined transactions
+  if (result.kind === 'safe-proposed') {
+    return {
+      kind: 'safe-proposed',
+      transactionHash: result.hash,
+    }
+  }
 
-  // 5. Extract attestation UIDs from logs
-  // For now, use placeholders - in production, decode logs to get actual UIDs
-  const attestationUIDs = requests.map(() => txHash)
+  // Extract attestation UIDs from logs for mined transactions
+  const attestationUIDs = extractAttestationUIDs(result.receipt, easAddress)
+
+  // Validate we got the expected number of UIDs
+  const totalAttestations = requests.reduce((sum, req) => sum + req.data.length, 0)
+  if (attestationUIDs.length !== totalAttestations) {
+    throw new Error(
+      `Expected ${totalAttestations} attestation UIDs but got ${attestationUIDs.length}`
+    )
+  }
 
   return {
+    kind: 'mined',
     attestationUIDs,
-    transactionHash: txHash,
+    transactionHash: result.hash,
   }
 }

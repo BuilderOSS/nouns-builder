@@ -1,8 +1,8 @@
+import { useAuthStore } from '@buildeross/stores'
 import { Box, Flex, Text, vars } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { useAccount } from 'wagmi'
 
 import { ExploreSortMenu } from './ExploreSortMenu'
 
@@ -18,7 +18,7 @@ export const ExploreToolbar: React.FC<ExploreToolbarProps> = ({
   helperText,
 }) => {
   const { query, pathname } = useRouter()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   return (
     <Flex

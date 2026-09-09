@@ -28,12 +28,19 @@ export interface CommentWithSignatureParams {
   parentCommentUID?: Hex
 }
 
-export interface CommentWithSignatureResult {
-  commentUID: Hex
-  signatureUID: Hex
-  transactionHash: Hex
-  signature: Hex
-}
+export type CommentWithSignatureResult =
+  | {
+      kind: 'mined'
+      commentUID: Hex
+      signatureUID: Hex
+      transactionHash: Hex
+      signature: Hex
+    }
+  | {
+      kind: 'safe-proposed'
+      transactionHash: Hex
+      signature: Hex
+    }
 
 /**
  * Submit both a comment/vote AND a sponsor signature in a single transaction
@@ -161,7 +168,17 @@ export async function attestCommentWithSignature(
     requests,
   })
 
+  // Handle Safe proposals vs mined transactions
+  if (result.kind === 'safe-proposed') {
+    return {
+      kind: 'safe-proposed',
+      transactionHash: result.transactionHash,
+      signature,
+    }
+  }
+
   return {
+    kind: 'mined',
     commentUID: result.attestationUIDs[0],
     signatureUID: result.attestationUIDs[1],
     transactionHash: result.transactionHash,

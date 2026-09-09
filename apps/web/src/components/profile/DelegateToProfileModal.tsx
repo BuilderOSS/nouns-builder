@@ -3,10 +3,13 @@ import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { useUserDaos } from '@buildeross/hooks/useUserDaos'
 import { tokenAbi } from '@buildeross/sdk/contract'
 import { daoMembershipRequest } from '@buildeross/sdk/subgraph'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
+import { useAuthStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { AnimatedModal } from '@buildeross/ui/Modal'
+import { getSafeErrorMessage } from '@buildeross/utils'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import React from 'react'
@@ -23,8 +26,8 @@ import {
   filterLabel,
 } from 'src/styles/profile.css'
 import useSWR from 'swr'
-import { useAccount, useConfig } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { useConfig } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 type DelegateToProfileModalProps = {
   open: boolean
@@ -51,7 +54,7 @@ export const DelegateToProfileModal: React.FC<DelegateToProfileModalProps> = ({
   profileName,
 }) => {
   const config = useConfig()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const { daos, isLoading: isLoadingDaos } = useUserDaos({
     address,
     enabled: open && !!address,
@@ -156,16 +159,21 @@ export const DelegateToProfileModal: React.FC<DelegateToProfileModalProps> = ({
         functionName: 'delegate',
         args: [profileAddress],
       })
-      const hash = await writeContract(config, data.request)
-      await waitForTransactionReceipt(config, { hash, chainId: selectedDao.chainId })
-      setTxHash(hash)
+      const result = await executeAppTransaction({
+        config,
+        request: data.request,
+        chainId: selectedDao.chainId,
+      })
+      if (result.kind === 'safe-proposed') {
+        setError(
+          'Delegation proposed to your Safe. Other owners must sign it before delegation takes effect.'
+        )
+        return
+      }
+      setTxHash(result.hash)
     } catch (err) {
       console.error('Failed to delegate to profile:', err)
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Delegation failed. Please check your wallet and try again.'
-      )
+      setError(getSafeErrorMessage(err))
     } finally {
       setIsDelegating(false)
     }
