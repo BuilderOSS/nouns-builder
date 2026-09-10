@@ -74,11 +74,6 @@ export function handleAuctionSettled(event: AuctionSettledEvent): void {
   if (dao == null) return
 
   let winningBidEntity = auction.winningBid ? AuctionBid.load(auction.winningBid!) : null
-  let winnerAddress = winningBidEntity
-    ? Address.fromBytes(winningBidEntity.bidder)
-    : event.transaction.from
-  let winnerBytes = winningBidEntity ? winningBidEntity.bidder : event.transaction.from
-  let winnerProfile = getOrCreateProfile(winnerAddress, event.block.timestamp)
 
   dao.currentAuction = null
   if (auction.highestBid) {
@@ -100,22 +95,26 @@ export function handleAuctionSettled(event: AuctionSettledEvent): void {
   feedEvent.actor = event.transaction.from
   feedEvent.auction = auction.id
 
-  feedEvent.winner = winnerBytes
-
+  feedEvent.winner = winningBidEntity ? winningBidEntity.bidder : event.transaction.from
   feedEvent.amount = winningBidEntity ? winningBidEntity.amount : event.params.amount
   feedEvent.save()
 
-  // Update profile counts and timestamps
-  touchProfile(winnerProfile, event.block.timestamp)
-  winnerProfile.auctionWinsCount = winnerProfile.auctionWinsCount + 1
-  winnerProfile.save()
+  // Update profile counts and timestamps only if there was an actual winner
+  if (winningBidEntity) {
+    let winnerAddress = Address.fromBytes(winningBidEntity.bidder)
+    let winnerProfile = getOrCreateProfile(winnerAddress, event.block.timestamp)
 
-  // Update DAO-specific voter activity
-  let winnerVoterId = `${tokenAddress}:${winnerAddress.toHexString()}`
-  let winnerVoter = DAOVoter.load(winnerVoterId)
-  if (winnerVoter) {
-    winnerVoter.lastActiveAt = event.block.timestamp
-    winnerVoter.save()
+    touchProfile(winnerProfile, event.block.timestamp)
+    winnerProfile.auctionWinsCount = winnerProfile.auctionWinsCount + 1
+    winnerProfile.save()
+
+    // Update DAO-specific voter activity
+    let winnerVoterId = `${tokenAddress}:${winnerAddress.toHexString()}`
+    let winnerVoter = DAOVoter.load(winnerVoterId)
+    if (winnerVoter) {
+      winnerVoter.lastActiveAt = event.block.timestamp
+      winnerVoter.save()
+    }
   }
 }
 

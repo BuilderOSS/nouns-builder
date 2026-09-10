@@ -68,9 +68,12 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
   let tokenOwnerId = `${event.address.toHexString()}:${owner.toHexString()}`
 
   let tokenContract = TokenContract.bind(event.address)
+  let balance = tokenContract.balanceOf(owner).toI32()
   let tokenOwner = DAOTokenOwner.load(tokenOwnerId)
   let ownerProfile = getOrCreateProfile(owner, event.block.timestamp)
-  if (!tokenOwner) {
+
+  // Only create DAOTokenOwner if the owner has a positive balance
+  if (!tokenOwner && balance > 0) {
     tokenOwner = new DAOTokenOwner(tokenOwnerId)
     tokenOwner.dao = event.address.toHexString()
     tokenOwner.owner = owner
@@ -79,66 +82,78 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
     ownerProfile.ownerDaoCount = ownerProfile.ownerDaoCount + 1
   }
 
-  tokenOwner.daoTokenCount = tokenContract.balanceOf(owner).toI32()
-  tokenOwner.profile = ownerProfile.id
-  tokenOwner.delegate = newDelegate
-  tokenOwner.lastActiveAt = event.block.timestamp
-  tokenOwner.save()
+  // Update existing owner record
+  if (tokenOwner) {
+    tokenOwner.daoTokenCount = balance
+    tokenOwner.profile = ownerProfile.id
+    tokenOwner.delegate = newDelegate
+    tokenOwner.lastActiveAt = event.block.timestamp
+    tokenOwner.save()
+  }
+
   touchProfile(ownerProfile, event.block.timestamp)
   ownerProfile.save()
 
-  let newDelegateVoterId = `${event.address.toHexString()}:${newDelegate.toHexString()}`
-
-  let newDelegateVoter = DAOVoter.load(newDelegateVoterId)
+  // Track voter count changes
   let isNewVoter = false
-  let newDelegateProfile = getOrCreateProfile(newDelegate, event.block.timestamp)
-  if (!newDelegateVoter) {
-    newDelegateVoter = new DAOVoter(newDelegateVoterId)
-    newDelegateVoter.daoTokenCount = 0
-    newDelegateVoter.dao = event.address.toHexString()
-    newDelegateVoter.voter = newDelegate
-    newDelegateVoter.profile = newDelegateProfile.id
-    newDelegateVoter.lastActiveAt = event.block.timestamp
-    newDelegateProfile.voterDaoCount = newDelegateProfile.voterDaoCount + 1
-    isNewVoter = true
-  }
-
-  let newTokenCount = newDelegateVoter.daoTokenCount + tokenOwner.daoTokenCount
-  newDelegateVoter.daoTokenCount = newTokenCount
-  newDelegateVoter.profile = newDelegateProfile.id
-  newDelegateVoter.lastActiveAt = event.block.timestamp
-  newDelegateVoter.save()
-  touchProfile(newDelegateProfile, event.block.timestamp)
-  newDelegateProfile.save()
-
-  let tokens = tokenOwner.daoTokens.load()
-
-  for (let i = 0; i < tokens.length; i++) {
-    let token = tokens[i]
-    token.voterInfo = newDelegateVoterId
-    token.save()
-  }
-
-  let prevDelegateVoterId = `${event.address.toHexString()}:${prevDelegate.toHexString()}`
-  let prevDelegateVoter = DAOVoter.load(prevDelegateVoterId)
   let isVoterRemoved = false
-  if (prevDelegateVoter) {
-    let prevTokenCount = prevDelegateVoter.daoTokenCount - tokenOwner.daoTokenCount
-    prevDelegateVoter.daoTokenCount = prevTokenCount
-    prevDelegateVoter.save()
 
-    let prevDelegateProfile = Profile.load(prevDelegate.toHexString())
-    if (prevDelegateProfile) {
-      touchProfile(prevDelegateProfile, event.block.timestamp)
-      if (prevTokenCount == 0 && prevDelegateProfile.voterDaoCount > 0) {
-        prevDelegateProfile.voterDaoCount = prevDelegateProfile.voterDaoCount - 1
-      }
-      prevDelegateProfile.save()
+  // Only create voter entities for non-zero delegates and when owner has balance
+  if (tokenOwner && newDelegate.notEqual(ADDRESS_ZERO)) {
+    let newDelegateVoterId = `${event.address.toHexString()}:${newDelegate.toHexString()}`
+
+    let newDelegateVoter = DAOVoter.load(newDelegateVoterId)
+    let newDelegateProfile = getOrCreateProfile(newDelegate, event.block.timestamp)
+    if (!newDelegateVoter) {
+      newDelegateVoter = new DAOVoter(newDelegateVoterId)
+      newDelegateVoter.daoTokenCount = 0
+      newDelegateVoter.dao = event.address.toHexString()
+      newDelegateVoter.voter = newDelegate
+      newDelegateVoter.profile = newDelegateProfile.id
+      newDelegateVoter.lastActiveAt = event.block.timestamp
+      newDelegateProfile.voterDaoCount = newDelegateProfile.voterDaoCount + 1
+      isNewVoter = true
     }
 
-    if (prevTokenCount == 0) {
-      store.remove('DAOVoter', prevDelegateVoterId)
-      isVoterRemoved = true
+    let newTokenCount = newDelegateVoter.daoTokenCount + tokenOwner.daoTokenCount
+    newDelegateVoter.daoTokenCount = newTokenCount
+    newDelegateVoter.profile = newDelegateProfile.id
+    newDelegateVoter.lastActiveAt = event.block.timestamp
+    newDelegateVoter.save()
+    touchProfile(newDelegateProfile, event.block.timestamp)
+    newDelegateProfile.save()
+
+    let tokens = tokenOwner.daoTokens.load()
+
+    for (let i = 0; i < tokens.length; i++) {
+      let token = tokens[i]
+      token.voterInfo = newDelegateVoterId
+      token.save()
+    }
+  }
+
+  // Handle previous delegate cleanup only if tokenOwner exists
+  if (tokenOwner) {
+    let prevDelegateVoterId = `${event.address.toHexString()}:${prevDelegate.toHexString()}`
+    let prevDelegateVoter = DAOVoter.load(prevDelegateVoterId)
+    if (prevDelegateVoter) {
+      let prevTokenCount = prevDelegateVoter.daoTokenCount - tokenOwner.daoTokenCount
+      prevDelegateVoter.daoTokenCount = prevTokenCount
+      prevDelegateVoter.save()
+
+      let prevDelegateProfile = Profile.load(prevDelegate.toHexString())
+      if (prevDelegateProfile) {
+        touchProfile(prevDelegateProfile, event.block.timestamp)
+        if (prevTokenCount == 0 && prevDelegateProfile.voterDaoCount > 0) {
+          prevDelegateProfile.voterDaoCount = prevDelegateProfile.voterDaoCount - 1
+        }
+        prevDelegateProfile.save()
+      }
+
+      if (prevTokenCount == 0) {
+        store.remove('DAOVoter', prevDelegateVoterId)
+        isVoterRemoved = true
+      }
     }
   }
 

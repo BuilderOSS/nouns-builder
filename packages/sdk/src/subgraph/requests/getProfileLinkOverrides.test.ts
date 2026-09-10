@@ -61,9 +61,13 @@ describe('getProfileLinkOverrides', () => {
       ]
     )
 
-    expect(profileLinkOverridesMock).toHaveBeenCalledWith({
-      address: profileAddress,
-    })
+    expect(profileLinkOverridesMock).toHaveBeenCalledWith(
+      {
+        address: profileAddress,
+      },
+      undefined,
+      expect.any(AbortSignal)
+    )
   })
 
   it('returns empty array for invalid address', async () => {

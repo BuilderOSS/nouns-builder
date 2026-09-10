@@ -5,6 +5,13 @@ import type { ProfileQuery } from '../sdk.generated'
 
 export type ProfileResponse = NonNullable<ProfileQuery['profile']>
 
+/**
+ * Fetch a user's profile with their DAO relationships.
+ *
+ * NOTE: This query has a hardcoded limit of 100 DAOs for both ownerDaos and voterDaos.
+ * For users participating in more than 100 DAOs, results will be truncated.
+ * The complete token count and activity counts in the Profile entity remain accurate.
+ */
 export const profileQuery = async (
   chainId: CHAIN_ID,
   address: string
