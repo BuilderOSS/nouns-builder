@@ -12536,6 +12536,206 @@ export type DaosForDashboardQuery = {
   }>
 }
 
+export type DaosForDashboardViaProfileQueryVariables = Exact<{
+  user: Scalars['ID']['input']
+  firstOwner?: InputMaybe<Scalars['Int']['input']>
+  firstVoter?: InputMaybe<Scalars['Int']['input']>
+}>
+
+export type DaosForDashboardViaProfileQuery = {
+  __typename?: 'Query'
+  profile?: {
+    __typename?: 'Profile'
+    id: string
+    address: any
+    ownerDaoCount: number
+    voterDaoCount: number
+    ownerDaos: Array<{
+      __typename?: 'DAOTokenOwner'
+      id: string
+      owner: any
+      daoTokenCount: number
+      dao: {
+        __typename?: 'DAO'
+        contractImage: string
+        name: string
+        tokenAddress: any
+        metadataAddress: any
+        treasuryAddress: any
+        auctionAddress: any
+        governorAddress: any
+        auctionConfig: {
+          __typename?: 'AuctionConfig'
+          minimumBidIncrement: any
+          reservePrice: any
+        }
+        proposals: Array<{
+          __typename?: 'Proposal'
+          voteEnd: any
+          voteStart: any
+          expiresAt?: any | null
+          abstainVotes: number
+          againstVotes: number
+          calldatas?: string | null
+          description?: string | null
+          representedAddress?: string | null
+          discussionUrl?: string | null
+          descriptionHash: any
+          executableFrom?: any | null
+          forVotes: number
+          proposalId: any
+          proposalNumber: number
+          proposalThreshold: any
+          proposer: any
+          quorumVotes: any
+          targets: Array<any>
+          timeCreated: any
+          title?: string | null
+          values: Array<any>
+          snapshotBlockNumber: any
+          transactionHash: any
+          executedAt?: any | null
+          executionTransactionHash?: any | null
+          vetoTransactionHash?: any | null
+          cancelTransactionHash?: any | null
+          updatePeriodEnd?: any | null
+          updateMessage?: string | null
+          updateCount: number
+          votes: Array<{ __typename?: 'ProposalVote'; voter: any }>
+          dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+          candidateVersion?: {
+            __typename?: 'ProposalCandidateVersion'
+            candidateId: any
+            proposalHash: any
+            attestationUID: any
+            versionNumber: any
+            proposal?: {
+              __typename?: 'Proposal'
+              id: string
+              proposalId: any
+              proposalNumber: number
+            } | null
+            group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+          } | null
+          replaces?: {
+            __typename?: 'Proposal'
+            proposalId: any
+            proposalNumber: number
+          } | null
+          replacedBy?: {
+            __typename?: 'Proposal'
+            proposalId: any
+            proposalNumber: number
+          } | null
+        }>
+        currentAuction?: {
+          __typename?: 'Auction'
+          endTime: any
+          highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
+          token: {
+            __typename?: 'Token'
+            name: string
+            image?: string | null
+            tokenId: any
+          }
+        } | null
+        links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
+      }
+    }>
+    voterDaos: Array<{
+      __typename?: 'DAOVoter'
+      id: string
+      voter: any
+      dao: {
+        __typename?: 'DAO'
+        contractImage: string
+        name: string
+        tokenAddress: any
+        metadataAddress: any
+        treasuryAddress: any
+        auctionAddress: any
+        governorAddress: any
+        auctionConfig: {
+          __typename?: 'AuctionConfig'
+          minimumBidIncrement: any
+          reservePrice: any
+        }
+        proposals: Array<{
+          __typename?: 'Proposal'
+          voteEnd: any
+          voteStart: any
+          expiresAt?: any | null
+          abstainVotes: number
+          againstVotes: number
+          calldatas?: string | null
+          description?: string | null
+          representedAddress?: string | null
+          discussionUrl?: string | null
+          descriptionHash: any
+          executableFrom?: any | null
+          forVotes: number
+          proposalId: any
+          proposalNumber: number
+          proposalThreshold: any
+          proposer: any
+          quorumVotes: any
+          targets: Array<any>
+          timeCreated: any
+          title?: string | null
+          values: Array<any>
+          snapshotBlockNumber: any
+          transactionHash: any
+          executedAt?: any | null
+          executionTransactionHash?: any | null
+          vetoTransactionHash?: any | null
+          cancelTransactionHash?: any | null
+          updatePeriodEnd?: any | null
+          updateMessage?: string | null
+          updateCount: number
+          votes: Array<{ __typename?: 'ProposalVote'; voter: any }>
+          dao: { __typename?: 'DAO'; governorAddress: any; tokenAddress: any }
+          candidateVersion?: {
+            __typename?: 'ProposalCandidateVersion'
+            candidateId: any
+            proposalHash: any
+            attestationUID: any
+            versionNumber: any
+            proposal?: {
+              __typename?: 'Proposal'
+              id: string
+              proposalId: any
+              proposalNumber: number
+            } | null
+            group: { __typename?: 'ProposalCandidateGroup'; candidateNumber: number }
+          } | null
+          replaces?: {
+            __typename?: 'Proposal'
+            proposalId: any
+            proposalNumber: number
+          } | null
+          replacedBy?: {
+            __typename?: 'Proposal'
+            proposalId: any
+            proposalNumber: number
+          } | null
+        }>
+        currentAuction?: {
+          __typename?: 'Auction'
+          endTime: any
+          highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
+          token: {
+            __typename?: 'Token'
+            name: string
+            image?: string | null
+            tokenId: any
+          }
+        } | null
+        links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
+      }
+    }>
+  } | null
+}
+
 export type DaosForUserQueryVariables = Exact<{
   user: Scalars['Bytes']['input']
   first?: InputMaybe<Scalars['Int']['input']>
@@ -15070,6 +15270,80 @@ export const DaosForDashboardDocument = gql`
   ${ProposalFragmentDoc}
   ${CurrentAuctionFragmentDoc}
 `
+export const DaosForDashboardViaProfileDocument = gql`
+  query daosForDashboardViaProfile($user: ID!, $firstOwner: Int, $firstVoter: Int) {
+    profile(id: $user) {
+      id
+      address
+      ownerDaoCount
+      voterDaoCount
+      ownerDaos(first: $firstOwner, orderBy: lastActiveAt, orderDirection: desc) {
+        id
+        owner
+        daoTokenCount
+        dao {
+          ...DAO
+          contractImage
+          auctionConfig {
+            minimumBidIncrement
+            reservePrice
+          }
+          proposals(
+            where: { executed_not: true, canceled_not: true, vetoed_not: true }
+            first: 10
+            skip: 0
+            orderBy: proposalNumber
+            orderDirection: desc
+          ) {
+            ...Proposal
+            voteEnd
+            voteStart
+            expiresAt
+            votes {
+              voter
+            }
+          }
+          currentAuction {
+            ...CurrentAuction
+          }
+        }
+      }
+      voterDaos(first: $firstVoter, orderBy: lastActiveAt, orderDirection: desc) {
+        id
+        voter
+        dao {
+          ...DAO
+          contractImage
+          auctionConfig {
+            minimumBidIncrement
+            reservePrice
+          }
+          proposals(
+            where: { executed_not: true, canceled_not: true, vetoed_not: true }
+            first: 10
+            skip: 0
+            orderBy: proposalNumber
+            orderDirection: desc
+          ) {
+            ...Proposal
+            voteEnd
+            voteStart
+            expiresAt
+            votes {
+              voter
+            }
+          }
+          currentAuction {
+            ...CurrentAuction
+          }
+        }
+      }
+    }
+  }
+  ${DaoFragmentDoc}
+  ${ProposalFragmentDoc}
+  ${CurrentAuctionFragmentDoc}
+`
 export const DaosForUserDocument = gql`
   query daosForUser($user: Bytes!, $first: Int, $skip: Int) {
     daos(
@@ -16275,6 +16549,24 @@ export function getSdk(
             signal,
           }),
         'daosForDashboard',
+        'query',
+        variables
+      )
+    },
+    daosForDashboardViaProfile(
+      variables: DaosForDashboardViaProfileQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<DaosForDashboardViaProfileQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<DaosForDashboardViaProfileQuery>({
+            document: DaosForDashboardViaProfileDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'daosForDashboardViaProfile',
         'query',
         variables
       )

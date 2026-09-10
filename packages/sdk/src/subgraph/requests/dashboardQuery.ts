@@ -3,9 +3,13 @@ import { CHAIN_ID } from '@buildeross/types'
 import { isAddress } from 'viem'
 
 import { SDK } from '../client'
-import type { DaosForDashboardQuery } from '../sdk.generated'
+import type { DaosForDashboardViaProfileQuery } from '../sdk.generated'
 
-export type DashboardDao = DaosForDashboardQuery['daos'][number] & {
+type ProfileData = NonNullable<DaosForDashboardViaProfileQuery['profile']>
+type DaoFromOwnerDaos = ProfileData['ownerDaos'][number]['dao']
+type DaoFromVoterDaos = ProfileData['voterDaos'][number]['dao']
+
+export type DashboardDao = (DaoFromOwnerDaos | DaoFromVoterDaos) & {
   chainId: CHAIN_ID
 }
 
@@ -23,9 +27,10 @@ export const dashboardRequest = async (
     const results = await Promise.allSettled(
       PUBLIC_DEFAULT_CHAINS.map((chain) =>
         SDK.connect(chain.id)
-          .daosForDashboard({
+          .daosForDashboardViaProfile({
             user: memberAddress.toLowerCase(),
-            first: 30,
+            firstOwner: 50,
+            firstVoter: 50,
           })
           .then((x) => ({ ...x, chainId: chain.id }))
       )
@@ -47,15 +52,34 @@ export const dashboardRequest = async (
       )
     }
 
-    return data
-      .map((queries) =>
-        queries.daos.map((dao) => ({
-          ...dao,
-          chainId: queries.chainId,
-        }))
-      )
-      .flat()
-      .sort((a, b) => a.name.localeCompare(b.name))
+    // Combine ownerDaos and voterDaos, deduplicate by tokenAddress
+    const daoMap = new Map<string, DashboardDao>()
+
+    for (const chainData of data) {
+      if (!chainData.profile) continue // User has no activity on this chain
+
+      // Add DAOs where user is an owner
+      for (const ownerDao of chainData.profile.ownerDaos) {
+        const key = `${chainData.chainId}:${ownerDao.dao.tokenAddress}`
+        daoMap.set(key, {
+          ...ownerDao.dao,
+          chainId: chainData.chainId,
+        })
+      }
+
+      // Add DAOs where user is a voter (skip if already added as owner)
+      for (const voterDao of chainData.profile.voterDaos) {
+        const key = `${chainData.chainId}:${voterDao.dao.tokenAddress}`
+        if (!daoMap.has(key)) {
+          daoMap.set(key, {
+            ...voterDao.dao,
+            chainId: chainData.chainId,
+          })
+        }
+      }
+    }
+
+    return Array.from(daoMap.values()).sort((a, b) => a.name.localeCompare(b.name))
   } catch (e: any) {
     console.error(e)
     try {
