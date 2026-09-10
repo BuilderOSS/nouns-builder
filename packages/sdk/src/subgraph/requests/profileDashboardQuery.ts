@@ -111,106 +111,35 @@ async function fetchCountsViaProfile(
   address: string,
   signal?: AbortSignal
 ): Promise<CountPageResult> {
-  try {
-    const data = await sdk.profile(
-      { address, firstOwner: 1, firstVoter: 1 },
-      undefined,
-      signal
-    )
+  const data = await sdk.profile(
+    { address, firstOwner: 1, firstVoter: 1 },
+    undefined,
+    signal
+  )
 
-    if (!data.profile) {
-      // Profile doesn't exist - user has no activity
-      return {
-        counts: {
-          tokenHoldings: 0,
-          proposalVotes: 0,
-          proposalsSubmitted: 0,
-          bidsPlaced: 0,
-        },
-        isComplete: true,
-      }
-    }
-
+  if (!data.profile) {
+    // Profile doesn't exist - user has no activity
     return {
       counts: {
-        tokenHoldings: data.profile.tokenCount,
-        proposalVotes: data.profile.proposalVotesCount,
-        proposalsSubmitted: data.profile.proposalsSubmittedCount,
-        bidsPlaced: data.profile.bidsPlacedCount,
+        tokenHoldings: 0,
+        proposalVotes: 0,
+        proposalsSubmitted: 0,
+        bidsPlaced: 0,
       },
       isComplete: true,
-    }
-  } catch (error) {
-    console.error('fetchCountsViaProfile error, falling back to pagination:', error)
-    // Fallback to old method if Profile query fails
-    return fetchCountPages(sdk, address, signal)
-  }
-}
-
-/**
- * Legacy: Fetch counts by paginating events (SLOW - kept as fallback)
- */
-async function fetchCountPages(
-  sdk: ProfileDashboardSdk,
-  address: string,
-  signal?: AbortSignal
-): Promise<CountPageResult> {
-  const tokenOwners = new Map<string, number>()
-  const tokens = new Set<string>()
-  const proposalVotes = new Set<string>()
-  const proposals = new Set<string>()
-  const bids = new Set<string>()
-
-  for (let page = 0; page < MAX_PAGES; page++) {
-    const data = await sdk.profileDashboardCountsPage(
-      { address, first: PAGE_SIZE, skip: page * PAGE_SIZE },
-      undefined,
-      signal
-    )
-
-    const tokenItems = data.tokens || []
-    const tokenOwnerItems = data.daotokenOwners || []
-    const voteItems = data.proposalVotedEvents || []
-    const proposalItems = data.proposalCreatedEvents || []
-    const bidItems = data.auctionBidPlacedEvents || []
-    tokenItems.forEach((item) => tokens.add(item.id))
-    tokenOwnerItems.forEach((item) => tokenOwners.set(item.id, item.daoTokenCount))
-    voteItems.forEach((item) => proposalVotes.add(item.id))
-    proposalItems.forEach((item) => proposals.add(item.id))
-    bidItems.forEach((item) => bids.add(item.id))
-
-    if (
-      tokenItems.length < PAGE_SIZE &&
-      tokenOwnerItems.length < PAGE_SIZE &&
-      voteItems.length < PAGE_SIZE &&
-      proposalItems.length < PAGE_SIZE &&
-      bidItems.length < PAGE_SIZE
-    ) {
-      return {
-        counts: {
-          tokenHoldings: tokens.size > 0 ? tokens.size : sumTokenOwnerCounts(tokenOwners),
-          proposalVotes: proposalVotes.size,
-          proposalsSubmitted: proposals.size,
-          bidsPlaced: bids.size,
-        },
-        isComplete: true,
-      }
     }
   }
 
   return {
     counts: {
-      tokenHoldings: tokens.size > 0 ? tokens.size : sumTokenOwnerCounts(tokenOwners),
-      proposalVotes: proposalVotes.size,
-      proposalsSubmitted: proposals.size,
-      bidsPlaced: bids.size,
+      tokenHoldings: data.profile.tokenCount,
+      proposalVotes: data.profile.proposalVotesCount,
+      proposalsSubmitted: data.profile.proposalsSubmittedCount,
+      bidsPlaced: data.profile.bidsPlacedCount,
     },
-    isComplete: false,
+    isComplete: true,
   }
 }
-
-const sumTokenOwnerCounts = (tokenOwners: Map<string, number>) =>
-  Array.from(tokenOwners.values()).reduce((total, count) => total + count, 0)
 
 async function fetchSettlementTimestamp(
   sdk: ProfileDashboardSdk,

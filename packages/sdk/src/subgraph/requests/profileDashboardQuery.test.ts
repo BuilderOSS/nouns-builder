@@ -161,19 +161,9 @@ describe('profileDashboardQuery', () => {
     expect(sdkMock.profileDashboardTokensPageViaProfile).not.toHaveBeenCalled()
   })
 
-  it('falls back to dao owner token counts when token IDs are unavailable', async () => {
-    // Test fallback to legacy pagination when Profile query fails
-    sdkMock.profile.mockRejectedValue(new Error('Profile query failed'))
-    sdkMock.profileDashboardCountsPage.mockResolvedValue({
-      tokens: [],
-      daotokenOwners: [
-        { id: 'owner-1', daoTokenCount: 2 },
-        { id: 'owner-2', daoTokenCount: 3 },
-      ],
-      proposalVotedEvents: [],
-      proposalCreatedEvents: [],
-      auctionBidPlacedEvents: [],
-    })
+  it('handles user with no activity (null profile)', async () => {
+    // Test null profile case - user has no activity
+    sdkMock.profile.mockResolvedValue({ profile: null })
     sdkMock.profileDashboardAuctionSettlementsPage.mockResolvedValue({
       auctionSettledEvents: [],
     })
@@ -181,7 +171,12 @@ describe('profileDashboardQuery', () => {
     const result = await profileDashboardQuery(chainId, address, { mode: 'summary' })
 
     expect(result.tokens).toEqual([])
-    expect(result.counts.tokenHoldings).toBe(5)
+    expect(result.counts).toEqual({
+      tokenHoldings: 0,
+      proposalVotes: 0,
+      proposalsSubmitted: 0,
+      bidsPlaced: 0,
+    })
   })
 
   it('only fetches token pages in tokens mode', async () => {
