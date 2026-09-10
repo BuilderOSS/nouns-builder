@@ -7,6 +7,7 @@ import { DropMintWidget } from '@buildeross/ui/DropMintWidget'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { MobileMintBar } from '@buildeross/ui/MobileMintBar'
 import { AnimatedModal } from '@buildeross/ui/Modal'
+import { SplitPayoutCard } from '@buildeross/ui/SplitPayout'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -124,6 +125,13 @@ export const DropDetail = ({
               maxPerAddress={parseInt(drop.maxSalePurchasePerAddress)}
               unstyledContainer
             />
+
+            <Box mt="x6">
+              <SplitPayoutCard
+                chainId={chainId as CHAIN_ID}
+                fundsRecipient={drop.fundsRecipient as Address | undefined}
+              />
+            </Box>
           </Box>
         </Box>
       </Box>
