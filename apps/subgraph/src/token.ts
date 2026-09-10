@@ -159,7 +159,6 @@ export function handleTransfer(event: TransferEvent): void {
 
   let tokenId = `${event.address.toHexString()}:${event.params.tokenId.toString()}`
   let token = Token.load(tokenId)
-  let previousTokenProfile = token ? token.profile : null
   let dao = DAO.load(event.address.toHexString())
   if (dao == null) {
     return
@@ -274,13 +273,12 @@ export function handleTransfer(event: TransferEvent): void {
 
   token.save()
 
-  let previousProfile = previousTokenProfile
-    ? Profile.load(previousTokenProfile!)
-    : fromProfile
-  if (previousProfile) {
-    touchProfile(previousProfile, event.block.timestamp)
-    if (previousProfile.tokenCount > 0) {
-      previousProfile.tokenCount = previousProfile.tokenCount - 1
+  // Decrement tokenCount from the previous owner's profile (if not a mint)
+  // Always use fromProfile (the actual sender) rather than the token's cached profile reference
+  if (fromProfile) {
+    touchProfile(fromProfile, event.block.timestamp)
+    if (fromProfile.tokenCount > 0) {
+      fromProfile.tokenCount = fromProfile.tokenCount - 1
     }
   }
 
@@ -296,8 +294,8 @@ export function handleTransfer(event: TransferEvent): void {
       fromOwner.save()
 
       if (fromOwnerTokenCount == 0) {
-        if (previousProfile && previousProfile.ownerDaoCount > 0) {
-          previousProfile.ownerDaoCount = previousProfile.ownerDaoCount - 1
+        if (fromProfile && fromProfile.ownerDaoCount > 0) {
+          fromProfile.ownerDaoCount = fromProfile.ownerDaoCount - 1
         }
         store.remove('DAOTokenOwner', fromOwnerId)
         dao.ownerCount = dao.ownerCount - 1
@@ -305,12 +303,12 @@ export function handleTransfer(event: TransferEvent): void {
     }
   }
 
-  // Save previous profile after all updates
-  if (previousProfile) {
-    previousProfile.save()
+  // Save fromProfile after all updates
+  if (fromProfile) {
+    fromProfile.save()
   }
 
-  // Load fromDelegateProfile AFTER saving previousProfile to avoid overwriting
+  // Load fromDelegateProfile AFTER saving fromProfile to avoid overwriting
   let fromDelegateProfile = fromDelegate.notEqual(ADDRESS_ZERO)
     ? Profile.load(fromDelegate.toHexString())
     : null
