@@ -1,0 +1,18 @@
+query profileDashboardTokensPageViaProfile($address: ID!, $first: Int!, $cursor: ID!) {
+  profile(id: $address) {
+    tokens(first: $first, orderBy: id, orderDirection: asc, where: { id_gt: $cursor }) {
+      id
+      tokenId
+      tokenContract
+      name
+      image
+      mintedAt
+      dao {
+        tokenAddress
+        name
+        symbol
+        contractImage
+      }
+    }
+  }
+}

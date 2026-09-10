@@ -11146,6 +11146,45 @@ export type CurrentAuctionFragment = {
   token: { __typename?: 'Token'; name: string; image?: string | null; tokenId: any }
 }
 
+export type DaoTokenOwnerFragment = {
+  __typename?: 'DAOTokenOwner'
+  id: string
+  owner: any
+  delegate: any
+  daoTokenCount: number
+  lastActiveAt: any
+  dao: {
+    __typename?: 'DAO'
+    name: string
+    contractImage: string
+    tokenAddress: any
+    metadataAddress: any
+    treasuryAddress: any
+    auctionAddress: any
+    governorAddress: any
+    links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
+  }
+}
+
+export type DaoVoterFragment = {
+  __typename?: 'DAOVoter'
+  id: string
+  voter: any
+  daoTokenCount: number
+  lastActiveAt: any
+  dao: {
+    __typename?: 'DAO'
+    name: string
+    contractImage: string
+    tokenAddress: any
+    metadataAddress: any
+    treasuryAddress: any
+    auctionAddress: any
+    governorAddress: any
+    links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
+  }
+}
+
 export type DaoFragment = {
   __typename?: 'DAO'
   name: string
@@ -11176,6 +11215,22 @@ export type PaymentOptionFragment = {
   startHopIndex: number
   endHopIndex: number
   isDirectSwap: boolean
+}
+
+export type ProfileFragment = {
+  __typename?: 'Profile'
+  id: string
+  address: any
+  createdAt: any
+  updatedAt: any
+  lastActiveAt: any
+  tokenCount: number
+  ownerDaoCount: number
+  voterDaoCount: number
+  proposalVotesCount: number
+  proposalsSubmittedCount: number
+  bidsPlacedCount: number
+  auctionWinsCount: number
 }
 
 export type ProposalFragment = {
@@ -13012,6 +13067,68 @@ export type SyncStatusQuery = {
   } | null
 }
 
+export type ProfileQueryVariables = Exact<{
+  address: Scalars['ID']['input']
+  firstOwner?: InputMaybe<Scalars['Int']['input']>
+  firstVoter?: InputMaybe<Scalars['Int']['input']>
+}>
+
+export type ProfileQuery = {
+  __typename?: 'Query'
+  profile?: {
+    __typename?: 'Profile'
+    id: string
+    address: any
+    createdAt: any
+    updatedAt: any
+    lastActiveAt: any
+    tokenCount: number
+    ownerDaoCount: number
+    voterDaoCount: number
+    proposalVotesCount: number
+    proposalsSubmittedCount: number
+    bidsPlacedCount: number
+    auctionWinsCount: number
+    ownerDaos: Array<{
+      __typename?: 'DAOTokenOwner'
+      id: string
+      owner: any
+      delegate: any
+      daoTokenCount: number
+      lastActiveAt: any
+      dao: {
+        __typename?: 'DAO'
+        name: string
+        contractImage: string
+        tokenAddress: any
+        metadataAddress: any
+        treasuryAddress: any
+        auctionAddress: any
+        governorAddress: any
+        links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
+      }
+    }>
+    voterDaos: Array<{
+      __typename?: 'DAOVoter'
+      id: string
+      voter: any
+      daoTokenCount: number
+      lastActiveAt: any
+      dao: {
+        __typename?: 'DAO'
+        name: string
+        contractImage: string
+        tokenAddress: any
+        metadataAddress: any
+        treasuryAddress: any
+        auctionAddress: any
+        governorAddress: any
+        links: Array<{ __typename?: 'DAOLink'; id: string; key: string; url: string }>
+      }
+    }>
+  } | null
+}
+
 export type ProfileDashboardTokensPageQueryVariables = Exact<{
   address: Scalars['Bytes']['input']
   first: Scalars['Int']['input']
@@ -13128,6 +13245,35 @@ export type ProfileDashboardAuctionSettlementsAtTimestampQuery = {
       token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
     }
   }>
+}
+
+export type ProfileDashboardTokensPageViaProfileQueryVariables = Exact<{
+  address: Scalars['ID']['input']
+  first: Scalars['Int']['input']
+  cursor: Scalars['ID']['input']
+}>
+
+export type ProfileDashboardTokensPageViaProfileQuery = {
+  __typename?: 'Query'
+  profile?: {
+    __typename?: 'Profile'
+    tokens: Array<{
+      __typename?: 'Token'
+      id: string
+      tokenId: any
+      tokenContract: any
+      name: string
+      image?: string | null
+      mintedAt: any
+      dao: {
+        __typename?: 'DAO'
+        tokenAddress: any
+        name: string
+        symbol: string
+        contractImage: string
+      }
+    }>
+  } | null
 }
 
 export type PropdatesQueryVariables = Exact<{
@@ -13930,6 +14076,31 @@ export const DaoFragmentDoc = gql`
     governorAddress
   }
 `
+export const DaoTokenOwnerFragmentDoc = gql`
+  fragment DAOTokenOwner on DAOTokenOwner {
+    id
+    owner
+    delegate
+    daoTokenCount
+    lastActiveAt
+    dao {
+      ...DAO
+    }
+  }
+  ${DaoFragmentDoc}
+`
+export const DaoVoterFragmentDoc = gql`
+  fragment DAOVoter on DAOVoter {
+    id
+    voter
+    daoTokenCount
+    lastActiveAt
+    dao {
+      ...DAO
+    }
+  }
+  ${DaoFragmentDoc}
+`
 export const ExploreDaoFragmentDoc = gql`
   fragment ExploreDao on Auction {
     dao {
@@ -13946,6 +14117,22 @@ export const ExploreDaoFragmentDoc = gql`
       image
       tokenId
     }
+  }
+`
+export const ProfileFragmentDoc = gql`
+  fragment Profile on Profile {
+    id
+    address
+    createdAt
+    updatedAt
+    lastActiveAt
+    tokenCount
+    ownerDaoCount
+    voterDaoCount
+    proposalVotesCount
+    proposalsSubmittedCount
+    bidsPlacedCount
+    auctionWinsCount
   }
 `
 export const ProposalFragmentDoc = gql`
@@ -15097,6 +15284,22 @@ export const SyncStatusDocument = gql`
     }
   }
 `
+export const ProfileDocument = gql`
+  query profile($address: ID!, $firstOwner: Int = 100, $firstVoter: Int = 100) {
+    profile(id: $address) {
+      ...Profile
+      ownerDaos(first: $firstOwner, orderBy: lastActiveAt, orderDirection: desc) {
+        ...DAOTokenOwner
+      }
+      voterDaos(first: $firstVoter, orderBy: lastActiveAt, orderDirection: desc) {
+        ...DAOVoter
+      }
+    }
+  }
+  ${ProfileFragmentDoc}
+  ${DaoTokenOwnerFragmentDoc}
+  ${DaoVoterFragmentDoc}
+`
 export const ProfileDashboardTokensPageDocument = gql`
   query profileDashboardTokensPage($address: Bytes!, $first: Int!, $cursor: ID!) {
     tokens(
@@ -15246,6 +15449,26 @@ export const ProfileDashboardAuctionSettlementsAtTimestampDocument = gql`
           tokenId
           name
           image
+        }
+      }
+    }
+  }
+`
+export const ProfileDashboardTokensPageViaProfileDocument = gql`
+  query profileDashboardTokensPageViaProfile($address: ID!, $first: Int!, $cursor: ID!) {
+    profile(id: $address) {
+      tokens(first: $first, orderBy: id, orderDirection: asc, where: { id_gt: $cursor }) {
+        id
+        tokenId
+        tokenContract
+        name
+        image
+        mintedAt
+        dao {
+          tokenAddress
+          name
+          symbol
+          contractImage
         }
       }
     }
@@ -16129,6 +16352,24 @@ export function getSdk(
         variables
       )
     },
+    profile(
+      variables: ProfileQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ProfileQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ProfileQuery>({
+            document: ProfileDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'profile',
+        'query',
+        variables
+      )
+    },
     profileDashboardTokensPage(
       variables: ProfileDashboardTokensPageQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -16197,6 +16438,24 @@ export function getSdk(
             signal,
           }),
         'profileDashboardAuctionSettlementsAtTimestamp',
+        'query',
+        variables
+      )
+    },
+    profileDashboardTokensPageViaProfile(
+      variables: ProfileDashboardTokensPageViaProfileQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ProfileDashboardTokensPageViaProfileQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ProfileDashboardTokensPageViaProfileQuery>({
+            document: ProfileDashboardTokensPageViaProfileDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'profileDashboardTokensPageViaProfile',
         'query',
         variables
       )

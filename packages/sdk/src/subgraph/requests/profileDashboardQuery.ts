@@ -56,6 +56,9 @@ type CountPageResult = {
   isComplete: boolean
 }
 
+/**
+ * Fetch tokens using Profile → tokens relationship (OPTIMIZED - indexed lookup)
+ */
 async function fetchTokenPages(
   sdk: ProfileDashboardSdk,
   address: string,
@@ -65,12 +68,18 @@ async function fetchTokenPages(
   let cursor = ''
 
   for (let page = 0; page < MAX_PAGES; page++) {
-    const data = await sdk.profileDashboardTokensPage(
+    const data = await sdk.profileDashboardTokensPageViaProfile(
       { address, first: PAGE_SIZE, cursor },
       undefined,
       signal
     )
-    const pageItems = (data.tokens || []) as TokenPageRow[]
+
+    // Handle null profile (user has no tokens)
+    if (!data.profile) {
+      return { items: [], isComplete: true }
+    }
+
+    const pageItems = (data.profile.tokens || []) as TokenPageRow[]
     items.push(
       ...pageItems.map((token) => ({
         tokenId: String(token.tokenId),
@@ -94,6 +103,53 @@ async function fetchTokenPages(
   return { items, isComplete: false }
 }
 
+/**
+ * Fetch counts using Profile entity (OPTIMIZED - instant, no pagination)
+ */
+async function fetchCountsViaProfile(
+  sdk: ProfileDashboardSdk,
+  address: string,
+  signal?: AbortSignal
+): Promise<CountPageResult> {
+  try {
+    const data = await sdk.profile(
+      { address, firstOwner: 1, firstVoter: 1 },
+      undefined,
+      signal
+    )
+
+    if (!data.profile) {
+      // Profile doesn't exist - user has no activity
+      return {
+        counts: {
+          tokenHoldings: 0,
+          proposalVotes: 0,
+          proposalsSubmitted: 0,
+          bidsPlaced: 0,
+        },
+        isComplete: true,
+      }
+    }
+
+    return {
+      counts: {
+        tokenHoldings: data.profile.tokenCount,
+        proposalVotes: data.profile.proposalVotesCount,
+        proposalsSubmitted: data.profile.proposalsSubmittedCount,
+        bidsPlaced: data.profile.bidsPlacedCount,
+      },
+      isComplete: true,
+    }
+  } catch (error) {
+    console.error('fetchCountsViaProfile error, falling back to pagination:', error)
+    // Fallback to old method if Profile query fails
+    return fetchCountPages(sdk, address, signal)
+  }
+}
+
+/**
+ * Legacy: Fetch counts by paginating events (SLOW - kept as fallback)
+ */
 async function fetchCountPages(
   sdk: ProfileDashboardSdk,
   address: string,
@@ -252,7 +308,7 @@ export const profileDashboardQuery = async (
         })
   const [tokens, countResult, settlements] = await Promise.all([
     tokensPromise,
-    fetchCountPages(sdk, normalizedAddress, signal),
+    fetchCountsViaProfile(sdk, normalizedAddress, signal), // OPTIMIZED: Use Profile entity
     fetchAuctionSettlements(sdk, normalizedAddress, signal),
   ])
 
