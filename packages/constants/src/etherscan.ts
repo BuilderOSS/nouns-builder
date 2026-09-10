@@ -5,7 +5,6 @@ export const ETHERSCAN_BASE_URL: Record<CHAIN_ID, string> = {
   [CHAIN_ID.ETHEREUM]: 'https://etherscan.io',
   [CHAIN_ID.OPTIMISM]: 'https://optimistic.etherscan.io',
   [CHAIN_ID.SEPOLIA]: 'https://sepolia.etherscan.io',
-  [CHAIN_ID.OPTIMISM_SEPOLIA]: 'https://sepolia-optimism.etherscan.io',
   [CHAIN_ID.BASE]: 'https://basescan.org',
   [CHAIN_ID.BASE_SEPOLIA]: 'https://sepolia.basescan.org',
   [CHAIN_ID.FOUNDRY]: '',

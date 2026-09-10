@@ -6,7 +6,7 @@ This is Nouns Builder front-end website and subgraph mono-repo. You can find Nou
 - [Sepolia testnet](//testnet.nouns.build)
 
 For an introduction to Nouns Builder and its concept, you can find further [documentation here](https://docs.nouns.build)
-You can also find the [nouns protocol code here](https://github.com/ourzora/nouns-protocol).
+You can also find the [nouns protocol code here](https://github.com/BuilderOSS/nouns-protocol).
 
 ### Apps and packages in this repository include:
 
@@ -239,6 +239,7 @@ pnpm test:unit
 ```
 
 Or in watch mode:
+
 ```bash
 pnpm test:watch
 ```
@@ -282,8 +283,6 @@ The Nouns Builder subgraph is deployed for the following networks:
 - [Base](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-base-mainnet/latest/gn)
 - [Base Sepolia](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-base-sepolia/latest/gn)
 - [Optimism](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-optimism-mainnet/latest/gn)
-- [Optimism Sepolia](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-optimism-sepolia/latest/gn)
-- [Zora](https://api.goldsky.com/api/public/project_cm33ek8kjx6pz010i2c3w8z25/subgraphs/nouns-builder-zora-mainnet/latest/gn)
 
 ## Contributions
 
