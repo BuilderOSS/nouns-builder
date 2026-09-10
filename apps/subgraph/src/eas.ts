@@ -22,6 +22,7 @@ import {
   CandidateVersionCreatedEvent,
   DAO,
   DaoMultisigUpdate,
+  DAOVoter,
   ProfileLinkOverride,
   Proposal,
   ProposalCandidateGroup,
@@ -47,7 +48,7 @@ import {
   PROPOSAL_CANDIDATE_SCHEMA_UID,
   TREASURY_ASSET_PIN_SCHEMA_UID,
 } from './utils/eas'
-import { getOrCreateProfile } from './utils/profile'
+import { getOrCreateProfile, touchProfile } from './utils/profile'
 import { parseDescriptionFields } from './utils/proposalMetadata'
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -133,6 +134,18 @@ function handlePropdateAttestation(event: AttestedEvent): void {
   update.deleted = false
   update.save()
 
+  // Update profile and DAO-specific voter activity
+  let attesterProfile = getOrCreateProfile(event.params.attester, event.block.timestamp)
+  touchProfile(attesterProfile, event.block.timestamp)
+  attesterProfile.save()
+
+  let attesterVoterId = `${dao.id}:${event.params.attester.toHexString()}`
+  let attesterVoter = DAOVoter.load(attesterVoterId)
+  if (attesterVoter) {
+    attesterVoter.lastActiveAt = event.block.timestamp
+    attesterVoter.save()
+  }
+
   // Create feed event
   let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let feedEvent = new ProposalUpdatedFeedEvent(feedEventId)
@@ -179,6 +192,21 @@ function handlePropdateAttestationRevoked(event: RevokedEvent): void {
   }
   update.deleted = true
   update.save()
+
+  // Update profile and DAO-specific voter activity
+  const dao = DAO.load(event.params.recipient.toHexString())
+  if (dao) {
+    let revokerProfile = getOrCreateProfile(event.params.attester, event.block.timestamp)
+    touchProfile(revokerProfile, event.block.timestamp)
+    revokerProfile.save()
+
+    let revokerVoterId = `${dao.id}:${event.params.attester.toHexString()}`
+    let revokerVoter = DAOVoter.load(revokerVoterId)
+    if (revokerVoter) {
+      revokerVoter.lastActiveAt = event.block.timestamp
+      revokerVoter.save()
+    }
+  }
 }
 
 function handleDaoMultisigAttestationRevoked(event: RevokedEvent): void {
