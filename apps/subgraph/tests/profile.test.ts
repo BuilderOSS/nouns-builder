@@ -105,6 +105,7 @@ function seedOwnerRows(
   owner.delegate = Address.fromString(delegateAddress)
   owner.profile = ownerAddress
   owner.daoTokenCount = 1
+  owner.lastActiveAt = BigInt.fromI32(TIMESTAMP)
   owner.save()
 
   const voter = new DAOVoter(voterId)
@@ -112,6 +113,7 @@ function seedOwnerRows(
   voter.voter = Address.fromString(delegateAddress)
   voter.profile = delegateAddress
   voter.daoTokenCount = 1
+  voter.lastActiveAt = BigInt.fromI32(TIMESTAMP)
   voter.save()
 
   const token = new Token(tokenAddress + ':' + tokenId.toString())
@@ -384,6 +386,7 @@ describe('Profile counts', () => {
     owner.delegate = Address.fromString(OWNER_A)
     owner.profile = OWNER_A
     owner.daoTokenCount = 2
+    owner.lastActiveAt = BigInt.fromI32(TIMESTAMP)
     owner.save()
 
     const voter = new DAOVoter(voterId)
@@ -391,6 +394,7 @@ describe('Profile counts', () => {
     voter.voter = Address.fromString(OWNER_A)
     voter.profile = OWNER_A
     voter.daoTokenCount = 2
+    voter.lastActiveAt = BigInt.fromI32(TIMESTAMP)
     voter.save()
 
     mockBalanceOf(OWNER_A, 2)
@@ -422,6 +426,7 @@ describe('Profile counts', () => {
     owner.delegate = Address.fromString(OWNER_B)
     owner.profile = OWNER_A
     owner.daoTokenCount = 1
+    owner.lastActiveAt = BigInt.fromI32(TIMESTAMP)
     owner.save()
 
     const voter = new DAOVoter(voterId)
@@ -429,6 +434,7 @@ describe('Profile counts', () => {
     voter.voter = Address.fromString(OWNER_B)
     voter.profile = OWNER_B
     voter.daoTokenCount = 1
+    voter.lastActiveAt = BigInt.fromI32(TIMESTAMP)
     voter.save()
 
     mockBalanceOf(OWNER_A, 1)

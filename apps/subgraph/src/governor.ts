@@ -13,6 +13,7 @@ import {
   CandidateSponsorSignature,
   CandidateSubmittedAsProposalEvent,
   DAO,
+  DAOVoter,
   Proposal,
   ProposalCandidateVersion,
   ProposalCreatedEvent as ProposalCreatedFeedEvent,
@@ -36,7 +37,7 @@ import {
 } from '../generated/templates/Governor/Governor'
 import { Token as TokenContract } from '../generated/templates/Governor/Token'
 import { Treasury as TreasuryContract } from '../generated/templates/Governor/Treasury'
-import { getOrCreateProfile } from './utils/profile'
+import { getOrCreateProfile, touchProfile } from './utils/profile'
 import { parseDescriptionFields } from './utils/proposalMetadata'
 
 function buildCalldatas(calldatasBytes: Bytes[]): string | null {
@@ -126,8 +127,18 @@ export function handleProposalCreated(event: ProposalCreatedEvent): void {
   dao.save()
   proposal.save()
 
+  // Update profile counts and timestamps
+  touchProfile(proposerProfile, event.block.timestamp)
   proposerProfile.proposalsSubmittedCount = proposerProfile.proposalsSubmittedCount + 1
   proposerProfile.save()
+
+  // Update DAO-specific voter activity
+  let proposerVoterId = `${dao.id}:${event.params.proposal.proposer.toHexString()}`
+  let proposerVoter = DAOVoter.load(proposerVoterId)
+  if (proposerVoter) {
+    proposerVoter.lastActiveAt = event.block.timestamp
+    proposerVoter.save()
+  }
 
   // Note: Candidate version linking happens later after processing signers (see lines ~274-293)
   // This allows us to find the version through the signature lookup
@@ -434,8 +445,18 @@ export function handleVoteCast(event: VoteCastEvent): void {
   proposal.save()
   proposalVote.save()
 
+  // Update profile counts and timestamps
+  touchProfile(voterProfile, event.block.timestamp)
   voterProfile.proposalVotesCount = voterProfile.proposalVotesCount + 1
   voterProfile.save()
+
+  // Update DAO-specific voter activity
+  let voterVoterId = `${proposal.dao}:${event.params.voter.toHexString()}`
+  let daoVoter = DAOVoter.load(voterVoterId)
+  if (daoVoter) {
+    daoVoter.lastActiveAt = event.block.timestamp
+    daoVoter.save()
+  }
 
   // Create feed event
   let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()

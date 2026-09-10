@@ -90,6 +90,7 @@ type DAOTokenOwner @entity {
   dao: DAO!
   daoTokenCount: Int!
   daoTokens: [Token!]! @derivedFrom(field: "ownerInfo")
+  lastActiveAt: BigInt!
 }
 
 type DAOVoter @entity {
@@ -99,6 +100,7 @@ type DAOVoter @entity {
   dao: DAO!
   daoTokenCount: Int!
   daoTokens: [Token!]! @derivedFrom(field: "voterInfo")
+  lastActiveAt: BigInt!
 }
 
 type Token @entity {

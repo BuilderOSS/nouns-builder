@@ -8,6 +8,7 @@ import {
   AuctionCreatedEvent as AuctionCreatedFeedEvent,
   AuctionSettledEvent as AuctionSettledFeedEvent,
   DAO,
+  DAOVoter,
 } from '../generated/schema'
 import {
   AuctionBid as AuctionBidEvent,
@@ -19,7 +20,7 @@ import {
   TimeBufferUpdated as TimeBufferUpdatedEvent,
 } from '../generated/templates/Auction/Auction'
 import { parseAuctionBidComment } from './utils/parseAuctionBidComment'
-import { getOrCreateProfile } from './utils/profile'
+import { getOrCreateProfile, touchProfile } from './utils/profile'
 
 export function handleAuctionCreated(event: AuctionCreatedEvent): void {
   let context = dataSource.context()
@@ -104,8 +105,18 @@ export function handleAuctionSettled(event: AuctionSettledEvent): void {
   feedEvent.amount = winningBidEntity ? winningBidEntity.amount : event.params.amount
   feedEvent.save()
 
+  // Update profile counts and timestamps
+  touchProfile(winnerProfile, event.block.timestamp)
   winnerProfile.auctionWinsCount = winnerProfile.auctionWinsCount + 1
   winnerProfile.save()
+
+  // Update DAO-specific voter activity
+  let winnerVoterId = `${tokenAddress}:${winnerAddress.toHexString()}`
+  let winnerVoter = DAOVoter.load(winnerVoterId)
+  if (winnerVoter) {
+    winnerVoter.lastActiveAt = event.block.timestamp
+    winnerVoter.save()
+  }
 }
 
 export function handleAuctionBid(event: AuctionBidEvent): void {
@@ -150,8 +161,18 @@ export function handleAuctionBid(event: AuctionBidEvent): void {
   feedEvent.bid = bid.id
   feedEvent.save()
 
+  // Update profile counts and timestamps
+  touchProfile(bidderProfile, event.block.timestamp)
   bidderProfile.bidsPlacedCount = bidderProfile.bidsPlacedCount + 1
   bidderProfile.save()
+
+  // Update DAO-specific voter activity
+  let bidderVoterId = `${tokenAddress}:${event.params.bidder.toHexString()}`
+  let bidderVoter = DAOVoter.load(bidderVoterId)
+  if (bidderVoter) {
+    bidderVoter.lastActiveAt = event.block.timestamp
+    bidderVoter.save()
+  }
 }
 
 export function handleDurationUpdated(event: DurationUpdatedEvent): void {
