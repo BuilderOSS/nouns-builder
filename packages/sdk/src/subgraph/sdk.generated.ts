@@ -13276,6 +13276,24 @@ export type ProfileDashboardTokensPageViaProfileQuery = {
   } | null
 }
 
+export type ProfileLinkOverridesQueryVariables = Exact<{
+  address: Scalars['Bytes']['input']
+}>
+
+export type ProfileLinkOverridesQuery = {
+  __typename?: 'Query'
+  profileLinkOverrides: Array<{
+    __typename?: 'ProfileLinkOverride'
+    id: string
+    key: string
+    value: string
+    attestationUID: any
+    timestamp: any
+    creator: any
+    revoked: boolean
+  }>
+}
+
 export type PropdatesQueryVariables = Exact<{
   proposalId: Scalars['String']['input']
   first: Scalars['Int']['input']
@@ -15474,6 +15492,23 @@ export const ProfileDashboardTokensPageViaProfileDocument = gql`
     }
   }
 `
+export const ProfileLinkOverridesDocument = gql`
+  query profileLinkOverrides($address: Bytes!) {
+    profileLinkOverrides(
+      where: { profile: $address, revoked: false }
+      orderBy: timestamp
+      orderDirection: desc
+    ) {
+      id
+      key
+      value
+      attestationUID
+      timestamp
+      creator
+      revoked
+    }
+  }
+`
 export const PropdatesDocument = gql`
   query propdates($proposalId: String!, $first: Int!, $skip: Int!) {
     proposalUpdates(
@@ -16456,6 +16491,24 @@ export function getSdk(
             signal,
           }),
         'profileDashboardTokensPageViaProfile',
+        'query',
+        variables
+      )
+    },
+    profileLinkOverrides(
+      variables: ProfileLinkOverridesQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<ProfileLinkOverridesQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<ProfileLinkOverridesQuery>({
+            document: ProfileLinkOverridesDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'profileLinkOverrides',
         'query',
         variables
       )

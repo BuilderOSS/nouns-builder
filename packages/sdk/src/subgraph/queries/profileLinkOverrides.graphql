@@ -1,0 +1,15 @@
+query profileLinkOverrides($address: Bytes!) {
+  profileLinkOverrides(
+    where: { profile: $address, revoked: false }
+    orderBy: timestamp
+    orderDirection: desc
+  ) {
+    id
+    key
+    value
+    attestationUID
+    timestamp
+    creator
+    revoked
+  }
+}
