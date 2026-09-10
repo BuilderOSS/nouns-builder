@@ -130,7 +130,7 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
     let prevDelegateProfile = Profile.load(prevDelegate.toHexString())
     if (prevDelegateProfile) {
       touchProfile(prevDelegateProfile, event.block.timestamp)
-      if (prevTokenCount == 0) {
+      if (prevTokenCount == 0 && prevDelegateProfile.voterDaoCount > 0) {
         prevDelegateProfile.voterDaoCount = prevDelegateProfile.voterDaoCount - 1
       }
       prevDelegateProfile.save()
@@ -145,7 +145,7 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
   // Update voterCount: net change = new voters created - old voters removed
   if (isNewVoter && !isVoterRemoved) {
     dao.voterCount = dao.voterCount + 1
-  } else if (!isNewVoter && isVoterRemoved) {
+  } else if (!isNewVoter && isVoterRemoved && dao.voterCount > 0) {
     dao.voterCount = dao.voterCount - 1
   }
   // If both created and removed, or neither, voterCount stays the same
@@ -298,7 +298,9 @@ export function handleTransfer(event: TransferEvent): void {
           fromProfile.ownerDaoCount = fromProfile.ownerDaoCount - 1
         }
         store.remove('DAOTokenOwner', fromOwnerId)
-        dao.ownerCount = dao.ownerCount - 1
+        if (dao.ownerCount > 0) {
+          dao.ownerCount = dao.ownerCount - 1
+        }
       }
     }
   }
@@ -324,7 +326,7 @@ export function handleTransfer(event: TransferEvent): void {
 
       if (fromDelegateProfile) {
         touchProfile(fromDelegateProfile, event.block.timestamp)
-        if (fromDelegateTokenCount == 0) {
+        if (fromDelegateTokenCount == 0 && fromDelegateProfile.voterDaoCount > 0) {
           fromDelegateProfile.voterDaoCount = fromDelegateProfile.voterDaoCount - 1
         }
         fromDelegateProfile.save()
@@ -332,7 +334,9 @@ export function handleTransfer(event: TransferEvent): void {
 
       if (fromDelegateTokenCount == 0) {
         store.remove('DAOVoter', fromVoterId)
-        dao.voterCount = dao.voterCount - 1
+        if (dao.voterCount > 0) {
+          dao.voterCount = dao.voterCount - 1
+        }
       }
     }
   }
