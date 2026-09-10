@@ -3,7 +3,7 @@ import type { CHAIN_ID, FeedItem } from '@buildeross/types'
 import { SDK } from '../client'
 import type {
   ProfileDashboardAuctionSettlementsAtTimestampQuery,
-  ProfileDashboardTokensPageQuery,
+  ProfileDashboardTokensPageViaProfileQuery,
 } from '../sdk.generated'
 
 export type ProfileDashboardToken = {
@@ -39,7 +39,9 @@ export type ProfileDashboardQueryOptions = {
   signal?: AbortSignal
 }
 
-type TokenPageRow = ProfileDashboardTokensPageQuery['tokens'][number]
+type TokenPageRow = NonNullable<
+  ProfileDashboardTokensPageViaProfileQuery['profile']
+>['tokens'][number]
 type SettlementRow =
   ProfileDashboardAuctionSettlementsAtTimestampQuery['auctionSettledEvents'][number]
 

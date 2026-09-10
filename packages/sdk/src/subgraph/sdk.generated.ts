@@ -15769,7 +15769,7 @@ export const ProfileDashboardTokensPageViaProfileDocument = gql`
 export const ProfileLinkOverridesDocument = gql`
   query profileLinkOverrides($address: Bytes!) {
     profileLinkOverrides(
-      where: { profile: $address, revoked: false }
+      where: { profile: $address }
       orderBy: timestamp
       orderDirection: desc
     ) {

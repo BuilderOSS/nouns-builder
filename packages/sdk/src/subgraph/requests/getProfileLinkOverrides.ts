@@ -36,7 +36,11 @@ export async function getProfileLinkOverrides(
     const sdk = SDK.connect(chainId)
     const profile = profileAddress.toLowerCase()
 
-    const response = await sdk.profileLinkOverrides({ address: profile })
+    const response = await sdk.profileLinkOverrides(
+      { address: profile },
+      undefined,
+      AbortSignal.timeout(10000)
+    )
 
     const latestByKey = new Map<ProfileLinkKey, ProfileLinkOverride>()
     const seenKeys = new Set<ProfileLinkKey>()
@@ -48,10 +52,15 @@ export async function getProfileLinkOverrides(
       if (!PROFILE_LINK_KEYS.has(key)) continue
       if (seenKeys.has(key)) continue
 
-      // The newest empty attestation removes the Builder override for this key.
-      // Mark it as seen so an older value cannot become active again, while
-      // omitting it from the returned override list so ENS can be used normally.
+      // Mark key as seen to prevent older records from becoming active
       seenKeys.add(key)
+
+      // If the most recent attestation is revoked, treat it as a terminal state
+      // (skip this key entirely - no override should be returned)
+      if (override.revoked) continue
+
+      // The newest empty attestation removes the Builder override for this key.
+      // Omit it from the returned override list so ENS can be used normally.
       if (!override.value.trim()) continue
 
       latestByKey.set(key, {
