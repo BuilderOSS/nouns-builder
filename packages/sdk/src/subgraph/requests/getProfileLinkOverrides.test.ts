@@ -3,62 +3,50 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { getProfileLinkOverrides } from './getProfileLinkOverrides'
 
-const { clientConfigMock, requestMock } = vi.hoisted(() => ({
-  clientConfigMock: vi.fn(),
-  requestMock: vi.fn(),
+const { profileLinkOverridesMock } = vi.hoisted(() => ({
+  profileLinkOverridesMock: vi.fn(),
 }))
 
-vi.mock('graphql-request', () => ({
-  gql: (strings: TemplateStringsArray) => strings.join(''),
-  GraphQLClient: class {
-    request = requestMock
-
-    constructor(_url: string, config: RequestInit) {
-      clientConfigMock(config)
-    }
+vi.mock('../client', () => ({
+  SDK: {
+    connect: vi.fn(() => ({
+      profileLinkOverrides: profileLinkOverridesMock,
+    })),
   },
 }))
 
 const profileAddress = '0x00000000000000000000000000000000000000aa'
-
-const decodedLink = (key: string, value: string) =>
-  JSON.stringify([
-    { name: 'key', value: { value: key } },
-    { name: 'value', value: { value } },
-  ])
 
 describe('getProfileLinkOverrides', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('uses a ten-second timeout and treats the latest empty value as removal', async () => {
-    const timeoutSignal = new AbortController().signal
-    const timeoutSpy = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(timeoutSignal)
-    requestMock.mockResolvedValue({
-      attestations: [
+  it('queries the subgraph and treats the latest empty value as removal', async () => {
+    profileLinkOverridesMock.mockResolvedValue({
+      profileLinkOverrides: [
         {
           id: `0x${'1'.repeat(64)}`,
-          attester: profileAddress,
-          recipient: profileAddress,
-          time: 3,
-          decodedDataJson: decodedLink('x', ''),
+          key: 'x',
+          value: '',
+          timestamp: '3',
+          creator: profileAddress,
           revoked: false,
         },
         {
           id: `0x${'2'.repeat(64)}`,
-          attester: profileAddress,
-          recipient: profileAddress,
-          time: 2,
-          decodedDataJson: decodedLink('x', 'stale_handle'),
+          key: 'x',
+          value: 'stale_handle',
+          timestamp: '2',
+          creator: profileAddress,
           revoked: false,
         },
         {
           id: `0x${'3'.repeat(64)}`,
-          attester: profileAddress,
-          recipient: profileAddress,
-          time: 1,
-          decodedDataJson: decodedLink('website', 'https://example.com'),
+          key: 'website',
+          value: 'https://example.com',
+          timestamp: '1',
+          creator: profileAddress,
           revoked: false,
         },
       ],
@@ -73,18 +61,62 @@ describe('getProfileLinkOverrides', () => {
       ]
     )
 
-    expect(timeoutSpy).toHaveBeenCalledWith(10_000)
-    expect(clientConfigMock).toHaveBeenCalledWith(
-      expect.objectContaining({ signal: timeoutSignal })
+    expect(profileLinkOverridesMock).toHaveBeenCalledWith({
+      address: profileAddress,
+    })
+  })
+
+  it('returns empty array for invalid address', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    await expect(getProfileLinkOverrides('invalid')).resolves.toEqual([])
+
+    expect(consoleSpy).toHaveBeenCalledWith('Invalid profile address')
+    expect(profileLinkOverridesMock).not.toHaveBeenCalled()
+  })
+
+  it('returns empty array for unsupported chain', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    await expect(
+      getProfileLinkOverrides(profileAddress, CHAIN_ID.ETHEREUM)
+    ).resolves.toEqual([])
+
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Profile links are only available on BASE or BASE_SEPOLIA'
     )
-    expect(requestMock).toHaveBeenCalledWith(
-      expect.any(String),
-      expect.objectContaining({
-        where: expect.objectContaining({
-          attester: { equals: profileAddress },
-          recipient: { equals: profileAddress },
+    expect(profileLinkOverridesMock).not.toHaveBeenCalled()
+  })
+
+  it('filters out non-standard keys', async () => {
+    profileLinkOverridesMock.mockResolvedValue({
+      profileLinkOverrides: [
+        {
+          id: `0x${'1'.repeat(64)}`,
+          key: 'invalid_key',
+          value: 'test',
+          timestamp: '1',
+          creator: profileAddress,
+          revoked: false,
+        },
+        {
+          id: `0x${'2'.repeat(64)}`,
+          key: 'website',
+          value: 'https://example.com',
+          timestamp: '2',
+          creator: profileAddress,
+          revoked: false,
+        },
+      ],
+    })
+
+    await expect(getProfileLinkOverrides(profileAddress, CHAIN_ID.BASE)).resolves.toEqual(
+      [
+        expect.objectContaining({
+          key: 'website',
+          value: 'https://example.com',
         }),
-      })
+      ]
     )
   })
 })
