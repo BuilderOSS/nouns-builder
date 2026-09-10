@@ -500,4 +500,174 @@ describe('Profile counts', () => {
     assert.fieldEquals('Profile', OWNER_A, 'ownerDaoCount', '0')
     assert.fieldEquals('Profile', OWNER_A, 'voterDaoCount', '0')
   })
+
+  test('decrements tokenCount when transferring token away', () => {
+    clearStore()
+    seedDao()
+    seedProfile(OWNER_A, 2, 1, 1)
+    seedProfile(OWNER_B, 0, 0, 0)
+
+    // Create owner with 2 tokens
+    const ownerId = TOKEN_ADDRESS + ':' + OWNER_A
+    const owner = new DAOTokenOwner(ownerId)
+    owner.dao = TOKEN_ADDRESS
+    owner.owner = Address.fromString(OWNER_A)
+    owner.delegate = Address.fromString(OWNER_A)
+    owner.profile = OWNER_A
+    owner.daoTokenCount = 2
+    owner.lastActiveAt = BigInt.fromI32(TIMESTAMP)
+    owner.save()
+
+    const voterId = TOKEN_ADDRESS + ':' + OWNER_A
+    const voter = new DAOVoter(voterId)
+    voter.dao = TOKEN_ADDRESS
+    voter.voter = Address.fromString(OWNER_A)
+    voter.profile = OWNER_A
+    voter.daoTokenCount = 2
+    voter.lastActiveAt = BigInt.fromI32(TIMESTAMP)
+    voter.save()
+
+    mockDelegates(OWNER_A, OWNER_A)
+    mockDelegates(OWNER_B, OWNER_B)
+    mockBalanceOf(OWNER_A, 1)
+
+    // Transfer one token to OWNER_B
+    handleTransfer(createTransferEvent(OWNER_A, OWNER_B))
+
+    // OWNER_A should now have tokenCount = 1
+    assert.fieldEquals('Profile', OWNER_A, 'tokenCount', '1')
+    // OWNER_B should now have tokenCount = 1
+    assert.fieldEquals('Profile', OWNER_B, 'tokenCount', '1')
+  })
+
+  test('decrements ownerDaoCount when transferring last token away', () => {
+    clearStore()
+    seedDao()
+    seedProfile(OWNER_A, 1, 1, 1)
+    seedProfile(OWNER_B, 0, 0, 0)
+    seedOwnerRows(OWNER_A, OWNER_A)
+
+    mockDelegates(OWNER_A, OWNER_A)
+    mockDelegates(OWNER_B, OWNER_B)
+    mockBalanceOf(OWNER_A, 0)
+
+    // Transfer last token to OWNER_B
+    handleTransfer(createTransferEvent(OWNER_A, OWNER_B))
+
+    // OWNER_A should have ownerDaoCount decremented to 0
+    assert.fieldEquals('Profile', OWNER_A, 'tokenCount', '0')
+    assert.fieldEquals('Profile', OWNER_A, 'ownerDaoCount', '0')
+
+    // OWNER_B should have ownerDaoCount incremented to 1
+    assert.fieldEquals('Profile', OWNER_B, 'tokenCount', '1')
+    assert.fieldEquals('Profile', OWNER_B, 'ownerDaoCount', '1')
+  })
+
+  test('decrements voterDaoCount when changing delegation from self with last token', () => {
+    clearStore()
+    seedDao()
+    seedProfile(OWNER_A, 1, 1, 1)
+    seedProfile(OWNER_B, 0, 0, 1)
+
+    const ownerId = TOKEN_ADDRESS + ':' + OWNER_A
+    const owner = new DAOTokenOwner(ownerId)
+    owner.dao = TOKEN_ADDRESS
+    owner.owner = Address.fromString(OWNER_A)
+    owner.delegate = Address.fromString(OWNER_A)
+    owner.profile = OWNER_A
+    owner.daoTokenCount = 1
+    owner.lastActiveAt = BigInt.fromI32(TIMESTAMP)
+    owner.save()
+
+    const voterId = TOKEN_ADDRESS + ':' + OWNER_A
+    const voter = new DAOVoter(voterId)
+    voter.dao = TOKEN_ADDRESS
+    voter.voter = Address.fromString(OWNER_A)
+    voter.profile = OWNER_A
+    voter.daoTokenCount = 1
+    voter.lastActiveAt = BigInt.fromI32(TIMESTAMP)
+    voter.save()
+
+    mockBalanceOf(OWNER_A, 1)
+
+    // Change delegation from self to OWNER_B
+    handleDelegateChanged(createDelegateChangedEvent(OWNER_A, OWNER_A, OWNER_B))
+
+    // OWNER_A should have voterDaoCount decremented to 0
+    assert.fieldEquals('Profile', OWNER_A, 'voterDaoCount', '0')
+
+    // OWNER_B should have voterDaoCount incremented to 2 (was 1, now 2)
+    assert.fieldEquals('Profile', OWNER_B, 'voterDaoCount', '2')
+  })
+
+  test('handles complex scenario: multiple transfers and delegation changes', () => {
+    clearStore()
+    seedDao()
+    seedProfile(OWNER_A, 3, 1, 1)
+    seedProfile(OWNER_B, 0, 0, 0)
+    seedProfile(OWNER_C, 0, 0, 0)
+
+    // Create owner with 3 tokens
+    const ownerId = TOKEN_ADDRESS + ':' + OWNER_A
+    const owner = new DAOTokenOwner(ownerId)
+    owner.dao = TOKEN_ADDRESS
+    owner.owner = Address.fromString(OWNER_A)
+    owner.delegate = Address.fromString(OWNER_A)
+    owner.profile = OWNER_A
+    owner.daoTokenCount = 3
+    owner.lastActiveAt = BigInt.fromI32(TIMESTAMP)
+    owner.save()
+
+    const voterId = TOKEN_ADDRESS + ':' + OWNER_A
+    const voter = new DAOVoter(voterId)
+    voter.dao = TOKEN_ADDRESS
+    voter.voter = Address.fromString(OWNER_A)
+    voter.profile = OWNER_A
+    voter.daoTokenCount = 3
+    voter.lastActiveAt = BigInt.fromI32(TIMESTAMP)
+    voter.save()
+
+    mockDelegates(OWNER_A, OWNER_A)
+    mockDelegates(OWNER_B, OWNER_B)
+    mockDelegates(OWNER_C, OWNER_C)
+    mockBalanceOf(OWNER_A, 2)
+    mockTokenURI(1, 'ipfs://token1')
+    mockTokenName('Token1')
+
+    // Transfer 1 token to OWNER_B
+    handleTransfer(createTransferEvent(OWNER_A, OWNER_B, 1))
+
+    assert.fieldEquals('Profile', OWNER_A, 'tokenCount', '2')
+    assert.fieldEquals('Profile', OWNER_A, 'ownerDaoCount', '1')
+    assert.fieldEquals('Profile', OWNER_B, 'tokenCount', '1')
+    assert.fieldEquals('Profile', OWNER_B, 'ownerDaoCount', '1')
+
+    mockBalanceOf(OWNER_A, 1)
+    mockTokenURI(2, 'ipfs://token2')
+    mockTokenName('Token2')
+
+    // Transfer another token to OWNER_C
+    handleTransfer(createTransferEvent(OWNER_A, OWNER_C, 2))
+
+    assert.fieldEquals('Profile', OWNER_A, 'tokenCount', '1')
+    assert.fieldEquals('Profile', OWNER_A, 'ownerDaoCount', '1')
+    assert.fieldEquals('Profile', OWNER_C, 'tokenCount', '1')
+    assert.fieldEquals('Profile', OWNER_C, 'ownerDaoCount', '1')
+
+    mockBalanceOf(OWNER_A, 0)
+    mockTokenURI(3, 'ipfs://token3')
+    mockTokenName('Token3')
+
+    // Transfer last token to OWNER_B
+    handleTransfer(createTransferEvent(OWNER_A, OWNER_B, 3))
+
+    // OWNER_A should have all counts at 0
+    assert.fieldEquals('Profile', OWNER_A, 'tokenCount', '0')
+    assert.fieldEquals('Profile', OWNER_A, 'ownerDaoCount', '0')
+    assert.fieldEquals('Profile', OWNER_A, 'voterDaoCount', '0')
+
+    // OWNER_B should have 2 tokens
+    assert.fieldEquals('Profile', OWNER_B, 'tokenCount', '2')
+    assert.fieldEquals('Profile', OWNER_B, 'ownerDaoCount', '1')
+  })
 })
