@@ -4,7 +4,6 @@ const TENDERLY_NETWORKS: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.ETHEREUM]: 'mainnet',
   [CHAIN_ID.OPTIMISM]: 'optimism',
   [CHAIN_ID.SEPOLIA]: 'sepolia',
-  [CHAIN_ID.OPTIMISM_SEPOLIA]: 'optimism-sepolia',
   [CHAIN_ID.BASE]: 'base',
   [CHAIN_ID.BASE_SEPOLIA]: 'base-sepolia',
 }

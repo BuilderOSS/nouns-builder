@@ -34,8 +34,6 @@ function getChainName(chainId: CHAIN_ID): string {
       return 'Base'
     case CHAIN_ID.OPTIMISM:
       return 'Optimism'
-    case CHAIN_ID.ZORA:
-      return 'Zora'
     default:
       return 'Unknown'
   }
@@ -200,7 +198,6 @@ enum CHAIN_ID {
   OPTIMISM_SEPOLIA = 11155420,
   BASE = 8453,
   BASE_SEPOLIA = 84532,
-  ZORA = 7777777,
   FOUNDRY = 31337,
 }
 
@@ -290,13 +287,11 @@ The package provides comprehensive support for all Builder protocol chains:
 - **Ethereum** (`CHAIN_ID.ETHEREUM`) - Chain ID: 1
 - **Base** (`CHAIN_ID.BASE`) - Chain ID: 8453
 - **Optimism** (`CHAIN_ID.OPTIMISM`) - Chain ID: 10
-- **Zora** (`CHAIN_ID.ZORA`) - Chain ID: 7777777
 
 ### Testnets
 
 - **Sepolia** (`CHAIN_ID.SEPOLIA`) - Chain ID: 11155111
 - **Base Sepolia** (`CHAIN_ID.BASE_SEPOLIA`) - Chain ID: 84532
-- **Optimism Sepolia** (`CHAIN_ID.OPTIMISM_SEPOLIA`) - Chain ID: 11155420
 
 ### Development
 
@@ -396,9 +391,7 @@ function isActiveProposal(state: ProposalState): boolean {
 }
 
 function isMainnet(chainId: CHAIN_ID): boolean {
-  return [CHAIN_ID.ETHEREUM, CHAIN_ID.BASE, CHAIN_ID.OPTIMISM, CHAIN_ID.ZORA].includes(
-    chainId
-  )
+  return [CHAIN_ID.ETHEREUM, CHAIN_ID.BASE, CHAIN_ID.OPTIMISM].includes(chainId)
 }
 ```
 

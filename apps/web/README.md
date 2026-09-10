@@ -44,7 +44,7 @@ The app is mostly organised by function and for the larger areas of concern ther
 
 ### Chain Environment
 
-Nouns Builder supports multiple networks: `Ethereum`, `Base`, `Optimism`, `Zora`, and their respective testnets (`Sepolia`). The environment variables indicated below dictate which networks the app includes.
+Nouns Builder supports multiple networks: `Ethereum`, `Base`, `Optimism`, and their respective testnets (`Sepolia`). The environment variables indicated below dictate which networks the app includes.
 
 You can swap out the environment variables as defined below to run against different network configurations locally.
 
@@ -53,7 +53,7 @@ You can swap out the environment variables as defined below to run against diffe
 NEXT_PUBLIC_TENDERLY_RPC_KEY=<TENDERLY_RPC_API_KEY>
 NEXT_PUBLIC_NETWORK_TYPE="testnet"
 
-# to run with production networks only (4 networks: Ethereum, Base, Optimism, Zora)
+# to run with production networks only (4 networks: Ethereum, Base, Optimism)
 NEXT_PUBLIC_TENDERLY_RPC_KEY=<TENDERLY_RPC_API_KEY>
 NEXT_PUBLIC_NETWORK_TYPE="mainnet"
 ```
