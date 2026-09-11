@@ -25,9 +25,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const result = await getSplitInfo(chainIdNum as CHAIN_ID, address as string)
 
-    // An immutable split never changes; a mutable one is re-checked against the
-    // on-chain hash on every read, so this is safe to cache at the edge too.
-    res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400')
+    // Edge caching is limited to 10 minutes because mutable splits can be updated,
+    // changing their hash and invalidating cached terms. The server-side Redis cache
+    // is keyed by the current hash, so it serves fresh results on hash changes.
+    res.setHeader('Cache-Control', 'public, max-age=600, must-revalidate')
     return res.status(200).json({ data: result })
   } catch (error) {
     console.error('Splits API error:', error)

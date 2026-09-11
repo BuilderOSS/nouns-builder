@@ -4,6 +4,7 @@ import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SPLIT_MAIN_ADDRESS } from '@buildeross/constants/splits'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
+import { useEffect } from 'react'
 import useSWR from 'swr'
 import type { Address } from 'viem'
 import { isAddressEqual, zeroAddress, zeroHash } from 'viem'
@@ -137,18 +138,24 @@ export const useSplitPayout = ({
     functionName: 'getHash',
     args: address ? [address] : undefined,
     chainId,
-    query: { enabled },
+    query: {
+      enabled,
+      // Refetch on every block to detect when a mutable split is updated
+      refetchInterval: 12_000, // ~12s (Ethereum block time)
+    },
   })
 
   const isSplit = Boolean(splitHash && splitHash !== zeroHash)
 
   const { data: terms, isLoading: termsLoading } = useSWR(
-    isSplit && address ? ([SWR_KEYS.SPLIT_TERMS, chainId, address] as const) : null,
+    isSplit && address && splitHash
+      ? ([SWR_KEYS.SPLIT_TERMS, chainId, address, splitHash] as const)
+      : null,
     ([, _chainId, _address]) => fetchSplitTerms(_chainId, _address),
     { revalidateOnFocus: false }
   )
 
-  const { data: splitBalance } = useReadContract({
+  const { data: splitBalance, refetch: refetchSplitBalance } = useReadContract({
     abi: splitMainAbi,
     address: splitMain,
     functionName: 'getETHBalance',
@@ -157,7 +164,7 @@ export const useSplitPayout = ({
     query: { enabled: isSplit },
   })
 
-  const { data: accountBalance } = useReadContract({
+  const { data: accountBalance, refetch: refetchAccountBalance } = useReadContract({
     abi: splitMainAbi,
     address: splitMain,
     functionName: 'getETHBalance',
@@ -205,7 +212,22 @@ export const useSplitPayout = ({
     variables,
   } = useWriteContract()
 
-  const { isLoading: isMining } = useWaitForTransactionReceipt({ hash: txHash, chainId })
+  const { isLoading: isMining, isSuccess: txSuccess } = useWaitForTransactionReceipt({
+    hash: txHash,
+    chainId,
+    query: {
+      enabled: Boolean(txHash),
+    },
+  })
+
+  // Refetch balances after a successful transaction to ensure distribute/withdraw
+  // buttons are based on fresh on-chain state and cannot enable a redundant tx.
+  useEffect(() => {
+    if (txSuccess) {
+      void refetchSplitBalance()
+      void refetchAccountBalance()
+    }
+  }, [txSuccess, refetchSplitBalance, refetchAccountBalance])
 
   const isBusy = isSigning || isMining
   const pendingFn = variables?.functionName

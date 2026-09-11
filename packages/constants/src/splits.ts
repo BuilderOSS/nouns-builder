@@ -4,7 +4,7 @@ import { CHAIN_ID } from '@buildeross/types'
 /**
  * 0xSplits v1 `SplitMain`. One deterministic deployment covers every chain the
  * app supports except Sepolia, which has its own.
- * https://docs.splits.org/core/split#addresses
+ * https://etherscan.io/address/0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE
  */
 const SPLIT_MAIN_DEFAULT = '0x2ed6c4B5dA6378c7897AC67Ba9e43102Feb694EE' as AddressType
 const SPLIT_MAIN_SEPOLIA = '0x54E4a6014D36c381fC43b7E24A1492F556139a6F' as AddressType

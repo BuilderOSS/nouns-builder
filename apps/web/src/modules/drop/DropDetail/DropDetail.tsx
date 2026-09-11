@@ -178,6 +178,13 @@ export const DropDetail = ({
             maxPerAddress={parseInt(drop.maxSalePurchasePerAddress)}
             unstyledContainer
           />
+
+          <Box mt="x6">
+            <SplitPayoutCard
+              chainId={chainId as CHAIN_ID}
+              fundsRecipient={drop.fundsRecipient as Address | undefined}
+            />
+          </Box>
         </Box>
       </AnimatedModal>
     </>

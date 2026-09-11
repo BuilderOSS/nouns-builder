@@ -37,8 +37,8 @@ export type SplitInfoResult = {
   source: 'fetched' | 'cache'
 }
 
-const redisKey = (chainId: CHAIN_ID, address: string) =>
-  `splits:terms:${chainId}:${address}`
+const redisKey = (chainId: CHAIN_ID, address: string, hash: string) =>
+  `splits:terms:${chainId}:${address}:${hash}`
 
 /**
  * `SplitMain` stores only a hash of a split's recipients — the accounts and
@@ -50,15 +50,19 @@ const fetchCreationInput = async (
   chainId: CHAIN_ID,
   address: AddressType
 ): Promise<Hex | null> => {
-  const creationUrl = `https://api.etherscan.io/v2/api?chainid=${chainId}&module=contract&action=getcontractcreation&contractaddresses=${address}${ETHERSCAN_API_KEY_PARAM}`
+  try {
+    const creationUrl = `https://api.etherscan.io/v2/api?chainid=${chainId}&module=contract&action=getcontractcreation&contractaddresses=${address}${ETHERSCAN_API_KEY_PARAM}`
 
-  const { data } = await axios.get(creationUrl, { timeout: 10_000 })
-  const txHash: string | undefined = data?.result?.[0]?.txHash
-  if (!txHash) return null
+    const { data } = await axios.get(creationUrl, { timeout: 10_000 })
+    const txHash: string | undefined = data?.result?.[0]?.txHash
+    if (!txHash) return null
 
-  const provider = getProvider(chainId)
-  const tx = await provider.getTransaction({ hash: txHash as Hex })
-  return tx?.input ?? null
+    const provider = getProvider(chainId)
+    const tx = await provider.getTransaction({ hash: txHash as Hex })
+    return tx?.input ?? null
+  } catch {
+    return null
+  }
 }
 
 const decodeTerms = (input: Hex): SplitTerms | null => {
@@ -119,7 +123,7 @@ export const getSplitInfo = async (
   }
 
   const redis = getRedisConnection()
-  const key = redisKey(chainId, address)
+  const key = redisKey(chainId, address, storedHash)
   const cached = await redis?.get(key)
   if (cached) {
     return { isSplit: true, terms: JSON.parse(cached) as SplitTerms, source: 'cache' }
@@ -135,11 +139,10 @@ export const getSplitInfo = async (
     return { isSplit: true, terms: null, reason: 'undecodable', source: 'fetched' }
   }
 
-  // These terms are the ones the split was created with. A mutable split could
-  // have been re-pointed since, so they are a proposal, not a promise: the
-  // client simulates `distributeETH` with them before enabling the button, and
-  // `SplitMain` itself rejects any set that doesn't match its stored hash. An
-  // hour is short enough that an updated split corrects itself quickly.
+  // These terms are keyed by the current hash, so if a mutable split is updated
+  // (changing the hash), the cache miss will force a new fetch. The client also
+  // simulates `distributeETH` before enabling the button, and `SplitMain` itself
+  // rejects any set that doesn't match its stored hash.
   await redis?.setex(key, 60 * 60, JSON.stringify(terms))
 
   return { isSplit: true, terms, source: 'fetched' }
