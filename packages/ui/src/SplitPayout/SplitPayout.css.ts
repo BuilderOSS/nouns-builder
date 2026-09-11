@@ -1,52 +1,117 @@
-import { vars } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
+
+export const splitPayoutWrapper = style([
+  atoms({
+    p: 'x6',
+    borderRadius: 'curved',
+    backgroundColor: 'background2',
+    borderColor: 'border',
+    borderWidth: 'thin',
+    borderStyle: 'solid',
+  }),
+])
 
 export const card = style({
   display: 'flex',
   flexDirection: 'column',
-  borderStyle: 'solid',
-  borderWidth: '1px',
-  borderColor: vars.color.border,
-  borderRadius: vars.radii.curved,
-  padding: '1.25rem 1.4rem',
+  gap: '1.5rem',
 })
 
-export const row = style({
-  display: 'grid',
-  gridTemplateColumns: '1fr auto',
-  alignItems: 'center',
+export const balanceSection = style({
+  display: 'flex',
+  flexDirection: 'column',
   gap: '0.75rem',
-  paddingTop: '0.6rem',
-  paddingBottom: '0.6rem',
+  paddingBottom: '1.5rem',
   borderBottomStyle: 'solid',
   borderBottomWidth: '1px',
   borderBottomColor: vars.color.border,
 })
 
-export const rowLast = style({ borderBottom: 'none' })
+export const balanceHeader = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'baseline',
+  gap: '1rem',
+})
+
+export const recipientsSection = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.5rem',
+})
+
+export const recipientsHeader = style({
+  fontSize: '14px',
+  fontWeight: 600,
+  color: vars.color.text2,
+  marginBottom: '0.5rem',
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+})
+
+export const recipientsList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.75rem',
+  width: '100%',
+})
+
+export const splitRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: '1rem',
+  width: '100%',
+})
+
+export const recipientAddress = style({
+  fontSize: '14px',
+  fontWeight: 500,
+  color: vars.color.text1,
+  textDecoration: 'none',
+  ':hover': {
+    color: vars.color.accent,
+    textDecoration: 'underline',
+  },
+})
 
 export const share = style({
-  fontSize: '13.5px',
+  fontSize: '14px',
   fontWeight: 600,
   fontVariantNumeric: 'tabular-nums',
-  color: vars.color.text1,
+  color: vars.color.text2,
+  whiteSpace: 'nowrap',
 })
 
 export const amount = style({
-  fontSize: '20px',
+  fontSize: '28px',
   fontWeight: 700,
   fontVariantNumeric: 'tabular-nums',
   color: vars.color.text1,
+  lineHeight: 1.2,
 })
 
 export const label = style({
-  fontSize: '12.5px',
+  fontSize: '13px',
   color: vars.color.text3,
+  fontWeight: 500,
+})
+
+export const splitLink = style({
+  fontSize: '12px',
+  color: vars.color.text3,
+  fontWeight: 500,
+  textDecoration: 'none',
+  ':hover': {
+    color: vars.color.text2,
+    textDecoration: 'underline',
+  },
 })
 
 export const actions = style({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: '0.6rem',
-  marginTop: '1rem',
+  gap: '0.75rem',
+  paddingTop: '0.5rem',
 })

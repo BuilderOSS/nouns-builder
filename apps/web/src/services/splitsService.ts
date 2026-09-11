@@ -1,14 +1,23 @@
+import { SplitsClient } from '@0xsplits/splits-sdk'
 import { SPLIT_MAIN_ADDRESS } from '@buildeross/constants/splits'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { getProvider } from '@buildeross/utils/provider'
 import axios from 'axios'
-import { decodeFunctionData, getAddress, type Hex, parseAbiItem, zeroHash } from 'viem'
+import {
+  decodeEventLog,
+  decodeFunctionData,
+  getAddress,
+  type Hex,
+  parseAbiItem,
+  zeroHash,
+} from 'viem'
 
 import { InvalidRequestError } from './errors'
 import { getRedisConnection } from './redisConnection'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY ?? ''
 const ETHERSCAN_API_KEY_PARAM = ETHERSCAN_API_KEY ? `&apikey=${ETHERSCAN_API_KEY}` : ''
+const SPLITS_API_KEY = process.env.SPLITS_API_KEY ?? ''
 
 const splitMainAbi = [
   parseAbiItem('function getHash(address split) view returns (bytes32)'),
@@ -20,6 +29,13 @@ const splitMainAbi = [
   ),
   parseAbiItem(
     'function updateAndDistributeETH(address split, address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address distributorAddress)'
+  ),
+  // Polygon/Optimism/Base/Sepolia event with full recipient data
+  parseAbiItem(
+    'event CreateSplit(address indexed split, address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address controller)'
+  ),
+  parseAbiItem(
+    'event UpdateSplit(address indexed split, address[] accounts, uint32[] percentAllocations, uint32 distributorFee)'
   ),
 ] as const
 
@@ -39,6 +55,98 @@ export type SplitInfoResult = {
 
 const redisKey = (chainId: CHAIN_ID, address: string, hash: string) =>
   `splits:terms:${chainId}:${address}:${hash}`
+
+/**
+ * Fetch split terms from 0xSplits GraphQL API using the SDK. Works for all
+ * splits on all chains, but requires an API key from splits.org.
+ */
+const fetchTermsFromGraphQL = async (
+  chainId: CHAIN_ID,
+  address: AddressType
+): Promise<SplitTerms | null> => {
+  if (!SPLITS_API_KEY) {
+    return null // API key not configured
+  }
+
+  try {
+    const provider = getProvider(chainId)
+    const client = new SplitsClient({
+      chainId,
+      publicClient: provider as any,
+      apiConfig: {
+        apiKey: SPLITS_API_KEY,
+      },
+    })
+
+    const split = await client.dataClient!.getSplitMetadata({
+      chainId,
+      splitAddress: address,
+    })
+
+    return {
+      accounts: split.recipients.map((r) => r.recipient.address as AddressType),
+      percentAllocations: split.recipients.map((r) =>
+        Math.round(r.percentAllocation * 10000)
+      ),
+      distributorFee: Math.round(split.distributorFeePercent * 10000),
+    }
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Extract split terms from transaction logs by reading CreateSplit/UpdateSplit
+ * events. Works for splits created via any method (direct, factory, multicall,
+ * Safe) on chains that emit full event data (Polygon, Optimism, Base, Sepolia).
+ * Ethereum mainnet only emits the split address in the event.
+ */
+const extractTermsFromLogs = async (
+  chainId: CHAIN_ID,
+  txHash: string,
+  splitAddress: AddressType
+): Promise<SplitTerms | null> => {
+  try {
+    const provider = getProvider(chainId)
+    const receipt = await provider.getTransactionReceipt({ hash: txHash as Hex })
+
+    if (!receipt) return null
+
+    // Look for CreateSplit or UpdateSplit events in the transaction logs
+    for (const log of receipt.logs) {
+      try {
+        const decoded = decodeEventLog({
+          abi: splitMainAbi,
+          data: log.data,
+          topics: log.topics,
+        })
+
+        // Check if this is a CreateSplit or UpdateSplit event for our split address
+        if (
+          (decoded.eventName === 'CreateSplit' || decoded.eventName === 'UpdateSplit') &&
+          decoded.args.split.toLowerCase() === splitAddress.toLowerCase()
+        ) {
+          // Only Polygon/Optimism/Base/Sepolia emit the full data in events
+          // Ethereum mainnet events only have the split address
+          if ('accounts' in decoded.args) {
+            return {
+              accounts: [...decoded.args.accounts] as AddressType[],
+              percentAllocations: [...decoded.args.percentAllocations] as number[],
+              distributorFee: Number(decoded.args.distributorFee),
+            }
+          }
+        }
+      } catch {
+        // Not a split event, continue to next log
+        continue
+      }
+    }
+
+    return null
+  } catch {
+    return null
+  }
+}
 
 /**
  * `SplitMain` stores only a hash of a split's recipients — the accounts and
@@ -129,20 +237,44 @@ export const getSplitInfo = async (
     return { isSplit: true, terms: JSON.parse(cached) as SplitTerms, source: 'cache' }
   }
 
-  const input = await fetchCreationInput(chainId, address)
-  if (!input) {
-    return { isSplit: true, terms: null, reason: 'creation-not-found', source: 'fetched' }
+  let terms: SplitTerms | null = null
+
+  // Try fetching from Etherscan creation transaction
+  try {
+    const creationUrl = `https://api.etherscan.io/v2/api?chainid=${chainId}&module=contract&action=getcontractcreation&contractaddresses=${address}${ETHERSCAN_API_KEY_PARAM}`
+
+    const { data } = await axios.get(creationUrl, { timeout: 10_000 })
+    const txHash: string | undefined = data?.result?.[0]?.txHash
+
+    if (txHash) {
+      // Try extracting from event logs first (works for all creation methods on
+      // Polygon/Optimism/Base/Sepolia which emit full data in CreateSplit event)
+      terms = await extractTermsFromLogs(chainId, txHash, address)
+
+      // Fall back to calldata decoding if log extraction didn't work
+      // (e.g., on Ethereum mainnet which doesn't emit recipient data in events)
+      if (!terms) {
+        const input = await fetchCreationInput(chainId, address)
+        if (input) {
+          terms = decodeTerms(input)
+        }
+      }
+    }
+  } catch {
+    // Etherscan API failed, will try GraphQL fallback below
   }
 
-  const terms = decodeTerms(input)
+  // Final fallback: use 0xSplits GraphQL API if available
+  // (works for all splits on all chains, including factory/multicall/Safe deployments)
+  if (!terms) {
+    terms = await fetchTermsFromGraphQL(chainId, address)
+  }
+
   if (!terms) {
     return { isSplit: true, terms: null, reason: 'undecodable', source: 'fetched' }
   }
 
-  // These terms are keyed by the current hash, so if a mutable split is updated
-  // (changing the hash), the cache miss will force a new fetch. The client also
-  // simulates `distributeETH` before enabling the button, and `SplitMain` itself
-  // rejects any set that doesn't match its stored hash.
+  // Cache the successfully extracted terms
   await redis?.setex(key, 60 * 60, JSON.stringify(terms))
 
   return { isSplit: true, terms, source: 'fetched' }
