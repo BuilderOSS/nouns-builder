@@ -157,6 +157,8 @@ export const DropDetail = ({
         priceEth={priceEth}
         shareUrl={shareUrl}
         saleActive={saleActive}
+        saleNotStarted={saleNotStarted}
+        saleEnded={saleEnded}
         onMintClick={() => setIsMobileModalOpen(true)}
       />
 

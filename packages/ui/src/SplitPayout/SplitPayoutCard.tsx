@@ -194,7 +194,7 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
 
           <Text variant="paragraph-sm" color="text3">
             Distributing moves the balance into each recipient&apos;s account, in the
-            shares above. Everyone then withdraws their own — anyone can pay for the
+            shares above. Everyone then withdraws their own and anyone can pay for the
             distribution, not just a recipient.
           </Text>
         </Flex>

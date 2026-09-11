@@ -9,6 +9,8 @@ export interface MobileMintBarProps {
   priceEth: string
   shareUrl: string | null
   saleActive: boolean
+  saleNotStarted: boolean
+  saleEnded: boolean
   onMintClick: () => void
 }
 
@@ -16,6 +18,8 @@ export const MobileMintBar: React.FC<MobileMintBarProps> = ({
   symbol,
   shareUrl,
   saleActive,
+  saleNotStarted,
+  saleEnded,
   onMintClick,
 }) => {
   return (
@@ -27,7 +31,13 @@ export const MobileMintBar: React.FC<MobileMintBarProps> = ({
         className={mintButton}
         disabled={!saleActive}
       >
-        Mint {symbol}
+        {saleActive
+          ? `Mint ${symbol}`
+          : saleNotStarted
+            ? 'Sale Not Started'
+            : saleEnded
+              ? 'Sale Ended'
+              : 'Mint Unavailable'}
       </Button>
     </div>
   )
