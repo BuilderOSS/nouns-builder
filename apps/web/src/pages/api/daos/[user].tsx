@@ -1,5 +1,5 @@
-import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
-import { myDaosRequest } from '@buildeross/sdk/subgraph'
+import { PUBLIC_DEFAULT_CHAINS, PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
+import { getUniqueDaosFromProfile, profileQuery } from '@buildeross/sdk/subgraph'
 import { AddressType } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { NotFoundError } from 'src/services/errors'
@@ -108,9 +108,29 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
     }
 
-    // Fetch fresh data
-    log('MyDAOs cache miss, fetching', { address })
-    const daos = await myDaosRequest(address)
+    // Fetch fresh data using Profile entity (optimized query)
+    log('MyDAOs cache miss, fetching via Profile', { address })
+    const profileResults = await Promise.all(
+      PUBLIC_DEFAULT_CHAINS.map((chain) =>
+        profileQuery(chain.id, address).then((profile) => ({ chain, profile }))
+      )
+    )
+
+    const daos = profileResults
+      .filter(({ profile }) => profile !== null)
+      .flatMap(({ chain, profile }) =>
+        getUniqueDaosFromProfile(profile!).map((dao) => ({
+          name: dao.name || '',
+          contractImage: dao.contractImage || '',
+          collectionAddress: dao.tokenAddress,
+          metadataAddress: dao.metadataAddress,
+          treasuryAddress: dao.treasuryAddress,
+          governorAddress: dao.governorAddress,
+          auctionAddress: dao.auctionAddress,
+          chainId: chain.id,
+        }))
+      )
+      .sort((a, b) => a.name.localeCompare(b.name))
 
     // Store in cache
     if (redis) {

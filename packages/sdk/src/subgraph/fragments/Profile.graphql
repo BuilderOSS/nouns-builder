@@ -1,0 +1,14 @@
+fragment Profile on Profile {
+  id
+  address
+  createdAt
+  updatedAt
+  lastActiveAt
+  tokenCount
+  ownerDaoCount
+  voterDaoCount
+  proposalVotesCount
+  proposalsSubmittedCount
+  bidsPlacedCount
+  auctionWinsCount
+}

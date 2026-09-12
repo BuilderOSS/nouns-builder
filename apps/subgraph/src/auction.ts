@@ -1,4 +1,4 @@
-import { dataSource } from '@graphprotocol/graph-ts'
+import { Address, dataSource } from '@graphprotocol/graph-ts'
 
 import {
   Auction,
@@ -8,6 +8,7 @@ import {
   AuctionCreatedEvent as AuctionCreatedFeedEvent,
   AuctionSettledEvent as AuctionSettledFeedEvent,
   DAO,
+  DAOVoter,
 } from '../generated/schema'
 import {
   AuctionBid as AuctionBidEvent,
@@ -19,6 +20,7 @@ import {
   TimeBufferUpdated as TimeBufferUpdatedEvent,
 } from '../generated/templates/Auction/Auction'
 import { parseAuctionBidComment } from './utils/parseAuctionBidComment'
+import { getOrCreateProfile, touchProfile } from './utils/profile'
 
 export function handleAuctionCreated(event: AuctionCreatedEvent): void {
   let context = dataSource.context()
@@ -71,6 +73,8 @@ export function handleAuctionSettled(event: AuctionSettledEvent): void {
   let dao = DAO.load(tokenAddress)
   if (dao == null) return
 
+  let winningBidEntity = auction.winningBid ? AuctionBid.load(auction.winningBid!) : null
+
   dao.currentAuction = null
   if (auction.highestBid) {
     let bid = AuctionBid.load(auction.highestBid!)
@@ -91,12 +95,28 @@ export function handleAuctionSettled(event: AuctionSettledEvent): void {
   feedEvent.actor = event.transaction.from
   feedEvent.auction = auction.id
 
-  let winningBidEntity = auction.winningBid ? AuctionBid.load(auction.winningBid!) : null
-
-  feedEvent.winner = winningBidEntity ? winningBidEntity.bidder : event.transaction.from
-
-  feedEvent.amount = winningBidEntity ? winningBidEntity.amount : event.params.amount
+  // Use event params directly: winner is address(0) and amount is 0 when no bid was placed
+  feedEvent.winner = event.params.winner
+  feedEvent.amount = event.params.amount
   feedEvent.save()
+
+  // Update profile counts and timestamps only if there was an actual winner
+  if (winningBidEntity) {
+    let winnerAddress = Address.fromBytes(winningBidEntity.bidder)
+    let winnerProfile = getOrCreateProfile(winnerAddress, event.block.timestamp)
+
+    touchProfile(winnerProfile, event.block.timestamp)
+    winnerProfile.auctionWinsCount = winnerProfile.auctionWinsCount + 1
+    winnerProfile.save()
+
+    // Update DAO-specific voter activity
+    let winnerVoterId = `${tokenAddress}:${winnerAddress.toHexString()}`
+    let winnerVoter = DAOVoter.load(winnerVoterId)
+    if (winnerVoter) {
+      winnerVoter.lastActiveAt = event.block.timestamp
+      winnerVoter.save()
+    }
+  }
 }
 
 export function handleAuctionBid(event: AuctionBidEvent): void {
@@ -119,6 +139,8 @@ export function handleAuctionBid(event: AuctionBidEvent): void {
   let auction = Auction.load(`${tokenAddress}:${event.params.tokenId.toString()}`)
   if (auction == null) return
 
+  let bidderProfile = getOrCreateProfile(event.params.bidder, event.block.timestamp)
+
   if (auction.bidCount == 0) auction.firstBidTime = event.block.timestamp
   auction.bidCount = auction.bidCount + 1
   auction.highestBid = bid.id
@@ -138,6 +160,19 @@ export function handleAuctionBid(event: AuctionBidEvent): void {
   feedEvent.auction = bid.auction
   feedEvent.bid = bid.id
   feedEvent.save()
+
+  // Update profile counts and timestamps
+  touchProfile(bidderProfile, event.block.timestamp)
+  bidderProfile.bidsPlacedCount = bidderProfile.bidsPlacedCount + 1
+  bidderProfile.save()
+
+  // Update DAO-specific voter activity
+  let bidderVoterId = `${tokenAddress}:${event.params.bidder.toHexString()}`
+  let bidderVoter = DAOVoter.load(bidderVoterId)
+  if (bidderVoter) {
+    bidderVoter.lastActiveAt = event.block.timestamp
+    bidderVoter.save()
+  }
 }
 
 export function handleDurationUpdated(event: DurationUpdatedEvent): void {

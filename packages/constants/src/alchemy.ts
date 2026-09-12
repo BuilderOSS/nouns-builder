@@ -4,7 +4,6 @@ export const ALCHEMY_NETWORKS: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.ETHEREUM]: 'eth-mainnet',
   [CHAIN_ID.OPTIMISM]: 'opt-mainnet',
   [CHAIN_ID.SEPOLIA]: 'eth-sepolia',
-  [CHAIN_ID.OPTIMISM_SEPOLIA]: 'opt-sepolia',
   [CHAIN_ID.BASE]: 'base-mainnet',
   [CHAIN_ID.BASE_SEPOLIA]: 'base-sepolia',
 }

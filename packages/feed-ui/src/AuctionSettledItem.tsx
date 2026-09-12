@@ -22,6 +22,10 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
   const formattedAmount =
     BigInt(item.amount) > 0n ? formatCryptoVal(formatEther(BigInt(item.amount))) : null
 
+  // Note: When there's no winning bid, the subgraph may set winner to event.transaction.from
+  // We treat amount === '0' as the indicator of "no actual winner"
+  const hasWinner = item.winner !== zeroAddress && BigInt(item.amount) > 0n
+
   return (
     <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)} isExternal>
       <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
@@ -38,13 +42,13 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
         {/* Content - below image on mobile, to the right on desktop */}
         <Stack gap="x2" style={{ flex: 1 }}>
           <Text className={feedItemTitle}>
-            {item.winner === zeroAddress ? (
-              `Auction for ${item.tokenName} settled`
-            ) : (
+            {hasWinner ? (
               <>
                 {displayName} won {item.tokenName}
                 {formattedAmount ? ` for ${formattedAmount} ETH` : ''}
               </>
+            ) : (
+              `Auction for ${item.tokenName} settled`
             )}
           </Text>
         </Stack>

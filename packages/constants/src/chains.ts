@@ -1,12 +1,5 @@
 import { Chain, CHAIN_ID } from '@buildeross/types'
-import {
-  base,
-  baseSepolia,
-  mainnet,
-  optimism,
-  optimismSepolia,
-  sepolia,
-} from 'wagmi/chains'
+import { base, baseSepolia, mainnet, optimism, sepolia } from 'wagmi/chains'
 
 /**
  * Non-empty array of items.
@@ -70,12 +63,6 @@ const TESTNET_CHAINS_UNSORTED: Chains = [
     icon: '/chains/ethereum.svg',
   },
   {
-    ...optimismSepolia,
-    id: CHAIN_ID.OPTIMISM_SEPOLIA,
-    slug: 'op-sepolia',
-    icon: '/chains/optimism.svg',
-  },
-  {
     ...baseSepolia,
     id: CHAIN_ID.BASE_SEPOLIA,
     slug: 'base-sepolia',
@@ -131,5 +118,5 @@ export const L1_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
   : ([CHAIN_ID.ETHEREUM] as const)
 
 export const L2_CHAINS: NonEmptyChainIds = PUBLIC_IS_TESTNET
-  ? ([CHAIN_ID.BASE_SEPOLIA, CHAIN_ID.OPTIMISM_SEPOLIA] as const)
+  ? ([CHAIN_ID.BASE_SEPOLIA] as const)
   : ([CHAIN_ID.BASE, CHAIN_ID.OPTIMISM] as const)

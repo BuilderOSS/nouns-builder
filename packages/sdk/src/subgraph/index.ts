@@ -26,6 +26,7 @@ export * from './requests/getUserCandidateSignal'
 export * from './requests/homepageQuery'
 export * from './requests/memberSnapshot'
 export * from './requests/profileDashboardQuery'
+export * from './requests/profileQuery'
 export * from './requests/proposalByExecutionTxHashQuery'
 export * from './requests/proposalQuery'
 export * from './requests/proposalsQuery'
@@ -50,9 +51,6 @@ export {
   ClankerToken_OrderBy,
   type ClankerTokenCardFragment,
   type ClankerTokenFragment,
-  ClankerTokenHolder_OrderBy,
-  type ClankerTokenHolderFragment,
-  type ClankerTokenWithHoldersFragment,
   type CurrentAuctionFragment,
   type DaoFragment,
   type DaosForDashboardQuery,

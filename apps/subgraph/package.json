@@ -23,7 +23,7 @@
     "deploy:subgraph": "pnpm clean && pnpm deploy:only",
     "graph:build": "graph build",
     "graph:codegen": "graph codegen",
-    "graph:test": "graph test",
+    "graph:test": "pnpm build:only base-mainnet && graph test",
     "lint": "eslint src tests --fix",
     "local-node": "docker compose up",
     "remove:local": "graph remove --node http://localhost:8020/ nouns-builder"

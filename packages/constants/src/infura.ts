@@ -6,7 +6,6 @@ const INFURA_NETWORKS: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.BASE]: 'base-mainnet',
   [CHAIN_ID.BASE_SEPOLIA]: 'base-sepolia',
   [CHAIN_ID.OPTIMISM]: 'optimism-mainnet',
-  [CHAIN_ID.OPTIMISM_SEPOLIA]: 'optimism-sepolia',
 }
 
 const INFURA_API_KEY = process.env.NEXT_PUBLIC_INFURA_API_KEY
