@@ -2,12 +2,13 @@ import {
   EAS_CONTRACT_ADDRESS,
   easAbi,
   PROFILE_LINK_EAS_CHAIN_ID,
-  PROFILE_LINK_SCHEMA,
   PROFILE_LINK_SCHEMA_UID,
 } from '@buildeross/constants'
+import { awaitSubgraphSync } from '@buildeross/sdk/subgraph'
 import type { AddressType } from '@buildeross/types'
 import { AnimatedModal } from '@buildeross/ui/Modal'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
+import { useFormik } from 'formik'
 import React from 'react'
 import {
   delegateModalSection,
@@ -23,6 +24,11 @@ import {
 import { encodeAbiParameters, zeroHash } from 'viem'
 import { useAccount, useConfig, useSwitchChain } from 'wagmi'
 import { waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+
+import {
+  type ProfileLinksFormValues,
+  profileLinksValidationSchema,
+} from './ProfileLinksEditModal.schema'
 
 type ProfileLinkKey = 'website' | 'x' | 'farcaster'
 
@@ -49,27 +55,47 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
   const config = useConfig()
   const { chainId } = useAccount()
   const { switchChainAsync } = useSwitchChain()
-  const [website, setWebsite] = React.useState('')
-  const [xHandle, setXHandle] = React.useState('')
-  const [farcasterHandle, setFarcasterHandle] = React.useState('')
   const [error, setError] = React.useState<string | null>(null)
-  const [txHashes, setTxHashes] = React.useState<`0x${string}`[]>([])
   const [isSaving, setIsSaving] = React.useState(false)
+  const [isSyncing, setIsSyncing] = React.useState(false)
+  const [isSwitchingNetwork, setIsSwitchingNetwork] = React.useState(false)
+  const mountedRef = React.useRef(true)
+
+  // Cleanup on unmount
+  React.useEffect(() => {
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
+
+  const formik = useFormik<ProfileLinksFormValues>({
+    initialValues: {
+      website: identity?.website?.href ?? '',
+      xHandle: identity?.x?.label ?? '',
+      farcasterHandle: identity?.farcaster?.label ?? '',
+    },
+    validationSchema: profileLinksValidationSchema,
+    enableReinitialize: true,
+    validateOnChange: true,
+    validateOnBlur: true,
+    onSubmit: handleSave,
+  })
+
+  const { resetForm } = formik
 
   React.useEffect(() => {
     if (!open) return
-    setWebsite(identity?.website?.href ?? '')
-    setXHandle(identity?.x?.label ?? '')
-    setFarcasterHandle(identity?.farcaster?.label ?? '')
+    resetForm()
     setError(null)
-    setTxHashes([])
     setIsSaving(false)
-  }, [identity, open])
+    setIsSyncing(false)
+    setIsSwitchingNetwork(false)
+  }, [open, resetForm])
 
-  const buildUpdates = (): ProfileLinkUpdate[] => {
-    const nextWebsiteInput = website.trim()
-    const nextXInput = xHandle.trim()
-    const nextFarcasterInput = farcasterHandle.trim()
+  const buildUpdates = (values: ProfileLinksFormValues): ProfileLinkUpdate[] => {
+    const nextWebsiteInput = values.website.trim()
+    const nextXInput = values.xHandle.trim()
+    const nextFarcasterInput = values.farcasterHandle.trim()
     const currentWebsite = identity?.website?.href ?? ''
     const currentXHandle = identity?.x?.handle ?? ''
     const currentFarcasterHandle = identity?.farcaster?.handle ?? ''
@@ -81,18 +107,6 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
     const normalizedFarcaster = nextFarcasterInput
       ? normalizeFarcasterHandle(nextFarcasterInput)
       : null
-
-    if (nextWebsiteInput && !normalizedWebsite) {
-      throw new Error('Enter a valid website URL.')
-    }
-
-    if (nextXInput && !normalizedX) {
-      throw new Error('Enter a valid X handle.')
-    }
-
-    if (nextFarcasterInput && !normalizedFarcaster) {
-      throw new Error('Enter a valid Farcaster handle.')
-    }
 
     const nextWebsiteValue = normalizedWebsite ?? ''
     const nextXValue = normalizedX?.handle ?? ''
@@ -114,7 +128,7 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
   const attestProfileLinks = async (
     easAddress: `0x${string}`,
     updates: ProfileLinkUpdate[]
-  ): Promise<`0x${string}`> => {
+  ): Promise<void> => {
     const hash = await writeContract(config, {
       abi: easAbi,
       address: easAddress,
@@ -142,28 +156,22 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
         ],
       ],
     })
-    await waitForTransactionReceipt(config, {
+
+    const receipt = await waitForTransactionReceipt(config, {
       hash,
       chainId: PROFILE_LINK_EAS_CHAIN_ID,
     })
 
-    return hash
+    if (!mountedRef.current) return
+
+    setIsSaving(false)
+    setIsSyncing(true)
+
+    await awaitSubgraphSync(PROFILE_LINK_EAS_CHAIN_ID, receipt.blockNumber)
   }
 
-  const saveProfileLinks = async (
-    easAddress: `0x${string}`,
-    updates: ProfileLinkUpdate[]
-  ): Promise<`0x${string}`[]> => [await attestProfileLinks(easAddress, updates)]
-
-  const handleSave = async () => {
-    let updates: ProfileLinkUpdate[]
-
-    try {
-      updates = buildUpdates()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid profile link input.')
-      return
-    }
+  async function handleSave(values: ProfileLinksFormValues) {
+    const updates = buildUpdates(values)
 
     if (!updates.length) {
       onClose()
@@ -171,12 +179,26 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
     }
 
     setError(null)
-    setTxHashes([])
     setIsSaving(true)
+    setIsSyncing(false)
+    setIsSwitchingNetwork(false)
 
     try {
+      // Handle chain switching
       if (chainId !== PROFILE_LINK_EAS_CHAIN_ID && switchChainAsync) {
-        await switchChainAsync({ chainId: PROFILE_LINK_EAS_CHAIN_ID })
+        try {
+          if (!mountedRef.current) return
+          setIsSwitchingNetwork(true)
+          await switchChainAsync({ chainId: PROFILE_LINK_EAS_CHAIN_ID })
+          if (!mountedRef.current) return
+          setIsSwitchingNetwork(false)
+        } catch (switchError) {
+          if (!mountedRef.current) return
+          setIsSwitchingNetwork(false)
+          throw new Error(
+            'Network switch was rejected. Please switch to Base network to save profile links.'
+          )
+        }
       }
 
       const profileLinkChainId =
@@ -188,11 +210,22 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
         throw new Error('Profile link attestations are not supported on this network.')
       }
 
-      const hashes = await saveProfileLinks(easAddress, updates)
+      await attestProfileLinks(easAddress, updates)
 
-      setTxHashes(hashes)
-      onSaved?.()
+      if (!mountedRef.current) return
+
+      // Call onSaved after subgraph sync - wrapped in try-catch
+      try {
+        onSaved?.()
+      } catch (callbackError) {
+        console.error('onSaved callback error:', callbackError)
+      }
+
+      // Auto-close modal
+      onClose()
     } catch (err) {
+      if (!mountedRef.current) return
+
       console.error('Failed to update profile links:', err)
       const message = err instanceof Error ? err.message : ''
       const lowerMessage = message.toLowerCase()
@@ -205,85 +238,157 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
           : message ||
               'Profile links update failed. Please check your wallet and try again.'
       )
-    } finally {
       setIsSaving(false)
+      setIsSyncing(false)
+      setIsSwitchingNetwork(false)
     }
+  }
+
+  const isLoading = isSaving || isSyncing || isSwitchingNetwork
+  const getButtonText = () => {
+    if (isSwitchingNetwork) return 'Switching network...'
+    if (isSaving) return 'Saving...'
+    if (isSyncing) return 'Syncing...'
+    return 'Save links'
   }
 
   return (
     <AnimatedModal open={open} close={onClose} size="medium">
-      <Flex direction="column" gap="x5" w="100%">
-        <Flex direction="column" gap="x2">
-          <Text variant="heading-sm">Edit links</Text>
-          <Text color="text3">
-            ENS links are used by default. Saving creates Builder-only profile overrides
-            on Base.
-          </Text>
-        </Flex>
-
-        <Box className={delegateModalSection}>
-          <Flex direction="column" gap="x4">
-            <label>
-              <Text className={filterLabel}>Website</Text>
-              <input
-                className={profileLinkEditInput}
-                placeholder="https://example.com"
-                value={website}
-                onChange={(event) => setWebsite(event.target.value)}
-              />
-            </label>
-
-            <label>
-              <Text className={filterLabel}>X</Text>
-              <input
-                className={profileLinkEditInput}
-                placeholder="@handle"
-                value={xHandle}
-                onChange={(event) => setXHandle(event.target.value)}
-              />
-            </label>
-
-            <label>
-              <Text className={filterLabel}>Farcaster</Text>
-              <input
-                className={profileLinkEditInput}
-                placeholder="@handle"
-                value={farcasterHandle}
-                onChange={(event) => setFarcasterHandle(event.target.value)}
-              />
-            </label>
+      <form onSubmit={formik.handleSubmit}>
+        <Flex direction="column" gap="x5" w="100%">
+          <Flex direction="column" gap="x2">
+            <Text variant="heading-sm">Edit links</Text>
+            <Text color="text3">
+              ENS links are used by default. Saving creates Builder-only profile overrides
+              on Base.
+            </Text>
           </Flex>
-        </Box>
 
-        <Box className={delegateModalSection}>
-          <Text color="text3" fontSize="14">
-            This attests the fields you changed with the {PROFILE_LINK_SCHEMA} EAS schema.
-            The schema is pre-registered on the supported Base network.
-          </Text>
-        </Box>
+          <Box className={delegateModalSection}>
+            <Flex direction="column" gap="x4">
+              <Flex direction="column" gap="x1">
+                <label htmlFor="profile-link-website">
+                  <Text className={filterLabel}>Website</Text>
+                </label>
+                <input
+                  id="profile-link-website"
+                  className={profileLinkEditInput}
+                  type="url"
+                  placeholder="https://example.com"
+                  aria-invalid={
+                    formik.touched.website && formik.errors.website ? 'true' : 'false'
+                  }
+                  aria-describedby={
+                    formik.touched.website && formik.errors.website
+                      ? 'profile-link-website-error'
+                      : undefined
+                  }
+                  {...formik.getFieldProps('website')}
+                />
+                {formik.touched.website && formik.errors.website ? (
+                  <Text
+                    id="profile-link-website-error"
+                    color="negative"
+                    style={{ fontSize: 12, marginTop: 4 }}
+                  >
+                    {formik.errors.website}
+                  </Text>
+                ) : null}
+              </Flex>
 
-        {error ? (
-          <Text color="negative" style={{ wordBreak: 'break-word' }}>
-            {error}
-          </Text>
-        ) : null}
+              <Flex direction="column" gap="x1">
+                <label htmlFor="profile-link-x">
+                  <Text className={filterLabel}>X</Text>
+                </label>
+                <input
+                  id="profile-link-x"
+                  className={profileLinkEditInput}
+                  type="text"
+                  placeholder="@handle"
+                  aria-invalid={
+                    formik.touched.xHandle && formik.errors.xHandle ? 'true' : 'false'
+                  }
+                  aria-describedby={
+                    formik.touched.xHandle && formik.errors.xHandle
+                      ? 'profile-link-x-error'
+                      : undefined
+                  }
+                  {...formik.getFieldProps('xHandle')}
+                />
+                {formik.touched.xHandle && formik.errors.xHandle ? (
+                  <Text
+                    id="profile-link-x-error"
+                    color="negative"
+                    style={{ fontSize: 12, marginTop: 4 }}
+                  >
+                    {formik.errors.xHandle}
+                  </Text>
+                ) : null}
+              </Flex>
 
-        {txHashes.length ? (
-          <Text color="positive">
-            Links updated. Refresh may take a moment while the subgraph indexes the
-            attestation.
-          </Text>
-        ) : null}
+              <Flex direction="column" gap="x1">
+                <label htmlFor="profile-link-farcaster">
+                  <Text className={filterLabel}>Farcaster</Text>
+                </label>
+                <input
+                  id="profile-link-farcaster"
+                  className={profileLinkEditInput}
+                  type="text"
+                  placeholder="@handle"
+                  aria-invalid={
+                    formik.touched.farcasterHandle && formik.errors.farcasterHandle
+                      ? 'true'
+                      : 'false'
+                  }
+                  aria-describedby={
+                    formik.touched.farcasterHandle && formik.errors.farcasterHandle
+                      ? 'profile-link-farcaster-error'
+                      : undefined
+                  }
+                  {...formik.getFieldProps('farcasterHandle')}
+                />
+                {formik.touched.farcasterHandle && formik.errors.farcasterHandle ? (
+                  <Text
+                    id="profile-link-farcaster-error"
+                    color="negative"
+                    style={{ fontSize: 12, marginTop: 4 }}
+                  >
+                    {formik.errors.farcasterHandle}
+                  </Text>
+                ) : null}
+              </Flex>
+            </Flex>
+          </Box>
 
-        <Flex justify="flex-end" gap="x3">
-          <Button variant="outline" onClick={onClose} disabled={isSaving}>
-            Close
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Saving...' : 'Save links'}
-          </Button>
+          {error ? (
+            <Text
+              color="negative"
+              style={{ wordBreak: 'break-word' }}
+              role="alert"
+              aria-live="polite"
+            >
+              {error}
+            </Text>
+          ) : null}
+
+          <Flex justify="flex-end" gap="x3">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={isLoading}
+              type="button"
+            >
+              Close
+            </Button>
+            <Button
+              type="submit"
+              disabled={!formik.dirty || !formik.isValid || isLoading}
+            >
+              {getButtonText()}
+            </Button>
+          </Flex>
         </Flex>
-      </Flex>
+      </form>
     </AnimatedModal>
   )
 }
