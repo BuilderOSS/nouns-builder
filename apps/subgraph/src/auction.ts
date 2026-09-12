@@ -95,8 +95,9 @@ export function handleAuctionSettled(event: AuctionSettledEvent): void {
   feedEvent.actor = event.transaction.from
   feedEvent.auction = auction.id
 
-  feedEvent.winner = winningBidEntity ? winningBidEntity.bidder : event.transaction.from
-  feedEvent.amount = winningBidEntity ? winningBidEntity.amount : event.params.amount
+  // Use event params directly: winner is address(0) and amount is 0 when no bid was placed
+  feedEvent.winner = event.params.winner
+  feedEvent.amount = event.params.amount
   feedEvent.save()
 
   // Update profile counts and timestamps only if there was an actual winner

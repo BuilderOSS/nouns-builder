@@ -123,7 +123,14 @@ export type AuctionSettledFeedItem = BaseFeedItem & {
   tokenId: string
   tokenName: string
   tokenImage: string
+  /**
+   * The address of the auction winner.
+   * Note: When no bids were placed (auction settled with no winner), the subgraph
+   * may incorrectly set this to event.transaction.from (the settler's address).
+   * Always check `amount === '0'` to determine if there was an actual winner.
+   */
   winner: AddressType
+  /** The winning bid amount in wei. Will be '0' if auction settled with no bids. */
   amount: string
 }
 
