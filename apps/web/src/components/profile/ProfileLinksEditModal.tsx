@@ -229,14 +229,38 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
       console.error('Failed to update profile links:', err)
       const message = err instanceof Error ? err.message : ''
       const lowerMessage = message.toLowerCase()
-      setError(
+
+      // Handle user rejection
+      if (lowerMessage.includes('user rejected')) {
+        setError('Transaction was cancelled')
+        setIsSaving(false)
+        setIsSyncing(false)
+        setIsSwitchingNetwork(false)
+        return
+      }
+
+      // Handle RPC/network errors
+      if (
         lowerMessage.includes('429') ||
-          lowerMessage.includes('too many requests') ||
-          lowerMessage.includes('cors') ||
-          lowerMessage.includes('failed to fetch')
-          ? 'Base RPC is rate limiting requests. Please wait a minute and try again, or switch to a wallet/RPC that is not rate-limited.'
-          : message ||
-              'Profile links update failed. Please check your wallet and try again.'
+        lowerMessage.includes('too many requests') ||
+        lowerMessage.includes('cors') ||
+        lowerMessage.includes('failed to fetch')
+      ) {
+        setError(
+          'Base RPC is rate limiting requests. Please wait a minute and try again, or switch to a wallet/RPC that is not rate-limited.'
+        )
+        setIsSaving(false)
+        setIsSyncing(false)
+        setIsSwitchingNetwork(false)
+        return
+      }
+
+      // Truncate to first line for all other errors
+      const truncatedMessage = message.split('\n')[0] || message
+
+      setError(
+        truncatedMessage ||
+          'Profile links update failed. Please check your wallet and try again.'
       )
       setIsSaving(false)
       setIsSyncing(false)
