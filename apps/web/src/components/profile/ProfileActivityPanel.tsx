@@ -14,7 +14,6 @@ import {
   activityDaoNameText,
   activityHeaderControls,
   activityList,
-  activityMeta,
   activityRow,
   activityRowContent,
   activityRowTitle,
@@ -87,8 +86,8 @@ const itemTitle = (item: FeedItem, kind?: string) => {
       : undefined
 
   if (item.type === 'AUCTION_BID_PLACED') {
-    const suffix = item.tokenId ? ` #${item.tokenId}` : ''
-    return `Bid on ${item.tokenName}${suffix}`
+    const amount = amountLabel(item)
+    return `Bid ${amount} on ${tokenNameWithId(item.tokenName, item.tokenId)}`
   }
 
   if (item.type === 'AUCTION_SETTLED') {
@@ -254,7 +253,6 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
                 const classification = classifyProfileActivity(item, profileAddress)
                 const vote = voteSupport(item)
                 const chain = getProfileChainMetadata(item.chainId)
-                const amount = amountLabel(item)
                 const href =
                   'proposalNumber' in item
                     ? getProposalLink(
@@ -305,9 +303,6 @@ export const ProfileActivityPanel: React.FC<ProfileActivityPanelProps> = ({
                           {itemTitle(item, classification?.kind)}
                         </Text>
                       </span>
-                      {item.type === 'AUCTION_BID_PLACED' && amount ? (
-                        <span className={activityMeta}>{amount}</span>
-                      ) : null}
                     </span>
                     <span className={activityDaoMeta}>
                       <span className={activityDaoNameRow}>
