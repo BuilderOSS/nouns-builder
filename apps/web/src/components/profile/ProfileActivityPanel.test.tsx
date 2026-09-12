@@ -100,7 +100,7 @@ describe('ProfileActivityPanel', () => {
   it('renders dao name and chain logo above the date on the right side of the card', () => {
     render(<ProfileActivityPanel profileAddress={profileAddress} selectedDaoKeys={[]} />)
 
-    const row = screen.getByRole('link', { name: /Bid on Token 1/ })
+    const row = screen.getByRole('link', { name: /Bid 1 ETH on Token 1/ })
     const activityDetails = row.querySelector<HTMLElement>(`.${activityRowContent}`)
     const daoMetadata = row.querySelector<HTMLElement>(`.${activityDaoMeta}`)
     expect(activityDetails).not.toBeNull()
@@ -144,7 +144,7 @@ describe('ProfileActivityPanel', () => {
       />
     )
 
-    const row = screen.getByRole('link', { name: /Bid on Tiny Token #2/ })
+    const row = screen.getByRole('link', { name: /Bid 0\.00005 ETH on Tiny Token #2/ })
     expect(row).toHaveTextContent('0.00005 ETH')
     expect(row).not.toHaveTextContent('0 ETH')
   })
@@ -178,7 +178,7 @@ describe('ProfileActivityPanel', () => {
     expect(screen.getByRole('region', { name: 'Activity' })).toHaveClass(
       profileDashboardSurface
     )
-    expect(screen.getByRole('link', { name: /Bid on Token 1/ })).toBeVisible()
+    expect(screen.getByRole('link', { name: /Bid 1 ETH on Token 1/ })).toBeVisible()
     expect(screen.getByRole('link', { name: /FOR proposal/ })).toBeVisible()
     expect(screen.queryByText('bid')).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Activity list' })).toBeVisible()

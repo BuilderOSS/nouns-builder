@@ -158,7 +158,9 @@ export const classifyProfileActivity = (
         ? { group: 'auction', kind: 'bid' }
         : null
     case 'AUCTION_SETTLED':
-      if (sameAddress(item.winner, profileAddress)) {
+      // Note: When there's no winning bid, the subgraph may set winner to event.transaction.from
+      // We check amount > 0 to ensure there was an actual winner
+      if (sameAddress(item.winner, profileAddress) && BigInt(item.amount) > 0n) {
         return { group: 'auction', kind: 'win' }
       }
       return sameAddress(item.actor, profileAddress)
