@@ -7,10 +7,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { MembersList } from './MembersList'
 
-const hoisted = vi.hoisted(() => ({
-  activeMembers: ['0xaaa0000000000000000000000000000000000001'] as string[] | undefined,
-}))
-
 vi.mock('@buildeross/stores', () => ({
   useChainStore: (selector: (s: { chain: { id: number } }) => unknown) =>
     selector({ chain: { id: 1 } }),
@@ -20,18 +16,6 @@ vi.mock('@buildeross/stores', () => ({
 }))
 
 vi.mock('axios', () => ({ default: { get: vi.fn() } }))
-
-vi.mock('@buildeross/hooks/useActiveMembers', () => ({
-  useActiveMembers: () => ({
-    activeMembers: hoisted.activeMembers,
-    isActiveMember: (address?: string) =>
-      !!address &&
-      !!hoisted.activeMembers &&
-      hoisted.activeMembers.includes(address.toLowerCase()),
-    isLoading: false,
-    error: undefined,
-  }),
-}))
 
 vi.mock('@buildeross/hooks/useEnsData', () => ({
   useEnsData: (address?: string) => ({
@@ -47,9 +31,25 @@ vi.mock('@buildeross/hooks/useEnsData', () => ({
 const activeAddress = '0xaaa0000000000000000000000000000000000001'
 const inactiveAddress = '0xbbb0000000000000000000000000000000000002'
 
+// Active threshold: 30 days in seconds
+const ACTIVE_THRESHOLD_SECONDS = 30 * 24 * 60 * 60
+const nowSeconds = Math.floor(Date.now() / 1000)
+
 const members: DaoVoter[] = [
-  { voter: activeAddress, tokens: [1], tokenCount: 1, timeJoined: 1640995200 },
-  { voter: inactiveAddress, tokens: [2], tokenCount: 1, timeJoined: 1640995200 },
+  {
+    voter: activeAddress,
+    tokens: [1],
+    tokenCount: 1,
+    timeJoined: 1640995200,
+    lastActiveAt: nowSeconds - 1000, // Active: 1000 seconds ago
+  },
+  {
+    voter: inactiveAddress,
+    tokens: [2],
+    tokenCount: 1,
+    timeJoined: 1640995200,
+    lastActiveAt: nowSeconds - ACTIVE_THRESHOLD_SECONDS - 1000, // Inactive: over 30 days ago
+  },
 ]
 
 const renderList = () =>
@@ -61,7 +61,6 @@ const renderList = () =>
 
 describe('MembersList', () => {
   beforeEach(() => {
-    hoisted.activeMembers = [activeAddress]
     vi.mocked(axios.get).mockResolvedValue({ data: { membersList: members } })
   })
 
@@ -93,7 +92,23 @@ describe('MembersList', () => {
   })
 
   it('shows empty state when no listed members are active', async () => {
-    hoisted.activeMembers = []
+    const allInactiveMembers: DaoVoter[] = [
+      {
+        voter: activeAddress,
+        tokens: [1],
+        tokenCount: 1,
+        timeJoined: 1640995200,
+        lastActiveAt: nowSeconds - ACTIVE_THRESHOLD_SECONDS - 1000,
+      },
+      {
+        voter: inactiveAddress,
+        tokens: [2],
+        tokenCount: 1,
+        timeJoined: 1640995200,
+        lastActiveAt: nowSeconds - ACTIVE_THRESHOLD_SECONDS - 1000,
+      },
+    ]
+    vi.mocked(axios.get).mockResolvedValue({ data: { membersList: allInactiveMembers } })
     renderList()
 
     await screen.findByText(activeAddress)
@@ -103,16 +118,5 @@ describe('MembersList', () => {
     await waitFor(() =>
       expect(screen.getByText('No active members found.')).toBeInTheDocument()
     )
-  })
-
-  it('disables the Active filter while activity data is unavailable', async () => {
-    hoisted.activeMembers = undefined
-    renderList()
-
-    await screen.findByText(activeAddress)
-
-    expect(screen.getByRole('button', { name: 'Active' })).toBeDisabled()
-    // No badges render when activity data is unavailable (StatBadge is a <span>)
-    expect(screen.queryAllByText('Active', { selector: 'span' })).toHaveLength(0)
   })
 })

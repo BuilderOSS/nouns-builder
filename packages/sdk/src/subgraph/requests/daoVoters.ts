@@ -9,6 +9,7 @@ export type DaoVoter = {
   tokens: number[]
   tokenCount: number
   timeJoined: number
+  lastActiveAt: number
 }
 
 export const votersRequest = async (
@@ -39,6 +40,7 @@ export const votersRequest = async (
         timeJoined: member.daoTokens
           .map((daoToken) => Number(daoToken.mintedAt))
           .sort((a, b) => a - b)[0] as number,
+        lastActiveAt: Number(member.lastActiveAt),
       }))
       .filter((member) => member.tokenCount > 0)
   } catch (error) {
