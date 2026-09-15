@@ -46,17 +46,22 @@ const Recipient: React.FC<{
   chainId: CHAIN_ID
 }> = ({ account, percent, chainId }) => {
   const { displayName } = useEnsData(account)
+  const explorerUrl = ETHERSCAN_BASE_URL[chainId]
 
   return (
     <div className={splitRow}>
-      <a
-        href={`${ETHERSCAN_BASE_URL[chainId]}/address/${account}`}
-        target="_blank"
-        rel="noreferrer noopener"
-        className={recipientAddress}
-      >
-        {displayName || walletSnippet(account)}
-      </a>
+      {explorerUrl ? (
+        <a
+          href={`${explorerUrl}/address/${account}`}
+          target="_blank"
+          rel="noreferrer noopener"
+          className={recipientAddress}
+        >
+          {displayName || walletSnippet(account)}
+        </a>
+      ) : (
+        <span className={recipientAddress}>{displayName || walletSnippet(account)}</span>
+      )}
       <span className={share}>{formatSplitPercent(percent)}</span>
     </div>
   )
@@ -100,6 +105,7 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
   const isRecipient = Boolean(
     account && recipients.some((recipient) => isAddressEqual(recipient.account, account))
   )
+  const explorerUrl = ETHERSCAN_BASE_URL[chainId]
 
   return (
     <Box className={splitPayoutWrapper} w="100%">
@@ -113,23 +119,25 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
             Mint revenue is shared via 0xSplits.
           </Text>
           <Box className={metadataRow}>
-            <a
-              href={`${ETHERSCAN_BASE_URL[chainId]}/address/${fundsRecipient}`}
-              target="_blank"
-              rel="noreferrer noopener"
-              className={splitLink}
-              aria-label={`View split contract ${fundsRecipient} on explorer`}
-              title={fundsRecipient}
-            >
-              <span className={label}>Contract</span>
-              <span>
-                {fundsRecipient.slice(0, 6)}…{fundsRecipient.slice(-4)}{' '}
-                <span aria-hidden="true">↗</span>
-              </span>
-            </a>
-            {creationTxHash && (
+            {explorerUrl && (
               <a
-                href={`${ETHERSCAN_BASE_URL[chainId]}/tx/${creationTxHash}`}
+                href={`${explorerUrl}/address/${fundsRecipient}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className={splitLink}
+                aria-label={`View split contract ${fundsRecipient} on explorer`}
+                title={fundsRecipient}
+              >
+                <span className={label}>Contract</span>
+                <span>
+                  {fundsRecipient.slice(0, 6)}…{fundsRecipient.slice(-4)}{' '}
+                  <span aria-hidden="true">↗</span>
+                </span>
+              </a>
+            )}
+            {explorerUrl && creationTxHash && (
+              <a
+                href={`${explorerUrl}/tx/${creationTxHash}`}
                 target="_blank"
                 rel="noreferrer noopener"
                 className={splitLink}
