@@ -17,7 +17,6 @@ import { getRedisConnection } from './redisConnection'
 
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY ?? ''
 const ETHERSCAN_API_KEY_PARAM = ETHERSCAN_API_KEY ? `&apikey=${ETHERSCAN_API_KEY}` : ''
-const SPLITS_API_KEY = process.env.SPLITS_API_KEY ?? ''
 
 const splitMainAbi = [
   parseAbiItem('function getHash(address split) view returns (bytes32)'),
@@ -47,6 +46,8 @@ export type SplitTerms = {
 
 export type SplitInfoResult = {
   isSplit: boolean
+  /** The transaction that originally deployed this split contract. */
+  creationTxHash: Hex | null
   /** Null when the recipient set could not be recovered — see `reason`. */
   terms: SplitTerms | null
   reason?: 'not-a-split' | 'creation-not-found' | 'undecodable'
@@ -54,7 +55,7 @@ export type SplitInfoResult = {
 }
 
 const redisKey = (chainId: CHAIN_ID, address: string, hash: string) =>
-  `splits:terms:${chainId}:${address}:${hash}`
+  `splits:info:v2:${chainId}:${address}:${hash}`
 
 /**
  * Fetch split terms from 0xSplits GraphQL API using the SDK. Works for all
@@ -62,8 +63,10 @@ const redisKey = (chainId: CHAIN_ID, address: string, hash: string) =>
  */
 const fetchTermsFromGraphQL = async (
   chainId: CHAIN_ID,
-  address: AddressType
-): Promise<SplitTerms | null> => {
+  address: AddressType,
+  needsCreationHash: boolean
+): Promise<{ terms: SplitTerms; creationTxHash: Hex | null } | null> => {
+  const SPLITS_API_KEY = process.env.SPLITS_API_KEY ?? ''
   if (!SPLITS_API_KEY) {
     return null // API key not configured
   }
@@ -83,13 +86,90 @@ const fetchTermsFromGraphQL = async (
       splitAddress: address,
     })
 
-    return {
+    const terms = {
       accounts: split.recipients.map((r) => r.recipient.address as AddressType),
       percentAllocations: split.recipients.map((r) =>
         Math.round(r.percentAllocation * 10000)
       ),
       distributorFee: Math.round(split.distributorFeePercent * 10000),
     }
+    const creationTxHash = needsCreationHash
+      ? await fetchGraphQLCreationHash(
+          chainId,
+          address,
+          split.createdBlock,
+          SPLITS_API_KEY
+        )
+      : null
+    return { terms, creationTxHash }
+  } catch {
+    return null
+  }
+}
+
+const isTransactionHash = (value: unknown): value is Hex =>
+  typeof value === 'string' && /^0x[0-9a-fA-F]{64}$/.test(value)
+
+/** Query only the creation block's events, so older splits don't require paging
+ * through their entire activity history. Updates must never become creation links.
+ */
+const fetchGraphQLCreationHash = async (
+  chainId: CHAIN_ID,
+  address: AddressType,
+  createdBlock: number,
+  apiKey: string
+): Promise<Hex | null> => {
+  if (!Number.isSafeInteger(createdBlock) || createdBlock < 0) return null
+  const provider = getProvider(chainId)
+  const blockNumber = BigInt(createdBlock)
+  try {
+    const block = await provider.getBlock({ blockNumber })
+    const { data } = await axios.post(
+      'https://api.splits.org/graphql',
+      {
+        query: `query SplitCreation($address: ID!, $chainId: String!, $timestamp: Int!) {
+          split(id: $address, chainId: $chainId) {
+            accountEvents(minTimestamp: $timestamp, maxTimestamp: $timestamp) {
+              __typename
+              ... on SetSplitEvent { type transaction { id } }
+            }
+          }
+        }`,
+        variables: {
+          address: address.toLowerCase(),
+          chainId: String(chainId),
+          timestamp: Number(block.timestamp),
+        },
+      },
+      { headers: { Authorization: `Bearer ${apiKey}` }, timeout: 10_000 }
+    )
+    const events = data?.data?.split?.accountEvents as
+      | { __typename: string; type?: string; transaction?: { id?: string } }[]
+      | undefined
+    const hash = events?.find(
+      (event) => event.__typename === 'SetSplitEvent' && event.type === 'create'
+    )?.transaction?.id
+    if (isTransactionHash(hash)) return hash
+  } catch {
+    // Metadata still gives us the exact block to check on chain below.
+  }
+
+  try {
+    const logs = await provider.getLogs({
+      address: SPLIT_MAIN_ADDRESS[chainId],
+      events: [
+        parseAbiItem('event CreateSplit(address indexed split)'),
+        parseAbiItem(
+          'event CreateSplit(address indexed split, address[] accounts, uint32[] percentAllocations, uint32 distributorFee, address controller)'
+        ),
+      ],
+      fromBlock: blockNumber,
+      toBlock: blockNumber,
+    })
+    const hash = logs.find(
+      (log) => log.args.split?.toLowerCase() === address.toLowerCase()
+    )?.transactionHash
+    return isTransactionHash(hash) ? hash : null
   } catch {
     return null
   }
@@ -216,7 +296,13 @@ export const getSplitInfo = async (
 
   const splitMain = SPLIT_MAIN_ADDRESS[chainId]
   if (!splitMain)
-    return { isSplit: false, terms: null, reason: 'not-a-split', source: 'fetched' }
+    return {
+      isSplit: false,
+      terms: null,
+      creationTxHash: null,
+      reason: 'not-a-split',
+      source: 'fetched',
+    }
 
   const provider = getProvider(chainId)
   const storedHash = await provider.readContract({
@@ -227,17 +313,29 @@ export const getSplitInfo = async (
   })
 
   if (!storedHash || storedHash === zeroHash) {
-    return { isSplit: false, terms: null, reason: 'not-a-split', source: 'fetched' }
+    return {
+      isSplit: false,
+      terms: null,
+      creationTxHash: null,
+      reason: 'not-a-split',
+      source: 'fetched',
+    }
   }
 
   const redis = getRedisConnection()
   const key = redisKey(chainId, address, storedHash)
   const cached = await redis?.get(key)
-  if (cached) {
-    return { isSplit: true, terms: JSON.parse(cached) as SplitTerms, source: 'cache' }
-  }
-
   let terms: SplitTerms | null = null
+  let creationTxHash: Hex | null = null
+  if (cached) {
+    const info = JSON.parse(cached) as Pick<SplitInfoResult, 'terms' | 'creationTxHash'>
+    if (isTransactionHash(info.creationTxHash)) {
+      return { isSplit: true, ...info, source: 'cache' }
+    }
+    // Keep usable terms, but retry missing creation metadata instead of letting
+    // a temporary explorer failure suppress the link for the cache's full TTL.
+    terms = info.terms
+  }
 
   // Try fetching from Etherscan creation transaction
   try {
@@ -246,10 +344,11 @@ export const getSplitInfo = async (
     const { data } = await axios.get(creationUrl, { timeout: 10_000 })
     const txHash: string | undefined = data?.result?.[0]?.txHash
 
-    if (txHash) {
+    if (isTransactionHash(txHash)) {
+      creationTxHash = txHash
       // Try extracting from event logs first (works for all creation methods on
       // Polygon/Optimism/Base/Sepolia which emit full data in CreateSplit event)
-      terms = await extractTermsFromLogs(chainId, txHash, address)
+      terms ??= await extractTermsFromLogs(chainId, txHash, address)
 
       // Fall back to calldata decoding if log extraction didn't work
       // (e.g., on Ethereum mainnet which doesn't emit recipient data in events)
@@ -266,16 +365,24 @@ export const getSplitInfo = async (
 
   // Final fallback: use 0xSplits GraphQL API if available
   // (works for all splits on all chains, including factory/multicall/Safe deployments)
-  if (!terms) {
-    terms = await fetchTermsFromGraphQL(chainId, address)
+  if (!terms || !creationTxHash) {
+    const info = await fetchTermsFromGraphQL(chainId, address, !creationTxHash)
+    terms ??= info?.terms ?? null
+    creationTxHash ??= info?.creationTxHash ?? null
   }
 
   if (!terms) {
-    return { isSplit: true, terms: null, reason: 'undecodable', source: 'fetched' }
+    return {
+      isSplit: true,
+      terms: null,
+      creationTxHash,
+      reason: 'undecodable',
+      source: 'fetched',
+    }
   }
 
   // Cache the successfully extracted terms
-  await redis?.setex(key, 60 * 60, JSON.stringify(terms))
+  await redis?.setex(key, 60 * 60, JSON.stringify({ terms, creationTxHash }))
 
-  return { isSplit: true, terms, source: 'fetched' }
+  return { isSplit: true, terms, creationTxHash, source: 'fetched' }
 }

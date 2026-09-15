@@ -6,7 +6,7 @@ import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useEffect } from 'react'
 import useSWR from 'swr'
-import type { Address } from 'viem'
+import type { Address, Hex } from 'viem'
 import { isAddressEqual, zeroAddress, zeroHash } from 'viem'
 import {
   useAccount,
@@ -70,6 +70,11 @@ interface SplitTermsResult {
   distributorFee: number
 }
 
+interface SplitInfoResult {
+  terms: SplitTermsResult | null
+  creationTxHash?: Hex
+}
+
 /**
  * Recipients are not readable on chain — `SplitMain` keeps only a hash of them —
  * and 0xSplits' own indexer needs an API key. The server route recovers them
@@ -79,13 +84,13 @@ interface SplitTermsResult {
 const fetchSplitTerms = async (
   chainId: CHAIN_ID,
   address: AddressType
-): Promise<SplitTermsResult | null> => {
+): Promise<SplitInfoResult> => {
   const params = new URLSearchParams({ chainId: String(chainId), address })
   const response = await fetch(`${BASE_URL}/api/splits?${params.toString()}`)
   if (!response.ok) throw new Error('Failed to load split')
 
   const { data } = await response.json()
-  return data?.terms ?? null
+  return { terms: data?.terms ?? null, creationTxHash: data?.creationTxHash ?? undefined }
 }
 
 export interface UseSplitPayoutArgs {
@@ -97,6 +102,8 @@ export interface UseSplitPayoutArgs {
 export interface UseSplitPayoutResult {
   /** True once `SplitMain` confirms the address is a split it controls. */
   isSplit: boolean
+  /** The transaction that originally deployed this split contract. */
+  creationTxHash: Hex | undefined
   recipients: SplitAllocation[]
   distributorFee: number
   /** ETH sitting in the split, waiting to be pushed to recipient balances. */
@@ -147,13 +154,14 @@ export const useSplitPayout = ({
 
   const isSplit = Boolean(splitHash && splitHash !== zeroHash)
 
-  const { data: terms, isLoading: termsLoading } = useSWR(
+  const { data: splitInfo, isLoading: termsLoading } = useSWR(
     isSplit && address && splitHash
       ? ([SWR_KEYS.SPLIT_TERMS, chainId, address, splitHash] as const)
       : null,
     ([, _chainId, _address]) => fetchSplitTerms(_chainId, _address),
     { revalidateOnFocus: false }
   )
+  const terms = splitInfo?.terms
 
   const { data: splitBalance, refetch: refetchSplitBalance } = useReadContract({
     abi: splitMainAbi,
@@ -234,6 +242,7 @@ export const useSplitPayout = ({
 
   return {
     isSplit,
+    creationTxHash: splitInfo?.creationTxHash,
     recipients,
     distributorFee: terms?.distributorFee ?? 0,
     distributable: splitBalance,

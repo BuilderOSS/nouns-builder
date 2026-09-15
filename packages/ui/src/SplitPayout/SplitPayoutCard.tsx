@@ -13,14 +13,17 @@ import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React from 'react'
-import { formatEther } from 'viem'
+import { formatEther, isAddressEqual } from 'viem'
+import { useAccount } from 'wagmi'
 
 import { ContractButton } from '../ContractButton'
 import {
+  actions,
   amount,
   balanceHeader,
   balanceSection,
   label,
+  metadataRow,
   recipientAddress,
   recipientsHeader,
   recipientsList,
@@ -28,6 +31,7 @@ import {
   share,
   splitLink,
   splitPayoutWrapper,
+  splitRow,
 } from './SplitPayout.css'
 
 interface SplitPayoutCardProps {
@@ -42,26 +46,22 @@ const Recipient: React.FC<{
   chainId: CHAIN_ID
 }> = ({ account, percent, chainId }) => {
   const { displayName } = useEnsData(account)
+  const explorerUrl = ETHERSCAN_BASE_URL[chainId]
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1rem',
-        width: '100%',
-        marginBottom: '0.5rem',
-      }}
-    >
-      <a
-        href={`${ETHERSCAN_BASE_URL[chainId]}/address/${account}`}
-        target="_blank"
-        rel="noreferrer noopener"
-        className={recipientAddress}
-      >
-        {displayName || walletSnippet(account)}
-      </a>
+    <div className={splitRow}>
+      {explorerUrl ? (
+        <a
+          href={`${explorerUrl}/address/${account}`}
+          target="_blank"
+          rel="noreferrer noopener"
+          className={recipientAddress}
+        >
+          {displayName || walletSnippet(account)}
+        </a>
+      ) : (
+        <span className={recipientAddress}>{displayName || walletSnippet(account)}</span>
+      )}
       <span className={share}>{formatSplitPercent(percent)}</span>
     </div>
   )
@@ -78,6 +78,7 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
   chainId,
   fundsRecipient,
 }) => {
+  const { address: account } = useAccount()
   const {
     isSplit,
     recipients,
@@ -92,6 +93,7 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
     isWithdrawing,
     splitsAppUrl,
     isLoading,
+    creationTxHash,
   } = useSplitPayout({ chainId, address: fundsRecipient })
 
   // Don't render anything during loading or if it's not a split
@@ -100,15 +102,56 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
   const pending = distributableBalance(distributable ?? 0n)
   const yours = distributableBalance(withdrawable ?? 0n)
   const feePercent = distributorFeePercent(distributorFee)
+  const isRecipient = Boolean(
+    account && recipients.some((recipient) => isAddressEqual(recipient.account, account))
+  )
+  const explorerUrl = ETHERSCAN_BASE_URL[chainId]
 
   return (
     <Box className={splitPayoutWrapper} w="100%">
       <Flex direction="column" width="100%">
-        <Text fontSize={20} fontWeight="display" mb="x4">
-          Revenue split
+        <Text fontSize={20} fontWeight="display" mb="x2">
+          Revenue split contract
         </Text>
 
-        <Flex direction="column" width="100%" gap="x4">
+        <Flex direction="column" width="100%" gap="x3">
+          <Text variant="paragraph-sm" color="text3">
+            Mint revenue is shared via 0xSplits.
+          </Text>
+          <Box className={metadataRow}>
+            {explorerUrl && (
+              <a
+                href={`${explorerUrl}/address/${fundsRecipient}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className={splitLink}
+                aria-label={`View split contract ${fundsRecipient} on explorer`}
+                title={fundsRecipient}
+              >
+                <span className={label}>Contract</span>
+                <span>
+                  {fundsRecipient.slice(0, 6)}…{fundsRecipient.slice(-4)}{' '}
+                  <span aria-hidden="true">↗</span>
+                </span>
+              </a>
+            )}
+            {explorerUrl && creationTxHash && (
+              <a
+                href={`${explorerUrl}/tx/${creationTxHash}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className={splitLink}
+                aria-label={`View creation transaction ${creationTxHash} on explorer`}
+                title={creationTxHash}
+              >
+                <span className={label}>Creation txn</span>
+                <span>
+                  {creationTxHash.slice(0, 6)}…{creationTxHash.slice(-4)}{' '}
+                  <span aria-hidden="true">↗</span>
+                </span>
+              </a>
+            )}
+          </Box>
           {pending > 0n && (
             <Box className={balanceSection}>
               <Box className={balanceHeader}>
@@ -118,26 +161,17 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
                   </div>
                   <div className={label}>Collected, not yet distributed</div>
                 </Box>
-                <a
-                  href={`${ETHERSCAN_BASE_URL[chainId]}/address/${fundsRecipient}`}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className={splitLink}
-                >
-                  {walletSnippet(fundsRecipient)} ↗
-                </a>
               </Box>
             </Box>
           )}
 
           {recipients.length === 0 && (
             <Text variant="paragraph-sm" color="text3">
-              The recipient list for this split isn&apos;t readable from here, so it has
-              to be distributed{' '}
+              The recipient list for this split isn&apos;t available here. View this split{' '}
               <a href={splitsAppUrl} target="_blank" rel="noreferrer noopener">
                 on splits.org
               </a>
-              . Anything already allocated to you can still be withdrawn below.
+              .
             </Text>
           )}
 
@@ -156,7 +190,7 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
                   />
                 ))}
               </Box>
-              {feePercent > 0 && (
+              {isRecipient && feePercent > 0 && (
                 <Text variant="paragraph-sm" color="text3" mt="x2">
                   {formatSplitPercent(feePercent)} goes to whoever pays for the
                   distribution.
@@ -165,38 +199,41 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
             </Box>
           )}
 
-          <Flex direction="row" width="100%" gap="x4">
-            {recipients.length > 0 && (
-              <ContractButton
-                chainId={chainId}
-                handleClick={distribute}
-                disabled={!canDistribute}
-                loading={isDistributing}
-                size="sm"
-              >
-                {pending > 0n ? 'Distribute' : 'Nothing to distribute'}
-              </ContractButton>
-            )}
+          {isRecipient && (
+            <>
+              <Box className={actions}>
+                {recipients.length > 0 && (
+                  <ContractButton
+                    chainId={chainId}
+                    handleClick={distribute}
+                    disabled={!canDistribute}
+                    loading={isDistributing}
+                    size="sm"
+                  >
+                    {pending > 0n ? 'Distribute' : 'Nothing to distribute'}
+                  </ContractButton>
+                )}
 
-            {yours > 0n && (
-              <ContractButton
-                chainId={chainId}
-                handleClick={withdraw}
-                disabled={!canWithdraw}
-                loading={isWithdrawing}
-                variant="outline"
-                size="sm"
-              >
-                {`Withdraw ${formatCryptoVal(formatEther(yours))} ETH`}
-              </ContractButton>
-            )}
-          </Flex>
+                {yours > 0n && (
+                  <ContractButton
+                    chainId={chainId}
+                    handleClick={withdraw}
+                    disabled={!canWithdraw}
+                    loading={isWithdrawing}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {`Withdraw ${formatCryptoVal(formatEther(yours))} ETH`}
+                  </ContractButton>
+                )}
+              </Box>
 
-          <Text variant="paragraph-sm" color="text3">
-            Distributing moves the balance into each recipient&apos;s account, in the
-            shares above. Everyone then withdraws their own and anyone can pay for the
-            distribution, not just a recipient.
-          </Text>
+              <Text variant="paragraph-sm" color="text3">
+                Distribute funds to the shares above, then withdraw your balance. Anyone
+                can pay for distribution.
+              </Text>
+            </>
+          )}
         </Flex>
       </Flex>
     </Box>
