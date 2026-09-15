@@ -3,7 +3,7 @@ import { style } from '@vanilla-extract/css'
 
 export const splitPayoutWrapper = style([
   atoms({
-    p: 'x6',
+    p: 'x5',
     borderRadius: 'curved',
     backgroundColor: 'background2',
     borderColor: 'border',
@@ -22,7 +22,7 @@ export const balanceSection = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '0.75rem',
-  paddingBottom: '1.5rem',
+  paddingBottom: '0.75rem',
   borderBottomStyle: 'solid',
   borderBottomWidth: '1px',
   borderBottomColor: vars.color.border,
@@ -45,7 +45,7 @@ export const recipientsHeader = style({
   fontSize: '14px',
   fontWeight: 600,
   color: vars.color.text2,
-  marginBottom: '0.5rem',
+  marginBottom: '0.25rem',
   textTransform: 'uppercase',
   letterSpacing: '0.05em',
 })
@@ -53,7 +53,7 @@ export const recipientsHeader = style({
 export const recipientsList = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '0.75rem',
+  gap: '0.5rem',
   width: '100%',
 })
 
@@ -66,6 +66,10 @@ export const splitRow = style({
 })
 
 export const recipientAddress = style({
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
   fontSize: '14px',
   fontWeight: 500,
   color: vars.color.text1,
@@ -85,7 +89,7 @@ export const share = style({
 })
 
 export const amount = style({
-  fontSize: '28px',
+  fontSize: '24px',
   fontWeight: 700,
   fontVariantNumeric: 'tabular-nums',
   color: vars.color.text1,
@@ -98,14 +102,37 @@ export const label = style({
   fontWeight: 500,
 })
 
+export const metadataRow = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 120px), 1fr))',
+  gap: '0.5rem 1rem',
+})
+
 export const splitLink = style({
-  fontSize: '12px',
-  color: vars.color.text3,
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  gap: '0.25rem',
+  minHeight: '44px',
+  fontSize: '14px',
+  color: vars.color.text1,
   fontWeight: 500,
+  fontVariantNumeric: 'tabular-nums',
   textDecoration: 'none',
+  selectors: {
+    '&:nth-child(2)': {
+      alignItems: 'flex-end',
+      textAlign: 'right',
+    },
+  },
   ':hover': {
     color: vars.color.text2,
     textDecoration: 'underline',
+  },
+  ':focus-visible': {
+    outline: `2px solid ${vars.color.accent}`,
+    outlineOffset: '3px',
+    borderRadius: '2px',
   },
 })
 
@@ -113,5 +140,4 @@ export const actions = style({
   display: 'flex',
   flexWrap: 'wrap',
   gap: '0.75rem',
-  paddingTop: '0.5rem',
 })

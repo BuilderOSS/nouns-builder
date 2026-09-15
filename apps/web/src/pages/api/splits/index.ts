@@ -28,7 +28,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Edge caching is limited to 10 minutes because mutable splits can be updated,
     // changing their hash and invalidating cached terms. The server-side Redis cache
     // is keyed by the current hash, so it serves fresh results on hash changes.
-    res.setHeader('Cache-Control', 'public, max-age=600, must-revalidate')
+    // Let the next request retry creation lookup after a temporary upstream failure.
+    res.setHeader(
+      'Cache-Control',
+      result.isSplit && !result.creationTxHash
+        ? 'no-store'
+        : 'public, max-age=600, must-revalidate'
+    )
     return res.status(200).json({ data: result })
   } catch (error) {
     console.error('Splits API error:', error)
