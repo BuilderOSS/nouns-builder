@@ -2,7 +2,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
 
 import { SDK } from '../client'
-import { FeedEvent_Filter, FeedEventsQuery, FeedEventType } from '../sdk.generated'
+import { Proposal_OrderBy } from '../sdk.generated'
 
 export type RecentVote = {
   voter: Address
@@ -10,53 +10,17 @@ export type RecentVote = {
   timestamp: number
 }
 
-export type RecentBid = {
-  bidder: Address
-  bidTime: number
-}
-
 export type DaoActivityResponse = {
   recentProposalIds: string[]
   votes: RecentVote[]
-  bids: RecentBid[]
 }
 
 export type DaoActivityOptions = {
   recentProposalCount?: number
-  bidWindowSeconds?: number
   nowSeconds?: number
 }
 
-const PAGE_SIZE = 1000
-const MAX_PAGES = 10
-
-const fetchFeedEventsSince = async (
-  chainId: CHAIN_ID,
-  dao: string,
-  type: FeedEventType,
-  sinceSeconds: number
-): Promise<FeedEventsQuery['feedEvents']> => {
-  const events: FeedEventsQuery['feedEvents'] = []
-  let cursor: number | undefined
-
-  for (let page = 0; page < MAX_PAGES; page++) {
-    const where: FeedEvent_Filter = {
-      dao,
-      type,
-      timestamp_gte: sinceSeconds.toString(),
-      ...(cursor !== undefined ? { timestamp_lt: cursor.toString() } : {}),
-    }
-
-    const data = await SDK.connect(chainId).feedEvents({ first: PAGE_SIZE, where })
-    events.push(...data.feedEvents)
-
-    if (data.feedEvents.length < PAGE_SIZE) break
-    cursor = Number(data.feedEvents[data.feedEvents.length - 1].timestamp)
-  }
-
-  return events
-}
-
+/** Voting activity on the DAO's most recent completed, non-canceled proposals. */
 export const daoActivityRequest = async (
   chainId: CHAIN_ID,
   collectionAddress: string,
@@ -64,53 +28,41 @@ export const daoActivityRequest = async (
 ): Promise<DaoActivityResponse> => {
   const nowSeconds = options?.nowSeconds ?? Math.floor(Date.now() / 1000)
   const recentProposalCount = options?.recentProposalCount ?? 5
-  const bidWindowSeconds = options?.bidWindowSeconds ?? 30 * 24 * 60 * 60
 
   const dao = collectionAddress.toLowerCase()
 
   const proposalsData = await SDK.connect(chainId).proposals({
     where: { dao, voteEnd_lt: nowSeconds.toString(), canceled_not: true },
     first: recentProposalCount,
+    orderBy: Proposal_OrderBy.VoteEnd,
   })
 
-  const recentProposals = proposalsData.proposals
+  let recentProposals = proposalsData.proposals
+  // Resolve ties at the limit before truncation, including proposals omitted
+  // by the voteEnd-only query. proposalNumber is unique within a DAO.
+  if (recentProposals.length && recentProposals.length === recentProposalCount) {
+    const voteEnd = recentProposals[recentProposals.length - 1].voteEnd
+    const newer = recentProposals.filter((proposal) => proposal.voteEnd !== voteEnd)
+    const boundary = await SDK.connect(chainId).proposals({
+      where: { dao, voteEnd, voteEnd_lt: nowSeconds.toString(), canceled_not: true },
+      first: recentProposalCount - newer.length,
+      orderBy: Proposal_OrderBy.ProposalNumber,
+    })
+    recentProposals = [...newer, ...boundary.proposals]
+  }
+  recentProposals.sort(
+    (a, b) => Number(b.voteEnd) - Number(a.voteEnd) || b.proposalNumber - a.proposalNumber
+  )
   const recentProposalIds = recentProposals.map((p) => String(p.proposalId))
-  const proposalIdSet = new Set(recentProposalIds.map((id) => id.toLowerCase()))
 
-  const earliestVoteStart = recentProposals.length
-    ? Math.min(...recentProposals.map((p) => Number(p.voteStart)))
-    : undefined
-
-  const [voteEvents, bidEvents] = await Promise.all([
-    earliestVoteStart !== undefined
-      ? fetchFeedEventsSince(chainId, dao, FeedEventType.ProposalVoted, earliestVoteStart)
-      : Promise.resolve([] as FeedEventsQuery['feedEvents']),
-    fetchFeedEventsSince(
-      chainId,
-      dao,
-      FeedEventType.AuctionBidPlaced,
-      nowSeconds - bidWindowSeconds
-    ),
-  ])
-
-  const votes: RecentVote[] = voteEvents.flatMap((event) =>
-    event.__typename === 'ProposalVotedEvent' &&
-    proposalIdSet.has(String(event.proposal.proposalId).toLowerCase())
-      ? [
-          {
-            voter: event.actor as Address,
-            proposalId: String(event.proposal.proposalId),
-            timestamp: Number(event.timestamp),
-          },
-        ]
-      : []
+  // Extract votes directly from the proposals
+  const votes: RecentVote[] = recentProposals.flatMap((proposal) =>
+    proposal.votes.map((vote) => ({
+      voter: vote.voter as Address,
+      proposalId: String(proposal.proposalId),
+      timestamp: Number(vote.timestamp),
+    }))
   )
 
-  const bids: RecentBid[] = bidEvents.flatMap((event) =>
-    event.__typename === 'AuctionBidPlacedEvent'
-      ? [{ bidder: event.bid.bidder as Address, bidTime: Number(event.bid.bidTime) }]
-      : []
-  )
-
-  return { recentProposalIds, votes, bids }
+  return { recentProposalIds, votes }
 }

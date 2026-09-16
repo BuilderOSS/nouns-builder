@@ -110,7 +110,8 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
       newDelegateVoter.dao = event.address.toHexString()
       newDelegateVoter.voter = newDelegate
       newDelegateVoter.profile = newDelegateProfile.id
-      newDelegateVoter.lastActiveAt = event.block.timestamp
+      // Set to 0 when created passively - will be updated when they actually vote or take an action
+      newDelegateVoter.lastActiveAt = BigInt.fromI32(0)
       newDelegateProfile.voterDaoCount = newDelegateProfile.voterDaoCount + 1
       isNewVoter = true
     }
@@ -118,7 +119,7 @@ export function handleDelegateChanged(event: DelegateChangedEvent): void {
     let newTokenCount = newDelegateVoter.daoTokenCount + tokenOwner.daoTokenCount
     newDelegateVoter.daoTokenCount = newTokenCount
     newDelegateVoter.profile = newDelegateProfile.id
-    newDelegateVoter.lastActiveAt = event.block.timestamp
+    // Don't update lastActiveAt - receiving delegation is passive
     newDelegateVoter.save()
     touchProfile(newDelegateProfile, event.block.timestamp)
     newDelegateProfile.save()
@@ -264,14 +265,15 @@ export function handleTransfer(event: TransferEvent): void {
       toVoter.dao = event.address.toHexString()
       toVoter.voter = toDelegate
       toVoter.profile = toDelegateProfile ? toDelegateProfile.id : null
-      toVoter.lastActiveAt = event.block.timestamp
+      // Set to 0 when created passively - the delegate didn't initiate this transfer
+      toVoter.lastActiveAt = BigInt.fromI32(0)
       dao.voterCount = dao.voterCount + 1
       if (toDelegateProfile) {
         toDelegateProfile.voterDaoCount = toDelegateProfile.voterDaoCount + 1
       }
     } else toVoter.daoTokenCount = toVoter.daoTokenCount + 1
 
-    toVoter.lastActiveAt = event.block.timestamp
+    // Don't update lastActiveAt - the delegate didn't initiate this transfer
     if (toDelegateProfile) {
       toVoter.profile = toDelegateProfile.id
       touchProfile(toDelegateProfile, event.block.timestamp)
@@ -336,7 +338,7 @@ export function handleTransfer(event: TransferEvent): void {
     if (fromVoter) {
       let fromDelegateTokenCount = fromVoter.daoTokenCount - 1
       fromVoter.daoTokenCount = fromDelegateTokenCount
-      fromVoter.lastActiveAt = event.block.timestamp
+      // Don't update lastActiveAt - the delegate didn't initiate this transfer
       fromVoter.save()
 
       if (fromDelegateProfile) {

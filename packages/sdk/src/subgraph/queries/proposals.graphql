@@ -1,9 +1,14 @@
-query proposals($where: Proposal_filter, $first: Int!, $skip: Int) {
+query proposals(
+  $where: Proposal_filter
+  $first: Int!
+  $skip: Int
+  $orderBy: Proposal_orderBy = proposalNumber
+) {
   proposals(
     where: $where
     first: $first
     skip: $skip
-    orderBy: proposalNumber
+    orderBy: $orderBy
     orderDirection: desc
   ) {
     ...Proposal

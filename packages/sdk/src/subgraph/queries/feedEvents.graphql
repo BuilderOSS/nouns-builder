@@ -1,5 +1,9 @@
-query feedEvents($first: Int!, $where: FeedEvent_filter) {
-  feedEvents(first: $first, where: $where, orderBy: timestamp, orderDirection: desc) {
+query feedEvents(
+  $first: Int!
+  $where: FeedEvent_filter
+  $orderBy: FeedEvent_orderBy = timestamp
+) {
+  feedEvents(first: $first, where: $where, orderBy: $orderBy, orderDirection: desc) {
     __typename
     id
     type
