@@ -10,8 +10,8 @@ import useSWR from 'swr'
 import { MemberCard } from './MemberListCard'
 import { MemberCardSkeleton, MembersPanel } from './MembersListLayout'
 
-// Active threshold: 3 months (90 days) in seconds
-const ACTIVE_THRESHOLD_SECONDS = 90 * 24 * 60 * 60
+// Active threshold: 1 month (30 days) in seconds
+const ACTIVE_THRESHOLD_SECONDS = 30 * 24 * 60 * 60
 
 type MembersQuery = {
   membersList: DaoVoter[]
@@ -63,15 +63,28 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
     [votingActivity]
   )
 
+  const daoContractAddresses = React.useMemo(
+    () =>
+      new Set(
+        Object.values(addresses)
+          .filter((address): address is NonNullable<typeof address> => !!address)
+          .map((address) => address.toLowerCase())
+      ),
+    [addresses]
+  )
+
   const isActiveMember = React.useCallback(
     (member: DaoVoter) => {
+      // DAO infrastructure contracts are never active members.
+      if (daoContractAddresses.has(member.voter.toLowerCase())) return false
+
       const nowSeconds = Math.floor(Date.now() / 1000)
       return (
         member.lastActiveAt >= nowSeconds - ACTIVE_THRESHOLD_SECONDS ||
         recentProposalVoters.has(member.voter.toLowerCase())
       )
     },
-    [recentProposalVoters]
+    [daoContractAddresses, recentProposalVoters]
   )
 
   const activeListedMembers = React.useMemo(

@@ -7,11 +7,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { MembersList } from './MembersList'
 
+const daoAddresses = vi.hoisted(() => ({
+  token: '0x1000000000000000000000000000000000000001',
+  auction: '0xabc0000000000000000000000000000000000002',
+  treasury: '0xabc0000000000000000000000000000000000003',
+  governor: '0xabc0000000000000000000000000000000000004',
+  metadata: '0xabc0000000000000000000000000000000000005',
+}))
+
 vi.mock('@buildeross/stores', () => ({
   useChainStore: (selector: (s: { chain: { id: number } }) => unknown) =>
     selector({ chain: { id: 1 } }),
   useDaoStore: () => ({
-    addresses: { token: '0x1000000000000000000000000000000000000001' },
+    addresses: daoAddresses,
   }),
 }))
 
@@ -33,8 +41,8 @@ vi.mock('@buildeross/hooks/useEnsData', () => ({
 const activeAddress = '0xaaa0000000000000000000000000000000000001'
 const inactiveAddress = '0xbbb0000000000000000000000000000000000002'
 
-// Active threshold: 3 months (90 days) in seconds
-const ACTIVE_THRESHOLD_SECONDS = 90 * 24 * 60 * 60
+// Active threshold: 1 month (30 days) in seconds
+const ACTIVE_THRESHOLD_SECONDS = 30 * 24 * 60 * 60
 const nowSeconds = Math.floor(Date.now() / 1000)
 
 const members: DaoVoter[] = [
@@ -43,14 +51,14 @@ const members: DaoVoter[] = [
     tokens: [1],
     tokenCount: 1,
     timeJoined: 1640995200,
-    lastActiveAt: nowSeconds - 60 * 24 * 60 * 60, // Active: 60 days ago
+    lastActiveAt: nowSeconds - 15 * 24 * 60 * 60, // Active: 15 days ago
   },
   {
     voter: inactiveAddress,
     tokens: [2],
     tokenCount: 1,
     timeJoined: 1640995200,
-    lastActiveAt: nowSeconds - ACTIVE_THRESHOLD_SECONDS - 1000, // Inactive: over 90 days ago
+    lastActiveAt: nowSeconds - ACTIVE_THRESHOLD_SECONDS - 1000, // Inactive: over 30 days ago
   },
 ]
 
@@ -127,7 +135,7 @@ describe('MembersList', () => {
     )
   })
 
-  it('includes old voters on recent completed proposals alongside 90-day activity', async () => {
+  it('includes old voters on recent completed proposals alongside 30-day activity', async () => {
     vi.mocked(daoActivityRequest).mockResolvedValue({
       recentProposalIds: ['0xp1'],
       votes: [
@@ -159,6 +167,47 @@ describe('MembersList', () => {
 
     await screen.findByText(activeAddress)
     expect(screen.getByRole('button', { name: 'Active' })).toBeDisabled()
+  })
+
+  it('excludes DAO contracts from Active even with recent activity and qualifying votes', async () => {
+    const contractMembers: DaoVoter[] = Object.values(daoAddresses).map((address) => ({
+      voter: address.toUpperCase() as DaoVoter['voter'],
+      tokens: [3],
+      tokenCount: 1,
+      timeJoined: 1640995200,
+      lastActiveAt: nowSeconds,
+    }))
+    vi.mocked(axios.get).mockResolvedValue({
+      data: { membersList: [...members, ...contractMembers] },
+    })
+    vi.mocked(daoActivityRequest).mockResolvedValue({
+      recentProposalIds: ['0xp1'],
+      votes: contractMembers.map((member) => ({
+        voter: member.voter,
+        proposalId: '0xp1',
+        timestamp: nowSeconds,
+      })),
+    })
+
+    renderList()
+
+    const activeFilter = await screen.findByRole('button', { name: 'Active (1)' })
+    for (const member of contractMembers) {
+      expect(screen.getByText(member.voter)).toBeInTheDocument()
+    }
+    expect(screen.getAllByText('Active')).toHaveLength(1)
+
+    fireEvent.click(activeFilter)
+
+    expect(screen.getByText(activeAddress)).toBeInTheDocument()
+    for (const member of contractMembers) {
+      expect(screen.queryByText(member.voter)).not.toBeInTheDocument()
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: 'All (7)' }))
+    for (const member of contractMembers) {
+      expect(screen.getByText(member.voter)).toBeInTheDocument()
+    }
   })
 
   it('reports voting activity errors without displaying an incomplete active count', async () => {
