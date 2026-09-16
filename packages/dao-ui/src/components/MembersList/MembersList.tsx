@@ -1,6 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { DaoVoter } from '@buildeross/sdk/subgraph'
+import { daoActivityRequest, DaoVoter } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Button, Flex, Text } from '@buildeross/zord'
 import axios from 'axios'
@@ -10,8 +10,8 @@ import useSWR from 'swr'
 import { MemberCard } from './MemberListCard'
 import { MemberCardSkeleton, MembersPanel } from './MembersListLayout'
 
-// Active threshold: 30 days in seconds
-const ACTIVE_THRESHOLD_SECONDS = 30 * 24 * 60 * 60
+// Active threshold: 3 months (90 days) in seconds
+const ACTIVE_THRESHOLD_SECONDS = 90 * 24 * 60 * 60
 
 type MembersQuery = {
   membersList: DaoVoter[]
@@ -44,10 +44,35 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
 
   const [showActiveOnly, setShowActiveOnly] = React.useState(false)
 
-  const isActiveMember = React.useCallback((member: DaoVoter) => {
-    const nowSeconds = Math.floor(Date.now() / 1000)
-    return member.lastActiveAt >= nowSeconds - ACTIVE_THRESHOLD_SECONDS
-  }, [])
+  const { data: votingActivity, error: votingActivityError } = useSWR(
+    token && chain.id
+      ? ([SWR_KEYS.ACTIVE_MEMBERS, chain.id, token, 'recent-proposal-voters', 5] as const)
+      : null,
+    ([, chainId, collectionAddress, , recentProposalCount]) =>
+      daoActivityRequest(chainId, collectionAddress, {
+        recentProposalCount,
+      }),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  )
+
+  const recentProposalVoters = React.useMemo(
+    () => new Set(votingActivity?.votes.map((vote) => vote.voter.toLowerCase())),
+    [votingActivity]
+  )
+
+  const isActiveMember = React.useCallback(
+    (member: DaoVoter) => {
+      const nowSeconds = Math.floor(Date.now() / 1000)
+      return (
+        member.lastActiveAt >= nowSeconds - ACTIVE_THRESHOLD_SECONDS ||
+        recentProposalVoters.has(member.voter.toLowerCase())
+      )
+    },
+    [recentProposalVoters]
+  )
 
   const activeListedMembers = React.useMemo(
     () => members?.filter((member) => isActiveMember(member)),
@@ -122,12 +147,15 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
         variant={showActiveOnly ? 'outline' : 'ghost'}
         size="sm"
         onClick={() => setShowActiveOnly(true)}
-        disabled={!activeListedMembers}
+        disabled={!activeListedMembers || !votingActivity}
         aria-pressed={showActiveOnly}
       >
         Active
-        {activeListedMembers ? ` (${activeListedMembers.length})` : ''}
+        {activeListedMembers && votingActivity ? ` (${activeListedMembers.length})` : ''}
       </Button>
+      {votingActivityError && !votingActivity && (
+        <Text role="status">Unable to load voting activity.</Text>
+      )}
     </Flex>
   )
 

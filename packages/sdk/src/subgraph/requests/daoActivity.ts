@@ -10,30 +10,22 @@ export type RecentVote = {
   timestamp: number
 }
 
-export type RecentBid = {
-  bidder: Address
-  bidTime: number
-}
-
 export type DaoActivityResponse = {
   recentProposalIds: string[]
   votes: RecentVote[]
-  bids: RecentBid[]
 }
 
 export type DaoActivityOptions = {
   recentProposalCount?: number
-  bidWindowSeconds?: number
   nowSeconds?: number
 }
 
 const PAGE_SIZE = 1000
 const MAX_PAGES = 10
 
-const fetchFeedEventsSince = async (
+const fetchVoteEventsSince = async (
   chainId: CHAIN_ID,
   dao: string,
-  type: FeedEventType,
   sinceSeconds: number
 ): Promise<FeedEventsQuery['feedEvents']> => {
   const events: FeedEventsQuery['feedEvents'] = []
@@ -42,7 +34,7 @@ const fetchFeedEventsSince = async (
   for (let page = 0; page < MAX_PAGES; page++) {
     const where: FeedEvent_Filter = {
       dao,
-      type,
+      type: FeedEventType.ProposalVoted,
       timestamp_gte: sinceSeconds.toString(),
       ...(cursor !== undefined ? { timestamp_lt: cursor.toString() } : {}),
     }
@@ -57,6 +49,7 @@ const fetchFeedEventsSince = async (
   return events
 }
 
+/** Voting activity on the DAO's most recent completed, non-canceled proposals. */
 export const daoActivityRequest = async (
   chainId: CHAIN_ID,
   collectionAddress: string,
@@ -64,7 +57,6 @@ export const daoActivityRequest = async (
 ): Promise<DaoActivityResponse> => {
   const nowSeconds = options?.nowSeconds ?? Math.floor(Date.now() / 1000)
   const recentProposalCount = options?.recentProposalCount ?? 5
-  const bidWindowSeconds = options?.bidWindowSeconds ?? 30 * 24 * 60 * 60
 
   const dao = collectionAddress.toLowerCase()
 
@@ -81,17 +73,10 @@ export const daoActivityRequest = async (
     ? Math.min(...recentProposals.map((p) => Number(p.voteStart)))
     : undefined
 
-  const [voteEvents, bidEvents] = await Promise.all([
+  const voteEvents =
     earliestVoteStart !== undefined
-      ? fetchFeedEventsSince(chainId, dao, FeedEventType.ProposalVoted, earliestVoteStart)
-      : Promise.resolve([] as FeedEventsQuery['feedEvents']),
-    fetchFeedEventsSince(
-      chainId,
-      dao,
-      FeedEventType.AuctionBidPlaced,
-      nowSeconds - bidWindowSeconds
-    ),
-  ])
+      ? await fetchVoteEventsSince(chainId, dao, earliestVoteStart)
+      : []
 
   const votes: RecentVote[] = voteEvents.flatMap((event) =>
     event.__typename === 'ProposalVotedEvent' &&
@@ -106,11 +91,5 @@ export const daoActivityRequest = async (
       : []
   )
 
-  const bids: RecentBid[] = bidEvents.flatMap((event) =>
-    event.__typename === 'AuctionBidPlacedEvent'
-      ? [{ bidder: event.bid.bidder as Address, bidTime: Number(event.bid.bidTime) }]
-      : []
-  )
-
-  return { recentProposalIds, votes, bids }
+  return { recentProposalIds, votes }
 }
