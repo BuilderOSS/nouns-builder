@@ -2,7 +2,13 @@ import { CHAIN_ID } from '@buildeross/types'
 import { Address } from 'viem'
 
 import { SDK } from '../client'
-import { FeedEvent_Filter, FeedEventsQuery, FeedEventType } from '../sdk.generated'
+import {
+  FeedEvent_Filter,
+  FeedEvent_OrderBy,
+  FeedEventsQuery,
+  FeedEventType,
+  Proposal_OrderBy,
+} from '../sdk.generated'
 
 export type RecentVote = {
   voter: Address
@@ -21,7 +27,6 @@ export type DaoActivityOptions = {
 }
 
 const PAGE_SIZE = 1000
-const MAX_PAGES = 10
 
 const fetchVoteEventsSince = async (
   chainId: CHAIN_ID,
@@ -29,24 +34,47 @@ const fetchVoteEventsSince = async (
   sinceSeconds: number
 ): Promise<FeedEventsQuery['feedEvents']> => {
   const events: FeedEventsQuery['feedEvents'] = []
-  let cursor: number | undefined
+  let cursor: string | undefined
 
-  for (let page = 0; page < MAX_PAGES; page++) {
+  while (true) {
     const where: FeedEvent_Filter = {
       dao,
       type: FeedEventType.ProposalVoted,
       timestamp_gte: sinceSeconds.toString(),
-      ...(cursor !== undefined ? { timestamp_lt: cursor.toString() } : {}),
+      ...(cursor !== undefined ? { timestamp_lt: cursor } : {}),
     }
 
     const data = await SDK.connect(chainId).feedEvents({ first: PAGE_SIZE, where })
-    events.push(...data.feedEvents)
+    if (data.feedEvents.length < PAGE_SIZE) {
+      events.push(...data.feedEvents)
+      break
+    }
 
-    if (data.feedEvents.length < PAGE_SIZE) break
-    cursor = Number(data.feedEvents[data.feedEvents.length - 1].timestamp)
+    // The API only supports one orderBy. Drain the boundary timestamp by ID
+    // before advancing, so the effective cursor is (timestamp, id).
+    cursor = String(data.feedEvents[data.feedEvents.length - 1].timestamp)
+    events.push(...data.feedEvents.filter((event) => String(event.timestamp) !== cursor))
+    let idCursor: string | undefined
+    while (true) {
+      const boundary = await SDK.connect(chainId).feedEvents({
+        first: PAGE_SIZE,
+        orderBy: FeedEvent_OrderBy.Id,
+        where: {
+          ...where,
+          timestamp: cursor,
+          ...(idCursor !== undefined ? { id_lt: idCursor } : {}),
+        },
+      })
+      events.push(...boundary.feedEvents)
+      if (boundary.feedEvents.length < PAGE_SIZE) break
+      idCursor = boundary.feedEvents[boundary.feedEvents.length - 1].id
+    }
   }
 
-  return events
+  return events.sort((a, b) => {
+    const timeOrder = Number(b.timestamp) - Number(a.timestamp)
+    return timeOrder || (a.id < b.id ? 1 : a.id > b.id ? -1 : 0)
+  })
 }
 
 /** Voting activity on the DAO's most recent completed, non-canceled proposals. */
@@ -63,9 +91,25 @@ export const daoActivityRequest = async (
   const proposalsData = await SDK.connect(chainId).proposals({
     where: { dao, voteEnd_lt: nowSeconds.toString(), canceled_not: true },
     first: recentProposalCount,
+    orderBy: Proposal_OrderBy.VoteEnd,
   })
 
-  const recentProposals = proposalsData.proposals
+  let recentProposals = proposalsData.proposals
+  // Resolve ties at the limit before truncation, including proposals omitted
+  // by the voteEnd-only query. proposalNumber is unique within a DAO.
+  if (recentProposals.length && recentProposals.length === recentProposalCount) {
+    const voteEnd = recentProposals[recentProposals.length - 1].voteEnd
+    const newer = recentProposals.filter((proposal) => proposal.voteEnd !== voteEnd)
+    const boundary = await SDK.connect(chainId).proposals({
+      where: { dao, voteEnd, voteEnd_lt: nowSeconds.toString(), canceled_not: true },
+      first: recentProposalCount - newer.length,
+      orderBy: Proposal_OrderBy.ProposalNumber,
+    })
+    recentProposals = [...newer, ...boundary.proposals]
+  }
+  recentProposals.sort(
+    (a, b) => Number(b.voteEnd) - Number(a.voteEnd) || b.proposalNumber - a.proposalNumber
+  )
   const recentProposalIds = recentProposals.map((p) => String(p.proposalId))
   const proposalIdSet = new Set(recentProposalIds.map((id) => id.toLowerCase()))
 
