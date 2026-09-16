@@ -1,5 +1,4 @@
 export * from './splitPayout.helper'
-export * from './useActiveMembers'
 export * from './useAirdropData'
 export * from './useArtworkPreview'
 export * from './useArtworkUpload'

@@ -21,6 +21,7 @@ const member: DaoVoter = {
   tokens: [1, 2],
   tokenCount: 2,
   timeJoined: 1640995200,
+  lastActiveAt: Math.floor(Date.now() / 1000) - 1000,
 }
 
 describe('MemberCard', () => {

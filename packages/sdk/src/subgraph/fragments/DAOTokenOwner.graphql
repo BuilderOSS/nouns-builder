@@ -1,0 +1,12 @@
+#import "./Dao.graphql"
+
+fragment DAOTokenOwner on DAOTokenOwner {
+  id
+  owner
+  delegate
+  daoTokenCount
+  lastActiveAt
+  dao {
+    ...DAO
+  }
+}

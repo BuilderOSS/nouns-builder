@@ -1,0 +1,15 @@
+#import "../fragments/Profile.graphql"
+#import "../fragments/DAOTokenOwner.graphql"
+#import "../fragments/DAOVoter.graphql"
+
+query profile($address: ID!, $firstOwner: Int = 100, $firstVoter: Int = 100) {
+  profile(id: $address) {
+    ...Profile
+    ownerDaos(first: $firstOwner, orderBy: lastActiveAt, orderDirection: desc) {
+      ...DAOTokenOwner
+    }
+    voterDaos(first: $firstVoter, orderBy: lastActiveAt, orderDirection: desc) {
+      ...DAOVoter
+    }
+  }
+}

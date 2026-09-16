@@ -1,6 +1,5 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { useActiveMembers } from '@buildeross/hooks/useActiveMembers'
 import { DaoVoter } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Button, Flex, Text } from '@buildeross/zord'
@@ -10,6 +9,9 @@ import useSWR from 'swr'
 
 import { MemberCard } from './MemberListCard'
 import { MemberCardSkeleton, MembersPanel } from './MembersListLayout'
+
+// Active threshold: 30 days in seconds
+const ACTIVE_THRESHOLD_SECONDS = 30 * 24 * 60 * 60
 
 type MembersQuery = {
   membersList: DaoVoter[]
@@ -40,15 +42,15 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
     }
   )
 
-  const { activeMembers, isActiveMember } = useActiveMembers({
-    chainId: chain.id,
-    collectionAddress: token,
-  })
-
   const [showActiveOnly, setShowActiveOnly] = React.useState(false)
 
+  const isActiveMember = React.useCallback((member: DaoVoter) => {
+    const nowSeconds = Math.floor(Date.now() / 1000)
+    return member.lastActiveAt >= nowSeconds - ACTIVE_THRESHOLD_SECONDS
+  }, [])
+
   const activeListedMembers = React.useMemo(
-    () => members?.filter((member) => isActiveMember(member.voter)),
+    () => members?.filter((member) => isActiveMember(member)),
     [members, isActiveMember]
   )
 
@@ -120,11 +122,11 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
         variant={showActiveOnly ? 'outline' : 'ghost'}
         size="sm"
         onClick={() => setShowActiveOnly(true)}
-        disabled={!activeMembers}
+        disabled={!activeListedMembers}
         aria-pressed={showActiveOnly}
       >
         Active
-        {activeListedMembers && activeMembers ? ` (${activeListedMembers.length})` : ''}
+        {activeListedMembers ? ` (${activeListedMembers.length})` : ''}
       </Button>
     </Flex>
   )
@@ -164,7 +166,7 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
             key={member.voter}
             member={member}
             totalSupply={totalSupply}
-            isActive={isActiveMember(member.voter)}
+            isActive={isActiveMember(member)}
             auctionAddress={addresses.auction}
             treasuryAddress={addresses.treasury}
           />

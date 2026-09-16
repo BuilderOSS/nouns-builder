@@ -22,6 +22,7 @@ import {
   CandidateVersionCreatedEvent,
   DAO,
   DaoMultisigUpdate,
+  DAOVoter,
   ProfileLinkOverride,
   Proposal,
   ProposalCandidateGroup,
@@ -47,6 +48,7 @@ import {
   PROPOSAL_CANDIDATE_SCHEMA_UID,
   TREASURY_ASSET_PIN_SCHEMA_UID,
 } from './utils/eas'
+import { getOrCreateProfile, touchProfile } from './utils/profile'
 import { parseDescriptionFields } from './utils/proposalMetadata'
 
 const ZERO_BYTES32 = '0x0000000000000000000000000000000000000000000000000000000000000000'
@@ -132,6 +134,18 @@ function handlePropdateAttestation(event: AttestedEvent): void {
   update.deleted = false
   update.save()
 
+  // Update profile and DAO-specific voter activity
+  let attesterProfile = getOrCreateProfile(event.params.attester, event.block.timestamp)
+  touchProfile(attesterProfile, event.block.timestamp)
+  attesterProfile.save()
+
+  let attesterVoterId = `${dao.id}:${event.params.attester.toHexString()}`
+  let attesterVoter = DAOVoter.load(attesterVoterId)
+  if (attesterVoter) {
+    attesterVoter.lastActiveAt = event.block.timestamp
+    attesterVoter.save()
+  }
+
   // Create feed event
   let feedEventId = event.transaction.hash.toHex() + '-' + event.logIndex.toString()
   let feedEvent = new ProposalUpdatedFeedEvent(feedEventId)
@@ -178,6 +192,21 @@ function handlePropdateAttestationRevoked(event: RevokedEvent): void {
   }
   update.deleted = true
   update.save()
+
+  // Update profile and DAO-specific voter activity
+  const dao = DAO.load(event.params.recipient.toHexString())
+  if (dao) {
+    let revokerProfile = getOrCreateProfile(event.params.attester, event.block.timestamp)
+    touchProfile(revokerProfile, event.block.timestamp)
+    revokerProfile.save()
+
+    let revokerVoterId = `${dao.id}:${event.params.attester.toHexString()}`
+    let revokerVoter = DAOVoter.load(revokerVoterId)
+    if (revokerVoter) {
+      revokerVoter.lastActiveAt = event.block.timestamp
+      revokerVoter.save()
+    }
+  }
 }
 
 function handleDaoMultisigAttestationRevoked(event: RevokedEvent): void {
@@ -245,9 +274,11 @@ function handleTreasuryAssetPinRevoked(event: RevokedEvent): void {
 
 function handleProfileLinkAttestation(event: AttestedEvent): void {
   // Self-attestation check
-  if (event.params.attester != event.params.recipient) {
+  if (event.params.attester.toHexString() != event.params.recipient.toHexString()) {
     return
   }
+
+  getOrCreateProfile(event.params.recipient, event.block.timestamp).save()
 
   const data = getAttestation(event.address, event.params.uid)
   if (!data) {
@@ -307,9 +338,11 @@ function handleProfileLinkAttestation(event: AttestedEvent): void {
 
 function handleProfileLinkRevoked(event: RevokedEvent): void {
   // Self-revocation check
-  if (event.params.attester != event.params.recipient) {
+  if (event.params.attester.toHexString() != event.params.recipient.toHexString()) {
     return
   }
+
+  getOrCreateProfile(event.params.recipient, event.block.timestamp).save()
 
   const data = getAttestation(event.address, event.params.uid)
   if (!data) {
@@ -904,7 +937,7 @@ function handleCandidateSponsorSignatureRevoked(event: RevokedEvent): void {
 }
 
 export function handleAttested(event: AttestedEvent): void {
-  if (event.params.schema == PROFILE_LINK_SCHEMA_UID) {
+  if (event.params.schema.equals(PROFILE_LINK_SCHEMA_UID)) {
     handleProfileLinkAttestation(event)
     return
   }
@@ -912,23 +945,23 @@ export function handleAttested(event: AttestedEvent): void {
   const dao = DAO.load(event.params.recipient.toHexString())
   if (!dao) return
 
-  if (event.params.schema == DAO_MULTISIG_SCHEMA_UID) {
+  if (event.params.schema.equals(DAO_MULTISIG_SCHEMA_UID)) {
     handleDaoMultisigAttestation(event)
-  } else if (event.params.schema == PROPDATE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(PROPDATE_SCHEMA_UID)) {
     handlePropdateAttestation(event)
-  } else if (event.params.schema == TREASURY_ASSET_PIN_SCHEMA_UID) {
+  } else if (event.params.schema.equals(TREASURY_ASSET_PIN_SCHEMA_UID)) {
     handleTreasuryAssetPinAttestation(event)
-  } else if (event.params.schema == PROPOSAL_CANDIDATE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(PROPOSAL_CANDIDATE_SCHEMA_UID)) {
     handleProposalCandidateAttestation(event)
-  } else if (event.params.schema == CANDIDATE_COMMENT_SCHEMA_UID) {
+  } else if (event.params.schema.equals(CANDIDATE_COMMENT_SCHEMA_UID)) {
     handleCandidateCommentAttestation(event)
-  } else if (event.params.schema == CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID)) {
     handleCandidateSponsorSignatureAttestation(event)
   }
 }
 
 export function handleRevoked(event: RevokedEvent): void {
-  if (event.params.schema == PROFILE_LINK_SCHEMA_UID) {
+  if (event.params.schema.equals(PROFILE_LINK_SCHEMA_UID)) {
     handleProfileLinkRevoked(event)
     return
   }
@@ -936,17 +969,17 @@ export function handleRevoked(event: RevokedEvent): void {
   const dao = DAO.load(event.params.recipient.toHexString())
   if (!dao) return
 
-  if (event.params.schema == DAO_MULTISIG_SCHEMA_UID) {
+  if (event.params.schema.equals(DAO_MULTISIG_SCHEMA_UID)) {
     handleDaoMultisigAttestationRevoked(event)
-  } else if (event.params.schema == PROPDATE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(PROPDATE_SCHEMA_UID)) {
     handlePropdateAttestationRevoked(event)
-  } else if (event.params.schema == TREASURY_ASSET_PIN_SCHEMA_UID) {
+  } else if (event.params.schema.equals(TREASURY_ASSET_PIN_SCHEMA_UID)) {
     handleTreasuryAssetPinRevoked(event)
-  } else if (event.params.schema == PROPOSAL_CANDIDATE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(PROPOSAL_CANDIDATE_SCHEMA_UID)) {
     handleProposalCandidateRevoked(event)
-  } else if (event.params.schema == CANDIDATE_COMMENT_SCHEMA_UID) {
+  } else if (event.params.schema.equals(CANDIDATE_COMMENT_SCHEMA_UID)) {
     handleCandidateCommentRevoked(event)
-  } else if (event.params.schema == CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID) {
+  } else if (event.params.schema.equals(CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID)) {
     handleCandidateSponsorSignatureRevoked(event)
   }
 }

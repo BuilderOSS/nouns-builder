@@ -4,7 +4,7 @@ import { fetchIpfsMetadata, type IpfsMetadata } from '@buildeross/ipfs-service'
 import { getDAOAddresses } from '@buildeross/sdk/contract'
 import {
   type ClankerTokenFragment,
-  type ClankerTokenWithHoldersFragment,
+  // type ClankerTokenWithHoldersFragment, // DEPRECATED: holders removed from subgraph
   SubgraphSDK,
   type ZoraCoinFragment,
   type ZoraCoinWithHoldersFragment,
@@ -231,13 +231,13 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
       }
     }
 
-    // Try to fetch as ClankerToken (with holders)
-    const clankerTokenResult = await sdk.clankerTokenWithHolders({
+    // Try to fetch as ClankerToken
+    const clankerTokenResult = await sdk.clankerToken({
       tokenAddress: coinAddress.toLowerCase(),
     })
 
     if (clankerTokenResult.clankerToken) {
-      const token = clankerTokenResult.clankerToken as ClankerTokenWithHoldersFragment
+      const token = clankerTokenResult.clankerToken as ClankerTokenFragment
 
       // Fetch DAO name if we have a DAO link
       const daoName = token.dao?.name ?? null
@@ -257,12 +257,14 @@ export const getServerSideProps: GetServerSideProps = async ({ res, params }) =>
       // Parse description (ClankerToken doesn't have metadata in current schema)
       const description: string | null = null
 
+      // DEPRECATED: holders removed from ClankerToken entity in subgraph
       // Extract holders data
-      const holders =
-        token.holders?.map((h) => ({
-          holder: h.holder as `0x${string}`,
-          balance: h.balance.toString(),
-        })) ?? []
+      // const holders =
+      //   token.holders?.map((h) => ({
+      //     holder: h.holder as `0x${string}`,
+      //     balance: h.balance.toString(),
+      //   })) ?? []
+      const holders: Array<{ holder: `0x${string}`; balance: string }> = []
 
       return {
         props: {

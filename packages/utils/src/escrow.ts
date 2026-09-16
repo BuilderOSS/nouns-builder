@@ -36,8 +36,6 @@ function getEscrowFactory(chainId: number | string): Address {
       return '0xF9822818143948237A60A1a1CEFC85D6F1b929Df' as Address
     case CHAIN_ID.SEPOLIA:
       return '0x8227b9868e00B8eE951F17B480D369b84Cd17c20' as Address
-    case CHAIN_ID.OPTIMISM_SEPOLIA:
-      return '0x4cd7beae668ed7c7803b787ba9b84ce17135646b' as Address
     case CHAIN_ID.BASE_SEPOLIA:
       return '0x851e59a39571e599954702f0e4996bf838d9c863' as Address
     default:
@@ -67,10 +65,6 @@ const ESCROW_BUNDLER_ADDRESSES: Partial<
   [CHAIN_ID.SEPOLIA]: {
     v2: '0xcf933e48b5677e15b49ab69821bb7b7b8ad109bb',
     legacy: '0x9c1E057B37605B7f6ed6f4c8E2826C3d84ddC08D',
-  },
-  [CHAIN_ID.OPTIMISM_SEPOLIA]: {
-    v2: '0xd8e1f218021550fadda4b1e353578b80a1ce1a94',
-    legacy: '0xe0986c3bdab537fbeb7c94d0c5ef961d6d8bf63a',
   },
   [CHAIN_ID.BASE_SEPOLIA]: {
     v2: '0x189a535b05faf9ab537868589fa935705a1893a5',

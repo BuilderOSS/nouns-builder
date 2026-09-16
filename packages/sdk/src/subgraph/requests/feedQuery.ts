@@ -161,6 +161,9 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem | nul
         tokenId: event.auction.token.tokenId.toString(),
         tokenName: event.auction.token.name,
         tokenImage: event.auction.token.image || '',
+        // Note: We use token.owner (the final owner after settlement) rather than event.winner
+        // because event.winner may be incorrectly set to the settler's address when no bids
+        // were placed. token.owner reflects the actual final state of token ownership.
         winner: event.auction.token.owner,
         amount: event.amount.toString(),
       }

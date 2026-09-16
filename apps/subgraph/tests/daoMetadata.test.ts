@@ -77,12 +77,14 @@ function seedToken(): void {
   owner.owner = Address.fromString(OWNER_ADDRESS)
   owner.delegate = Address.fromString(OWNER_ADDRESS)
   owner.daoTokenCount = 1
+  owner.lastActiveAt = BigInt.fromI32(1)
   owner.save()
 
   const voter = new DAOVoter(ownerId)
   voter.dao = TOKEN_ADDRESS
   voter.voter = Address.fromString(OWNER_ADDRESS)
   voter.daoTokenCount = 1
+  voter.lastActiveAt = BigInt.fromI32(1)
   voter.save()
 
   const token = new Token(TOKEN_ADDRESS + ':1')

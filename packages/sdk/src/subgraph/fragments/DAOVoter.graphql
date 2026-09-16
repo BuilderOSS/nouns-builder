@@ -1,0 +1,11 @@
+#import "./Dao.graphql"
+
+fragment DAOVoter on DAOVoter {
+  id
+  voter
+  daoTokenCount
+  lastActiveAt
+  dao {
+    ...DAO
+  }
+}

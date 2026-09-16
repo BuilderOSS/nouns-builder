@@ -140,6 +140,30 @@ describe('profile dashboard helpers', () => {
     })
   })
 
+  it('excludes auctions settled with no bids (amount = 0) from wins', () => {
+    const settlementNoWinner = {
+      ...baseItem,
+      type: 'AUCTION_SETTLED',
+      actor: address,
+      auctionId: 'auction-2',
+      tokenId: '2',
+      tokenName: 'Token 2',
+      tokenImage: '',
+      // When no bids are placed, subgraph may incorrectly set winner to the settler's address
+      winner: address,
+      amount: '0', // No bids placed
+    } as FeedItem
+
+    // Should classify as 'settled' (the actor settled it), not 'win' (no actual winner)
+    expect(classifyProfileActivity(settlementNoWinner, address)).toEqual({
+      group: 'auction',
+      kind: 'settled',
+    })
+
+    // For another user's profile, should return null (they didn't participate)
+    expect(classifyProfileActivity(settlementNoWinner, otherAddress)).toBe(null)
+  })
+
   it('filters activity kinds after the shared DAO filter is applied', () => {
     const selected = [createDaoKey(1, baseItem.daoId)]
     const bid = makeBid('bid')
