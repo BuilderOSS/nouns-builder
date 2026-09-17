@@ -13097,6 +13097,7 @@ export type FeedEventsQuery = {
         }
         update: {
           __typename?: 'ProposalUpdate'
+          id: string
           messageType: number
           message: string
           originalMessageId: any
@@ -15435,6 +15436,7 @@ export const FeedEventsDocument = gql`
           proposer
         }
         update {
+          id
           messageType
           message
           originalMessageId

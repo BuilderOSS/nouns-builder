@@ -73,7 +73,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
     return {
       id: (updateItem.originalMessageId !== zeroHash
         ? updateItem.originalMessageId
-        : updateItem.id) as Hex,
+        : updateItem.messageId) as Hex,
       creator: updateItem.actor as Hex,
       message: parsedContent ?? updateItem.message,
     }
