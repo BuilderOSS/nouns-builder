@@ -25,7 +25,6 @@ export default defineConfig({
     '@buildeross/ui',
     '@buildeross/utils',
     '@buildeross/zord',
-    '@ethereum-attestation-service/eas-sdk',
     '@walletconnect/core',
     '@walletconnect/utils',
     '@walletconnect/web3wallet',

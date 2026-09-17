@@ -30,7 +30,9 @@ export const getProposals = async (
 
     // Derive hasNextPage from raw result count before enrichment
     const hasNextPage = data.proposals.length > limit
-    const proposalsToEnrich = hasNextPage ? data.proposals.slice(0, limit) : data.proposals
+    const proposalsToEnrich = hasNextPage
+      ? data.proposals.slice(0, limit)
+      : data.proposals
 
     // Enrich only the proposals we're returning (not the extra one used for pagination)
     const proposals = await Promise.all(

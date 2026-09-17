@@ -9,6 +9,14 @@ export const onlyDesktop = style({
   },
 })
 
+export const onlyMobile = style({
+  '@media': {
+    [media.min1024]: {
+      display: 'none',
+    },
+  },
+})
+
 export const dropDetailContainer = style([
   atoms({
     m: 'auto',
@@ -47,6 +55,16 @@ export const dropInfoPanel = style([
   }),
 ])
 
+export const rightColumnSticky = style({
+  '@media': {
+    [media.min1024]: {
+      position: 'sticky',
+      alignSelf: 'flex-start',
+      transition: 'top 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+    },
+  },
+})
+
 export const mintPanel = style([
   atoms({
     p: 'x6',
@@ -56,15 +74,6 @@ export const mintPanel = style([
     borderWidth: 'thin',
     borderStyle: 'solid',
   }),
-  {
-    '@media': {
-      [media.min1024]: {
-        position: 'sticky',
-        alignSelf: 'flex-start',
-        transition: 'top 150ms cubic-bezier(0.4, 0, 0.2, 1)',
-      },
-    },
-  },
 ])
 
 export const dropHeader = style([

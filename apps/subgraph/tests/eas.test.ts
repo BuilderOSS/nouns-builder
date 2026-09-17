@@ -1,6 +1,7 @@
-import { Address, Bytes } from '@graphprotocol/graph-ts'
-import { assert, describe, test } from 'matchstick-as'
+import { Address, BigInt, Bytes } from '@graphprotocol/graph-ts'
+import { assert, clearStore, describe, test } from 'matchstick-as'
 
+import { ProfileLinkOverride } from '../generated/schema'
 import {
   decodeCandidateComment,
   decodeCandidateSponsorSignature,
@@ -8,6 +9,207 @@ import {
   decodeProfileLink,
   decodePropdate,
 } from '../src/utils/eas'
+
+const PROFILE_ADDRESS = '0x00000000000000000000000000000000000000dd'
+const PROFILE_LINK_UID =
+  '0x1111111111111111111111111111111111111111111111111111111111111111'
+
+describe('Profile link entity tests', () => {
+  test('creates ProfileLinkOverride entity with correct fields', () => {
+    clearStore()
+
+    // Manually create a ProfileLinkOverride to test entity structure
+    const override = new ProfileLinkOverride(PROFILE_ADDRESS + '-website')
+    override.profile = Address.fromString(PROFILE_ADDRESS)
+    override.key = 'website'
+    override.value = 'https://example.com'
+    override.attestationUID = Bytes.fromHexString(PROFILE_LINK_UID)
+    override.transactionHash = Bytes.fromHexString(
+      '0x1111111111111111111111111111111111111111111111111111111111111111'
+    )
+    override.timestamp = BigInt.fromI32(1)
+    override.creator = Address.fromString(PROFILE_ADDRESS)
+    override.revoked = false
+    override.revokedAt = null
+    override.revokedBy = null
+    override.revokedTxHash = null
+    override.save()
+
+    // Verify entity was created with correct fields
+    assert.fieldEquals(
+      'ProfileLinkOverride',
+      PROFILE_ADDRESS + '-website',
+      'key',
+      'website'
+    )
+    assert.fieldEquals(
+      'ProfileLinkOverride',
+      PROFILE_ADDRESS + '-website',
+      'value',
+      'https://example.com'
+    )
+    assert.fieldEquals(
+      'ProfileLinkOverride',
+      PROFILE_ADDRESS + '-website',
+      'revoked',
+      'false'
+    )
+    assert.fieldEquals(
+      'ProfileLinkOverride',
+      PROFILE_ADDRESS + '-website',
+      'profile',
+      PROFILE_ADDRESS
+    )
+  })
+
+  test('handles ProfileLinkOverride updates correctly', () => {
+    clearStore()
+
+    // Create initial override
+    const override = new ProfileLinkOverride(PROFILE_ADDRESS + '-x')
+    override.profile = Address.fromString(PROFILE_ADDRESS)
+    override.key = 'x'
+    override.value = 'buildeross'
+    override.attestationUID = Bytes.fromHexString(PROFILE_LINK_UID)
+    override.transactionHash = Bytes.fromHexString(
+      '0x1111111111111111111111111111111111111111111111111111111111111111'
+    )
+    override.timestamp = BigInt.fromI32(1)
+    override.creator = Address.fromString(PROFILE_ADDRESS)
+    override.revoked = false
+    override.revokedAt = null
+    override.revokedBy = null
+    override.revokedTxHash = null
+    override.save()
+
+    assert.fieldEquals(
+      'ProfileLinkOverride',
+      PROFILE_ADDRESS + '-x',
+      'value',
+      'buildeross'
+    )
+    assert.fieldEquals('ProfileLinkOverride', PROFILE_ADDRESS + '-x', 'revoked', 'false')
+
+    // Update to new value
+    const loaded = ProfileLinkOverride.load(PROFILE_ADDRESS + '-x')
+    if (loaded) {
+      loaded.value = 'newhandle'
+      loaded.attestationUID = Bytes.fromHexString(
+        '0x2222222222222222222222222222222222222222222222222222222222222222'
+      )
+      loaded.timestamp = BigInt.fromI32(2)
+      loaded.save()
+    }
+
+    assert.fieldEquals(
+      'ProfileLinkOverride',
+      PROFILE_ADDRESS + '-x',
+      'value',
+      'newhandle'
+    )
+    assert.fieldEquals('ProfileLinkOverride', PROFILE_ADDRESS + '-x', 'revoked', 'false')
+  })
+
+  test('marks ProfileLinkOverride as revoked', () => {
+    clearStore()
+
+    // Create override
+    const override = new ProfileLinkOverride(PROFILE_ADDRESS + '-discord')
+    override.profile = Address.fromString(PROFILE_ADDRESS)
+    override.key = 'discord'
+    override.value = 'user#1234'
+    override.attestationUID = Bytes.fromHexString(PROFILE_LINK_UID)
+    override.transactionHash = Bytes.fromHexString(
+      '0x1111111111111111111111111111111111111111111111111111111111111111'
+    )
+    override.timestamp = BigInt.fromI32(1)
+    override.creator = Address.fromString(PROFILE_ADDRESS)
+    override.revoked = false
+    override.revokedAt = null
+    override.revokedBy = null
+    override.revokedTxHash = null
+    override.save()
+
+    // Revoke it
+    const loaded = ProfileLinkOverride.load(PROFILE_ADDRESS + '-discord')
+    if (loaded) {
+      loaded.revoked = true
+      loaded.revokedAt = BigInt.fromI32(100)
+      loaded.revokedBy = Address.fromString(PROFILE_ADDRESS)
+      loaded.revokedTxHash = Bytes.fromHexString(
+        '0x3333333333333333333333333333333333333333333333333333333333333333'
+      )
+      loaded.save()
+    }
+
+    assert.fieldEquals(
+      'ProfileLinkOverride',
+      PROFILE_ADDRESS + '-discord',
+      'revoked',
+      'true'
+    )
+    assert.fieldEquals(
+      'ProfileLinkOverride',
+      PROFILE_ADDRESS + '-discord',
+      'revokedAt',
+      '100'
+    )
+    assert.fieldEquals(
+      'ProfileLinkOverride',
+      PROFILE_ADDRESS + '-discord',
+      'revokedBy',
+      PROFILE_ADDRESS
+    )
+  })
+
+  test('supports multiple link types per profile', () => {
+    clearStore()
+
+    // Create multiple link types for same profile
+    const website = new ProfileLinkOverride(PROFILE_ADDRESS + '-website')
+    website.profile = Address.fromString(PROFILE_ADDRESS)
+    website.key = 'website'
+    website.value = 'https://example.com'
+    website.attestationUID = Bytes.fromHexString(PROFILE_LINK_UID)
+    website.transactionHash = Bytes.fromHexString(
+      '0x1111111111111111111111111111111111111111111111111111111111111111'
+    )
+    website.timestamp = BigInt.fromI32(1)
+    website.creator = Address.fromString(PROFILE_ADDRESS)
+    website.revoked = false
+    website.revokedAt = null
+    website.revokedBy = null
+    website.revokedTxHash = null
+    website.save()
+
+    const twitter = new ProfileLinkOverride(PROFILE_ADDRESS + '-x')
+    twitter.profile = Address.fromString(PROFILE_ADDRESS)
+    twitter.key = 'x'
+    twitter.value = 'handle'
+    twitter.attestationUID = Bytes.fromHexString(
+      '0x2222222222222222222222222222222222222222222222222222222222222222'
+    )
+    twitter.transactionHash = Bytes.fromHexString(
+      '0x1111111111111111111111111111111111111111111111111111111111111111'
+    )
+    twitter.timestamp = BigInt.fromI32(2)
+    twitter.creator = Address.fromString(PROFILE_ADDRESS)
+    twitter.revoked = false
+    twitter.revokedAt = null
+    twitter.revokedBy = null
+    twitter.revokedTxHash = null
+    twitter.save()
+
+    assert.entityCount('ProfileLinkOverride', 2)
+    assert.fieldEquals(
+      'ProfileLinkOverride',
+      PROFILE_ADDRESS + '-website',
+      'key',
+      'website'
+    )
+    assert.fieldEquals('ProfileLinkOverride', PROFILE_ADDRESS + '-x', 'key', 'x')
+  })
+})
 
 describe('Eas Decode Tests', () => {
   test('decode propdate test - message type 0', () => {

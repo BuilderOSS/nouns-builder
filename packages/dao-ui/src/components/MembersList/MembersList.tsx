@@ -1,7 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
-import { useActiveMembers } from '@buildeross/hooks/useActiveMembers'
-import { DaoVoter } from '@buildeross/sdk/subgraph'
+import { daoActivityRequest, DaoVoter } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { Button, Flex, Text } from '@buildeross/zord'
 import axios from 'axios'
@@ -10,6 +9,9 @@ import useSWR from 'swr'
 
 import { MemberCard } from './MemberListCard'
 import { MemberCardSkeleton, MembersPanel } from './MembersListLayout'
+
+// Active threshold: 1 month (30 days) in seconds
+const ACTIVE_THRESHOLD_SECONDS = 30 * 24 * 60 * 60
 
 type MembersQuery = {
   membersList: DaoVoter[]
@@ -40,15 +42,53 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
     }
   )
 
-  const { activeMembers, isActiveMember } = useActiveMembers({
-    chainId: chain.id,
-    collectionAddress: token,
-  })
-
   const [showActiveOnly, setShowActiveOnly] = React.useState(false)
 
+  const { data: votingActivity, error: votingActivityError } = useSWR(
+    token && chain.id
+      ? ([SWR_KEYS.ACTIVE_MEMBERS, chain.id, token, 'recent-proposal-voters', 5] as const)
+      : null,
+    ([, chainId, collectionAddress, , recentProposalCount]) =>
+      daoActivityRequest(chainId, collectionAddress, {
+        recentProposalCount,
+      }),
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  )
+
+  const recentProposalVoters = React.useMemo(
+    () => new Set(votingActivity?.votes.map((vote) => vote.voter.toLowerCase())),
+    [votingActivity]
+  )
+
+  const daoContractAddresses = React.useMemo(
+    () =>
+      new Set(
+        Object.values(addresses)
+          .filter((address): address is NonNullable<typeof address> => !!address)
+          .map((address) => address.toLowerCase())
+      ),
+    [addresses]
+  )
+
+  const isActiveMember = React.useCallback(
+    (member: DaoVoter) => {
+      // DAO infrastructure contracts are never active members.
+      if (daoContractAddresses.has(member.voter.toLowerCase())) return false
+
+      const nowSeconds = Math.floor(Date.now() / 1000)
+      return (
+        member.lastActiveAt >= nowSeconds - ACTIVE_THRESHOLD_SECONDS ||
+        recentProposalVoters.has(member.voter.toLowerCase())
+      )
+    },
+    [daoContractAddresses, recentProposalVoters]
+  )
+
   const activeListedMembers = React.useMemo(
-    () => members?.filter((member) => isActiveMember(member.voter)),
+    () => members?.filter((member) => isActiveMember(member)),
     [members, isActiveMember]
   )
 
@@ -120,12 +160,15 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
         variant={showActiveOnly ? 'outline' : 'ghost'}
         size="sm"
         onClick={() => setShowActiveOnly(true)}
-        disabled={!activeMembers}
+        disabled={!activeListedMembers || !votingActivity}
         aria-pressed={showActiveOnly}
       >
         Active
-        {activeListedMembers && activeMembers ? ` (${activeListedMembers.length})` : ''}
+        {activeListedMembers && votingActivity ? ` (${activeListedMembers.length})` : ''}
       </Button>
+      {votingActivityError && !votingActivity && (
+        <Text role="status">Unable to load voting activity.</Text>
+      )}
     </Flex>
   )
 
@@ -164,7 +207,7 @@ export const MembersList = ({ totalSupply }: { totalSupply?: number }) => {
             key={member.voter}
             member={member}
             totalSupply={totalSupply}
-            isActive={isActiveMember(member.voter)}
+            isActive={isActiveMember(member)}
             auctionAddress={addresses.auction}
             treasuryAddress={addresses.treasury}
           />

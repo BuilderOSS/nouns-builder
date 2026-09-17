@@ -1,13 +1,10 @@
 import {
-  CANDIDATE_COMMENT_SCHEMA,
   CANDIDATE_COMMENT_SCHEMA_UID,
-  CANDIDATE_SPONSOR_SIGNATURE_SCHEMA,
   CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID,
 } from '@buildeross/constants/eas'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
-import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import type { Hex, WalletClient } from 'viem'
-import { getAddress, zeroHash } from 'viem'
+import { encodeAbiParameters, getAddress, zeroHash } from 'viem'
 import type { Config } from 'wagmi'
 
 import type { CandidateVoteSupportEnum } from './attestCandidateComment'
@@ -105,24 +102,26 @@ export async function attestCommentWithSignature(
     )
   }
 
-  // 2. Encode comment attestation data
-  const commentEncoder = new SchemaEncoder(CANDIDATE_COMMENT_SCHEMA)
-  const commentData = commentEncoder.encodeData([
-    { name: 'candidateId', value: candidateId, type: 'bytes32' },
-    { name: 'support', value: support, type: 'uint8' },
-    { name: 'comment', value: comment, type: 'string' },
-    { name: 'parentCommentUID', value: parentCommentUID, type: 'bytes32' },
-  ]) as Hex
+  const commentData = encodeAbiParameters(
+    [
+      { name: 'candidateId', type: 'bytes32' },
+      { name: 'support', type: 'uint8' },
+      { name: 'comment', type: 'string' },
+      { name: 'parentCommentUID', type: 'bytes32' },
+    ],
+    [candidateId, support, comment, parentCommentUID]
+  )
 
-  // 3. Encode signature attestation data
-  const signatureEncoder = new SchemaEncoder(CANDIDATE_SPONSOR_SIGNATURE_SCHEMA)
-  const signatureData = signatureEncoder.encodeData([
-    { name: 'candidateId', value: candidateId, type: 'bytes32' },
-    { name: 'proposalId', value: proposalId, type: 'bytes32' },
-    { name: 'nonce', value: nonce, type: 'uint256' },
-    { name: 'deadline', value: deadline, type: 'uint256' },
-    { name: 'signature', value: signature, type: 'bytes' },
-  ]) as Hex
+  const signatureData = encodeAbiParameters(
+    [
+      { name: 'candidateId', type: 'bytes32' },
+      { name: 'proposalId', type: 'bytes32' },
+      { name: 'nonce', type: 'uint256' },
+      { name: 'deadline', type: 'uint256' },
+      { name: 'signature', type: 'bytes' },
+    ],
+    [candidateId, proposalId, nonce, BigInt(deadline), signature]
+  )
 
   // 4. Create multi-attestation requests
   const recipient = getAddress(daoTokenAddress)

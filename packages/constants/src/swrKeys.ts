@@ -38,6 +38,7 @@ export const SWR_KEYS = {
   TOKEN_IMAGE: 'token-image',
   DASHBOARD: 'dashboard',
   DAO_MEMBERSHIP: 'dao-membership',
+  SPLIT_TERMS: 'split-terms',
   TOKEN_BALANCES: 'token-balances',
   TOKEN_METADATA: 'token-metadata',
   TOKEN_PRICES: 'token-prices',

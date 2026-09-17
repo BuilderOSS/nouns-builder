@@ -34,6 +34,7 @@ interface InternalFilterMode {
   enableFeed?: boolean
   enableFilters?: boolean
   enableInfiniteScroll?: boolean
+  emptyMessage?: string
 }
 
 // External filter mode - Feed accepts filters from parent
@@ -47,6 +48,7 @@ interface ExternalFilterMode {
   enableFeed?: boolean
   enableFilters?: never
   enableInfiniteScroll?: boolean
+  emptyMessage?: string
 }
 
 export type FeedProps = InternalFilterMode | ExternalFilterMode
@@ -244,9 +246,10 @@ export const Feed: React.FC<FeedProps> = (props) => {
       <Stack gap="x6" w="100%" pb="x4" style={{ maxWidth: '1440px' }}>
         {items.length === 0 && (
           <Text color="tertiary" textAlign="center" w="100%">
-            {!externalFilterMode && filterStore.hasActiveFilters()
-              ? 'No results match your current filters'
-              : 'No activity yet'}
+            {props.emptyMessage ??
+              (!externalFilterMode && filterStore.hasActiveFilters()
+                ? 'No results match your current filters'
+                : 'No activity yet')}
           </Text>
         )}
 

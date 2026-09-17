@@ -169,7 +169,7 @@ const CandidateCreatePageContent = () => {
     if (!daoTokenAddress) return false
 
     return !!ALLOWED_MIGRATION_DAOS.find((address) =>
-      isAddressEqual(address, daoTokenAddress)
+      isAddressEqual(address as AddressType, daoTokenAddress as AddressType)
     )
   }, [addresses.token])
 

@@ -3,7 +3,6 @@
   "description": "SDK for interacting with Nouns Builder contracts and subgraphs",
   "version": "0.3.2",
   "dependencies": {
-    "@ethereum-attestation-service/eas-sdk": "^2.7.0",
     "graphql": "^16.11.0",
     "graphql-request": "^7.1.2",
     "graphql-tag": "^2.12.6"
@@ -23,7 +22,8 @@
     "terser": "^5.46.1",
     "tsup": "^8.3.5",
     "tsx": "^4.21.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
   },
   "exports": {
     ".": {
@@ -88,6 +88,9 @@
     "generate-abis": "node ./scripts/generate-abis.js",
     "lint": "pnpm type-check && eslint src --fix",
     "parse-events": "tsx ./scripts/parse-events.ts",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
     "type-check": "tsc --noEmit"
   },
   "types": "./dist/index.d.ts"

@@ -7,6 +7,7 @@ import { DropMintWidget } from '@buildeross/ui/DropMintWidget'
 import { useLinks } from '@buildeross/ui/LinksProvider'
 import { MobileMintBar } from '@buildeross/ui/MobileMintBar'
 import { AnimatedModal } from '@buildeross/ui/Modal'
+import { SplitPayoutCard } from '@buildeross/ui/SplitPayout'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
@@ -18,6 +19,8 @@ import {
   dropInfoPanel,
   mintPanel,
   mintPanelDesktopOnly,
+  onlyMobile,
+  rightColumnSticky,
 } from './DropDetail.css'
 import { DropInfo } from './DropInfo'
 
@@ -104,25 +107,45 @@ export const DropDetail = ({
             />
           </Box>
 
-          {/* Right: Mint Widget (Desktop Only) */}
-          <Box
-            className={`${mintPanel} ${mintPanelDesktopOnly}`}
+          {/* Right column: Mint Widget + Split Payout (Desktop Only) */}
+          <Flex
+            direction="column"
+            gap="x8"
+            width="100%"
+            className={`${mintPanelDesktopOnly} ${rightColumnSticky}`}
             style={{ top: `${sidebarTopOffset}px` }}
             data-header-visible={scrollDirection !== 'down'}
           >
-            <DropMintWidget
+            {/* Mint Widget */}
+            <Box w="100%" className={mintPanel}>
+              <DropMintWidget
+                chainId={chainId as CHAIN_ID}
+                dropAddress={drop.id as Address}
+                symbol={drop.symbol}
+                priceEth={priceEth}
+                saleActive={saleActive}
+                saleNotStarted={saleNotStarted}
+                saleEnded={saleEnded}
+                saleStart={saleStart}
+                saleEnd={saleEnd}
+                editionSize={drop.editionSize}
+                maxPerAddress={parseInt(drop.maxSalePurchasePerAddress)}
+                unstyledContainer
+              />
+            </Box>
+
+            {/* Revenue Split (Desktop) */}
+            <SplitPayoutCard
               chainId={chainId as CHAIN_ID}
-              dropAddress={drop.id as Address}
-              symbol={drop.symbol}
-              priceEth={priceEth}
-              saleActive={saleActive}
-              saleNotStarted={saleNotStarted}
-              saleEnded={saleEnded}
-              saleStart={saleStart}
-              saleEnd={saleEnd}
-              editionSize={drop.editionSize}
-              maxPerAddress={parseInt(drop.maxSalePurchasePerAddress)}
-              unstyledContainer
+              fundsRecipient={drop.fundsRecipient as Address | undefined}
+            />
+          </Flex>
+
+          {/* Revenue Split (Mobile Only - appears below DropInfo) */}
+          <Box className={onlyMobile}>
+            <SplitPayoutCard
+              chainId={chainId as CHAIN_ID}
+              fundsRecipient={drop.fundsRecipient as Address | undefined}
             />
           </Box>
         </Box>
@@ -134,6 +157,8 @@ export const DropDetail = ({
         priceEth={priceEth}
         shareUrl={shareUrl}
         saleActive={saleActive}
+        saleNotStarted={saleNotStarted}
+        saleEnded={saleEnded}
         onMintClick={() => setIsMobileModalOpen(true)}
       />
 

@@ -257,18 +257,24 @@ export const Gallery: React.FC<GalleryProps> = ({
       case 'dao-post':
         startProposalDraft({
           transactionType: TransactionType.CONTENT_COIN,
+          title: 'Propose Post',
+          summary: 'Create a governance proposal to publish a post.',
         })
         onOpenProposalCreate('transactions')
         break
       case 'dao-drop':
         startProposalDraft({
           transactionType: TransactionType.DROPOSAL,
+          title: 'Propose Drop',
+          summary: 'Create a governance proposal to publish a drop.',
         })
         onOpenProposalCreate('transactions')
         break
       case 'dao-creator-coin':
         startProposalDraft({
           transactionType: TransactionType.CREATOR_COIN,
+          title: 'Propose Creator Coin',
+          summary: 'Create a governance proposal to launch the creator coin.',
         })
         onOpenProposalCreate('transactions')
         break

@@ -1,14 +1,12 @@
 import {
   AttestationParams,
-  CANDIDATE_COMMENT_SCHEMA,
   CANDIDATE_COMMENT_SCHEMA_UID,
   EAS_CONTRACT_ADDRESS,
   easAbi,
 } from '@buildeross/constants/eas'
 import { CHAIN_ID } from '@buildeross/types'
-import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import type { Hex } from 'viem'
-import { getAddress, zeroHash } from 'viem'
+import { encodeAbiParameters, getAddress, zeroHash } from 'viem'
 import type { Config } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -61,14 +59,15 @@ export async function attestCandidateComment(
     throw new Error(`EAS not supported on chain ${chainId}`)
   }
 
-  // 1. Encode data using SchemaEncoder
-  const schemaEncoder = new SchemaEncoder(CANDIDATE_COMMENT_SCHEMA)
-  const encodedData = schemaEncoder.encodeData([
-    { name: 'candidateId', value: candidateId, type: 'bytes32' },
-    { name: 'support', value: support, type: 'uint8' },
-    { name: 'comment', value: comment, type: 'string' },
-    { name: 'parentCommentUID', value: parentCommentUID, type: 'bytes32' },
-  ]) as Hex
+  const encodedData = encodeAbiParameters(
+    [
+      { name: 'candidateId', type: 'bytes32' },
+      { name: 'support', type: 'uint8' },
+      { name: 'comment', type: 'string' },
+      { name: 'parentCommentUID', type: 'bytes32' },
+    ],
+    [candidateId, support, comment, parentCommentUID]
+  )
 
   // 2. Create attestation params
   const attestParams: AttestationParams = {

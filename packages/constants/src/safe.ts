@@ -5,7 +5,6 @@ export const SAFE_APP_URL: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.OPTIMISM]: 'https://app.safe.global/apps/open?safe=oeth',
   [CHAIN_ID.BASE]: 'https://app.safe.global/apps/open?safe=base',
   [CHAIN_ID.SEPOLIA]: 'https://app.safe.global/apps/open?safe=sep',
-  [CHAIN_ID.OPTIMISM_SEPOLIA]: undefined,
   [CHAIN_ID.BASE_SEPOLIA]: 'https://app.safe.global/apps/open?safe=basesep',
 }
 
@@ -14,6 +13,5 @@ export const SAFE_HOME_URL: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.OPTIMISM]: 'https://app.safe.global/home?safe=oeth',
   [CHAIN_ID.BASE]: 'https://app.safe.global/home?safe=base',
   [CHAIN_ID.SEPOLIA]: 'https://app.safe.global/home?safe=sep',
-  [CHAIN_ID.OPTIMISM_SEPOLIA]: undefined,
   [CHAIN_ID.BASE_SEPOLIA]: 'https://app.safe.global/home?safe=basesep',
 }

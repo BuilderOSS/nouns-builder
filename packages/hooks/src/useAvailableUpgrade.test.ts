@@ -13,13 +13,9 @@ vi.mock('wagmi', async () => {
   }
 })
 
-vi.mock('@buildeross/sdk', async () => {
-  const mod = await vi.importActual<typeof import('@buildeross/sdk')>('@buildeross/sdk')
-  return {
-    ...mod,
-    getProposals: vi.fn(() => Promise.resolve({ proposals: [] })),
-  }
-})
+vi.mock('@buildeross/sdk/subgraph', () => ({
+  getProposals: vi.fn(() => Promise.resolve({ proposals: [] })),
+}))
 
 const chainId = CHAIN_ID.FOUNDRY
 

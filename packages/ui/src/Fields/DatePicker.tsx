@@ -45,6 +45,17 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const inputRef = React.useRef<HTMLInputElement | null>(null)
   const fpRef = React.useRef<flatpickr.Instance | null>(null)
 
+  /*
+    An altFormat turns on flatpickr's alt input — a second, display-formatted
+    element rendered next to this one. flatpickr hides the original by flipping
+    its `type` to "hidden", but React re-applies `type` on every update to an
+    <input>, so the raw input reappears beside the formatted one. Hide it from
+    our side instead, with an inline style rather than a class: flatpickr copies
+    className onto the alt input, so a hiding class would hide that too.
+  */
+  const usesAltInput = !!altFormat
+  const inputClass = !!errorMessage ? defaultInputErrorStyle : defaultInputStyle
+
   // Keep latest formik without forcing flatpickr re-init
   const formikRef = React.useRef<FormikProps<any>>(formik)
   React.useEffect(() => {
@@ -99,6 +110,16 @@ const DatePicker: React.FC<DatePickerProps> = ({
     }
   }, [autoSubmit, id, altFormat, dateFormat, enableTime, disabled])
 
+  /*
+    flatpickr snapshots the input's className onto the alt input at init, so the
+    error border would never reach the element the user actually sees. Re-apply
+    it whenever the validation state changes.
+  */
+  React.useEffect(() => {
+    const altInput = fpRef.current?.altInput
+    if (altInput) altInput.className = `${inputClass} form-control input`
+  }, [inputClass])
+
   // Sync external value -> flatpickr without firing change callbacks
   React.useEffect(() => {
     const fp = fpRef.current
@@ -113,12 +134,13 @@ const DatePicker: React.FC<DatePickerProps> = ({
       {inputLabel && <label className={defaultInputLabelStyle}>{inputLabel}</label>}
       <Box position="relative">
         <input
-          className={!!errorMessage ? defaultInputErrorStyle : defaultInputStyle}
+          className={inputClass}
           ref={inputRef}
           type="text"
           data-input
           placeholder={placeholder}
           disabled={disabled}
+          style={usesAltInput ? { display: 'none' } : undefined}
         />
         {errorMessage && (
           <Box

@@ -12,9 +12,11 @@ import { useBalance } from 'wagmi'
 
 import { statisticContent } from '../../styles/About.css'
 import { activitySection } from '../../styles/Section.css'
-import { NFTBalance } from './NFTBalance'
-import { TokenBalance } from './TokenBalance'
 import { treasuryWrapper } from './Treasury.css'
+import { TreasuryAnalytics } from './TreasuryAnalytics'
+import { TreasuryComposition } from './TreasuryComposition'
+import { TreasuryNfts } from './TreasuryNfts'
+import { TreasuryRecentTransactions } from './TreasuryRecentTransactions'
 
 export const Treasury = () => {
   const { addresses } = useDaoStore()
@@ -135,8 +137,10 @@ export const Treasury = () => {
           </Text>
         </Flex>
       </Grid>
-      <TokenBalance />
-      <NFTBalance />
+      <TreasuryComposition />
+      <TreasuryRecentTransactions />
+      <TreasuryNfts />
+      <TreasuryAnalytics />
     </Flex>
   )
 }

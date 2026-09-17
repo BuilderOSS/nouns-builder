@@ -1,14 +1,12 @@
 import {
   AttestationParams,
-  CANDIDATE_SPONSOR_SIGNATURE_SCHEMA,
   CANDIDATE_SPONSOR_SIGNATURE_SCHEMA_UID,
   EAS_CONTRACT_ADDRESS,
   easAbi,
 } from '@buildeross/constants/eas'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
-import { SchemaEncoder } from '@ethereum-attestation-service/eas-sdk'
 import type { Hex, WalletClient } from 'viem'
-import { getAddress, zeroHash } from 'viem'
+import { encodeAbiParameters, getAddress, zeroHash } from 'viem'
 import type { Config } from 'wagmi'
 import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
 
@@ -110,15 +108,16 @@ export async function attestCandidateSignature(
     )
   }
 
-  // 2. Encode the attestation data
-  const schemaEncoder = new SchemaEncoder(CANDIDATE_SPONSOR_SIGNATURE_SCHEMA)
-  const encodedData = schemaEncoder.encodeData([
-    { name: 'candidateId', value: candidateId, type: 'bytes32' },
-    { name: 'proposalId', value: proposalId, type: 'bytes32' },
-    { name: 'nonce', value: nonce, type: 'uint256' },
-    { name: 'deadline', value: deadline, type: 'uint256' },
-    { name: 'signature', value: signature, type: 'bytes' },
-  ]) as Hex
+  const encodedData = encodeAbiParameters(
+    [
+      { name: 'candidateId', type: 'bytes32' },
+      { name: 'proposalId', type: 'bytes32' },
+      { name: 'nonce', type: 'uint256' },
+      { name: 'deadline', type: 'uint256' },
+      { name: 'signature', type: 'bytes' },
+    ],
+    [candidateId, proposalId, nonce, BigInt(deadline), signature]
+  )
 
   // 3. Create attestation params
   const attestParams: AttestationParams = {
