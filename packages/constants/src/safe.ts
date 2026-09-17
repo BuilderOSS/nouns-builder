@@ -13,7 +13,6 @@ export const SAFE_SERVICE_URL: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.OPTIMISM]: 'https://safe-transaction-optimism.safe.global',
   [CHAIN_ID.BASE]: 'https://safe-transaction-base.safe.global',
   [CHAIN_ID.SEPOLIA]: 'https://safe-transaction-sepolia.safe.global',
-  [CHAIN_ID.OPTIMISM_SEPOLIA]: undefined,
   [CHAIN_ID.BASE_SEPOLIA]: 'https://safe-transaction-base-sepolia.safe.global',
 }
 
@@ -30,6 +29,5 @@ export const SAFE_CHAIN_PREFIX: Partial<Record<CHAIN_ID, string>> = {
   [CHAIN_ID.OPTIMISM]: 'oeth',
   [CHAIN_ID.BASE]: 'base',
   [CHAIN_ID.SEPOLIA]: 'sep',
-  [CHAIN_ID.OPTIMISM_SEPOLIA]: undefined,
   [CHAIN_ID.BASE_SEPOLIA]: 'basesep',
 }

@@ -22,7 +22,7 @@ import {
   validateWebsiteUrl,
 } from 'src/utils/profileIdentity'
 import { encodeAbiParameters, zeroHash } from 'viem'
-import { useAccount, useConfig, useSwitchChain } from 'wagmi'
+import { useAccount, useConfig } from 'wagmi'
 import { simulateContract } from 'wagmi/actions'
 
 import {
@@ -54,10 +54,8 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
 }) => {
   const config = useConfig()
   const { chainId } = useAccount()
-  const { switchChainAsync } = useSwitchChain()
   const [error, setError] = React.useState<string | null>(null)
   const [isSaving, setIsSaving] = React.useState(false)
-  const [isSwitchingNetwork, setIsSwitchingNetwork] = React.useState(false)
   const mountedRef = React.useRef(true)
 
   // Cleanup on unmount
@@ -87,7 +85,6 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
     resetForm()
     setError(null)
     setIsSaving(false)
-    setIsSwitchingNetwork(false)
   }, [open, resetForm])
 
   const buildUpdates = (values: ProfileLinksFormValues): ProfileLinkUpdate[] => {
@@ -178,24 +175,11 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
 
     setError(null)
     setIsSaving(true)
-    setIsSwitchingNetwork(false)
 
     try {
-      // Handle chain switching
-      if (chainId !== PROFILE_LINK_EAS_CHAIN_ID && switchChainAsync) {
-        try {
-          if (!mountedRef.current) return
-          setIsSwitchingNetwork(true)
-          await switchChainAsync({ chainId: PROFILE_LINK_EAS_CHAIN_ID })
-          if (!mountedRef.current) return
-          setIsSwitchingNetwork(false)
-        } catch (switchError) {
-          if (!mountedRef.current) return
-          setIsSwitchingNetwork(false)
-          throw new Error(
-            'Network switch was rejected. Please switch to Base network to save profile links.'
-          )
-        }
+      // Verify correct chain - ContractButton should have switched already
+      if (chainId !== PROFILE_LINK_EAS_CHAIN_ID) {
+        throw new Error('Please switch to Base network to save profile links.')
       }
 
       const profileLinkChainId =
@@ -240,7 +224,6 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
       if (lowerMessage.includes('user rejected')) {
         setError('Transaction was cancelled')
         setIsSaving(false)
-        setIsSwitchingNetwork(false)
         return
       }
 
@@ -255,7 +238,6 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
           'Base RPC is rate limiting requests. Please wait a minute and try again, or switch to a wallet/RPC that is not rate-limited.'
         )
         setIsSaving(false)
-        setIsSwitchingNetwork(false)
         return
       }
 
@@ -267,13 +249,11 @@ export const ProfileLinksEditModal: React.FC<ProfileLinksEditModalProps> = ({
           'Profile links update failed. Please check your wallet and try again.'
       )
       setIsSaving(false)
-      setIsSwitchingNetwork(false)
     }
   }
 
-  const isLoading = isSaving || isSwitchingNetwork
+  const isLoading = isSaving
   const getButtonText = () => {
-    if (isSwitchingNetwork) return 'Switching network...'
     if (isSaving) return 'Saving...'
     return 'Save links'
   }
