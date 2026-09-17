@@ -115,11 +115,14 @@ export const PropDateForm = ({
       setErrorMessage(null)
 
       if (!tokenAddress) {
+        console.error('[PropDateForm] No token address available')
+        setErrorMessage('DAO token address is not available. Please try again.')
         return
       }
 
       const easContractAddress = EAS_CONTRACT_ADDRESS[chainId as CHAIN_ID]
       if (!easContractAddress) {
+        console.error('[PropDateForm] No EAS contract for chain:', chainId)
         setErrorMessage('Propdates are not supported on this network.')
         return
       }
@@ -180,7 +183,7 @@ export const PropDateForm = ({
         await awaitSubgraphSync(chainId, receipt.blockNumber)
         setIsTxSuccess(true)
       } catch (err: unknown) {
-        console.error('Error submitting propdate (signing):', err)
+        console.error('[PropDateForm] Error submitting propdate:', err)
         const message = getErrorMessage(err)
         setErrorMessage(message)
       } finally {

@@ -216,6 +216,11 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
 
   const onDisconnect = useWalletDisconnect()
 
+  const handleDisconnect = React.useCallback(() => {
+    onSetActiveDropdown(undefined)
+    onDisconnect()
+  }, [onSetActiveDropdown, onDisconnect])
+
   const renderConnectedUserCommon = ({ isStatic = false }: { isStatic?: boolean }) => (
     <>
       <Flex
@@ -254,7 +259,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           className={disconnectButton}
           variant={'outline'}
           color="negative"
-          onClick={onDisconnect}
+          onClick={handleDisconnect}
           id={'close-modal'}
         >
           Disconnect
