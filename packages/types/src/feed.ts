@@ -83,6 +83,7 @@ export type ProposalUpdatePostedFeedItem = BaseFeedItem & {
   proposer: AddressType
   messageType: number
   message: string
+  messageId: BytesType
   originalMessageId: BytesType
 }
 
