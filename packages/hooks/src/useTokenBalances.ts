@@ -65,6 +65,8 @@ export const useTokenBalances = (
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      dedupingInterval: 300000, // 5 minutes - match backend cache TTL
+      keepPreviousData: true, // Prevent loading flash when refetching
     }
   )
 

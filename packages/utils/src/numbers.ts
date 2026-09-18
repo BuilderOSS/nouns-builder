@@ -193,3 +193,13 @@ export function formatPrice(price: number | null | undefined): string {
 
   return `${sign}$${formatted}`
 }
+
+/**
+ * Format USD value with compact notation (e.g., $1.2k, $3.4M).
+ * Used for displaying token values in dropdowns and treasury views.
+ */
+export const formatUsd = (n: number): string => {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}k`
+  return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}

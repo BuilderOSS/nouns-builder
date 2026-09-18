@@ -37,7 +37,7 @@ export async function createPermit2Signature({
   walletClient,
   publicClient,
 }: {
-  chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
+  chainId: CHAIN_ID
   token: Address
   spender: Address
   amount: bigint

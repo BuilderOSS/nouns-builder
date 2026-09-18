@@ -21,13 +21,6 @@ export const tokenUsdValue = (
   return 0
 }
 
-/** Compact USD, e.g. $1.2k / $3.4M. */
-export const formatUsd = (n: number): string => {
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}k`
-  return `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`
-}
-
 /** Human token amount, up to 4 fractional digits, trailing zeros trimmed. */
 export const formatTokenAmount = (raw: bigint, decimals: number): string => {
   if (raw === 0n) return '0'

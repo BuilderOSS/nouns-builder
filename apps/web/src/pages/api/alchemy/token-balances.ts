@@ -43,6 +43,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       })
     }
 
+    // Cache for 5 minutes with 2 minute stale-while-revalidate
+    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=120')
+
     // Data is already sanitized by the service
     return res.status(200).json({
       data: result.data,

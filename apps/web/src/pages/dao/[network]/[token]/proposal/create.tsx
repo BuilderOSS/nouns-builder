@@ -749,7 +749,7 @@ const CreateProposalPage: NextPageWithLayout = () => {
 
         {continueHelperText && (
           <Flex align={'center'} gap={'x2'} mb={'x4'}>
-            <Text variant={'paragraph-sm'} color={'negative'}>
+            <Text variant={'paragraph-sm'} color={'warning'}>
               {continueHelperText}
             </Text>
             {createStage === 'transactions' && hasDraftBlockers && (

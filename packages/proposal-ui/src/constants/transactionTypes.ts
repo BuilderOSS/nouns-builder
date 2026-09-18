@@ -160,4 +160,10 @@ export const TRANSACTION_TYPES: TransactionTypesPropsMap = {
     icon: 'content-coin',
     iconBackdrop: iconBackdrop(color.accent),
   },
+  [TransactionType.UNISWAP_SWAP]: {
+    title: 'Uniswap',
+    subTitle: 'Swap tokens using Uniswap',
+    icon: 'swap',
+    iconBackdrop: iconBackdrop(color.accent),
+  },
 }
