@@ -429,7 +429,7 @@ export async function executeSwap({
   publicClient,
   validateTransaction = true,
 }: {
-  chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
+  chainId: CHAIN_ID
   path: SwapPath
   amountIn: bigint
   minAmountOut: bigint

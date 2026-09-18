@@ -18,11 +18,15 @@ export function getWrappedTokenAddress(chainId: number | string): Address {
 }
 
 /**
- * Check if a token address is native ETH (NATIVE_TOKEN_ADDRESS)
+ * Check if a token address is native ETH
+ * Checks both NATIVE_TOKEN_ADDRESS (0xEee...) and zero address (0x000...)
  */
 export function isNativeEth(tokenAddress: string | AddressType): boolean {
   const normalized = tokenAddress.toLowerCase()
-  return normalized === NATIVE_TOKEN_ADDRESS.toLowerCase()
+  return (
+    normalized === NATIVE_TOKEN_ADDRESS.toLowerCase() ||
+    normalized === zeroAddress.toLowerCase()
+  )
 }
 
 // WETH9 ABI - deposit and approve functions

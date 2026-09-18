@@ -24,6 +24,7 @@ export enum TransactionType {
   AIRDROP_TOKENS = 'airdrop-tokens',
   CREATOR_COIN = 'creator-coin',
   CONTENT_COIN = 'content-coin',
+  UNISWAP_SWAP = 'uniswap-swap',
 }
 
 export type Transaction = {

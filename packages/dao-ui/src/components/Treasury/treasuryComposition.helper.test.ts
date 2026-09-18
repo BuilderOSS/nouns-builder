@@ -1,10 +1,10 @@
+import { formatUsd } from '@buildeross/utils/numbers'
 import { parseEther, parseUnits } from 'viem'
 import { describe, expect, it } from 'vitest'
 
 import {
   computeDonutArcs,
   formatTokenAmount,
-  formatUsd,
   sliceColor,
   tokenUsdValue,
 } from './treasuryComposition.helper'
@@ -27,7 +27,7 @@ describe('formatUsd', () => {
   it('compacts thousands and millions', () => {
     expect(formatUsd(1234)).toBe('$1.2k')
     expect(formatUsd(2_500_000)).toBe('$2.5M')
-    expect(formatUsd(42)).toBe('$42')
+    expect(formatUsd(42)).toBe('$42.00')
   })
 })
 

@@ -895,6 +895,9 @@ importers:
       '@buildeross/stores':
         specifier: workspace:*
         version: link:../stores
+      '@buildeross/swap':
+        specifier: workspace:*
+        version: link:../swap
       '@buildeross/test-fixtures':
         specifier: workspace:*
         version: link:../test-fixtures
@@ -1233,6 +1236,9 @@ importers:
       '@smartinvoicexyz/types':
         specifier: ^0.1.27
         version: 0.1.28(@emotion/react@11.14.0(@types/react@19.2.2)(react@19.2.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.2.2)(react@19.2.1))(@types/react@19.2.2)(react@19.2.1))(@types/node@22.18.10)(@types/react@19.2.2)(bufferutil@4.0.9)(encoding@0.1.13)(framer-motion@12.23.24(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(graphql-ws@6.0.6(crossws@0.3.5)(graphql@16.11.0)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(graphql@16.11.0)(react-dom@19.2.1(react@19.2.1))(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
+      '@tanstack/react-query':
+        specifier: ^5.90.3
+        version: 5.90.3(react@19.2.1)
       '@types/lodash':
         specifier: ^4.17.17
         version: 4.17.20
