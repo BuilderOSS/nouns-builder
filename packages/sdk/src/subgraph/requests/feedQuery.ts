@@ -109,6 +109,7 @@ function transformFeedEvent(event: FeedEvent, chainId: CHAIN_ID): FeedItem | nul
         proposer: event.proposal.proposer,
         messageType: event.update.messageType,
         message: event.update.message,
+        messageId: event.update.id as `0x${string}`,
         originalMessageId: event.update.originalMessageId,
       }
     }

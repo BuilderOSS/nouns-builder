@@ -65,6 +65,7 @@ query feedEvents(
         proposer
       }
       update {
+        id
         messageType
         message
         originalMessageId
