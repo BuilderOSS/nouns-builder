@@ -9,10 +9,11 @@ import { formatDuration } from '@buildeross/utils'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
 import { isNativeEth } from '@buildeross/utils/sablier'
+import { getWrappedTokenAddress } from '@buildeross/utils/weth'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import type { FormikHelpers } from 'formik'
 import { Form, Formik, useFormikContext } from 'formik'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { encodeFunctionData, formatUnits, getAddress, parseUnits } from 'viem'
 import { useReadContracts } from 'wagmi'
 
@@ -50,6 +51,7 @@ const FormikStateSyncer: React.FC<{
   setSwapType: (type: 'exactIn' | 'exactOut') => void
   setDeadline: (deadline: number) => void
   totalExecutionDelay?: number
+  isWrapOrUnwrap: boolean
 }> = ({
   setInputTokenAddress,
   setOutputTokenAddress,
@@ -60,6 +62,7 @@ const FormikStateSyncer: React.FC<{
   setSwapType,
   setDeadline,
   totalExecutionDelay,
+  isWrapOrUnwrap,
 }) => {
   const { values } = useFormikContext<UniswapSwapFormValues>()
 
@@ -89,13 +92,24 @@ const FormikStateSyncer: React.FC<{
   }, [values.outputTokenMetadata?.decimals, setOutputTokenDecimals])
 
   // Sync slippage
+  // For wrap/unwrap transactions, always use 0% slippage
   useEffect(() => {
-    const slippageValue =
-      values.slippageType === 'preset'
-        ? (values.slippagePreset ?? 10) / 100
-        : parseFloat(values.slippageCustom ?? '10') / 100
-    setSlippage(slippageValue)
-  }, [values.slippageType, values.slippagePreset, values.slippageCustom, setSlippage])
+    if (isWrapOrUnwrap) {
+      setSlippage(0)
+    } else {
+      const slippageValue =
+        values.slippageType === 'preset'
+          ? (values.slippagePreset ?? 10) / 100
+          : parseFloat(values.slippageCustom ?? '10') / 100
+      setSlippage(slippageValue)
+    }
+  }, [
+    values.slippageType,
+    values.slippagePreset,
+    values.slippageCustom,
+    setSlippage,
+    isWrapOrUnwrap,
+  ])
 
   // Sync swap type based on direction
   // buy = exactOut (specify output amount), sell = exactIn (specify input amount)
@@ -130,6 +144,27 @@ export const UniswapSwap: React.FC = () => {
 
   // Debounce amount input to reduce API calls (500ms delay)
   const debouncedAmountIn = useDebounce(amountIn, 500)
+
+  // Detect if this is a wrap (ETH → WETH) or unwrap (WETH → ETH) transaction
+  const isWrapOrUnwrap = useMemo(() => {
+    if (!inputTokenAddress || !outputTokenAddress) return false
+
+    try {
+      const wethAddress = getWrappedTokenAddress(chainId).toLowerCase()
+      const inputAddr = inputTokenAddress.toLowerCase()
+      const outputAddr = outputTokenAddress.toLowerCase()
+
+      // Wrap: ETH → WETH
+      const isWrap = isNativeEth(inputAddr) && outputAddr === wethAddress
+      // Unwrap: WETH → ETH
+      const isUnwrap = inputAddr === wethAddress && isNativeEth(outputAddr)
+
+      return isWrap || isUnwrap
+    } catch {
+      // If getWrappedTokenAddress throws (unsupported chain), return false
+      return false
+    }
+  }, [inputTokenAddress, outputTokenAddress, chainId])
 
   // Fetch governance configuration to calculate proposal execution timeline
   const { data: governanceConfigData } = useReadContracts({
@@ -294,8 +329,10 @@ export const UniswapSwap: React.FC = () => {
       }
 
       // Calculate slippage from form (for display purposes)
-      const slippage =
-        values.slippageType === 'preset'
+      // For wrap/unwrap, slippage is always 0%
+      const slippage = isWrapOrUnwrap
+        ? 0
+        : values.slippageType === 'preset'
           ? (values.slippagePreset ?? 10) / 100
           : parseFloat(values.slippageCustom ?? '10') / 100
 
@@ -474,6 +511,7 @@ export const UniswapSwap: React.FC = () => {
                 setSwapType={setSwapType}
                 setDeadline={setDeadline}
                 totalExecutionDelay={totalExecutionDelay}
+                isWrapOrUnwrap={isWrapOrUnwrap}
               />
               <Box
                 data-testid="uniswap-v4-swap-form"
@@ -650,10 +688,26 @@ export const UniswapSwap: React.FC = () => {
                       }}
                     />
 
-                    <SlippageSelector
-                      formik={formik}
-                      executionDelayText={executionDelayText}
-                    />
+                    {isWrapOrUnwrap ? (
+                      <Box
+                        p="x4"
+                        borderRadius="curved"
+                        backgroundColor="background2"
+                        borderWidth="thin"
+                        borderStyle="solid"
+                        borderColor="border"
+                      >
+                        <Text fontSize="14" color="text3">
+                          ℹ️ Slippage is set to 0% for ETH/WETH wrap and unwrap transactions,
+                          as these operations are not affected by market price changes.
+                        </Text>
+                      </Box>
+                    ) : (
+                      <SlippageSelector
+                        formik={formik}
+                        executionDelayText={executionDelayText}
+                      />
+                    )}
 
                     <DeadlineSelector
                       formik={formik}
