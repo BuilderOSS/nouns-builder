@@ -37,134 +37,11 @@ const durationToSeconds = (duration: Duration): number => {
   return days * 86400 + hours * 3600 + minutes * 60 + seconds
 }
 
-/**
- * Helper component to sync Formik values to component state using useEffect.
- * This runs outside the render cycle and follows React best practices.
- */
-const FormikStateSyncer: React.FC<{
-  setInputTokenAddress: (addr: AddressType | undefined) => void
-  setOutputTokenAddress: (addr: AddressType | undefined) => void
-  setAmountIn: (amount: string | undefined) => void
-  setInputTokenDecimals: (decimals: number) => void
-  setOutputTokenDecimals: (decimals: number) => void
-  setSlippage: (slippage: number) => void
-  setSwapType: (type: 'exactIn' | 'exactOut') => void
-  setDeadline: (deadline: number) => void
-  totalExecutionDelay?: number
-  isWrapOrUnwrap: boolean
-}> = ({
-  setInputTokenAddress,
-  setOutputTokenAddress,
-  setAmountIn,
-  setInputTokenDecimals,
-  setOutputTokenDecimals,
-  setSlippage,
-  setSwapType,
-  setDeadline,
-  totalExecutionDelay,
-  isWrapOrUnwrap,
-}) => {
-  const { values } = useFormikContext<UniswapSwapFormValues>()
-
-  // Sync input token address
-  useEffect(() => {
-    setInputTokenAddress(values.inputTokenMetadata?.address)
-  }, [values.inputTokenMetadata?.address, setInputTokenAddress])
-
-  // Sync output token address
-  useEffect(() => {
-    setOutputTokenAddress(values.outputTokenMetadata?.address)
-  }, [values.outputTokenMetadata?.address, setOutputTokenAddress])
-
-  // Sync amount input
-  useEffect(() => {
-    setAmountIn(values.amountIn)
-  }, [values.amountIn, setAmountIn])
-
-  // Sync input token decimals
-  useEffect(() => {
-    setInputTokenDecimals(values.inputTokenMetadata?.decimals ?? 18)
-  }, [values.inputTokenMetadata?.decimals, setInputTokenDecimals])
-
-  // Sync output token decimals
-  useEffect(() => {
-    setOutputTokenDecimals(values.outputTokenMetadata?.decimals ?? 18)
-  }, [values.outputTokenMetadata?.decimals, setOutputTokenDecimals])
-
-  // Sync slippage
-  // For wrap/unwrap transactions, always use 0% slippage
-  useEffect(() => {
-    if (isWrapOrUnwrap) {
-      setSlippage(0)
-    } else {
-      const slippageValue =
-        values.slippageType === 'preset'
-          ? (values.slippagePreset ?? 10) / 100
-          : parseFloat(values.slippageCustom ?? '10') / 100
-      setSlippage(slippageValue)
-    }
-  }, [
-    values.slippageType,
-    values.slippagePreset,
-    values.slippageCustom,
-    setSlippage,
-    isWrapOrUnwrap,
-  ])
-
-  // Sync swap type based on direction
-  // buy = exactOut (specify output amount), sell = exactIn (specify input amount)
-  useEffect(() => {
-    setSwapType(values.swapDirection === 'buy' ? 'exactOut' : 'exactIn')
-  }, [values.swapDirection, setSwapType])
-
-  // The form stores a duration; the Uniswap API expects an absolute Unix timestamp.
-  useEffect(() => {
-    const totalDeadlineFromSubmission =
-      (totalExecutionDelay ?? 0) + durationToSeconds(values.deadline)
-    setDeadline(Math.floor(Date.now() / 1000) + totalDeadlineFromSubmission)
-  }, [values.deadline, totalExecutionDelay, setDeadline])
-
-  return null // This component doesn't render anything
-}
 
 export const UniswapSwap: React.FC = () => {
   const { id: chainId } = useChainStore((s) => s.chain)
   const { addTransaction, resetTransactionType } = useTransactionComposer()
   const addresses = useDaoStore((state) => state.addresses)
-
-  // State for form values that API needs
-  const [inputTokenAddress, setInputTokenAddress] = useState<AddressType | undefined>()
-  const [outputTokenAddress, setOutputTokenAddress] = useState<AddressType | undefined>()
-  const [amountIn, setAmountIn] = useState<string | undefined>()
-  const [inputTokenDecimals, setInputTokenDecimals] = useState<number>(18)
-  const [outputTokenDecimals, setOutputTokenDecimals] = useState<number>(18)
-  const [slippage, setSlippage] = useState<number>(0.005) // 0.5% default
-  const [swapType, setSwapType] = useState<'exactIn' | 'exactOut'>('exactIn')
-  const [deadline, setDeadline] = useState<number>()
-
-  // Debounce amount input to reduce API calls (500ms delay)
-  const debouncedAmountIn = useDebounce(amountIn, 500)
-
-  // Detect if this is a wrap (ETH → WETH) or unwrap (WETH → ETH) transaction
-  const isWrapOrUnwrap = useMemo(() => {
-    if (!inputTokenAddress || !outputTokenAddress) return false
-
-    try {
-      const wethAddress = getWrappedTokenAddress(chainId).toLowerCase()
-      const inputAddr = inputTokenAddress.toLowerCase()
-      const outputAddr = outputTokenAddress.toLowerCase()
-
-      // Wrap: ETH → WETH
-      const isWrap = isNativeEth(inputAddr) && outputAddr === wethAddress
-      // Unwrap: WETH → ETH
-      const isUnwrap = inputAddr === wethAddress && isNativeEth(outputAddr)
-
-      return isWrap || isUnwrap
-    } catch {
-      // If getWrappedTokenAddress throws (unsupported chain), return false
-      return false
-    }
-  }, [inputTokenAddress, outputTokenAddress, chainId])
 
   // Fetch governance configuration to calculate proposal execution timeline
   const { data: governanceConfigData } = useReadContracts({
@@ -236,7 +113,7 @@ export const UniswapSwap: React.FC = () => {
         timelockDelay
       : undefined
 
-  // Convert to Duration type for formatting
+  // Format the execution delay for display
   const executionDelayDuration: Duration | undefined = totalExecutionDelay
     ? {
         days: Math.floor(totalExecutionDelay / 86400),
@@ -246,33 +123,6 @@ export const UniswapSwap: React.FC = () => {
       }
     : undefined
 
-  // Fetch swap transaction from Uniswap API
-  // Use debounced amount to avoid excessive API calls while user is typing
-  const swapEnabled =
-    !!inputTokenAddress &&
-    !!outputTokenAddress &&
-    !!debouncedAmountIn &&
-    debouncedAmountIn !== '0'
-
-  const {
-    swap: swapData,
-    isLoading: isLoadingSwap,
-    error: swapError,
-  } = useUniswapSwap({
-    chainId,
-    tokenIn: inputTokenAddress,
-    tokenOut: outputTokenAddress,
-    amount: debouncedAmountIn, // Use debounced value for API calls
-    inputTokenDecimals, // Pass decimals for wei conversion
-    outputTokenDecimals, // Pass output decimals for wei conversion
-    type: swapType, // Use dynamic swap type based on swapDirection
-    slippageTolerance: (slippage * 100).toFixed(2),
-    sender: addresses.treasury,
-    deadline,
-    enabled: swapEnabled,
-  })
-
-  // Format the execution delay for display
   const executionDelayText = executionDelayDuration
     ? formatDuration(executionDelayDuration)
     : undefined
@@ -309,7 +159,9 @@ export const UniswapSwap: React.FC = () => {
 
   const handleSubmit = async (
     values: UniswapSwapFormValues,
-    actions: FormikHelpers<UniswapSwapFormValues>
+    actions: FormikHelpers<UniswapSwapFormValues>,
+    swapData: any,
+    swapError: Error | null
   ) => {
     if (!values.inputTokenMetadata || !values.outputTokenMetadata) {
       return
@@ -319,6 +171,7 @@ export const UniswapSwap: React.FC = () => {
       const inputSymbol = values.inputTokenMetadata.symbol
       const outputSymbol = values.outputTokenMetadata.symbol
       const inputTokenAddress = values.inputTokenMetadata.address
+      const outputTokenAddress = values.outputTokenMetadata.address
 
       if (!swapData) {
         throw new Error('Unable to get swap quote from Uniswap API')
@@ -330,6 +183,18 @@ export const UniswapSwap: React.FC = () => {
 
       // Calculate slippage from form (for display purposes)
       // For wrap/unwrap, slippage is always 0%
+      let isWrapOrUnwrap = false
+      try {
+        const wethAddress = getWrappedTokenAddress(chainId).toLowerCase()
+        const inputAddr = inputTokenAddress.toLowerCase()
+        const outputAddr = outputTokenAddress.toLowerCase()
+        const isWrap = isNativeEth(inputAddr) && outputAddr === wethAddress
+        const isUnwrap = inputAddr === wethAddress && isNativeEth(outputAddr)
+        isWrapOrUnwrap = isWrap || isUnwrap
+      } catch {
+        // ignore
+      }
+
       const slippage = isWrapOrUnwrap
         ? 0
         : values.slippageType === 'preset'
@@ -444,7 +309,7 @@ export const UniswapSwap: React.FC = () => {
         initialValues={initialValues}
         enableReinitialize={true}
         validationSchema={UniswapSwapSchema()}
-        onSubmit={handleSubmit}
+        onSubmit={() => {}}
         validateOnBlur
         validateOnMount={false}
         validateOnChange={false}
@@ -456,12 +321,119 @@ export const UniswapSwap: React.FC = () => {
           const outputSymbol = formik.values.outputTokenMetadata?.symbol ?? ''
           const outputDecimals = formik.values.outputTokenMetadata?.decimals ?? 18
 
+          // Derive all API parameters atomically from Formik values
+          const apiParams = useMemo(() => {
+            const inputTokenAddress = formik.values.inputTokenMetadata?.address
+            const outputTokenAddress = formik.values.outputTokenMetadata?.address
+            const inputTokenDecimals = formik.values.inputTokenMetadata?.decimals ?? 18
+            const outputTokenDecimals = formik.values.outputTokenMetadata?.decimals ?? 18
+            const amountIn = formik.values.amountIn
+            const swapType = formik.values.swapDirection === 'buy' ? 'exactOut' : 'exactIn'
+
+            // Calculate slippage - check for wrap/unwrap
+            let slippage = 0
+            if (inputTokenAddress && outputTokenAddress) {
+              try {
+                const wethAddress = getWrappedTokenAddress(chainId).toLowerCase()
+                const inputAddr = inputTokenAddress.toLowerCase()
+                const outputAddr = outputTokenAddress.toLowerCase()
+                const isWrap = isNativeEth(inputAddr) && outputAddr === wethAddress
+                const isUnwrap = inputAddr === wethAddress && isNativeEth(outputAddr)
+
+                if (isWrap || isUnwrap) {
+                  slippage = 0 // Wrap/unwrap always use 0% slippage
+                } else {
+                  slippage =
+                    formik.values.slippageType === 'preset'
+                      ? (formik.values.slippagePreset ?? 10) / 100
+                      : parseFloat(formik.values.slippageCustom ?? '10') / 100
+                }
+              } catch {
+                slippage =
+                  formik.values.slippageType === 'preset'
+                    ? (formik.values.slippagePreset ?? 10) / 100
+                    : parseFloat(formik.values.slippageCustom ?? '10') / 100
+              }
+            }
+
+            // Calculate deadline
+            const totalDeadlineFromSubmission =
+              (totalExecutionDelay ?? 0) + durationToSeconds(formik.values.deadline)
+            const deadline = Math.floor(Date.now() / 1000) + totalDeadlineFromSubmission
+
+            return {
+              inputTokenAddress,
+              outputTokenAddress,
+              inputTokenDecimals,
+              outputTokenDecimals,
+              amountIn,
+              swapType,
+              slippage,
+              deadline,
+            }
+          }, [
+            formik.values.inputTokenMetadata,
+            formik.values.outputTokenMetadata,
+            formik.values.amountIn,
+            formik.values.swapDirection,
+            formik.values.slippageType,
+            formik.values.slippagePreset,
+            formik.values.slippageCustom,
+            formik.values.deadline,
+            totalExecutionDelay,
+            chainId,
+          ])
+
+          // Debounce the entire params object to keep everything in sync
+          const debouncedParams = useDebounce(apiParams, 500)
+
+          // Detect wrap/unwrap for UI
+          const isWrapOrUnwrap = useMemo(() => {
+            const { inputTokenAddress, outputTokenAddress } = apiParams
+            if (!inputTokenAddress || !outputTokenAddress) return false
+
+            try {
+              const wethAddress = getWrappedTokenAddress(chainId).toLowerCase()
+              const inputAddr = inputTokenAddress.toLowerCase()
+              const outputAddr = outputTokenAddress.toLowerCase()
+              const isWrap = isNativeEth(inputAddr) && outputAddr === wethAddress
+              const isUnwrap = inputAddr === wethAddress && isNativeEth(outputAddr)
+              return isWrap || isUnwrap
+            } catch {
+              return false
+            }
+          }, [apiParams.inputTokenAddress, apiParams.outputTokenAddress, chainId])
+
+          // Fetch swap transaction from Uniswap API using debounced params
+          const swapEnabled =
+            !!debouncedParams.inputTokenAddress &&
+            !!debouncedParams.outputTokenAddress &&
+            !!debouncedParams.amountIn &&
+            debouncedParams.amountIn !== '0'
+
+          const {
+            swap: swapData,
+            isLoading: isLoadingSwap,
+            error: swapError,
+            refetch: refetchSwap,
+          } = useUniswapSwap({
+            chainId,
+            tokenIn: debouncedParams.inputTokenAddress,
+            tokenOut: debouncedParams.outputTokenAddress,
+            amount: debouncedParams.amountIn,
+            inputTokenDecimals: debouncedParams.inputTokenDecimals,
+            outputTokenDecimals: debouncedParams.outputTokenDecimals,
+            type: debouncedParams.swapType as 'exactIn' | 'exactOut',
+            slippageTolerance: (debouncedParams.slippage * 100).toFixed(2),
+            sender: addresses.treasury,
+            deadline: debouncedParams.deadline,
+            enabled: swapEnabled,
+          })
+
           // Parse amount for validation and quote
           let amountInBigInt: bigint | null = null
           if (formik.values.amountIn && DECIMAL_REGEX.test(formik.values.amountIn)) {
             try {
-              // For 'sell' (exactIn): amount is input token
-              // For 'buy' (exactOut): amount is output token
               const decimalsToUse =
                 formik.values.swapDirection === 'sell' ? inputDecimals : outputDecimals
               amountInBigInt = parseUnits(formik.values.amountIn, decimalsToUse)
@@ -470,14 +442,10 @@ export const UniswapSwap: React.FC = () => {
             }
           }
 
-          // Calculate slippage for display
-          const currentSlippage =
-            formik.values.slippageType === 'preset'
-              ? (formik.values.slippagePreset ?? 10) / 100
-              : parseFloat(formik.values.slippageCustom ?? '10') / 100
+          // Calculate slippage for display (use current, not debounced)
+          const currentSlippage = apiParams.slippage
 
           // For buy mode (exactOut), calculate maximum input including slippage
-          // The quote gives us the expected input, but we might need to pay more due to slippage
           const maxInputForBuy = swapData?.quote?.amount
             ? BigInt(swapData.quote.amount) +
               (BigInt(swapData.quote.amount) *
@@ -486,8 +454,6 @@ export const UniswapSwap: React.FC = () => {
             : undefined
 
           // Balance validation
-          // For 'sell' (exactIn): validate user's input amount against balance
-          // For 'buy' (exactOut): validate maximum input (with slippage) against balance
           const hasInsufficientBalance =
             formik.values.swapDirection === 'sell'
               ? amountInBigInt !== null && inputBalance < amountInBigInt
@@ -500,19 +466,6 @@ export const UniswapSwap: React.FC = () => {
 
           return (
             <>
-              {/* Sync Formik values to component state using useEffect (best practice) */}
-              <FormikStateSyncer
-                setInputTokenAddress={setInputTokenAddress}
-                setOutputTokenAddress={setOutputTokenAddress}
-                setAmountIn={setAmountIn}
-                setInputTokenDecimals={setInputTokenDecimals}
-                setOutputTokenDecimals={setOutputTokenDecimals}
-                setSlippage={setSlippage}
-                setSwapType={setSwapType}
-                setDeadline={setDeadline}
-                totalExecutionDelay={totalExecutionDelay}
-                isWrapOrUnwrap={isWrapOrUnwrap}
-              />
               <Box
                 data-testid="uniswap-v4-swap-form"
                 as={'fieldset'}
@@ -678,14 +631,7 @@ export const UniswapSwap: React.FC = () => {
                       error={swapError}
                       swapDirection={formik.values.swapDirection}
                       maxInputForBuy={maxInputForBuy}
-                      refetch={() => {
-                        // Force refetch by updating state
-                        const currentInputAddr = formik.values.inputTokenMetadata?.address
-                        if (currentInputAddr) {
-                          setInputTokenAddress(undefined)
-                          queueMicrotask(() => setInputTokenAddress(currentInputAddr))
-                        }
-                      }}
+                      refetch={refetchSwap}
                     />
 
                     {isWrapOrUnwrap ? (
@@ -799,7 +745,8 @@ export const UniswapSwap: React.FC = () => {
                             mt={errorMessage ? 'x2' : 'x9'}
                             variant={'outline'}
                             borderRadius={'curved'}
-                            type="submit"
+                            type="button"
+                            onClick={() => handleSubmit(formik.values, formik, swapData, swapError)}
                             disabled={
                               formik.isSubmitting ||
                               !formik.values.inputTokenMetadata?.isValid ||
