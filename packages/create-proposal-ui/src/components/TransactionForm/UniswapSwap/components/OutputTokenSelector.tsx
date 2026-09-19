@@ -131,6 +131,8 @@ export const OutputTokenSelector: React.FC<OutputTokenSelectorProps> = ({
   )
 
   // Update form when metadata loads or when native ETH is selected
+  // Mirrors the approach from TokenSelectionForm: return null while loading,
+  // only mark as invalid after validation completes
   useEffect(() => {
     // Handle native ETH with hardcoded metadata
     if (isNativeToken && currentTokenAddress) {
@@ -145,27 +147,40 @@ export const OutputTokenSelector: React.FC<OutputTokenSelectorProps> = ({
       return
     }
 
-    // Handle ERC20 tokens
-    if (tokenMetadata && currentTokenAddress) {
-      setFieldValue('outputTokenMetadata', {
-        address: currentTokenAddress,
-        name: tokenMetadata.name,
-        symbol: tokenMetadata.symbol,
-        decimals: tokenMetadata.decimals,
-        balance: 0n, // Output token balance not relevant for proposals
-        isValid: true,
-      })
-    } else if (currentTokenAddress && !isLoadingMetadata && !isResolving) {
-      // Address is set but metadata failed to load
-      setFieldValue('outputTokenMetadata', {
-        address: currentTokenAddress,
-        name: '',
-        symbol: '',
-        decimals: 0,
-        balance: 0n,
-        isValid: false,
-      })
+    // If we're still validating, don't produce an invalid "shell" yet
+    // This prevents marking tokens as invalid while metadata is loading
+    if (isLoadingMetadata || isResolving || !currentTokenAddress) {
+      // Don't set metadata to invalid - just wait
+      return
     }
+
+    // We have a resolved metadata - mark as valid
+    if (tokenMetadata && currentTokenAddress) {
+      const addr = normalizeAddr(currentTokenAddress)
+      const tokenAddress = normalizeAddr(tokenMetadata.address)
+
+      if (tokenAddress === addr && !!tokenMetadata.symbol) {
+        setFieldValue('outputTokenMetadata', {
+          address: currentTokenAddress,
+          name: tokenMetadata.name,
+          symbol: tokenMetadata.symbol,
+          decimals: tokenMetadata.decimals,
+          balance: 0n, // Output token balance not relevant for proposals
+          isValid: true,
+        })
+        return
+      }
+    }
+
+    // Validation finished, address present, but no metadata → invalid token
+    setFieldValue('outputTokenMetadata', {
+      address: currentTokenAddress,
+      name: '',
+      symbol: '',
+      decimals: 0,
+      balance: 0n,
+      isValid: false,
+    })
   }, [
     tokenMetadata,
     currentTokenAddress,
