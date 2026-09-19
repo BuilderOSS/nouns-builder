@@ -1,7 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
-import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
-import useSWR from 'swr'
+import { useQuery } from '@tanstack/react-query'
 
 interface UseUniswapSwapParams {
   chainId: CHAIN_ID
@@ -73,7 +72,8 @@ const fetchUniswapSwap = async (
   sender: AddressType,
   slippageTolerance?: string,
   recipient?: AddressType,
-  deadline?: number
+  deadline?: number,
+  signal?: AbortSignal
 ): Promise<UniswapSwapResponse> => {
   // Normalize native ETH address: Uniswap API expects 0x0000...0000, not 0xEeee...eeee
   const normalizeAddress = (addr: AddressType): AddressType => {
@@ -101,6 +101,7 @@ const fetchUniswapSwap = async (
       recipient,
       deadline,
     }),
+    signal,
   })
 
   if (!response.ok) {
@@ -143,25 +144,24 @@ export const useUniswapSwap = ({
   const {
     data,
     error,
-    mutate: refetch,
-  } = useSWR<UniswapSwapResponse>(
-    canFetch
-      ? [
-          SWR_KEYS.UNISWAP_SWAP,
-          chainId,
-          tokenIn,
-          tokenOut,
-          amount,
-          inputTokenDecimals,
-          outputTokenDecimals,
-          type,
-          sender,
-          slippageTolerance,
-          recipient,
-          deadline,
-        ]
-      : null,
-    () =>
+    isLoading,
+    refetch,
+  } = useQuery<UniswapSwapResponse, Error>({
+    queryKey: [
+      'uniswap-swap',
+      chainId,
+      tokenIn,
+      tokenOut,
+      amount,
+      inputTokenDecimals,
+      outputTokenDecimals,
+      type,
+      sender,
+      slippageTolerance,
+      recipient,
+      deadline,
+    ],
+    queryFn: ({ signal }) =>
       fetchUniswapSwap(
         chainId,
         tokenIn!,
@@ -173,20 +173,20 @@ export const useUniswapSwap = ({
         sender!,
         slippageTolerance,
         recipient,
-        deadline
+        deadline,
+        signal
       ),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      refreshInterval: 0, // No auto-refresh for swap calldata (must be fresh)
-      dedupingInterval: 5000, // Dedupe identical requests within 5 seconds
-      shouldRetryOnError: false, // Don't retry failed swap requests automatically
-    }
-  )
+    enabled: canFetch,
+    staleTime: 0, // Always fetch fresh quotes
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
+    retry: false, // Don't retry failed swap requests automatically
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  })
 
   return {
     swap: data?.data ?? null,
-    isLoading: !error && !data && canFetch,
+    isLoading,
     error: error ?? null,
     refetch,
   }

@@ -1,7 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
-import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import type { CHAIN_ID } from '@buildeross/types'
-import useSWR from 'swr'
+import { useQuery } from '@tanstack/react-query'
 import { Address } from 'viem'
 
 export interface PopularToken {
@@ -19,8 +18,13 @@ interface PopularTokensResponse {
   chainId: number
 }
 
-const fetchPopularTokens = async (chainId: number): Promise<PopularTokensResponse> => {
-  const response = await fetch(`${BASE_URL}/api/uniswap/tokens?chainId=${chainId}`)
+const fetchPopularTokens = async (
+  chainId: number,
+  signal?: AbortSignal
+): Promise<PopularTokensResponse> => {
+  const response = await fetch(`${BASE_URL}/api/uniswap/tokens?chainId=${chainId}`, {
+    signal,
+  })
 
   if (!response.ok) {
     throw new Error(`Failed to fetch popular tokens: ${response.status}`)
@@ -34,16 +38,15 @@ const fetchPopularTokens = async (chainId: number): Promise<PopularTokensRespons
  * Returns a curated list of commonly traded tokens on Base/Base Sepolia
  */
 export function usePopularTokens(chainId?: CHAIN_ID) {
-  const { data, error, isLoading } = useSWR(
-    chainId ? ([SWR_KEYS.POPULAR_TOKENS, chainId] as const) : null,
-    async ([, _chainId]) => fetchPopularTokens(_chainId),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      // Cache popular tokens for 1 hour
-      dedupingInterval: 3600000,
-    }
-  )
+  const { data, error, isLoading } = useQuery<PopularTokensResponse, Error>({
+    queryKey: ['popular-tokens', chainId],
+    queryFn: ({ signal }) => fetchPopularTokens(chainId!, signal),
+    enabled: !!chainId,
+    staleTime: 60 * 60 * 1000, // 1 hour - tokens rarely change
+    gcTime: 24 * 60 * 60 * 1000, // 24 hours in cache
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  })
 
   return {
     tokens: data?.data || [],
