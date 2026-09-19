@@ -47,7 +47,7 @@ export async function getQuoteFromUniswap({
   slippage = 0.01,
 }: {
   publicClient: PublicClient
-  chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
+  chainId: CHAIN_ID
   path: SwapPath
   amountIn: bigint
   slippage?: number

@@ -198,21 +198,6 @@ export function formatAmount(
 }
 
 /**
- * Format USD value with commas and 2 decimal places
- */
-export function formatUsd(value: bigint, decimals: number = 0): string {
-  // USD should be fixed 2 decimals (not significant digits).
-  const formatted =
-    decimals > 0 ? formatFixed(value, pow10(decimals), 2) : formatFixed(value, 1n, 2)
-  const [intPart, decPart] = formatted.split('.')
-
-  // Add commas to integer part
-  const withCommas = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-
-  return decPart !== undefined ? `${withCommas}.${decPart}` : withCommas
-}
-
-/**
  * Format USD value from rational number with adaptive precision
  * - If >= $1: 2 decimals with commas (e.g., "$1,234.56")
  * - If $0.01 <= value < $1: 4 decimals (e.g., "$0.0789")

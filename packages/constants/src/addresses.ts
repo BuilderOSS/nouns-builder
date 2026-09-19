@@ -126,25 +126,39 @@ export const UNISWAP_STATE_VIEW_ADDRESS = {
 }
 
 // Uniswap V4 Pool Manager
-export const UNISWAP_V4_POOL_MANAGER_ADDRESS = {
+// Note: Addresses vary by chain (not canonical)
+export const UNISWAP_V4_POOL_MANAGER_ADDRESS: Partial<Record<CHAIN_ID, AddressType>> = {
+  [CHAIN_ID.ETHEREUM]: '0x000000000004444c5dc75cB358380D2e3dE08A90' as AddressType,
+  [CHAIN_ID.SEPOLIA]: '0xE03A1074c86CFeDd5C142C4F04F1a1536e203543' as AddressType,
+  [CHAIN_ID.OPTIMISM]: '0x9a13f98cb987694c9f086b1f5eb990eea8264ec3' as AddressType,
   [CHAIN_ID.BASE]: '0x498581ff718922c3f8e6a244956af099b2652b2b' as AddressType,
   [CHAIN_ID.BASE_SEPOLIA]: '0x05E73354cFDd6745C338b50BcFDfA3Aa6fA03408' as AddressType,
 }
 
 // Uniswap V4 Quoter
-export const UNISWAP_V4_QUOTER_ADDRESS = {
+export const UNISWAP_V4_QUOTER_ADDRESS: Partial<Record<CHAIN_ID, AddressType>> = {
+  [CHAIN_ID.ETHEREUM]: '0x52f0e24d1c21c8a0cb1e5a5dd6198556bd9e1203' as AddressType,
+  [CHAIN_ID.SEPOLIA]: '0x61b3f2011a92d183c7dbadbda940a7555ccf9227' as AddressType,
+  [CHAIN_ID.OPTIMISM]: '0x1f3131a13296fb91c90870043742c3cdbff1a8d7' as AddressType,
   [CHAIN_ID.BASE]: '0x0d5e0f971ed27fbff6c2837bf31316121532048d' as AddressType,
   [CHAIN_ID.BASE_SEPOLIA]: '0x4a6513c898fe1b2d0e78d3b0e0a4a151589b1cba' as AddressType,
 }
 
 // Uniswap V4 Position Manager
-export const UNISWAP_V4_POSITION_MANAGER_ADDRESS = {
-  [CHAIN_ID.BASE]: '0x7c5f5a4bbd8fd63184577525326123b519429bdc' as AddressType,
-  [CHAIN_ID.BASE_SEPOLIA]: '0x4b2c77d209d3405f41a037ec6c77f7f5b8e2ca80' as AddressType,
-}
+export const UNISWAP_V4_POSITION_MANAGER_ADDRESS: Partial<Record<CHAIN_ID, AddressType>> =
+  {
+    [CHAIN_ID.ETHEREUM]: '0xbd216513d74c8cf14cf4747e6aaa6420ff64ee9e' as AddressType,
+    [CHAIN_ID.SEPOLIA]: '0x429ba70129df741B2Ca2a85BC3A2a3328e5c09b4' as AddressType,
+    [CHAIN_ID.OPTIMISM]: '0x3c3ea4b57a46241e54610e5f022e5c45859a1017' as AddressType,
+    [CHAIN_ID.BASE]: '0x7c5f5a4bbd8fd63184577525326123b519429bdc' as AddressType,
+    [CHAIN_ID.BASE_SEPOLIA]: '0x4b2c77d209d3405f41a037ec6c77f7f5b8e2ca80' as AddressType,
+  }
 
-// Uniswap Universal Router
-export const UNISWAP_UNIVERSAL_ROUTER_ADDRESS = {
+// Uniswap Universal Router (Latest version)
+export const UNISWAP_UNIVERSAL_ROUTER_ADDRESS: Partial<Record<CHAIN_ID, AddressType>> = {
+  [CHAIN_ID.ETHEREUM]: '0x66a9893cc07d91d95644aedd05d03f95e1dba8af' as AddressType,
+  [CHAIN_ID.SEPOLIA]: '0x3A9D48AB9751398BbFa63ad67599Bb04e4BdF98b' as AddressType,
+  [CHAIN_ID.OPTIMISM]: '0x851116d9223fabed8e56c0e6b8ad0c31d98b3507' as AddressType,
   [CHAIN_ID.BASE]: '0x6ff5693b99212da76ad316178a184ab56d299b43' as AddressType,
   [CHAIN_ID.BASE_SEPOLIA]: '0x492e6456d9528771018deb9e87ef7750ef184104' as AddressType,
 }

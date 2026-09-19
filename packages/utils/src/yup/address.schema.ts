@@ -31,7 +31,7 @@ const validateAddress = async (
 
 export const addressValidationSchema = Yup.string()
   .required('*')
-  .test('is-valid-address', '*', function (value) {
+  .test('is-valid-address', '*', async function (value) {
     return validateAddress(value, this)
   })
 
@@ -41,14 +41,14 @@ export const addressValidationSchemaWithError = (
 ) =>
   Yup.string()
     .required(requiredErrorMessage)
-    .test('is-valid-address', invalidErrorMessage, function (value) {
+    .test('is-valid-address', invalidErrorMessage, async function (value) {
       return validateAddress(value, this, invalidErrorMessage)
     })
 
 export const addressValidationOptionalSchema = Yup.string().test(
   'is-valid-address-optional',
   'Invalid address',
-  function (value) {
+  async function (value) {
     if (!value) return true
     return validateAddress(value, this)
   }

@@ -179,7 +179,7 @@ export async function getPoolMaxSwapAmount({
   isZoraCoin = false,
 }: {
   publicClient: PublicClient
-  chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
+  chainId: CHAIN_ID
   hop: SwapPathHop
   userBalance: bigint
   isZoraCoin?: boolean

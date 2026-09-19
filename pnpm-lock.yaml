@@ -895,6 +895,9 @@ importers:
       '@buildeross/stores':
         specifier: workspace:*
         version: link:../stores
+      '@buildeross/swap':
+        specifier: workspace:*
+        version: link:../swap
       '@buildeross/test-fixtures':
         specifier: workspace:*
         version: link:../test-fixtures
