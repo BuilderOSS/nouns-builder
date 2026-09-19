@@ -1,8 +1,10 @@
 import { MERKLE_RESERVE_MINTER } from '@buildeross/constants/addresses'
 import { tokenAbi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useState } from 'react'
-import { usePublicClient, useReadContract, useWriteContract } from 'wagmi'
+import { useConfig, useReadContract } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 export const useAuthorizeMinter = (
   tokenAddress?: AddressType,
@@ -11,9 +13,9 @@ export const useAuthorizeMinter = (
 ) => {
   const [authorizeTxHash, setAuthorizeTxHash] = useState<`0x${string}`>()
   const [error, setError] = useState<string>()
+  const [isAuthorizing, setIsAuthorizing] = useState(false)
 
-  const { writeContractAsync, isPending } = useWriteContract()
-  const publicClient = usePublicClient({ chainId })
+  const config = useConfig()
 
   const minterAddress = chainId ? MERKLE_RESERVE_MINTER[chainId] : undefined
 
@@ -23,7 +25,6 @@ export const useAuthorizeMinter = (
     abi: tokenAbi,
     functionName: 'minter',
     args: minterAddress ? [minterAddress] : undefined,
-    chainId,
     query: {
       enabled: !!tokenAddress && !!minterAddress && !!chainId,
     },
@@ -36,10 +37,11 @@ export const useAuthorizeMinter = (
     }
 
     setError(undefined)
+    setIsAuthorizing(true)
 
     try {
       // Call updateMinters with [(minterAddress, true)]
-      const hash = await writeContractAsync({
+      const { request } = await simulateContract(config, {
         abi: tokenAbi,
         address: tokenAddress,
         functionName: 'updateMinters',
@@ -47,15 +49,18 @@ export const useAuthorizeMinter = (
         chainId,
       })
 
-      setAuthorizeTxHash(hash)
+      const result = await executeAppTransaction({
+        config,
+        request,
+        chainId,
+      })
+
+      setAuthorizeTxHash(result.hash)
+      if (result.kind === 'safe-proposed') return result.hash
 
       // Wait for transaction receipt
-      if (publicClient) {
-        const receipt = await publicClient.waitForTransactionReceipt({ hash })
-
-        if (receipt.status !== 'success') {
-          throw new Error('Transaction failed to authorize minter')
-        }
+      if (result.receipt.status !== 'success') {
+        throw new Error('Transaction failed to authorize minter')
       }
 
       // Refetch authorization status
@@ -63,17 +68,19 @@ export const useAuthorizeMinter = (
 
       onAuthorized?.()
 
-      return hash
+      return result.hash
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to authorize minter'
       setError(message)
       throw new Error(message)
+    } finally {
+      setIsAuthorizing(false)
     }
   }
 
   return {
     authorizeMinter,
-    isAuthorizing: isPending,
+    isAuthorizing,
     isMinterAuthorized,
     authorizeTxHash,
     error,

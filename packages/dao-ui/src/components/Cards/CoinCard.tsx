@@ -1,5 +1,6 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
 import { useIpfsMetadata, useMediaType } from '@buildeross/hooks'
+import { useAuthStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { LikeButton } from '@buildeross/ui/LikeButton'
@@ -11,7 +12,7 @@ import { StatBadge } from '@buildeross/ui/StatBadge'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React, { useMemo } from 'react'
 import { Address } from 'viem'
-import { useAccount, useBalance } from 'wagmi'
+import { useBalance } from 'wagmi'
 
 import { card, coinImage, tradeButtonContainer, typeBadge } from './Cards.css'
 
@@ -65,7 +66,7 @@ export const CoinCard = ({
     ? Date.now() / 1000 - parseInt(createdAt) < 7 * 24 * 60 * 60
     : false
 
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useAuthStore()
 
   // Get user's coin balance to determine if they can trade
   // Only fetch balance if sellEnabled is true (otherwise we always show "Buy")

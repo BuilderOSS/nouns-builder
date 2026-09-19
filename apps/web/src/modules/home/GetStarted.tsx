@@ -1,20 +1,11 @@
 import { useChainStore } from '@buildeross/stores'
-import { Button } from '@buildeross/zord'
-import { useConnectModal } from '@rainbow-me/rainbowkit'
+import { ContractButton } from '@buildeross/ui/ContractButton'
 import { useRouter } from 'next/router'
-import React from 'react'
-import { useAccount, useSwitchChain } from 'wagmi'
 
 import { marqueeButton } from './Home.css'
 
 export const GetStarted = () => {
-  const { address, chain: wagmiChain } = useAccount()
   const chain = useChainStore((x) => x.chain)
-
-  const { openConnectModal } = useConnectModal()
-  const { switchChain } = useSwitchChain()
-
-  const handleSwitchChain = () => switchChain({ chainId: chain.id })
 
   const { push } = useRouter()
 
@@ -23,14 +14,9 @@ export const GetStarted = () => {
   }
 
   return (
-    <Button
-      onClick={
-        !address
-          ? openConnectModal
-          : wagmiChain?.id != chain.id
-            ? handleSwitchChain
-            : handleClick
-      }
+    <ContractButton
+      chainId={chain.id}
+      handleClick={handleClick}
       h="x16"
       fontWeight={'display'}
       borderRadius={'curved'}
@@ -47,6 +33,6 @@ export const GetStarted = () => {
       justify={'center'}
     >
       Create your DAO
-    </Button>
+    </ContractButton>
   )
 }

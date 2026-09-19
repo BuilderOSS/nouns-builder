@@ -1,13 +1,13 @@
 import { isBlocked } from '@buildeross/blocklist'
+import { useAuthStore } from '@buildeross/stores'
 import { Box, Stack } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 import { Skull } from 'src/components/Skull'
-import { useAccount } from 'wagmi'
 
 import { DefaultLayout } from './DefaultLayout'
 
 export function LayoutWrapper({ children }: { children: ReactNode }) {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   if (isBlocked(address))
     return (

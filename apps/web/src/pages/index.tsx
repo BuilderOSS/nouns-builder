@@ -1,4 +1,5 @@
 import { AuctionFragment } from '@buildeross/sdk/subgraph'
+import { useAuthStore } from '@buildeross/stores'
 import { Stack } from '@buildeross/zord'
 import React, { ReactNode } from 'react'
 import { Meta } from 'src/components/Meta'
@@ -15,14 +16,13 @@ import {
   VisitAlternate,
 } from 'src/modules/home'
 import { container } from 'src/styles/dashboard.css'
-import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
 
 export type DaoProps = AuctionFragment['dao']
 
 function ConditionalLayout({ children }: { children: ReactNode }) {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   if (address) {
     return (
@@ -42,7 +42,7 @@ function ConditionalLayout({ children }: { children: ReactNode }) {
 }
 
 const HomePage: NextPageWithLayout = () => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   return (
     <>
@@ -66,7 +66,7 @@ const HomePage: NextPageWithLayout = () => {
 
 HomePage.getLayout = (page) => {
   // We need to check the page content to determine layout
-  // Since we can't access useAccount here, we'll create a wrapper that handles both cases
+  // Since we can't access useAuthStore here, we'll create a wrapper that handles both cases
   return <ConditionalLayout>{page}</ConditionalLayout>
 }
 

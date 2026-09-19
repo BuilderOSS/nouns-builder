@@ -16,7 +16,12 @@ import {
 import { useGovernorVersion } from '@buildeross/hooks/useContractVersion'
 import { auctionAbi, getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { OrderDirection, SubgraphSDK, Token_OrderBy } from '@buildeross/sdk/subgraph'
-import { DaoContractAddresses, useChainStore, useDaoStore } from '@buildeross/stores'
+import {
+  DaoContractAddresses,
+  useAuthStore,
+  useChainStore,
+  useDaoStore,
+} from '@buildeross/stores'
 import { AddressType, CHAIN_ID, ProposalCreateStage } from '@buildeross/types'
 import { unpackOptionalArray } from '@buildeross/utils/helpers'
 import { serverConfig } from '@buildeross/utils/wagmi/serverConfig'
@@ -28,7 +33,7 @@ import { Meta } from 'src/components/Meta'
 import { getDaoLayout } from 'src/layouts/DaoLayout'
 import { NextPageWithLayout } from 'src/pages/_app'
 import { isAddress } from 'viem'
-import { useAccount, useReadContract, useReadContracts } from 'wagmi'
+import { useReadContract, useReadContracts } from 'wagmi'
 import { readContract } from 'wagmi/actions'
 
 interface DaoPageProps {
@@ -40,7 +45,7 @@ interface DaoPageProps {
 const DaoPage: NextPageWithLayout<DaoPageProps> = ({ chainId, collectionAddress }) => {
   const { query, pathname, push } = useRouter()
 
-  const { address: signerAddress } = useAccount()
+  const { address: signerAddress } = useAuthStore()
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const chainIdKey = chain.id as keyof typeof MERKLE_RESERVE_MINTER

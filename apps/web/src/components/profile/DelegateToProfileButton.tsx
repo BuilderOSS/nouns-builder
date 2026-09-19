@@ -1,7 +1,7 @@
+import { useAuthStore } from '@buildeross/stores'
 import { Button } from '@buildeross/zord'
 import React from 'react'
 import { isOwnProfileAddress } from 'src/utils/profileDashboard'
-import { useAccount } from 'wagmi'
 
 import { DelegateToProfileModal } from './DelegateToProfileModal'
 
@@ -14,7 +14,7 @@ export const DelegateToProfileButton: React.FC<DelegateToProfileButtonProps> = (
   profileAddress,
   profileName,
 }) => {
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const [isOpen, setIsOpen] = React.useState(false)
   const isOwnProfile = isOwnProfileAddress(address, profileAddress)
 

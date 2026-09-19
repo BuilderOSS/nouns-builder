@@ -117,4 +117,37 @@ describe('ContractButton', () => {
       expect(mockSwitchChain).toHaveBeenCalledTimes(1)
     })
   })
+
+  it('shows safe reconnect popup action on wrong chain for safe wallets', async () => {
+    const user = userEvent.setup()
+    const handleClick = vi.fn()
+
+    mockUseAccount.mockReturnValue({
+      address: '0x1234',
+      chain: { id: CHAIN_ID.OPTIMISM },
+      connector: { id: 'safeOwner' },
+    })
+
+    render(
+      <ContractButton chainId={CHAIN_ID.ETHEREUM} handleClick={handleClick}>
+        Submit vote
+      </ContractButton>
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Submit vote' }))
+
+    expect(handleClick).not.toHaveBeenCalled()
+    expect(
+      await screen.findByText(
+        'Safe wallets cannot switch networks. Connect a Safe on Ethereum to continue.'
+      )
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Connect Safe' }))
+
+    await waitFor(() => {
+      expect(mockOpenConnectModal).toHaveBeenCalledTimes(1)
+    })
+    expect(mockSwitchChain).not.toHaveBeenCalled()
+  })
 })
