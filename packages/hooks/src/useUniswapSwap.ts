@@ -141,12 +141,7 @@ export const useUniswapSwap = ({
   const canFetch =
     enabled && !!tokenIn && !!tokenOut && !!amount && amount !== '0' && !!sender
 
-  const {
-    data,
-    error,
-    isLoading,
-    refetch,
-  } = useQuery<UniswapSwapResponse, Error>({
+  const { data, error, isLoading, refetch } = useQuery<UniswapSwapResponse, Error>({
     queryKey: [
       'uniswap-swap',
       chainId,
