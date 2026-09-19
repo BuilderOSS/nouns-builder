@@ -7,7 +7,7 @@ import { withRateLimit } from 'src/utils/api/rateLimit'
 import { ironOptions, type IronSessionData } from 'src/utils/iron'
 import { SIWE_VERIFY_RATE_LIMIT_KEY_PREFIX } from 'src/utils/siweAuthFlow'
 import type { Address, Hex } from 'viem'
-import { hexToBytes, isHex, size } from 'viem'
+import { isHex } from 'viem'
 import { parseSiweMessage, type SiweMessage } from 'viem/siwe'
 
 /**
@@ -15,18 +15,10 @@ import { parseSiweMessage, type SiweMessage } from 'viem/siwe'
  * Supports both EOA signatures (65 bytes) and smart contract wallet signatures (EIP-1271)
  */
 function normalizeSignature(signature: string): Hex {
-  console.log('📝 Raw signature received:', {
-    signature: signature.substring(0, 20) + '...',
-    fullLength: signature.length,
-    hasPrefix: signature.startsWith('0x'),
-    type: typeof signature,
-  })
-
   let normalized = signature.trim()
 
   // Ensure 0x prefix
   if (!normalized.startsWith('0x')) {
-    console.log('⚠️  Missing 0x prefix, adding it')
     normalized = `0x${normalized}`
   }
 
@@ -36,20 +28,6 @@ function normalizeSignature(signature: string): Hex {
       `Signature is not a valid hex string: ${normalized.substring(0, 20)}...`
     )
   }
-
-  // Check byte size and log signature type
-  const sigBytes = hexToBytes(normalized as Hex)
-  const byteSize = size(sigBytes)
-
-  const signatureType =
-    byteSize === 65 ? 'EOA (ECDSA)' : 'Smart Contract Wallet (EIP-1271)'
-
-  console.log('🔍 Signature analysis:', {
-    normalizedLength: normalized.length,
-    byteSize,
-    signatureType,
-    isStandardEOA: byteSize === 65,
-  })
 
   return normalized as Hex
 }
@@ -63,15 +41,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const siweMessage = parseSiweMessage(message) as SiweMessage
         const eoaAddress = siweMessage.address
 
-        console.log('🔐 Starting signature verification for address:', eoaAddress)
-
         // Normalize signature to handle wallet-specific formats
         const normalizedSignature = normalizeSignature(signature)
 
         // Get the provider for this chain (cached PublicClient)
         const chainId = siweMessage.chainId as CHAIN_ID
-        console.log('🌐 Getting provider for chain ID:', chainId)
-
         const provider = getProvider(chainId)
 
         // Verify signature (automatically handles both EOA and smart contract wallets)
@@ -83,12 +57,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           signature: normalizedSignature,
         })
 
-        if (!valid) {
-          console.error('❌ Signature verification failed')
-          throw new Error('Invalid signature.')
-        }
-
-        console.log('✅ Signature verified successfully')
+        if (!valid) throw new Error('Invalid signature.')
 
         const session = await getIronSession<IronSessionData>(req, res, ironOptions)
 

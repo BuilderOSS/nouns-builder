@@ -28,7 +28,12 @@ interface WalletConnectDialogProps {
 
 export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProps) {
   const [state, send] = useMachine(walletModalMachine)
-  const { connector: activeConnector, chainId } = useAccount()
+  const {
+    connector: activeConnector,
+    chainId,
+    isConnected,
+    address: connectedAddress,
+  } = useAccount()
   const { connectAsync } = useConnect()
   const { disconnectAsync } = useDisconnect()
   const { signMessageAsync } = useSignMessage()
@@ -74,6 +79,19 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
       })),
     [walletConnectors]
   )
+
+  // Detect if we have a connected wallet that's not authenticated
+  // If the modal is open with a connected wallet, the user wants to authenticate
+  const connectedWallet = useMemo(() => {
+    if (!isConnected || !activeConnector || !isOpen) return undefined
+    return wallets.find((w) => w.id === activeConnector.id)
+  }, [isConnected, activeConnector, wallets, isOpen])
+
+  // Filter out connected wallet from the main list to avoid duplication
+  const availableWallets = useMemo(() => {
+    if (!connectedWallet) return wallets
+    return wallets.filter((w) => w.id !== connectedWallet.id)
+  }, [wallets, connectedWallet])
 
   // Open modal handler
   useEffect(() => {
@@ -380,6 +398,49 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
     }
   }
 
+  // Handle selection of already-connected wallet (skip connection, go directly to signing)
+  const handleSelectConnectedWallet = async (walletId: string) => {
+    debugWallet('handleSelectConnectedWallet called with walletId: %s', walletId)
+
+    if (!activeConnector || !connectedAddress) {
+      debugWallet(
+        'ERROR: No active connector or address despite being in connected state'
+      )
+      send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
+      return
+    }
+
+    const wallet = wallets.find((w) => w.id === walletId)
+
+    if (!wallet) {
+      debugWallet('ERROR: Connected wallet not found in list! walletId: %s', walletId)
+      send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
+      return
+    }
+
+    flowCancelledRef.current = false
+    const attemptId = ++authAttemptRef.current
+
+    try {
+      debugWallet('Using already-connected wallet: %s', wallet.name)
+      debugWallet(
+        'Skipping connection, directly to signature with address: %s',
+        connectedAddress
+      )
+
+      // Skip the SELECT_WALLET and connectAsync steps, go directly to WALLET_CONNECTED
+      send({
+        type: 'WALLET_CONNECTED',
+        address: connectedAddress,
+        connector: activeConnector,
+      })
+    } catch (error) {
+      if (attemptId !== authAttemptRef.current || flowCancelledRef.current) return
+      debugWallet('Error handling connected wallet: %O', error)
+      send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
+    }
+  }
+
   // Handle Safe address submission
   const handleSubmitSafeAddress = (safeAddress: Address, chainId: number) => {
     safeFlowStartedRef.current = true
@@ -584,8 +645,10 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
     if (state.matches('selectingWallet')) {
       return (
         <WalletListView
-          wallets={wallets}
+          wallets={availableWallets}
+          connectedWallet={connectedWallet}
           onSelectWallet={handleSelectWallet}
+          onSelectConnectedWallet={handleSelectConnectedWallet}
           onSelectSafe={() => send({ type: 'SELECT_SAFE' })}
           showSafeOption={true}
         />
@@ -613,8 +676,10 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
     if (state.matches('selectingSafeOwnerWallet')) {
       return (
         <WalletListView
-          wallets={wallets}
+          wallets={availableWallets}
+          connectedWallet={connectedWallet}
           onSelectWallet={handleSelectWallet}
+          onSelectConnectedWallet={handleSelectConnectedWallet}
           onSelectSafe={() => {}}
           showSafeOption={false}
           title="Connect Safe Owner Wallet"

@@ -7,7 +7,9 @@ import { WalletOption } from '../WalletOption'
 
 interface WalletListViewProps {
   wallets: WalletInfo[]
+  connectedWallet?: WalletInfo
   onSelectWallet: (walletId: string) => void
+  onSelectConnectedWallet?: (walletId: string) => void
   onSelectSafe: () => void
   showSafeOption?: boolean
   title?: string
@@ -16,7 +18,9 @@ interface WalletListViewProps {
 
 export function WalletListView({
   wallets,
+  connectedWallet,
   onSelectWallet,
+  onSelectConnectedWallet,
   onSelectSafe,
   showSafeOption = true,
   title = 'Connect Wallet',
@@ -35,6 +39,21 @@ export function WalletListView({
           </Text>
         )}
       </Stack>
+
+      {connectedWallet && (
+        <Stack gap="x0">
+          <Text variant="label-sm" color="text3">
+            Connected
+          </Text>
+          <WalletOption
+            key={connectedWallet.id}
+            name={connectedWallet.name}
+            icon={connectedWallet.iconUrl || ''}
+            iconBackground="#ffffff"
+            onClick={() => onSelectConnectedWallet?.(connectedWallet.id)}
+          />
+        </Stack>
+      )}
 
       {installedWallets.length > 0 && (
         <Stack gap="x0">
