@@ -907,6 +907,27 @@ const CreateProposalPage: NextPageWithLayout = () => {
           />
         )}
 
+        {/* Desktop full-width buttons */}
+        <Flex
+          gap="x3"
+          mt={createStage === 'transactions' ? 'x12' : 'x3'}
+          width="100%"
+          display={{ '@initial': 'none', '@768': 'flex' }}
+          style={{ maxWidth: '100%' }}
+        >
+          <Button
+            borderRadius="curved"
+            disabled={!canContinueFromCurrentStage}
+            onClick={() => {
+              void onContinueStep()
+            }}
+            h="x15"
+            style={{ flex: 1 }}
+          >
+            Continue
+          </Button>
+        </Flex>
+
         <MobileProposalActionBar
           showBack
           onBack={onBackStep}
