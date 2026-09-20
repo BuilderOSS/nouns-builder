@@ -97,6 +97,16 @@ export const row = style({
   borderColor: vars.color.border,
   borderRadius: vars.radii.curved,
   padding: '0.85rem 1.1rem',
+  textDecoration: 'none',
+  color: 'inherit',
+  transition: 'background-color 0.15s ease, border-color 0.15s ease',
+  selectors: {
+    '&[href]:hover': {
+      backgroundColor: vars.color.background2,
+      borderColor: vars.color.text4,
+      cursor: 'pointer',
+    },
+  },
   '@media': {
     'screen and (max-width: 600px)': {
       gridTemplateColumns: '32px 1fr auto',

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { usePublicClient } from 'wagmi'
 
 interface UseSwapQuoteParams {
-  chainId: CHAIN_ID.BASE | CHAIN_ID.BASE_SEPOLIA
+  chainId: CHAIN_ID
   path?: SwapPath | null
   amountIn?: bigint
   slippage?: number

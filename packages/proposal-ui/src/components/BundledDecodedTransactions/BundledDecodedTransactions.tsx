@@ -5,6 +5,7 @@ import {
   type ProposalTransactionBundle,
   type ProposalTransactionBundleContext,
   type SimulationOutput,
+  TransactionType,
 } from '@buildeross/types'
 import { DecodedTransactions } from '@buildeross/ui/DecodedTransactions'
 import { atoms, Flex, Stack, Text } from '@buildeross/zord'
@@ -12,6 +13,7 @@ import React, { useMemo } from 'react'
 
 import { normalizeTextForCompare, TRANSACTION_TYPES } from '../../constants'
 import { TransactionTypeIcon } from '../TransactionTypeIcon'
+import { UniswapSwapDisplay } from '../UniswapSwapDisplay'
 
 type DecodedTransactionsProp = React.ComponentProps<
   typeof DecodedTransactions
@@ -21,6 +23,7 @@ type BundleWithRange = ProposalTransactionBundle & {
   bundleIndex: number
   start: number
   end: number
+  metadata?: ProposalTransactionBundle['metadata']
 }
 
 interface BundledDecodedTransactionsProps {
@@ -31,6 +34,7 @@ interface BundledDecodedTransactionsProps {
   transactionBundles?: ProposalTransactionBundle[]
   simulationByIndex?: Record<number, SimulationOutput>
   isDecoding?: boolean
+  hasEnded?: boolean
 }
 
 const getBundleIntent = (summary: string | undefined, fallback: string | undefined) => {
@@ -50,6 +54,7 @@ export const BundledDecodedTransactions: React.FC<BundledDecodedTransactionsProp
   transactionBundles,
   simulationByIndex,
   isDecoding = false,
+  hasEnded = false,
 }) => {
   const bundlesWithRanges = useMemo(() => {
     if (!decodedTransactions?.length || !transactionBundles?.length) return undefined
@@ -134,6 +139,17 @@ export const BundledDecodedTransactions: React.FC<BundledDecodedTransactionsProp
                   </Text>
                 </Stack>
               </Flex>
+
+              {/* Enhanced display for Uniswap swaps with metadata */}
+              {bundle.type === TransactionType.UNISWAP_SWAP &&
+                bundle.metadata?.uniswapQuote && (
+                  <UniswapSwapDisplay
+                    chainId={chainId}
+                    metadata={bundle.metadata.uniswapQuote}
+                    treasuryAddress={addresses.treasury}
+                    hasEnded={hasEnded}
+                  />
+                )}
 
               {!!bundleDecodedTransactions?.length && (
                 <DecodedTransactions

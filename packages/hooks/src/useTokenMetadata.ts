@@ -58,6 +58,8 @@ export const useTokenMetadata = (
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      dedupingInterval: 3600000, // 1 hour - metadata changes infrequently
+      keepPreviousData: true, // Prevent loading flash when refetching
     }
   )
 

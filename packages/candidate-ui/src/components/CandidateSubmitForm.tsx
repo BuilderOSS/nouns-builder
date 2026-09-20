@@ -74,6 +74,7 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
         type: transaction.type,
         summary: transaction.summary,
         callCount: transaction.transactions.length,
+        metadata: transaction.metadata,
       })),
     [transactions]
   )
