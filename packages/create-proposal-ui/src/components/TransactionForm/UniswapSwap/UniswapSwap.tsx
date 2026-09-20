@@ -744,11 +744,37 @@ export const UniswapSwap: React.FC = () => {
           ? `Swap ${formattedAmount} ${inputSymbol} to buy ${outputSymbol} (${(slippage * 100).toFixed(1)}% slippage)`
           : `Sell ${formattedAmount} ${inputSymbol} for ${outputSymbol} (${(slippage * 100).toFixed(1)}% slippage)`
 
+      // Store original quote metadata for enhanced display in proposal UI
+      const metadata = {
+        uniswapQuote: {
+          quoteId: swapData.quoteId,
+          timestamp: Date.now(),
+          inputToken: {
+            address: inputTokenAddress,
+            symbol: inputSymbol,
+            decimals: values.inputTokenMetadata.decimals,
+          },
+          outputToken: {
+            address: outputTokenAddress,
+            symbol: outputSymbol,
+            decimals: values.outputTokenMetadata.decimals,
+          },
+          inputAmount: swapData.quote.amount, // wei
+          outputAmount: swapData.quote.quote, // wei
+          minimumAmountOut: swapData.quote.minimumAmountOut, // wei
+          slippage,
+          routing: swapData.routing || 'Unknown',
+          priceImpact: swapData.quote.priceImpact || '0',
+          swapDirection: values.swapDirection,
+        },
+      }
+
       addTransaction({
         type: TransactionType.UNISWAP_SWAP,
         title: 'Uniswap Swap',
         summary,
         transactions,
+        metadata,
       })
 
       actions.resetForm()

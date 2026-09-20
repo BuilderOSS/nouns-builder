@@ -337,6 +337,7 @@ export const ReviewProposalForm = ({
                 TRANSACTION_TYPES[transaction.type]?.subTitle
               ),
               callCount: transaction.transactions.length,
+              metadata: transaction.metadata,
             })),
             representedAddress: values.representedAddressEnabled
               ? values.representedAddress

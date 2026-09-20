@@ -34,9 +34,36 @@ export type Transaction = {
   calldata: string
 }
 
+export type UniswapQuoteMetadata = {
+  quoteId: string
+  timestamp: number
+  inputToken: {
+    address: AddressType
+    symbol: string
+    decimals: number
+  }
+  outputToken: {
+    address: AddressType
+    symbol: string
+    decimals: number
+  }
+  inputAmount: string // wei
+  outputAmount: string // wei
+  minimumAmountOut: string // wei
+  slippage: number
+  routing: string // "V2", "V3", "V4", etc.
+  priceImpact: string
+  swapDirection: 'buy' | 'sell'
+}
+
+export type TransactionBundleMetadata = {
+  uniswapQuote?: UniswapQuoteMetadata
+}
+
 export type TransactionBundle = {
   type: TransactionType
   title: string
   summary: string
   transactions: Transaction[]
+  metadata?: TransactionBundleMetadata
 }
