@@ -6,7 +6,6 @@ import {
 import { DaoContractAddresses, useChainStore, useProposalStore } from '@buildeross/stores'
 import { UpgradeCard } from '@buildeross/ui/UpgradeCard'
 import { Flex, Text } from '@buildeross/zord'
-import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
 import React from 'react'
 import { useReadContract } from 'wagmi'
@@ -216,7 +215,7 @@ Proposal replacement tracking is not applicable when updatable proposals are dis
     startProposalDraft({
       transactions,
       disabled: true,
-      title: `Nouns Builder Upgrade v${latest} ${dayjs().format('YYYY-MM-DD')}`,
+      title: `Upgrade to Nouns Builder v${latest}`,
       summary,
     })
 
