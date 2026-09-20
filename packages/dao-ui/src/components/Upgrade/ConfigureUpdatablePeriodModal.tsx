@@ -1,4 +1,4 @@
-import { AnimatedModal } from '@buildeross/ui'
+import { AnimatedModal, Toggle } from '@buildeross/ui'
 import { DaysHoursMinsSecs } from '@buildeross/ui/Fields'
 import { Box, Button, Flex, Heading, Text } from '@buildeross/zord'
 import React from 'react'
@@ -19,6 +19,8 @@ interface ConfigureUpdatablePeriodModalProps {
   votingPeriodSeconds?: bigint
   updatablePeriodSeconds: number
   daoName?: string
+  enableUpdatablePeriod: boolean
+  onEnableUpdatablePeriodChange: (enabled: boolean) => void
 }
 
 const PR_URL = 'https://github.com/BuilderOSS/nouns-protocol/pull/5'
@@ -36,6 +38,8 @@ export const ConfigureUpdatablePeriodModal: React.FC<
   votingPeriodSeconds,
   updatablePeriodSeconds,
   daoName,
+  enableUpdatablePeriod,
+  onEnableUpdatablePeriodChange,
 }) => {
   const [acceptedDisclaimer, setAcceptedDisclaimer] = React.useState(false)
   const [confirmText, setConfirmText] = React.useState('')
@@ -160,31 +164,44 @@ export const ConfigureUpdatablePeriodModal: React.FC<
             After this period ends, proposals can no longer be edited and voting begins.
           </Text>
 
-          <DaysHoursMinsSecs
-            id="updatablePeriod"
-            value={updatablePeriod}
-            inputLabel="Proposal Updatable Period"
-            onChange={() => {}}
-            formik={
-              {
-                setFieldValue: (id: string, value: number) => {
-                  const field = id.split('.')[1]
-                  onUpdatablePeriodChange(field, value)
-                },
-              } as any
-            }
-            placeholder={['1', '0', '0', '0']}
-            errorMessage={
-              exceedsVotingPeriod
-                ? `Updatable period (${(updatablePeriodSeconds / 86400).toFixed(
-                    2
-                  )} days) cannot exceed voting period (${(
-                    Number(votingPeriodSeconds) / 86400
-                  ).toFixed(2)} days)`
-                : undefined
-            }
-            helperText="Must not exceed the voting period."
-          />
+          {/* Toggle for Enable/Disable Updatable Period */}
+          <Flex align="center" gap="x3" mb="x4">
+            <Toggle
+              on={enableUpdatablePeriod}
+              onToggle={() => onEnableUpdatablePeriodChange(!enableUpdatablePeriod)}
+            />
+            <Text fontSize="14" color="text1" fontWeight="label">
+              Enable Updatable Proposals
+            </Text>
+          </Flex>
+
+          {enableUpdatablePeriod && (
+            <DaysHoursMinsSecs
+              id="updatablePeriod"
+              value={updatablePeriod}
+              inputLabel="Proposal Updatable Period"
+              onChange={() => {}}
+              formik={
+                {
+                  setFieldValue: (id: string, value: number) => {
+                    const field = id.split('.')[1]
+                    onUpdatablePeriodChange(field, value)
+                  },
+                } as any
+              }
+              placeholder={['1', '0', '0', '0']}
+              errorMessage={
+                exceedsVotingPeriod
+                  ? `Updatable period (${(updatablePeriodSeconds / 86400).toFixed(
+                      2
+                    )} days) cannot exceed voting period (${(
+                      Number(votingPeriodSeconds) / 86400
+                    ).toFixed(2)} days)`
+                  : undefined
+              }
+              helperText="Must not exceed the voting period."
+            />
+          )}
         </Box>
 
         <Flex gap="x4" justify="flex-end">
@@ -194,7 +211,10 @@ export const ConfigureUpdatablePeriodModal: React.FC<
           <Button
             onClick={onContinue}
             disabled={
-              !hasThreshold || exceedsVotingPeriod || !acceptedDisclaimer || !isTextMatch
+              !hasThreshold ||
+              (enableUpdatablePeriod && exceedsVotingPeriod) ||
+              !acceptedDisclaimer ||
+              !isTextMatch
             }
           >
             Continue with Upgrade
