@@ -169,6 +169,8 @@ export const ConfigureUpdatablePeriodModal: React.FC<
             <Toggle
               on={enableUpdatablePeriod}
               onToggle={() => onEnableUpdatablePeriodChange(!enableUpdatablePeriod)}
+              ariaLabel="Enable updatable proposals"
+              id="enable-updatable-proposals-toggle"
             />
             <Text fontSize="14" color="text1" fontWeight="label">
               Enable Updatable Proposals
@@ -197,7 +199,9 @@ export const ConfigureUpdatablePeriodModal: React.FC<
                     )} days) cannot exceed voting period (${(
                       Number(votingPeriodSeconds) / 86400
                     ).toFixed(2)} days)`
-                  : undefined
+                  : updatablePeriodSeconds === 0
+                    ? 'Updatable period must be greater than 0 seconds when enabled'
+                    : undefined
               }
               helperText="Must not exceed the voting period."
             />
@@ -212,7 +216,8 @@ export const ConfigureUpdatablePeriodModal: React.FC<
             onClick={onContinue}
             disabled={
               !hasThreshold ||
-              (enableUpdatablePeriod && exceedsVotingPeriod) ||
+              (enableUpdatablePeriod &&
+                (exceedsVotingPeriod || updatablePeriodSeconds === 0)) ||
               !acceptedDisclaimer ||
               !isTextMatch
             }
