@@ -8,9 +8,10 @@ import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import type { Hex, WalletClient } from 'viem'
 import { encodeAbiParameters, getAddress, zeroHash } from 'viem'
 import type { Config } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
-import { awaitSubgraphSync } from '../subgraph/requests/sync'
+import { executeAppTransaction } from '../transaction'
+import { extractSingleAttestationUID } from './utils'
 
 export interface CandidateSignatureParams {
   config: Config
@@ -27,11 +28,18 @@ export interface CandidateSignatureParams {
   deadline: number
 }
 
-export interface CandidateSignatureResult {
-  attestationUID: Hex
-  transactionHash: Hex
-  signature: Hex
-}
+export type CandidateSignatureResult =
+  | {
+      kind: 'mined'
+      attestationUID: Hex
+      transactionHash: Hex
+      signature: Hex
+    }
+  | {
+      kind: 'safe-proposed'
+      transactionHash: Hex
+      signature: Hex
+    }
 
 /**
  * Generate an EIP-712 signature for a candidate and submit it as an attestation
@@ -142,23 +150,28 @@ export async function attestCandidateSignature(
   })
 
   // 5. Write the transaction
-  const txHash = await writeContract(config, simulation.request)
-
-  // 6. Wait for confirmation
-  const receipt = await waitForTransactionReceipt(config, {
-    hash: txHash,
-    chainId: chainId,
+  const result = await executeAppTransaction({
+    config,
+    request: simulation.request,
+    chainId,
   })
 
-  // 7. Sync with subgraph
-  await awaitSubgraphSync(chainId, receipt.blockNumber)
+  // Handle Safe proposals vs mined transactions
+  if (result.kind === 'safe-proposed') {
+    return {
+      kind: 'safe-proposed',
+      transactionHash: result.hash,
+      signature,
+    }
+  }
 
-  // 8. Use transaction hash as attestation UID
-  const attestationUID = txHash
+  // Extract attestation UID from logs for mined transactions
+  const attestationUID = extractSingleAttestationUID(result.receipt, easAddress)
 
   return {
+    kind: 'mined',
     attestationUID,
-    transactionHash: txHash,
+    transactionHash: result.hash,
     signature,
   }
 }

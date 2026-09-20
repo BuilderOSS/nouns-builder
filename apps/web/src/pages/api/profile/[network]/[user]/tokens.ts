@@ -8,6 +8,7 @@ import {
 import { NextApiRequest, NextApiResponse } from 'next'
 import { NotFoundError } from 'src/services/errors'
 import { withCors } from 'src/utils/api/cors'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 import { getAddress } from 'viem'
 
 export interface UserTokensResponse {
@@ -53,4 +54,10 @@ export const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
-export default withCors()(handler)
+export default withCors()(
+  withRateLimit({
+    maxRequests: 30,
+    windowSeconds: 60,
+    keyPrefix: 'profile:tokens',
+  })(handler)
+)

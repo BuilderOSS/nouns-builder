@@ -154,7 +154,7 @@ export const truncateAddress = (addr: string | undefined, chars: number = 5): st
     return addr
   }
 
-  return truncateHex(getAddress(addr), chars)
+  return truncateHex(getAddress(addr) as `0x${string}`, chars)
 }
 
 /**

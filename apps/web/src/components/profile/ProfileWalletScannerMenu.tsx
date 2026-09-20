@@ -1,5 +1,6 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
+import { useAuthStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
 import { Icon, Text } from '@buildeross/zord'
 import React from 'react'
@@ -12,7 +13,6 @@ import {
 } from 'src/styles/profile.css'
 import { isOwnProfileAddress } from 'src/utils/profileDashboard'
 import type { ProfileIdentity } from 'src/utils/profileIdentity'
-import { useAccount } from 'wagmi'
 
 import { DelegateToProfileModal } from './DelegateToProfileModal'
 import { ProfileLinksEditModal } from './ProfileLinksEditModal'
@@ -50,7 +50,7 @@ export const ProfileWalletScannerMenu: React.FC<ProfileWalletScannerMenuProps> =
   const menuRootRef = React.useRef<HTMLDivElement>(null)
   const menuButtonRef = React.useRef<HTMLButtonElement>(null)
   const [isOpen, setIsOpen] = React.useState(false)
-  const { address: connectedAddress } = useAccount()
+  const { address: connectedAddress } = useAuthStore()
   const isOwnProfile = isOwnProfileAddress(connectedAddress, profileAddress)
   const [isDelegateModalOpen, setIsDelegateModalOpen] = React.useState(false)
   const [isEditLinksModalOpen, setIsEditLinksModalOpen] = React.useState(false)

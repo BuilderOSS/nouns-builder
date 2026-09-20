@@ -29,9 +29,10 @@ vi.mock('src/components/ProfileDaoList', () => ({
   },
 }))
 
-vi.mock('wagmi', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('wagmi')>()),
-  useAccount: () => ({ address: '0xabc' }),
+vi.mock('@buildeross/stores', () => ({
+  useAuthStore: () => ({
+    address: '0xabc',
+  }),
 }))
 
 vi.mock('next/image', () => ({

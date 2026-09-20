@@ -8,9 +8,10 @@ import { CHAIN_ID } from '@buildeross/types'
 import type { Hex } from 'viem'
 import { encodeAbiParameters, getAddress, zeroHash } from 'viem'
 import type { Config } from 'wagmi'
-import { simulateContract, waitForTransactionReceipt, writeContract } from 'wagmi/actions'
+import { simulateContract } from 'wagmi/actions'
 
-import { awaitSubgraphSync } from '../subgraph/requests/sync'
+import { executeAppTransaction } from '../transaction'
+import { extractSingleAttestationUID } from './utils'
 
 export interface CandidateAttestationParams {
   config: Config
@@ -24,10 +25,16 @@ export interface CandidateAttestationParams {
   description: string
 }
 
-export interface CandidateAttestationResult {
-  attestationUID: Hex
-  transactionHash: Hex
-}
+export type CandidateAttestationResult =
+  | {
+      kind: 'mined'
+      attestationUID: Hex
+      transactionHash: Hex
+    }
+  | {
+      kind: 'safe-proposed'
+      transactionHash: Hex
+    }
 
 /**
  * Submits a candidate attestation to EAS
@@ -90,25 +97,26 @@ export async function attestCandidate(
   })
 
   // 4. Write the transaction
-  const txHash = await writeContract(config, simulation.request)
-
-  // 5. Wait for confirmation
-  const receipt = await waitForTransactionReceipt(config, {
-    hash: txHash,
-    chainId: chainId,
+  const result = await executeAppTransaction({
+    config,
+    request: simulation.request,
+    chainId,
   })
 
-  // 6. Sync with subgraph
-  await awaitSubgraphSync(chainId, receipt.blockNumber)
+  // Handle Safe proposals vs mined transactions
+  if (result.kind === 'safe-proposed') {
+    return {
+      kind: 'safe-proposed',
+      transactionHash: result.hash,
+    }
+  }
 
-  // 7. Extract attestation UID from logs
-  // The attest function returns the attestation UID
-  // For now, we'll use the transaction hash as a placeholder
-  // In a real implementation, you'd decode the logs to get the actual UID
-  const attestationUID = txHash
+  // Extract attestation UID from logs for mined transactions
+  const attestationUID = extractSingleAttestationUID(result.receipt, easAddress)
 
   return {
+    kind: 'mined',
     attestationUID,
-    transactionHash: txHash,
+    transactionHash: result.hash,
   }
 }

@@ -7,14 +7,14 @@ import {
 } from '@buildeross/create-proposal-ui'
 import { getDAOAddresses, tokenAbi } from '@buildeross/sdk/contract'
 import { daoOGMetadataRequest } from '@buildeross/sdk/subgraph'
-import { DaoContractAddresses } from '@buildeross/stores'
+import { DaoContractAddresses, useAuthStore } from '@buildeross/stores'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import { chainIdToSlug } from '@buildeross/utils'
 import { Box, Flex, Stack, Text } from '@buildeross/zord'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback } from 'react'
-import { useAccount, useReadContracts } from 'wagmi'
+import { useReadContracts } from 'wagmi'
 
 import { getDaoLayout } from '../../../../layouts/DaoLayout'
 import { NextPageWithLayout } from '../../../_app'
@@ -39,7 +39,7 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
   addresses,
   chainId,
 }) => {
-  const { address: walletAddress, isConnected } = useAccount()
+  const { address: walletAddress, isConnected, isSafeMode } = useAuthStore()
   const router = useRouter()
 
   const onNavigateToReview = useCallback(() => {
@@ -102,6 +102,21 @@ const MigratePage: NextPageWithLayout<MigratePageProps> = ({
 
     return false
   }, [walletAddress, founders, builderBalance])
+
+  if (isConnected && isSafeMode) {
+    return (
+      <Flex justify="center" align="center" py="x32" px="x4">
+        <Stack gap="x6" align="center" style={{ maxWidth: 600 }}>
+          <Text fontSize="28px" fontWeight="display" textAlign="center">
+            Migration unavailable for Safe wallets
+          </Text>
+          <Text fontSize="16px" color="text3" textAlign="center">
+            Connect an owner wallet directly to use the migration wizard.
+          </Text>
+        </Stack>
+      </Flex>
+    )
+  }
 
   // Show loading state while checking access
   if (isConnected && isLoadingAccess) {

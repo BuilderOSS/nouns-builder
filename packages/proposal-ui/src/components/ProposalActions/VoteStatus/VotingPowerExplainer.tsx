@@ -1,11 +1,10 @@
 import { useDaoMembership } from '@buildeross/hooks/useDaoMembership'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { useVotes } from '@buildeross/hooks/useVotes'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { handleGMTOffset } from '@buildeross/utils/helpers'
 import dayjs from 'dayjs'
 import React, { useMemo } from 'react'
-import { useAccount } from 'wagmi'
 
 import { getVotingPowerCase } from './VotingPowerExplainer.helper'
 import { VotingPowerExplainerView } from './VotingPowerExplainerView'
@@ -21,7 +20,7 @@ export const VotingPowerExplainer: React.FC<VotingPowerExplainerProps> = ({
   timeCreated,
   daoName,
 }) => {
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useAuthStore()
   const chain = useChainStore((x) => x.chain)
   const { token, governor } = useDaoStore((x) => x.addresses)
 

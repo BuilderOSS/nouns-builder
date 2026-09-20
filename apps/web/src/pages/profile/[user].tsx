@@ -7,6 +7,7 @@ import {
   type ProfileDashboardChainResult,
   type ProfileDashboardQueryMode,
 } from '@buildeross/sdk/subgraph'
+import { useAuthStore } from '@buildeross/stores'
 import type { AddressType, CHAIN_ID, FeedItem } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { getEnsAddress, getEnsName } from '@buildeross/utils/ens'
@@ -55,7 +56,6 @@ import {
 import { TOKEN_SORT_OPTIONS, type TokenSortOption } from 'src/utils/profileIdentity'
 import useSWR, { unstable_serialize } from 'swr'
 import { isAddress } from 'viem'
-import { useAccount } from 'wagmi'
 
 interface ProfileProps {
   userAddress: string
@@ -121,7 +121,8 @@ const ProfilePage: NextPageWithLayout<ProfileProps> = ({
   ogImageURL,
 }) => {
   const router = useRouter()
-  const { address: connectedAddress } = useAccount()
+  const { address: connectedAddress } = useAuthStore()
+
   const { ensName, ensAvatar } = useEnsData(userAddress)
   const { data: profileIdentity, mutate: mutateProfileIdentity } = useProfileIdentity(
     ensName && !isAddress(ensName, { strict: false }) ? ensName : undefined,
