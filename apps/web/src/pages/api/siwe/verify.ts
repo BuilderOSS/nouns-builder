@@ -37,7 +37,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   switch (method) {
     case 'POST':
       try {
-        const { message, signature, nonce, safeAddress, safeChainId } = req.body
+        const { message, signature, safeAddress, safeChainId } = req.body
         const siweMessage = parseSiweMessage(message) as SiweMessage
         const eoaAddress = siweMessage.address
 
@@ -61,9 +61,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
         const session = await getIronSession<IronSessionData>(req, res, ironOptions)
 
-        const hasSessionNonce = typeof session.nonce === 'string'
-        const nonceToValidate = hasSessionNonce ? session.nonce : nonce
-        if (siweMessage.nonce !== nonceToValidate) {
+        if (!session.nonce || siweMessage.nonce !== session.nonce) {
           return res.status(422).json({ message: 'Invalid nonce.' })
         }
 

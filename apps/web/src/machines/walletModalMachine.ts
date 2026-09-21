@@ -3,7 +3,6 @@ import {
   setSafeInfo as saveSafeInfo,
 } from '@buildeross/utils'
 import type { Address } from 'viem'
-import { parseSiweMessage } from 'viem/siwe'
 import type { Connector } from 'wagmi'
 import { assign, createMachine, fromPromise } from 'xstate'
 
@@ -268,7 +267,6 @@ export const walletModalMachine = createMachine(
           input: ({ context }) => ({
             message: context.message!,
             signature: context.signature!,
-            nonce: parseSiweMessage(context.message!).nonce,
             safeAddress: context.safeInfo?.safeAddress,
             safeChainId: context.safeInfo?.chainId,
           }),
@@ -461,9 +459,12 @@ export const walletModalMachine = createMachine(
         },
       }),
       setVerificationError: assign({
-        error: () => ({
+        error: ({ event }) => ({
           code: 'VERIFICATION_FAILED',
-          message: 'Signature verification failed',
+          message:
+            'error' in event && event.error instanceof Error
+              ? event.error.message
+              : 'Signature verification failed',
         }),
       }),
       setTimeoutError: assign({
@@ -528,7 +529,6 @@ export const walletModalMachine = createMachine(
         {
           message: string
           signature: string
-          nonce: string
           safeAddress?: Address
           safeChainId?: number
         }
@@ -552,6 +552,18 @@ export const walletModalMachine = createMachine(
           response.status,
           response.ok
         )
+
+        if (response.status === 422) {
+          throw new Error(
+            'Cookies are disabled or unavailable. Please enable cookies for this site and try again.'
+          )
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            `Signature verification failed with status ${response.status}. Please try again.`
+          )
+        }
 
         const body = (await response.json()) as { ok?: boolean }
         debugWallet('Verification body: %O', body)
