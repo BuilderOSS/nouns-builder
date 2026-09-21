@@ -59,7 +59,11 @@ export function ErrorView({ error, onRetry, onBack, onClose }: ErrorViewProps) {
   const { title, message } = getErrorMessage(error)
 
   return (
-    <Stack gap="x4" p="x5">
+    <Stack
+      gap="x4"
+      p="x5"
+      style={{ gap: 'clamp(16px, 4vw, 24px)', padding: 'clamp(20px, 5vw, 32px)' }}
+    >
       <Text variant="heading-sm">{title}</Text>
 
       <Box p="x3" borderRadius="phat" backgroundColor="background2">

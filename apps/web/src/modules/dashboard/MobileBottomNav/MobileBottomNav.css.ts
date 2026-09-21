@@ -1,5 +1,5 @@
 import { MOBILE_BOTTOM_NAV_LAYER } from '@buildeross/constants/layers'
-import { atoms, color } from '@buildeross/zord'
+import { atoms, vars } from '@buildeross/zord'
 import { style } from '@vanilla-extract/css'
 
 export const bottomNav = style([
@@ -45,7 +45,7 @@ export const navItem = style([
     cursor: 'pointer',
     flex: 1,
     transition: 'opacity 0.2s ease',
-    color: color.text3,
+    color: vars.color.text3,
 
     ':hover': {
       opacity: 0.8,
@@ -58,7 +58,7 @@ export const navItem = style([
 ])
 
 export const navItemActive = style({
-  color: color.accent,
+  color: vars.color.accent,
 })
 
 export const navItemIcon = style({

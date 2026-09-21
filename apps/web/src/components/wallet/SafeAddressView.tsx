@@ -57,14 +57,18 @@ export function SafeAddressView({ onSubmit, onBack, error }: SafeAddressViewProp
   }
 
   return (
-    <Stack gap="x4" p="x5">
+    <Stack
+      gap="x4"
+      p="x5"
+      style={{ gap: 'clamp(16px, 4vw, 24px)', padding: 'clamp(20px, 5vw, 32px)' }}
+    >
       <Text variant="heading-sm">Connect Safe Wallet</Text>
 
       <Text variant="paragraph-sm" color="text3">
         Enter your Safe address and select the network
       </Text>
 
-      <Stack gap="x3">
+      <Stack gap="x3" style={{ gap: 'clamp(12px, 3vw, 16px)' }}>
         <DropdownSelect
           id="network"
           value={chainId}

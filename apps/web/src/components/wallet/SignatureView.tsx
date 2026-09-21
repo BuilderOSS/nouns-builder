@@ -25,10 +25,14 @@ export function SignatureView({
   isAuthenticating,
 }: SignatureViewProps) {
   return (
-    <Stack gap="x4" p="x5">
+    <Stack
+      gap="x4"
+      p="x5"
+      style={{ gap: 'clamp(16px, 4vw, 24px)', padding: 'clamp(20px, 5vw, 32px)' }}
+    >
       <Text variant="heading-sm">Sign Message</Text>
 
-      <Stack gap="x3">
+      <Stack gap="x3" style={{ gap: 'clamp(12px, 3vw, 16px)' }}>
         <Box>
           <Text variant="paragraph-sm" color="text3">
             {mode === 'safe' ? 'Signing wallet' : 'Wallet'}

@@ -30,7 +30,7 @@ export function WalletListView({
   const popularWallets = wallets.filter((w) => w.isRainbowKitConnector)
 
   return (
-    <Stack gap="x4">
+    <Stack gap="x4" style={{ gap: 'clamp(16px, 4vw, 24px)' }}>
       <Stack gap="x1">
         <Text variant="heading-sm">{title}</Text>
         {description && (
