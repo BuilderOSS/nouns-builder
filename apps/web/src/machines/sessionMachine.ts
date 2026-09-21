@@ -169,7 +169,10 @@ export const sessionMachine = createMachine(
     },
     actors: {
       fetchSession: fromPromise(async () => {
-        const res = await fetch(SIWE_ME_PATH, { cache: 'no-store' })
+        const res = await fetch(SIWE_ME_PATH, {
+          cache: 'no-store',
+          credentials: 'include',
+        })
         if (!res.ok) {
           // Throw error to distinguish from no session (allows proper error handling)
           throw new Error(`Session fetch failed: ${res.status}`)
@@ -177,7 +180,10 @@ export const sessionMachine = createMachine(
         return res.json() as Promise<SessionData>
       }),
       logoutApi: fromPromise(async () => {
-        const response = await fetch(SIWE_LOGOUT_PATH, { method: 'POST' })
+        const response = await fetch(SIWE_LOGOUT_PATH, {
+          method: 'POST',
+          credentials: 'include',
+        })
         if (!response.ok) {
           throw new Error(`Logout failed: ${response.status}`)
         }

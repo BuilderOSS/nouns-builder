@@ -6,7 +6,7 @@ import { SIWE_ME_PATH } from '../utils/siweAuthFlow'
 
 const fetcher = async (url: string): Promise<SessionData> => {
   debugSession('Fetching session from %s', url)
-  const res = await fetch(url, { cache: 'no-store' })
+  const res = await fetch(url, { cache: 'no-store', credentials: 'include' })
 
   if (!res.ok) {
     debugSession('Session fetch failed: %d', res.status)

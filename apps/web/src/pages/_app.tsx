@@ -224,7 +224,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
     () =>
       createAuthenticationAdapter({
         getNonce: async () => {
-          const response = await fetch(SIWE_NONCE_PATH)
+          const response = await fetch(SIWE_NONCE_PATH, { credentials: 'include' })
           const nonce = await response.text()
           return nonce
         },
@@ -252,6 +252,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
             const currentSafeState = safeStateRef.current
             const response = await fetch(SIWE_VERIFY_PATH, {
               method: 'POST',
+              credentials: 'include',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 message,

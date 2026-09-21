@@ -3,6 +3,7 @@ import {
   setSafeInfo as saveSafeInfo,
 } from '@buildeross/utils'
 import type { Address } from 'viem'
+import { parseSiweMessage } from 'viem/siwe'
 import type { Connector } from 'wagmi'
 import { assign, createMachine, fromPromise } from 'xstate'
 
@@ -267,6 +268,7 @@ export const walletModalMachine = createMachine(
           input: ({ context }) => ({
             message: context.message!,
             signature: context.signature!,
+            nonce: parseSiweMessage(context.message!).nonce,
             safeAddress: context.safeInfo?.safeAddress,
             safeChainId: context.safeInfo?.chainId,
           }),
@@ -526,6 +528,7 @@ export const walletModalMachine = createMachine(
         {
           message: string
           signature: string
+          nonce: string
           safeAddress?: Address
           safeChainId?: number
         }
@@ -539,6 +542,7 @@ export const walletModalMachine = createMachine(
 
         const response = await fetch(SIWE_VERIFY_PATH, {
           method: 'POST',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(input),
         })

@@ -493,7 +493,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
 
       // Get nonce from API
       debugWallet('Fetching nonce from /api/siwe/nonce...')
-      const nonceRes = await fetch(SIWE_NONCE_PATH)
+      const nonceRes = await fetch(SIWE_NONCE_PATH, { credentials: 'include' })
       if (flowCancelledRef.current || attemptId !== authAttemptRef.current) return
       debugWallet('Nonce response status: %d', nonceRes.status)
 

@@ -23,7 +23,12 @@ if (IRON_PASSWORD.length < 32) {
 export const ironOptions: SessionOptions = {
   cookieName: 'siwe',
   cookieOptions: {
-    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    // Local production-mode builds can still run over HTTP; only enable
+    // Secure cookies when deployed through Vercel over HTTPS.
+    secure:
+      process.env.NODE_ENV === 'production' &&
+      (process.env.VERCEL_ENV === 'production' || process.env.VERCEL_ENV === 'preview'),
     httpOnly: true,
     sameSite: 'lax',
     maxAge: 60 * 60 * 24 * 7, // 7 days
