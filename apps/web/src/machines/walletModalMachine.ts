@@ -87,6 +87,10 @@ export const walletModalMachine = createMachine(
             target: 'connectingWallet',
             actions: 'setSelectedWallet',
           },
+          WALLET_CONNECTED: {
+            target: 'walletConnected',
+            actions: 'setConnectedWallet',
+          },
           SELECT_SAFE: 'enteringSafeAddress',
           CLOSE: 'closed',
         },
@@ -141,6 +145,10 @@ export const walletModalMachine = createMachine(
           SELECT_WALLET: {
             target: 'connectingWallet',
             actions: 'setSelectedWallet',
+          },
+          WALLET_CONNECTED: {
+            target: 'walletConnected',
+            actions: 'setConnectedWallet',
           },
           BACK: 'enteringSafeAddress',
           CLOSE: 'closed',
