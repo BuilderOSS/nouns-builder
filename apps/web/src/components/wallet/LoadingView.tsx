@@ -8,12 +8,7 @@ interface LoadingViewProps {
 
 export function LoadingView({ message = 'Loading...' }: LoadingViewProps) {
   return (
-    <Stack
-      gap="x4"
-      p="x5"
-      align="center"
-      style={{ gap: 'clamp(16px, 4vw, 24px)', padding: 'clamp(20px, 5vw, 32px)' }}
-    >
+    <Stack gap="x4" align="center" style={{ gap: 'clamp(16px, 4vw, 24px)' }}>
       <Flex
         justify="center"
         align="center"

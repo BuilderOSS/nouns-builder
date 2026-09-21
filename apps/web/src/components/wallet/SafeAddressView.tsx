@@ -11,6 +11,8 @@ import { ChangeEvent, useState } from 'react'
 import type { Address } from 'viem'
 import { isAddress } from 'viem'
 
+import { actionButton, actionRow } from './walletView.css'
+
 interface SafeAddressViewProps {
   onSubmit: (address: Address, chainId: number) => void
   onBack: () => void
@@ -57,11 +59,7 @@ export function SafeAddressView({ onSubmit, onBack, error }: SafeAddressViewProp
   }
 
   return (
-    <Stack
-      gap="x4"
-      p="x5"
-      style={{ gap: 'clamp(16px, 4vw, 24px)', padding: 'clamp(20px, 5vw, 32px)' }}
-    >
+    <Stack gap="x4" style={{ gap: 'clamp(16px, 4vw, 24px)' }}>
       <Text variant="heading-sm">Connect Safe Wallet</Text>
 
       <Text variant="paragraph-sm" color="text3">
@@ -152,11 +150,11 @@ export function SafeAddressView({ onSubmit, onBack, error }: SafeAddressViewProp
         </Box>
       )}
 
-      <Flex gap="x3">
-        <Button onClick={handleSubmit} style={{ flex: 1 }}>
+      <Flex gap="x3" className={actionRow}>
+        <Button onClick={handleSubmit} className={actionButton}>
           Continue
         </Button>
-        <Button onClick={onBack} variant="secondary" style={{ flex: 1 }}>
+        <Button onClick={onBack} variant="secondary" className={actionButton}>
           Back
         </Button>
       </Flex>

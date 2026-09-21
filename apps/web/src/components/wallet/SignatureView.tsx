@@ -3,6 +3,8 @@
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import type { Address } from 'viem'
 
+import { actionButton, actionRow } from './walletView.css'
+
 interface SignatureViewProps {
   address: Address
   walletName: string
@@ -25,11 +27,7 @@ export function SignatureView({
   isAuthenticating,
 }: SignatureViewProps) {
   return (
-    <Stack
-      gap="x4"
-      p="x5"
-      style={{ gap: 'clamp(16px, 4vw, 24px)', padding: 'clamp(20px, 5vw, 32px)' }}
-    >
+    <Stack gap="x4" style={{ gap: 'clamp(16px, 4vw, 24px)' }}>
       <Text variant="heading-sm">Sign Message</Text>
 
       <Stack gap="x3" style={{ gap: 'clamp(12px, 3vw, 16px)' }}>
@@ -75,15 +73,15 @@ export function SignatureView({
         </Box>
       )}
 
-      <Flex gap="x3">
-        <Button onClick={onSign} disabled={isAuthenticating} style={{ flex: 1 }}>
+      <Flex gap="x3" className={actionRow}>
+        <Button onClick={onSign} disabled={isAuthenticating} className={actionButton}>
           {isAuthenticating ? 'Signing...' : 'Sign Message'}
         </Button>
         <Button
           onClick={onCancel}
           disabled={isAuthenticating}
           variant="secondary"
-          style={{ flex: 1 }}
+          className={actionButton}
         >
           Cancel
         </Button>

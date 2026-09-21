@@ -54,9 +54,11 @@ export const smallAnimatedContent = style({
   borderRadius: 12,
   '@media': {
     'screen and (max-width: 768px)': {
-      width: 'calc(100% - 50px)',
-      left: 25,
+      width: 'calc(100% - 32px)',
+      left: 16,
       marginLeft: '0 !important',
+      gap: 16,
+      padding: 20,
     },
   },
 })

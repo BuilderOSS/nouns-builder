@@ -3,6 +3,7 @@
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 
 import type { AuthError } from '../../types/auth'
+import { actionButton, actionRow } from './walletView.css'
 
 interface ErrorViewProps {
   error: AuthError
@@ -59,11 +60,7 @@ export function ErrorView({ error, onRetry, onBack, onClose }: ErrorViewProps) {
   const { title, message } = getErrorMessage(error)
 
   return (
-    <Stack
-      gap="x4"
-      p="x5"
-      style={{ gap: 'clamp(16px, 4vw, 24px)', padding: 'clamp(20px, 5vw, 32px)' }}
-    >
+    <Stack gap="x4" style={{ gap: 'clamp(16px, 4vw, 24px)' }}>
       <Text variant="heading-sm">{title}</Text>
 
       <Box p="x3" borderRadius="phat" backgroundColor="background2">
@@ -72,18 +69,18 @@ export function ErrorView({ error, onRetry, onBack, onClose }: ErrorViewProps) {
         </Text>
       </Box>
 
-      <Flex gap="x3">
+      <Flex gap="x3" className={actionRow}>
         {onRetry && (
-          <Button onClick={onRetry} style={{ flex: 1 }}>
+          <Button onClick={onRetry} className={actionButton}>
             Try Again
           </Button>
         )}
         {onBack && (
-          <Button onClick={onBack} variant="secondary" style={{ flex: 1 }}>
+          <Button onClick={onBack} variant="secondary" className={actionButton}>
             Go Back
           </Button>
         )}
-        <Button onClick={onClose} variant="secondary" style={{ flex: 1 }}>
+        <Button onClick={onClose} variant="secondary" className={actionButton}>
           Close
         </Button>
       </Flex>
