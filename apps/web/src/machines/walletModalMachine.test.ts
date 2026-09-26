@@ -114,7 +114,7 @@ describe('walletModalMachine', () => {
     expect(getSavedSafeInfo()).toMatchObject({
       safeAddress,
       chainId: 1,
-      eoaConnectorId: 'injected',
+      ownerConnectorId: 'injected',
     })
 
     clearSafeInfo()

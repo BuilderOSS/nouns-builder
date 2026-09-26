@@ -8,8 +8,8 @@ const STORAGE_KEY = 'safe-info'
 export interface SavedSafeInfo {
   safeAddress: Address
   chainId: number
-  eoaConnectorId: string
-  eoaAddress?: Address
+  ownerConnectorId: string
+  ownerAddress?: Address
   threshold: number
   owners: Address[]
   nonce?: number
@@ -27,7 +27,21 @@ export function getSavedSafeInfo(): SavedSafeInfo | null {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (!stored) return null
 
-    const parsed = JSON.parse(stored) as Partial<SavedSafeInfo>
+    const { eoaAddress, eoaConnectorId, ...current } = JSON.parse(
+      stored
+    ) as Partial<SavedSafeInfo> & {
+      eoaAddress?: unknown
+      eoaConnectorId?: unknown
+    }
+    const parsed = {
+      ...current,
+      ownerConnectorId:
+        current.ownerConnectorId === undefined
+          ? eoaConnectorId
+          : current.ownerConnectorId,
+      ownerAddress:
+        current.ownerAddress === undefined ? eoaAddress : current.ownerAddress,
+    }
     const safeAddress = parsed.safeAddress
     const owners = parsed.owners
     if (
@@ -35,10 +49,10 @@ export function getSavedSafeInfo(): SavedSafeInfo | null {
       !isAddress(safeAddress) ||
       typeof parsed.chainId !== 'number' ||
       !Number.isInteger(parsed.chainId) ||
-      typeof parsed.eoaConnectorId !== 'string' ||
-      !parsed.eoaConnectorId ||
-      (parsed.eoaAddress !== undefined &&
-        (typeof parsed.eoaAddress !== 'string' || !isAddress(parsed.eoaAddress))) ||
+      typeof parsed.ownerConnectorId !== 'string' ||
+      !parsed.ownerConnectorId ||
+      (parsed.ownerAddress !== undefined &&
+        (typeof parsed.ownerAddress !== 'string' || !isAddress(parsed.ownerAddress))) ||
       typeof parsed.threshold !== 'number' ||
       !Array.isArray(owners) ||
       !owners.every((owner) => typeof owner === 'string' && isAddress(owner)) ||
@@ -50,7 +64,7 @@ export function getSavedSafeInfo(): SavedSafeInfo | null {
     return {
       ...parsed,
       safeAddress: getAddress(safeAddress),
-      eoaAddress: parsed.eoaAddress ? getAddress(parsed.eoaAddress) : undefined,
+      ownerAddress: parsed.ownerAddress ? getAddress(parsed.ownerAddress) : undefined,
       owners: owners.map((owner) => getAddress(owner as string)),
     } as SavedSafeInfo
   } catch (error) {
@@ -64,8 +78,8 @@ export function getSavedSafeInfo(): SavedSafeInfo | null {
  */
 export function setSafeInfo(
   safeInfo: SafeInfo,
-  eoaConnectorId: string,
-  eoaAddress?: Address | null
+  ownerConnectorId: string,
+  ownerAddress?: Address | null
 ): void {
   if (typeof window === 'undefined') return
 
@@ -73,9 +87,9 @@ export function setSafeInfo(
     const data: SavedSafeInfo = {
       safeAddress: safeInfo.safeAddress,
       chainId: safeInfo.chainId,
-      eoaConnectorId,
-      eoaAddress:
-        eoaAddress && isAddress(eoaAddress) ? getAddress(eoaAddress) : undefined,
+      ownerConnectorId,
+      ownerAddress:
+        ownerAddress && isAddress(ownerAddress) ? getAddress(ownerAddress) : undefined,
       threshold: safeInfo.threshold,
       owners: safeInfo.owners,
       nonce: safeInfo.nonce,

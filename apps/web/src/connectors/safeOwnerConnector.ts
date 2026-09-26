@@ -31,8 +31,8 @@ export function setWagmiConfig(config: Config) {
  * Creates a static SafeOwnerConnector that reads Safe configuration from localStorage.
  * This connector works with wagmi's built-in persistence and reconnection system.
  *
- * Safe info (address, chainId, eoaConnectorId) is stored in localStorage and loaded on-demand.
- * The EOA connector is discovered from wagmi's config by ID.
+ * Safe info (address, chainId, ownerConnectorId) is stored in localStorage and loaded on-demand.
+ * The owner connector is discovered from wagmi's config by ID.
  */
 export function createSafeOwnerConnector(): CreateConnectorFn {
   type Provider = SafeOwnerProvider | undefined
@@ -43,8 +43,8 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
   let provider_: Provider | undefined
   let safeInfo_: SafeInfo | null = null
   let publicClient_: PublicClient | null = null
-  let eoaConnector_: Connector | null = null
-  let eoaAddress_: `0x${string}` | null = null
+  let ownerConnector_: Connector | null = null
+  let ownerAddress_: `0x${string}` | null = null
 
   return createConnector<Provider, Properties>((config) => {
     /**
@@ -55,9 +55,9 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
     }
 
     /**
-     * Find EOA connector by ID from wagmi config
+     * Find the Safe owner connector by ID from wagmi config.
      */
-    function findEOAConnector(connectorId: string): Connector | null {
+    function findOwnerConnector(connectorId: string): Connector | null {
       if (!wagmiConfig) {
         console.error('[SafeOwnerConnector] wagmiConfig not initialized')
         return null
@@ -73,8 +73,8 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
       provider_ = undefined
       safeInfo_ = null
       publicClient_ = null
-      eoaConnector_ = null
-      eoaAddress_ = null
+      ownerConnector_ = null
+      ownerAddress_ = null
     }
 
     return {
@@ -91,36 +91,36 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
        * Check if this connector should auto-reconnect.
        * Returns true if:
        * 1. Safe info exists in localStorage
-       * 2. EOA connector exists and is authorized
-       * 3. EOA is still a Safe owner
+       * 2. Owner connector exists and is authorized
+       * 3. Owner wallet is still a Safe owner
        */
       async isAuthorized() {
         try {
           const saved = loadSafeConfig()
           if (!saved) return false
 
-          // Find the EOA connector
-          const eoaConnector = findEOAConnector(saved.eoaConnectorId)
-          if (!eoaConnector) return false
+          // Find the owner connector.
+          const ownerConnector = findOwnerConnector(saved.ownerConnectorId)
+          if (!ownerConnector) return false
 
-          // Check if EOA connector is still authorized
-          const eoaAuthorized = await eoaConnector.isAuthorized()
-          if (!eoaAuthorized) {
-            // EOA no longer authorized, clear stale Safe info
+          // Check if the owner connector is still authorized.
+          const ownerAuthorized = await ownerConnector.isAuthorized()
+          if (!ownerAuthorized) {
+            // Owner wallet is no longer authorized, clear stale Safe info.
             clearSafeInfo()
             return false
           }
 
-          // Get EOA accounts
-          const eoaAccounts = await eoaConnector.getAccounts()
-          if (!eoaAccounts || eoaAccounts.length === 0) {
+          // Get owner wallet accounts.
+          const ownerAccounts = await ownerConnector.getAccounts()
+          if (!ownerAccounts || ownerAccounts.length === 0) {
             clearSafeInfo()
             return false
           }
 
-          // Verify EOA is still a Safe owner
+          // Verify the wallet is still a Safe owner.
           const isOwner = await isOwnerOfSafe(
-            eoaAccounts[0],
+            ownerAccounts[0],
             saved.safeAddress,
             saved.chainId
           )
@@ -161,25 +161,25 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
           )
         }
 
-        // Find and cache EOA connector
-        eoaConnector_ = findEOAConnector(saved.eoaConnectorId)
-        if (!eoaConnector_) {
+        // Find and cache the owner connector.
+        ownerConnector_ = findOwnerConnector(saved.ownerConnectorId)
+        if (!ownerConnector_) {
           throw new Error(
-            `EOA connector '${saved.eoaConnectorId}' not found. Please reconnect your wallet.`
+            `Owner connector '${saved.ownerConnectorId}' not found. Please reconnect your wallet.`
           )
         }
 
-        // Verify EOA connector is authorized (should be true from isAuthorized check)
-        const eoaAuthorized = await eoaConnector_.isAuthorized()
-        if (!eoaAuthorized) {
-          throw new Error('EOA wallet is not authorized. Please reconnect.')
+        // Verify the owner connector is authorized (should be true from isAuthorized check).
+        const ownerAuthorized = await ownerConnector_.isAuthorized()
+        if (!ownerAuthorized) {
+          throw new Error('Safe owner wallet is not authorized. Please reconnect.')
         }
 
-        // Cache EOA address for synchronous access
-        const eoaAccounts = await eoaConnector_.getAccounts()
-        eoaAddress_ = eoaAccounts?.[0] || null
+        // Cache the owner address for synchronous access.
+        const ownerAccounts = await ownerConnector_.getAccounts()
+        ownerAddress_ = ownerAccounts?.[0] || null
 
-        // Persist the resolved EOA address so the signing UI can read it back later.
+        // Persist the resolved owner address so the signing UI can read it back later.
         setSafeInfo(
           {
             safeAddress: saved.safeAddress,
@@ -190,8 +190,8 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
             nonce: saved.nonce,
             version: saved.version,
           },
-          saved.eoaConnectorId,
-          eoaAddress_
+          saved.ownerConnectorId,
+          ownerAddress_
         )
 
         // Load Safe info from cache if not already loaded
@@ -245,30 +245,30 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
           safeInfo_ &&
           (safeInfo_.safeAddress.toLowerCase() !== saved.safeAddress.toLowerCase() ||
             safeInfo_.chainId !== saved.chainId ||
-            !eoaConnector_ ||
-            eoaConnector_.id !== saved.eoaConnectorId)
+            !ownerConnector_ ||
+            ownerConnector_.id !== saved.ownerConnectorId)
         ) {
           provider_.destroy()
           clearCache()
         }
 
         if (!provider_) {
-          // Get EOA connector
-          if (!eoaConnector_) {
-            eoaConnector_ = findEOAConnector(saved.eoaConnectorId)
+          // Get the owner connector.
+          if (!ownerConnector_) {
+            ownerConnector_ = findOwnerConnector(saved.ownerConnectorId)
           }
-          if (!eoaConnector_) {
+          if (!ownerConnector_) {
             throw new ProviderNotFoundError()
           }
 
-          // Get EOA provider
-          const rawProvider = await eoaConnector_.getProvider()
+          // Get the owner wallet provider.
+          const rawProvider = await ownerConnector_.getProvider()
           if (!rawProvider) {
             throw new ProviderNotFoundError()
           }
 
           // Type assert to EIP1193Provider
-          const eoaProvider = rawProvider as EIP1193Provider
+          const ownerProvider = rawProvider as EIP1193Provider
 
           // Create public client if not already created
           if (!publicClient_) {
@@ -298,7 +298,7 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
           }
 
           // Create SafeOwnerProvider
-          provider_ = new SafeOwnerProvider(safeInfo_, eoaProvider, publicClient_)
+          provider_ = new SafeOwnerProvider(safeInfo_, ownerProvider, publicClient_)
         }
 
         return provider_
@@ -331,7 +331,7 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
       onAccountsChanged(_accounts) {
         const saved = loadSafeConfig()
         if (saved) {
-          // EOA accounts changed, but we still report Safe address
+          // Owner accounts changed, but we still report the Safe address.
           config.emitter.emit('change', { accounts: [saved.safeAddress] })
         }
       },
@@ -373,45 +373,51 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
         return safeInfo_
       },
 
-      // Synchronous getter for cached EOA connector
-      get cachedEOAConnector(): Connector | null {
-        return eoaConnector_
+      // Synchronous getter for the cached owner connector.
+      get cachedOwnerConnector(): Connector | null {
+        return ownerConnector_
       },
 
-      // Synchronous getter for cached EOA address
-      get cachedEOAAddress(): `0x${string}` | null {
-        return eoaAddress_ ?? loadSafeConfig()?.eoaAddress ?? null
+      // Synchronous getter for the cached owner address.
+      get cachedOwnerAddress(): `0x${string}` | null {
+        return ownerAddress_ ?? loadSafeConfig()?.ownerAddress ?? null
       },
 
-      // Custom method to get EOA connector
-      async getEOAConnector(): Promise<Connector | null> {
+      // Custom method to get the owner connector.
+      async getOwnerConnector(): Promise<Connector | null> {
         const saved = loadSafeConfig()
         if (!saved) return null
 
-        if (!eoaConnector_) {
-          eoaConnector_ = findEOAConnector(saved.eoaConnectorId)
+        if (!ownerConnector_) {
+          ownerConnector_ = findOwnerConnector(saved.ownerConnectorId)
         }
-        if (!eoaConnector_) return null
-        return eoaConnector_
+        if (!ownerConnector_) return null
+        return ownerConnector_
       },
 
-      // Custom method to get EOA address for signing
-      async getEOAAddress(): Promise<`0x${string}` | null> {
+      // Custom method to get the owner address for signing.
+      async getOwnerAddress(): Promise<`0x${string}` | null> {
         const saved = loadSafeConfig()
         if (!saved) return null
 
-        if (saved.eoaAddress) {
-          eoaAddress_ = saved.eoaAddress
-          return saved.eoaAddress
+        if (!ownerConnector_) {
+          ownerConnector_ = findOwnerConnector(saved.ownerConnectorId)
+        }
+        const ownerConnector = ownerConnector_
+        const ownerAddress = ownerConnector
+          ? (await ownerConnector.getAccounts())?.[0]
+          : null
+        if (ownerAddress) {
+          ownerAddress_ = ownerAddress
+          return ownerAddress
         }
 
-        if (!eoaConnector_) {
-          eoaConnector_ = findEOAConnector(saved.eoaConnectorId)
+        if (saved.ownerAddress) {
+          ownerAddress_ = saved.ownerAddress
+          return saved.ownerAddress
         }
-        if (!eoaConnector_) return null
 
-        const eoaAccounts = await eoaConnector_.getAccounts()
-        return eoaAccounts?.[0] || null
+        return null
       },
     }
   })

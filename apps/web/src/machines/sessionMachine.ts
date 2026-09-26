@@ -19,10 +19,10 @@ function isValidSessionData(data: unknown): data is SessionData {
     typeof obj.address === 'string' || typeof obj.safeAddress === 'string'
 
   // Validate optional fields if present
-  const validEoa = !obj.eoaAddress || typeof obj.eoaAddress === 'string'
+  const validOwner = !obj.ownerAddress || typeof obj.ownerAddress === 'string'
   const validChainId = !obj.safeChainId || typeof obj.safeChainId === 'number'
 
-  return hasAddress && validEoa && validChainId
+  return hasAddress && validOwner && validChainId
 }
 
 interface SessionContext {

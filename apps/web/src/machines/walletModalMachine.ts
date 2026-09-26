@@ -210,7 +210,7 @@ export const walletModalMachine = createMachine(
           src: 'switchToSafeConnector',
           input: ({ context }) => ({
             safeInfo: context.safeInfo!,
-            eoaConnectorId: context.connector!.id,
+            ownerConnectorId: context.connector!.id,
           }),
         },
         on: {
@@ -510,10 +510,10 @@ export const walletModalMachine = createMachine(
       ),
       switchToSafeConnector: fromPromise<
         void,
-        { safeInfo: SafeInfo; eoaConnectorId: string }
+        { safeInfo: SafeInfo; ownerConnectorId: string }
       >(async ({ input }) => {
         // Save Safe info before the Safe connector switch begins.
-        saveSafeInfo(input.safeInfo, input.eoaConnectorId)
+        saveSafeInfo(input.safeInfo, input.ownerConnectorId)
         // Actual connector switch handled by component
       }),
       signSiweMessage: fromPromise<

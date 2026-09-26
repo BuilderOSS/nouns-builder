@@ -35,7 +35,7 @@ export function useSession() {
   return {
     session: data,
     address: data?.safeAddress || data?.address,
-    eoaAddress: data?.eoaAddress,
+    ownerAddress: data?.ownerAddress,
     safeAddress: data?.safeAddress,
     isAuthenticated: !!(data?.address || data?.safeAddress),
     isSafeMode: !!data?.safeAddress,

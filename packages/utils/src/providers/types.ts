@@ -6,7 +6,7 @@ export interface SafeInfo {
   threshold: number
   owners: Address[]
   isReadOnly: boolean
-  eoaAddress?: Address
+  ownerAddress?: Address
   nonce?: number
   version?: string
 }

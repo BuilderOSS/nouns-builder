@@ -16,13 +16,13 @@ export interface SafeOwnerConnectorType extends Connector {
   id: 'safeOwner'
   name: 'Safe Owner'
   safeInfo: SavedSafeInfo | null
-  cachedEOAConnector: Connector | null
-  cachedEOAAddress: Address | null
-  getEOAConnector(): Promise<Connector | null>
-  getEOAAddress(): Promise<Address | null>
+  cachedOwnerConnector: Connector | null
+  cachedOwnerAddress: Address | null
+  getOwnerConnector(): Promise<Connector | null>
+  getOwnerAddress(): Promise<Address | null>
 }
 
 export interface SavedSafeInfo extends SafeInfo {
-  eoaConnectorId: string
+  ownerConnectorId: string
   timestamp: number
 }

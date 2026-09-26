@@ -25,7 +25,7 @@ export type AuthStoreState = {
   address: AddressType | undefined
 
   // Safe-specific fields (when user authenticated via Safe wallet)
-  eoaAddress?: AddressType
+  ownerAddress?: AddressType
   safeAddress?: AddressType
   safeChainId?: CHAIN_ID
   isSafeMode: boolean
@@ -43,7 +43,7 @@ export type AuthStoreState = {
  */
 export interface SessionData {
   address?: AddressType
-  eoaAddress?: AddressType
+  ownerAddress?: AddressType
   safeAddress?: AddressType
   safeChainId?: CHAIN_ID
 }
@@ -82,11 +82,11 @@ export function useAuthStore(): AuthStoreState {
   const address = session?.safeAddress || session?.address
 
   return {
-    // Address from session (Safe address if available, otherwise EOA)
+    // Address from session (Safe address if available, otherwise owner wallet)
     address: isAuthenticated && address ? (address as AddressType) : undefined,
 
     // Safe-specific fields
-    eoaAddress: session?.eoaAddress as AddressType | undefined,
+    ownerAddress: session?.ownerAddress as AddressType | undefined,
     safeAddress: session?.safeAddress as AddressType | undefined,
     safeChainId: session?.safeChainId as CHAIN_ID | undefined,
     isSafeMode: !!session?.safeAddress,

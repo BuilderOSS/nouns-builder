@@ -131,12 +131,13 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onOpenMenu,
   onSetActiveDropdown,
 }) => {
-  const { address, isAuthenticated, isSafeMode, eoaAddress, safeChainId } = useAuthStore()
+  const { address, isAuthenticated, isSafeMode, ownerAddress, safeChainId } =
+    useAuthStore()
   const { chain: selectedChain } = useChainStore()
   const { connector } = useAccount()
 
   const { displayName, ensAvatar } = useEnsData(address || '')
-  const eoaEnsData = useEnsData(eoaAddress || '')
+  const ownerEnsData = useEnsData(ownerAddress || '')
 
   const { data: balance } = useBalance({
     address: address!,
@@ -311,21 +312,21 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
                 )}
 
                 {/* Owner Info */}
-                {eoaAddress && (
+                {ownerAddress && (
                   <Flex align="center" justify="space-between">
                     <Flex align="center" gap="x2" style={{ flex: 1, minWidth: 0 }}>
                       <Text variant="label-sm" color="text3" style={{ flexShrink: 0 }}>
                         Owner:
                       </Text>
-                      <Avatar address={eoaAddress} size={'20'} />
+                      <Avatar address={ownerAddress} size={'20'} />
                       <Text
                         variant="paragraph-sm"
                         style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
                       >
-                        {eoaEnsData.displayName}
+                        {ownerEnsData.displayName}
                       </Text>
                     </Flex>
-                    <CopyButton text={eoaAddress} variant="icon" />
+                    <CopyButton text={ownerAddress} variant="icon" />
                   </Flex>
                 )}
               </Flex>

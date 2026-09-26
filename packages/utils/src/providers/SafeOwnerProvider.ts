@@ -16,14 +16,14 @@ const debugSafe = debug('app:safe')
 
 /**
  * Custom EIP-1193 provider that presents a Safe wallet as the connected account
- * while delegating signing operations to an EOA wallet.
+ * while delegating signing operations to the wallet that owns the Safe.
  *
  * This provider enables seamless integration of Safe multi-sig wallets with wagmi/viem
  * by implementing the standard EIP-1193 provider interface. It intelligently routes
  * different types of requests:
  *
  * - **Account/Chain info**: Returns Safe address and chain
- * - **Signing operations** (personal_sign, eth_signTypedData): Delegates to EOA for SIWE/authentication
+ * - **Signing operations** (personal_sign, eth_signTypedData): Delegates to the owner wallet for SIWE/authentication
  * - **Transactions** (eth_sendTransaction): Routes through Safe transaction handler for multi-sig
  * - **Read operations** (eth_call, getBalance, etc.): Uses public client for efficiency
  *
@@ -39,7 +39,7 @@ const debugSafe = debug('app:safe')
  *     threshold: 2,
  *     owners: ['0xabc...', '0xdef...'],
  *   },
- *   eoaProvider, // From wallet (MetaMask, etc.)
+ *   ownerProvider, // From an owner wallet (EOA or smart contract wallet)
  *   publicClient  // Viem public client for reads
  * )
  *
@@ -55,15 +55,19 @@ const debugSafe = debug('app:safe')
  */
 export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
   private readonly safe: SafeInfo
-  private readonly eoaProvider: EIP1193Provider
+  private readonly ownerProvider: EIP1193Provider
   private readonly publicClient: PublicClient
   private transactionHandler?: SafeTransactionHandler
   private eventCleanup?: () => void
 
-  constructor(safe: SafeInfo, eoaProvider: EIP1193Provider, publicClient: PublicClient) {
+  constructor(
+    safe: SafeInfo,
+    ownerProvider: EIP1193Provider,
+    publicClient: PublicClient
+  ) {
     super()
     this.safe = safe
-    this.eoaProvider = eoaProvider
+    this.ownerProvider = ownerProvider
     this.publicClient = publicClient
 
     // Forward events from EOA provider
@@ -88,18 +92,18 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
   }
 
   private setupEventForwarding(): void {
-    // Forward certain events from EOA provider, but modify accounts
-    const originalOn = this.eoaProvider.on?.bind(this.eoaProvider)
-    const originalOff = this.eoaProvider.removeListener?.bind(this.eoaProvider)
+    // Forward certain events from the owner provider, but modify accounts.
+    const originalOn = this.ownerProvider.on?.bind(this.ownerProvider)
+    const originalOff = this.ownerProvider.removeListener?.bind(this.ownerProvider)
 
     // Track event handlers for cleanup
     const accountsHandler = () => {
-      // Any backing EOA account change invalidates the Safe session.
+      // Any backing owner account change invalidates the Safe session.
       this.emit('disconnect')
     }
 
     const chainHandler = () => {
-      // Safes are chain-specific. Any backing EOA chain change invalidates the session.
+      // Safes are chain-specific. Any backing owner chain change invalidates the session.
       this.emit('disconnect')
     }
 
@@ -107,7 +111,7 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
       this.emit('disconnect')
     }
 
-    // Listen to EOA provider events
+    // Listen to owner provider events
     if (originalOn) {
       originalOn('accountsChanged', accountsHandler)
       originalOn('chainChanged', chainHandler)
@@ -154,33 +158,33 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
       case 'eth_signTypedData':
       case 'eth_signTypedData_v3':
       case 'eth_signTypedData_v4': {
-        // Delegate signing to EOA provider
-        // Need to replace Safe address with EOA address in params
-        const eoaAccounts = (await this.eoaProvider.request({
+        // Delegate signing to the owner provider.
+        // Replace the presented Safe address with the owner wallet address in params.
+        const ownerAccounts = (await this.ownerProvider.request({
           method: 'eth_accounts',
         })) as string[]
 
-        if (!eoaAccounts || eoaAccounts.length === 0) {
-          throw new Error('EOA wallet not connected')
+        if (!ownerAccounts || ownerAccounts.length === 0) {
+          throw new Error('Safe owner wallet not connected')
         }
 
-        const eoaAddress = eoaAccounts[0]
+        const ownerAddress = ownerAccounts[0]
 
-        // Replace Safe address with EOA address in params
+        // Replace Safe address with owner address in params.
         // For personal_sign: [message, address]
         // For eth_signTypedData_v4: [address, typedData]
         const modifiedParams = paramsArray.map((param) => {
-          // If param is the Safe address, replace with EOA address
+          // If param is the Safe address, replace with the owner address.
           if (
             typeof param === 'string' &&
             param.toLowerCase() === this.safe.safeAddress.toLowerCase()
           ) {
-            return eoaAddress
+            return ownerAddress
           }
           return param
         })
 
-        return this.eoaProvider.request({ method, params: modifiedParams })
+        return this.ownerProvider.request({ method, params: modifiedParams })
       }
 
       // Transaction methods - handle Safe transactions
@@ -212,7 +216,7 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
           const txHash = await executeSafeTransaction(
             this.safe,
             txParams.safeTransactions ?? txParams,
-            this.eoaProvider
+            this.ownerProvider
           )
           debugSafe(' Transaction executed:', txHash)
           return txHash
@@ -238,7 +242,7 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
           ...(txParams.safeTransactions
             ? { transactions: txParams.safeTransactions }
             : {}),
-          eoaProvider: this.eoaProvider,
+          eoaProvider: this.ownerProvider,
         })
 
         debugSafe(' Handler returned result:', result)

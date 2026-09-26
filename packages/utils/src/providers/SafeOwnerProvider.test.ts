@@ -95,4 +95,29 @@ describe('SafeOwnerProvider', () => {
     expect(eoaProvider.removeListener).toHaveBeenCalled()
     expect(disconnect).not.toHaveBeenCalled()
   })
+
+  it('delegates signing to a contract owner wallet', async () => {
+    const ownerAddress = '0x000000000000000000000000000000000000c0de'
+    const eoaProvider = createEoaProvider()
+    eoaProvider.request.mockImplementation(async ({ method, params }) => {
+      if (method === 'eth_accounts') return [ownerAddress]
+      if (method === 'personal_sign') {
+        expect(params).toEqual(['0x1234', ownerAddress])
+        return '0xsignature'
+      }
+      throw new Error(`Unexpected method: ${method}`)
+    })
+    const safeProvider = new SafeOwnerProvider(
+      safeInfo as any,
+      eoaProvider as any,
+      publicClient
+    )
+
+    await expect(
+      safeProvider.request({
+        method: 'personal_sign',
+        params: ['0x1234', safeInfo.safeAddress],
+      })
+    ).resolves.toBe('0xsignature')
+  })
 })

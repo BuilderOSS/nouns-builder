@@ -1,6 +1,9 @@
-import { setSafeInfo } from '@buildeross/utils'
 import type { Address } from 'viem'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+const { getSavedSafeInfoMock } = vi.hoisted(() => ({ getSavedSafeInfoMock: vi.fn() }))
+
+vi.mock('@buildeross/utils', () => ({ getSavedSafeInfo: getSavedSafeInfoMock }))
 
 import { resolveSigningAddress } from './signing'
 
@@ -29,26 +32,16 @@ describe('resolveSigningAddress', () => {
     vi.unstubAllGlobals()
   })
 
-  it('prefers the saved Safe EOA address when the cache is empty', async () => {
+  it('prefers the saved Safe owner address when the cache is empty', async () => {
     const fallback = '0x0000000000000000000000000000000000000001' as Address
     const eoa = '0x0000000000000000000000000000000000000002' as Address
 
-    setSafeInfo(
-      {
-        safeAddress: '0x0000000000000000000000000000000000000003' as Address,
-        chainId: 1,
-        threshold: 1,
-        owners: [eoa],
-        isReadOnly: false,
-      },
-      'injected',
-      eoa
-    )
+    getSavedSafeInfoMock.mockReturnValue({ ownerAddress: eoa })
 
     const connector = {
       id: 'safeOwner',
-      cachedEOAAddress: null,
-      getEOAAddress: vi.fn().mockResolvedValue(null),
+      cachedOwnerAddress: null,
+      getOwnerAddress: vi.fn().mockResolvedValue(null),
     } as any
 
     await expect(resolveSigningAddress(connector, fallback)).resolves.toBe(eoa)
@@ -62,17 +55,18 @@ describe('resolveSigningAddress', () => {
     ).resolves.toBe(fallback)
   })
 
-  it('prefers the cached EOA for Safe wallets', async () => {
+  it('prefers the current owner wallet over a stale cached address', async () => {
     const fallback = '0x0000000000000000000000000000000000000001' as Address
-    const eoa = '0x0000000000000000000000000000000000000002' as Address
+    const cachedEoa = '0x0000000000000000000000000000000000000002' as Address
+    const currentEoa = '0x0000000000000000000000000000000000000003' as Address
 
     const connector = {
       id: 'safeOwner',
-      cachedEOAAddress: eoa,
-      getEOAAddress: vi.fn(),
+      cachedOwnerAddress: cachedEoa,
+      getOwnerAddress: vi.fn().mockResolvedValue(currentEoa),
     } as any
 
-    await expect(resolveSigningAddress(connector, fallback)).resolves.toBe(eoa)
-    expect(connector.getEOAAddress).not.toHaveBeenCalled()
+    await expect(resolveSigningAddress(connector, fallback)).resolves.toBe(currentEoa)
+    expect(connector.getOwnerAddress).toHaveBeenCalledOnce()
   })
 })

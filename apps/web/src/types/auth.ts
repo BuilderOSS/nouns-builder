@@ -4,7 +4,7 @@ import type { Connector } from 'wagmi'
 // Session data from /api/siwe/me
 export interface SessionData {
   address?: Address
-  eoaAddress?: Address
+  ownerAddress?: Address
   safeAddress?: Address
   safeChainId?: number
 }
@@ -26,7 +26,7 @@ export interface SafeInfo {
   threshold: number
   owners: Address[]
   isReadOnly: boolean
-  eoaAddress?: Address
+  ownerAddress?: Address
   nonce?: number
   version?: string
 }

@@ -145,17 +145,17 @@ export function withDaoAuth(
           }
         }
 
-        // If not a member via effective address and in Safe mode, check EOA
+        // If not a member via effective address and in Safe mode, check the owner wallet.
         if (!effectiveMembership && authContext.isSafeMode) {
           const eoaData = await getDAOMembership(
             chainId,
             tokenAddress as AddressType,
-            authContext.eoaAddress as AddressType
+            authContext.ownerAddress as AddressType
           )
 
           if (eoaData?.isMember) {
             effectiveMembership = {
-              address: authContext.eoaAddress,
+              address: authContext.ownerAddress,
               hasBalance: eoaData.hasBalance,
               hasVotes: eoaData.hasVotes,
               isMember: true,

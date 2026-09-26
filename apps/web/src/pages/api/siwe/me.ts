@@ -12,7 +12,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       res.send({
         // For Safe mode, return Safe address; otherwise return EOA address
         address: session.safeAddress || session.siwe?.address,
-        eoaAddress: session.eoaAddress,
+        ownerAddress:
+          session.ownerAddress ||
+          (session.safeAddress ? session.siwe?.address : undefined),
         safeAddress: session.safeAddress,
         safeChainId: session.safeChainId,
       })
