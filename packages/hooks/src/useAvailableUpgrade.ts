@@ -21,7 +21,7 @@ import lt from 'lodash/lt'
 import pickBy from 'lodash/pickBy'
 import useSWR from 'swr'
 import { encodeFunctionData, isAddressEqual } from 'viem'
-import { useReadContracts } from 'wagmi'
+import { usePublicClient, useReadContracts } from 'wagmi'
 
 interface AvailableUpgrade {
   shouldUpgrade: boolean
@@ -54,6 +54,8 @@ export const useAvailableUpgrade = ({
     address: PUBLIC_MANAGER_ADDRESS[chainId],
     chainId,
   }
+
+  const publicClient = usePublicClient({ chainId })
 
   const { data: proposals } = useSWR(
     addresses.token && chainId
@@ -95,6 +97,152 @@ export const useAvailableUpgrade = ({
     ] as const,
   })
 
+  // Fetch current implementation addresses and verify them in a two-stage batch read
+  const { data: verificationData } = useSWR(
+    data &&
+      publicClient &&
+      addresses.governor &&
+      addresses.treasury &&
+      addresses.token &&
+      addresses.auction &&
+      addresses.metadata
+      ? ([
+          'verify-upgrades',
+          chainId,
+          addresses.governor,
+          addresses.treasury,
+          addresses.token,
+          addresses.auction,
+          addresses.metadata,
+        ] as const)
+      : null,
+    async ([, , gov, treasury, token, auction, metadata]) => {
+      if (!publicClient || !data) return null
+
+      const [
+        ,
+        ,
+        ,
+        ,
+        tokenImplNew,
+        governorImplNew,
+        treasuryImplNew,
+        auctionImplNew,
+        metadataImplNew,
+      ] = data
+
+      try {
+        const PROXY_ABI = [
+          {
+            type: 'function',
+            name: 'implementation',
+            inputs: [],
+            outputs: [{ type: 'address' }],
+            stateMutability: 'view',
+          } as const,
+        ]
+
+        // First batch: get current implementations (5 calls)
+        const implResults = await publicClient.multicall({
+          contracts: [
+            {
+              address: gov as AddressType,
+              abi: PROXY_ABI,
+              functionName: 'implementation',
+            },
+            {
+              address: treasury as AddressType,
+              abi: PROXY_ABI,
+              functionName: 'implementation',
+            },
+            {
+              address: token as AddressType,
+              abi: PROXY_ABI,
+              functionName: 'implementation',
+            },
+            {
+              address: auction as AddressType,
+              abi: PROXY_ABI,
+              functionName: 'implementation',
+            },
+            {
+              address: metadata as AddressType,
+              abi: PROXY_ABI,
+              functionName: 'implementation',
+            },
+          ] as const,
+        })
+
+        const currentImpls = {
+          governor: (implResults[0]?.result as AddressType | undefined) || null,
+          treasury: (implResults[1]?.result as AddressType | undefined) || null,
+          token: (implResults[2]?.result as AddressType | undefined) || null,
+          auction: (implResults[3]?.result as AddressType | undefined) || null,
+          metadata: (implResults[4]?.result as AddressType | undefined) || null,
+        }
+
+        // Second batch: verify upgrades with Manager (5 calls)
+        const verifyResults = await publicClient.multicall({
+          contracts: [
+            {
+              abi: managerAbi,
+              address: PUBLIC_MANAGER_ADDRESS[chainId],
+              functionName: 'isRegisteredUpgrade',
+              args: [
+                currentImpls.governor as AddressType,
+                governorImplNew as AddressType,
+              ],
+            },
+            {
+              abi: managerAbi,
+              address: PUBLIC_MANAGER_ADDRESS[chainId],
+              functionName: 'isRegisteredUpgrade',
+              args: [
+                currentImpls.treasury as AddressType,
+                treasuryImplNew as AddressType,
+              ],
+            },
+            {
+              abi: managerAbi,
+              address: PUBLIC_MANAGER_ADDRESS[chainId],
+              functionName: 'isRegisteredUpgrade',
+              args: [currentImpls.token as AddressType, tokenImplNew as AddressType],
+            },
+            {
+              abi: managerAbi,
+              address: PUBLIC_MANAGER_ADDRESS[chainId],
+              functionName: 'isRegisteredUpgrade',
+              args: [currentImpls.auction as AddressType, auctionImplNew as AddressType],
+            },
+            {
+              abi: managerAbi,
+              address: PUBLIC_MANAGER_ADDRESS[chainId],
+              functionName: 'isRegisteredUpgrade',
+              args: [
+                currentImpls.metadata as AddressType,
+                metadataImplNew as AddressType,
+              ],
+            },
+          ] as const,
+        })
+
+        return {
+          currentImpls,
+          isRegistered: {
+            governor: (verifyResults[0]?.result as boolean | undefined) || false,
+            treasury: (verifyResults[1]?.result as boolean | undefined) || false,
+            token: (verifyResults[2]?.result as boolean | undefined) || false,
+            auction: (verifyResults[3]?.result as boolean | undefined) || false,
+            metadata: (verifyResults[4]?.result as boolean | undefined) || false,
+          },
+        }
+      } catch (e) {
+        console.error('Error verifying upgrades:', e)
+        return null
+      }
+    }
+  )
+
   const hasUndefinedAddresses = Object.keys(pickBy(addresses, isUndefined)).length > 0
   if (!data || isLoading || hasUndefinedAddresses || isError || !proposals) {
     return {
@@ -134,6 +282,20 @@ export const useAvailableUpgrade = ({
     }
   }
 
+  // Wait for verification data before proceeding
+  if (!verificationData) {
+    return {
+      shouldUpgrade: false,
+      transaction: undefined,
+      currentVersions: undefined,
+      latest: undefined,
+      date: undefined,
+      description: undefined,
+      activeUpgradeProposalId: undefined,
+      totalContractUpgrades: undefined,
+    }
+  }
+
   const daoVersions = {
     governor: versions?.governor || '1.0.0',
     token: versions?.token || '1.0.0',
@@ -143,11 +305,11 @@ export const useAvailableUpgrade = ({
   }
 
   const managerImplementationAddresses: Record<ContractType, AddressType> = {
-    governor: governorImpl,
-    token: tokenImpl,
-    treasury: treasuryImpl,
-    auction: auctionImpl,
-    metadata: metadataImpl,
+    governor: governorImpl as AddressType,
+    token: tokenImpl as AddressType,
+    treasury: treasuryImpl as AddressType,
+    auction: auctionImpl as AddressType,
+    metadata: metadataImpl as AddressType,
   }
 
   const getUpgradesForVersion = (
@@ -248,7 +410,45 @@ export const useAvailableUpgrade = ({
 
   const upgradesNeededForLatestVersion = getUpgradesForVersion(daoVersions, latest)
 
-  const upgradeTransactions = createUpgradeTransactions(upgradesNeededForLatestVersion)
+  // Extract verification results
+  const isUpgradeRegistered = verificationData.isRegistered || {
+    governor: false,
+    treasury: false,
+    token: false,
+    auction: false,
+    metadata: false,
+  }
+
+  // Governor must be registered if it needs upgrade
+  const governorNeedsUpgrade = !!Object.entries(upgradesNeededForLatestVersion).find(
+    ([contract]) => contract === 'governor'
+  )
+  if (governorNeedsUpgrade && !isUpgradeRegistered.governor) {
+    // Don't show upgrade at all if Governor can't be upgraded
+    return {
+      latest: managerVersion,
+      currentVersions: daoVersions,
+      shouldUpgrade: false,
+      transaction: undefined,
+      date: CONTRACT_VERSION_DETAILS?.[managerVersion]['date'],
+      description: `This release upgrades the DAO to v${managerVersion} to add several features, improvements and bug fixes.`,
+      activeUpgradeProposalId: undefined,
+      totalContractUpgrades: undefined,
+    }
+  }
+
+  // Filter to only upgrade contracts with registered implementations
+  const verifiedUpgrades: Record<AddressType, string> = {}
+  Object.entries(upgradesNeededForLatestVersion).forEach(([contractAddr, version]) => {
+    const contract = Object.entries(addresses).find(
+      ([, addr]) => addr === contractAddr
+    )?.[0] as ContractType | undefined
+    if (contract && isUpgradeRegistered[contract]) {
+      verifiedUpgrades[contractAddr as AddressType] = version as string
+    }
+  })
+
+  const upgradeTransactions = createUpgradeTransactions(verifiedUpgrades)
 
   const activeUpgradeProposal = findActiveUpgradeProposal(
     proposals?.proposals,
