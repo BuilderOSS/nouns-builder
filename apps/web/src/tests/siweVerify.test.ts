@@ -22,7 +22,7 @@ vi.mock('@buildeross/utils/safeService', () => ({ isOwnerOfSafe: isOwnerOfSafeMo
 
 vi.mock('src/services/redisConnection', () => ({ getRedisConnection: () => undefined }))
 
-import verifyHandler from './verify'
+import verifyHandler from '../pages/api/siwe/verify'
 
 type ApiResponse = NextApiResponse & { body?: unknown; statusCode?: number }
 
