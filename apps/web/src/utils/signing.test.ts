@@ -55,17 +55,18 @@ describe('resolveSigningAddress', () => {
     ).resolves.toBe(fallback)
   })
 
-  it('prefers the cached owner wallet for Safe wallets', async () => {
+  it('prefers the current owner wallet over a stale cached address', async () => {
     const fallback = '0x0000000000000000000000000000000000000001' as Address
-    const eoa = '0x0000000000000000000000000000000000000002' as Address
+    const cachedEoa = '0x0000000000000000000000000000000000000002' as Address
+    const currentEoa = '0x0000000000000000000000000000000000000003' as Address
 
     const connector = {
       id: 'safeOwner',
-      cachedOwnerAddress: eoa,
-      getOwnerAddress: vi.fn(),
+      cachedOwnerAddress: cachedEoa,
+      getOwnerAddress: vi.fn().mockResolvedValue(currentEoa),
     } as any
 
-    await expect(resolveSigningAddress(connector, fallback)).resolves.toBe(eoa)
-    expect(connector.getOwnerAddress).not.toHaveBeenCalled()
+    await expect(resolveSigningAddress(connector, fallback)).resolves.toBe(currentEoa)
+    expect(connector.getOwnerAddress).toHaveBeenCalledOnce()
   })
 })

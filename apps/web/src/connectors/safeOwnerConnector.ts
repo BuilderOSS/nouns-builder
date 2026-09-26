@@ -400,18 +400,24 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
         const saved = loadSafeConfig()
         if (!saved) return null
 
+        if (!ownerConnector_) {
+          ownerConnector_ = findOwnerConnector(saved.ownerConnectorId)
+        }
+        const ownerConnector = ownerConnector_
+        const ownerAddress = ownerConnector
+          ? (await ownerConnector.getAccounts())?.[0]
+          : null
+        if (ownerAddress) {
+          ownerAddress_ = ownerAddress
+          return ownerAddress
+        }
+
         if (saved.ownerAddress) {
           ownerAddress_ = saved.ownerAddress
           return saved.ownerAddress
         }
 
-        if (!ownerConnector_) {
-          ownerConnector_ = findOwnerConnector(saved.ownerConnectorId)
-        }
-        if (!ownerConnector_) return null
-
-        const ownerAccounts = await ownerConnector_.getAccounts()
-        return ownerAccounts?.[0] || null
+        return null
       },
     }
   })

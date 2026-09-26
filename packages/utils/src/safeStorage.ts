@@ -27,7 +27,21 @@ export function getSavedSafeInfo(): SavedSafeInfo | null {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (!stored) return null
 
-    const parsed = JSON.parse(stored) as Partial<SavedSafeInfo>
+    const { eoaAddress, eoaConnectorId, ...current } = JSON.parse(
+      stored
+    ) as Partial<SavedSafeInfo> & {
+      eoaAddress?: unknown
+      eoaConnectorId?: unknown
+    }
+    const parsed = {
+      ...current,
+      ownerConnectorId:
+        current.ownerConnectorId === undefined
+          ? eoaConnectorId
+          : current.ownerConnectorId,
+      ownerAddress:
+        current.ownerAddress === undefined ? eoaAddress : current.ownerAddress,
+    }
     const safeAddress = parsed.safeAddress
     const owners = parsed.owners
     if (

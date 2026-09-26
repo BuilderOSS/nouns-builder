@@ -13,13 +13,13 @@ export async function resolveSigningAddress(
   }
 
   const safeConnector = connector as SafeOwnerConnectorType
-  if (safeConnector.cachedOwnerAddress) {
-    return safeConnector.cachedOwnerAddress
-  }
-
   const ownerAddress = await safeConnector.getOwnerAddress()
   if (ownerAddress) {
     return ownerAddress
+  }
+
+  if (safeConnector.cachedOwnerAddress) {
+    return safeConnector.cachedOwnerAddress
   }
 
   const savedOwnerAddress = getSavedSafeInfo()?.ownerAddress
