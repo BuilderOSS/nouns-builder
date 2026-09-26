@@ -143,54 +143,97 @@ export const useAvailableUpgrade = ({
       ] = data
 
       try {
-        const PROXY_ABI = [
-          {
-            type: 'function',
-            name: 'implementation',
-            inputs: [],
-            outputs: [{ type: 'address' }],
-            stateMutability: 'view',
-          } as const,
-        ]
+        // ERC1967 standard implementation storage slot
+        const ERC1967_IMPL_SLOT =
+          '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'
 
-        // First batch: get current implementations (5 calls)
-        const implResults = await publicClient.multicall({
-          contracts: [
-            {
+        // First batch: get current implementations via storage slot reads (5 calls)
+        console.log(
+          '[useAvailableUpgrade] Proxy addresses for reading current implementations:',
+          {
+            gov,
+            treasury,
+            token,
+            auction,
+            metadata,
+          }
+        )
+
+        // Read implementation addresses from ERC1967 storage slot
+        const [govSlot, treasurySlot, tokenSlot, auctionSlot, metadataSlot] =
+          await Promise.all([
+            publicClient.getStorageAt({
               address: gov as AddressType,
-              abi: PROXY_ABI,
-              functionName: 'implementation',
-            },
-            {
+              slot: ERC1967_IMPL_SLOT as `0x${string}`,
+              blockTag: 'latest',
+            }),
+            publicClient.getStorageAt({
               address: treasury as AddressType,
-              abi: PROXY_ABI,
-              functionName: 'implementation',
-            },
-            {
+              slot: ERC1967_IMPL_SLOT as `0x${string}`,
+              blockTag: 'latest',
+            }),
+            publicClient.getStorageAt({
               address: token as AddressType,
-              abi: PROXY_ABI,
-              functionName: 'implementation',
-            },
-            {
+              slot: ERC1967_IMPL_SLOT as `0x${string}`,
+              blockTag: 'latest',
+            }),
+            publicClient.getStorageAt({
               address: auction as AddressType,
-              abi: PROXY_ABI,
-              functionName: 'implementation',
-            },
-            {
+              slot: ERC1967_IMPL_SLOT as `0x${string}`,
+              blockTag: 'latest',
+            }),
+            publicClient.getStorageAt({
               address: metadata as AddressType,
-              abi: PROXY_ABI,
-              functionName: 'implementation',
-            },
-          ] as const,
-        })
+              slot: ERC1967_IMPL_SLOT as `0x${string}`,
+              blockTag: 'latest',
+            }),
+          ])
+
+        // Convert storage values to addresses
+        const parseStorageToAddress = (
+          value: `0x${string}` | null | undefined
+        ): AddressType | null => {
+          if (!value || value === '0x') return null
+          // ERC1967 stores the address in the last 20 bytes (40 hex chars)
+          return ('0x' + value.slice(-40)) as AddressType
+        }
 
         const currentImpls = {
-          governor: (implResults[0]?.result as AddressType | undefined) || null,
-          treasury: (implResults[1]?.result as AddressType | undefined) || null,
-          token: (implResults[2]?.result as AddressType | undefined) || null,
-          auction: (implResults[3]?.result as AddressType | undefined) || null,
-          metadata: (implResults[4]?.result as AddressType | undefined) || null,
+          governor: parseStorageToAddress(govSlot),
+          treasury: parseStorageToAddress(treasurySlot),
+          token: parseStorageToAddress(tokenSlot),
+          auction: parseStorageToAddress(auctionSlot),
+          metadata: parseStorageToAddress(metadataSlot),
         }
+
+        console.log('[useAvailableUpgrade] Raw storage slot results:', {
+          govSlot,
+          treasurySlot,
+          tokenSlot,
+          auctionSlot,
+          metadataSlot,
+        })
+
+        console.log('[useAvailableUpgrade] Current implementations read from proxies:', {
+          currentImpls,
+        })
+
+        console.log('[useAvailableUpgrade] New implementations from Manager:', {
+          governorImplNew,
+          treasuryImplNew,
+          tokenImplNew,
+          auctionImplNew,
+          metadataImplNew,
+        })
+
+        // Log the exact pairs being sent to Manager verification
+        console.log('[useAvailableUpgrade] Verification pairs being sent to Manager:', {
+          governor: [currentImpls.governor, governorImplNew],
+          treasury: [currentImpls.treasury, treasuryImplNew],
+          token: [currentImpls.token, tokenImplNew],
+          auction: [currentImpls.auction, auctionImplNew],
+          metadata: [currentImpls.metadata, metadataImplNew],
+        })
 
         // Second batch: verify upgrades with Manager (5 calls)
         const verifyResults = await publicClient.multicall({
@@ -237,15 +280,22 @@ export const useAvailableUpgrade = ({
           ] as const,
         })
 
+        const verifyResultsParsed = {
+          governor: (verifyResults[0]?.result as boolean | undefined) || false,
+          treasury: (verifyResults[1]?.result as boolean | undefined) || false,
+          token: (verifyResults[2]?.result as boolean | undefined) || false,
+          auction: (verifyResults[3]?.result as boolean | undefined) || false,
+          metadata: (verifyResults[4]?.result as boolean | undefined) || false,
+        }
+
+        console.log('[useAvailableUpgrade] Manager verification results:', {
+          verifyResults,
+          verifyResultsParsed,
+        })
+
         return {
           currentImpls,
-          isRegistered: {
-            governor: (verifyResults[0]?.result as boolean | undefined) || false,
-            treasury: (verifyResults[1]?.result as boolean | undefined) || false,
-            token: (verifyResults[2]?.result as boolean | undefined) || false,
-            auction: (verifyResults[3]?.result as boolean | undefined) || false,
-            metadata: (verifyResults[4]?.result as boolean | undefined) || false,
-          },
+          isRegistered: verifyResultsParsed,
         }
       } catch (e) {
         console.error('Error verifying upgrades:', e)
