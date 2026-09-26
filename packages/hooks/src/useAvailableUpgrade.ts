@@ -49,6 +49,12 @@ export const useAvailableUpgrade = ({
   addresses,
   contractVersion,
 }: AvailableUpgradeProps): AvailableUpgrade => {
+  console.log('[useAvailableUpgrade] Called with:', {
+    chainId,
+    addresses,
+    contractVersion,
+  })
+
   const contract = {
     abi: managerAbi,
     address: PUBLIC_MANAGER_ADDRESS[chainId],
@@ -275,6 +281,10 @@ export const useAvailableUpgrade = ({
   ] = data
 
   if (data.some(isNil)) {
+    console.log('[useAvailableUpgrade] Early return: data has nil values', {
+      data,
+      nilIndices: data.map((d, i) => (isNil(d) ? i : null)).filter(Boolean),
+    })
     return {
       shouldUpgrade: false,
       latest: undefined,
@@ -289,6 +299,7 @@ export const useAvailableUpgrade = ({
 
   // Wait for verification data before proceeding
   if (!verificationData) {
+    console.log('[useAvailableUpgrade] Early return: verification data not ready')
     return {
       shouldUpgrade: false,
       transaction: undefined,
@@ -338,6 +349,11 @@ export const useAvailableUpgrade = ({
 
   // meets the required given version, no upgrades needed
   if (Object.values(upgradesNeededForGivenVersion).length === 0) {
+    console.log('[useAvailableUpgrade] Early return: all contracts at required version', {
+      daoVersions,
+      givenVersion,
+      upgradesNeededForGivenVersion,
+    })
     return {
       latest: managerVersion,
       currentVersions: daoVersions,
@@ -432,8 +448,18 @@ export const useAvailableUpgrade = ({
   const governorNeedsUpgrade = !!Object.entries(upgradesNeededForLatestVersion).find(
     ([contract]) => contract === 'governor'
   )
+  console.log('[useAvailableUpgrade] Governor check:', {
+    governorNeedsUpgrade,
+    isGovernorRegistered: isUpgradeRegistered.governor,
+    upgradesNeededForLatestVersion,
+    isUpgradeRegistered,
+  })
+
   if (governorNeedsUpgrade && !isUpgradeRegistered.governor) {
     // Don't show upgrade at all if Governor can't be upgraded
+    console.log(
+      '[useAvailableUpgrade] Early return: Governor upgrade needed but not registered'
+    )
     return {
       latest: managerVersion,
       currentVersions: daoVersions,
@@ -452,9 +478,17 @@ export const useAvailableUpgrade = ({
     (_, contract) => isUpgradeRegistered[contract as ContractType]
   ) as Record<ContractType, string>
 
+  console.log('[useAvailableUpgrade] After filtering by registration:', {
+    upgradesNeededForLatestVersion,
+    verifiedUpgrades,
+  })
+
   const upgradeTransactions = createUpgradeTransactions(verifiedUpgrades)
 
   if (upgradeTransactions.length === 0) {
+    console.log(
+      '[useAvailableUpgrade] Early return: no upgrade transactions after filtering'
+    )
     return {
       latest: managerVersion,
       currentVersions: daoVersions,
@@ -489,6 +523,15 @@ export const useAvailableUpgrade = ({
       ? withPauseUnpause(paused, upgradeTransactions)
       : upgradeTransactions,
   }
+
+  console.log('[useAvailableUpgrade] SUCCESS - Returning upgrade data:', {
+    shouldUpgrade: noActiveUpgradeProposal,
+    totalContractUpgrades: upgradeTransactions.length,
+    activeUpgradeProposalId: activeUpgradeProposal?.proposalId,
+    isAuctionBeingUpgraded,
+    daoVersions,
+    latest: managerVersion,
+  })
 
   return {
     latest: managerVersion,
