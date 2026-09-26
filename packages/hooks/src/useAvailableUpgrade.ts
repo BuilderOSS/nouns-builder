@@ -315,10 +315,10 @@ export const useAvailableUpgrade = ({
   const getUpgradesForVersion = (
     daoVersions: DaoVersions,
     givenVersion: DaoVersions
-  ): Record<AddressType, string> =>
+  ): Record<ContractType, string> =>
     pickBy(daoVersions, (val, key) => {
       return isNil(val) || val === '' || lt(val, givenVersion[key as keyof DaoVersions])
-    })
+    }) as Record<ContractType, string>
 
   const givenVersion: DaoVersions = contractVersion
     ? {
@@ -374,7 +374,7 @@ export const useAvailableUpgrade = ({
   }
 
   const createUpgradeTransactions = (
-    upgrades: Record<AddressType, string>
+    upgrades: Record<ContractType, string>
   ): Transaction[] =>
     Object.keys(upgrades).map((contract) => ({
       value: '',
@@ -438,15 +438,10 @@ export const useAvailableUpgrade = ({
   }
 
   // Filter to only upgrade contracts with registered implementations
-  const verifiedUpgrades: Record<AddressType, string> = {}
-  Object.entries(upgradesNeededForLatestVersion).forEach(([contractAddr, version]) => {
-    const contract = Object.entries(addresses).find(
-      ([, addr]) => addr === contractAddr
-    )?.[0] as ContractType | undefined
-    if (contract && isUpgradeRegistered[contract]) {
-      verifiedUpgrades[contractAddr as AddressType] = version as string
-    }
-  })
+  const verifiedUpgrades: Record<ContractType, string> = pickBy(
+    upgradesNeededForLatestVersion,
+    (_, contract) => isUpgradeRegistered[contract as ContractType]
+  ) as Record<ContractType, string>
 
   const upgradeTransactions = createUpgradeTransactions(verifiedUpgrades)
 
