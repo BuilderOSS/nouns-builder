@@ -43,8 +43,8 @@ describe('safeStorage', () => {
     expect(getSavedSafeInfo()).toMatchObject({
       safeAddress: '0x0000000000000000000000000000000000000001',
       chainId: 1,
-      eoaConnectorId: 'injected',
-      eoaAddress: '0x0000000000000000000000000000000000000003',
+      ownerConnectorId: 'injected',
+      ownerAddress: '0x0000000000000000000000000000000000000003',
     })
   })
 

@@ -8,7 +8,7 @@ import type { SiweMessage } from 'viem/siwe'
  * Authentication context that includes both EOA and Safe information
  */
 export interface AuthContext {
-  eoaAddress: Address // EOA that signed the SIWE message
+  ownerAddress: Address // Wallet that signed the SIWE message (EOA or contract wallet)
   safeAddress?: Address // Safe address (if in Safe mode)
   safeChainId?: number // Chain ID of the Safe
   effectiveAddress: Address // Address acting on behalf of (Safe if present, else EOA)
@@ -20,16 +20,16 @@ export interface AuthContext {
  * Build AuthContext from session data
  */
 export function getAuthContext(session: IronSessionData): AuthContext {
-  const eoaAddress = session.siwe?.address as Address
+  const ownerAddress = (session.ownerAddress ?? session.siwe?.address) as Address
   const safeAddress = session.safeAddress
   const safeChainId = session.safeChainId
   const isSafeMode = !!safeAddress
 
   return {
-    eoaAddress,
+    ownerAddress,
     safeAddress,
     safeChainId,
-    effectiveAddress: safeAddress || eoaAddress,
+    effectiveAddress: safeAddress || ownerAddress,
     isSafeMode,
     siwe: session.siwe!,
   }
@@ -52,7 +52,7 @@ export type AuthenticatedNextApiHandler = (
  * Middleware to require authentication on API routes
  * Usage:
  * export default withAuth(async (req, res, authContext) => {
- *   // authContext.eoaAddress - EOA that signed
+ *   // authContext.ownerAddress - wallet that signed (EOA or contract wallet)
  *   // authContext.effectiveAddress - Safe (if Safe mode) or EOA
  *   // authContext.isSafeMode - true if acting as Safe owner
  *   res.json({ address: authContext.effectiveAddress })

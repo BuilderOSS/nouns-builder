@@ -13,21 +13,21 @@ export async function resolveSigningAddress(
   }
 
   const safeConnector = connector as SafeOwnerConnectorType
-  if (safeConnector.cachedEOAAddress) {
-    return safeConnector.cachedEOAAddress
+  if (safeConnector.cachedOwnerAddress) {
+    return safeConnector.cachedOwnerAddress
   }
 
-  const eoaAddress = await safeConnector.getEOAAddress()
-  if (eoaAddress) {
-    return eoaAddress
+  const ownerAddress = await safeConnector.getOwnerAddress()
+  if (ownerAddress) {
+    return ownerAddress
   }
 
-  const savedEOAAddress = getSavedSafeInfo()?.eoaAddress
-  if (savedEOAAddress) {
-    return savedEOAAddress
+  const savedOwnerAddress = getSavedSafeInfo()?.ownerAddress
+  if (savedOwnerAddress) {
+    return savedOwnerAddress
   }
 
-  throw new Error('Safe EOA address not available')
+  throw new Error('Safe owner address not available')
 }
 
 export function getCachedSigningAddress(
@@ -39,5 +39,5 @@ export function getCachedSigningAddress(
   }
 
   const safeConnector = connector as SafeOwnerConnectorType
-  return safeConnector.cachedEOAAddress ?? getSavedSafeInfo()?.eoaAddress ?? null
+  return safeConnector.cachedOwnerAddress ?? getSavedSafeInfo()?.ownerAddress ?? null
 }

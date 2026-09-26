@@ -39,7 +39,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       try {
         const { message, signature, safeAddress, safeChainId } = req.body
         const siweMessage = parseSiweMessage(message) as SiweMessage
-        const eoaAddress = siweMessage.address
+        // The SIWE address is the owner wallet, which can be an EOA or an EIP-1271 contract.
+        const ownerAddress = siweMessage.address
 
         // Normalize signature to handle wallet-specific formats
         const normalizedSignature = normalizeSignature(signature)
@@ -48,11 +49,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         const chainId = siweMessage.chainId as CHAIN_ID
         const provider = getProvider(chainId)
 
-        // Verify signature (automatically handles both EOA and smart contract wallets)
+        // Verify against the owner wallet (automatically handles EOAs and EIP-1271 wallets).
         // - EOA wallets: Uses ECDSA recovery (65-byte signatures)
         // - Smart contract wallets: Uses EIP-1271 isValidSignature (variable length)
         const valid = await provider.verifyMessage({
-          address: eoaAddress,
+          address: ownerAddress,
           message,
           signature: normalizedSignature,
         })
@@ -68,7 +69,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         // If safeAddress provided, verify ownership relationship
         if (safeAddress && safeChainId) {
           const isOwner = await isOwnerOfSafe(
-            eoaAddress as Address,
+            ownerAddress as Address,
             safeAddress as Address,
             safeChainId as CHAIN_ID
           )
@@ -79,16 +80,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
             })
           }
 
-          // Store both EOA address and Safe address in session
-          session.eoaAddress = eoaAddress as Address
+          // Store both owner wallet and Safe address in session.
+          session.ownerAddress = ownerAddress as Address
           session.safeAddress = safeAddress as Address
           session.safeChainId = safeChainId as number
 
-          // Store SIWE message with original EOA address
+          // Store the SIWE message with the original owner wallet address.
           session.siwe = siweMessage
         } else {
-          // Normal EOA authentication
-          delete session.eoaAddress
+          // Normal wallet authentication.
+          delete session.ownerAddress
           delete session.safeAddress
           delete session.safeChainId
           session.siwe = siweMessage
