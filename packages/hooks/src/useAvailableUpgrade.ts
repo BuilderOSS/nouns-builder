@@ -393,10 +393,14 @@ export const useAvailableUpgrade = ({
     }))
 
   const findActiveUpgradeProposal = (
-    proposals: Proposal[],
+    proposals: Proposal[] | undefined,
     upgrades: Transaction[]
   ): Proposal | undefined => {
-    const activeProposals = proposals?.filter(
+    if (!proposals || proposals.length === 0) {
+      return undefined
+    }
+
+    const activeProposals = proposals.filter(
       (proposal) =>
         proposal.state === ProposalState.Active ||
         proposal.state === ProposalState.Pending ||
