@@ -114,6 +114,11 @@ export const useAvailableUpgrade = ({
           addresses.token,
           addresses.auction,
           addresses.metadata,
+          data[4],
+          data[5],
+          data[6],
+          data[7],
+          data[8],
         ] as const)
       : null,
     async ([, , gov, treasury, token, auction, metadata]) => {
@@ -444,6 +449,19 @@ export const useAvailableUpgrade = ({
   ) as Record<ContractType, string>
 
   const upgradeTransactions = createUpgradeTransactions(verifiedUpgrades)
+
+  if (upgradeTransactions.length === 0) {
+    return {
+      latest: managerVersion,
+      currentVersions: daoVersions,
+      shouldUpgrade: false,
+      transaction: undefined,
+      date: undefined,
+      description: undefined,
+      activeUpgradeProposalId: undefined,
+      totalContractUpgrades: undefined,
+    }
+  }
 
   const activeUpgradeProposal = findActiveUpgradeProposal(
     proposals?.proposals,

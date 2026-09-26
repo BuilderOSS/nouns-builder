@@ -27,6 +27,20 @@ const mockMulticall = vi.fn(async () => [
   { result: null },
 ])
 
+const implementationResults = [
+  { result: '0x0000000000000000000000000000000000000001' },
+  { result: '0x0000000000000000000000000000000000000002' },
+  { result: '0x0000000000000000000000000000000000000003' },
+  { result: '0x0000000000000000000000000000000000000004' },
+  { result: '0x0000000000000000000000000000000000000005' },
+]
+
+const createMulticall = (registrations = [true, true, true, true, true]) =>
+  vi
+    .fn()
+    .mockResolvedValueOnce(implementationResults)
+    .mockResolvedValueOnce(registrations.map((result) => ({ result })))
+
 vi.mocked(usePublicClient).mockReturnValue({
   multicall: mockMulticall,
 } as any)
@@ -156,20 +170,7 @@ describe('Use available upgrade hook', () => {
   it('should determine no upgrades given all modules are up to date', async () => {
     // Mock verification to return all upgrades as registered
     vi.mocked(usePublicClient).mockReturnValue({
-      multicall: vi.fn(async () => [
-        // Current implementations batch
-        { result: '0x0000000000000000000000000000000000000001' }, // governor
-        { result: '0x0000000000000000000000000000000000000002' }, // treasury
-        { result: '0x0000000000000000000000000000000000000003' }, // token
-        { result: '0x0000000000000000000000000000000000000004' }, // auction
-        { result: '0x0000000000000000000000000000000000000005' }, // metadata
-        // Verification batch
-        { result: true }, // governor registered
-        { result: true }, // treasury registered
-        { result: true }, // token registered
-        { result: true }, // auction registered
-        { result: true }, // metadata registered
-      ]),
+      multicall: createMulticall(),
     } as any)
 
     vi.mocked(useReadContracts).mockReturnValue({
@@ -267,24 +268,55 @@ describe('Use available upgrade hook', () => {
     })
   })
 
+  it('does not offer an empty proposal when required upgrades are not registered', async () => {
+    vi.mocked(usePublicClient).mockReturnValue({
+      multicall: createMulticall([true, true, false, true, true]),
+    } as any)
+
+    vi.mocked(useReadContracts).mockReturnValue({
+      data: [
+        false,
+        '1.1.0',
+        {
+          governor: '1.1.0',
+          treasury: '1.1.0',
+          metadata: '1.1.0',
+          auction: '1.1.0',
+          token: '1.1.0',
+        },
+        {
+          governor: '1.1.0',
+          treasury: '1.1.0',
+          metadata: '1.1.0',
+          auction: '1.1.0',
+          token: '1.0.0',
+        },
+        '0x0000000000000000000000000000000000000006',
+        '0x9eefef0891b1895af967fe48c5d7d96e984b96a3',
+        '0x0b6d2473f54de3f1d80b27c92b22d13050da289a',
+        '0x2661fe1a882abfd28ae0c2769a90f327850397c6',
+        '0x26f494af990123154e7cc067da7a311b07d54ae1',
+      ],
+      isError: false,
+      isLoading: false,
+    } as any)
+
+    const { result } = renderHook(() => useAvailableUpgrade({ chainId, addresses }))
+
+    await waitFor(() => expect(result.current.latest).toBe('1.1.0'))
+
+    expect(result.current).toMatchObject({
+      shouldUpgrade: false,
+      transaction: undefined,
+      totalContractUpgrades: undefined,
+    })
+  })
+
   //TODO: Re-visit with MSW for graphql requests
   it('should determine the available upgrades given some modules out of date', async () => {
     // Mock verification to return all upgrades as registered
     vi.mocked(usePublicClient).mockReturnValue({
-      multicall: vi.fn(async () => [
-        // Current implementations batch
-        { result: '0x0000000000000000000000000000000000000001' }, // governor
-        { result: '0x0000000000000000000000000000000000000002' }, // treasury
-        { result: '0x0000000000000000000000000000000000000003' }, // token
-        { result: '0x0000000000000000000000000000000000000004' }, // auction
-        { result: '0x0000000000000000000000000000000000000005' }, // metadata
-        // Verification batch
-        { result: true }, // governor registered
-        { result: true }, // treasury registered
-        { result: true }, // token registered
-        { result: true }, // auction registered
-        { result: true }, // metadata registered
-      ]),
+      multicall: createMulticall(),
     } as any)
 
     vi.mocked(useReadContracts).mockReturnValue({
@@ -362,20 +394,7 @@ describe('Use available upgrade hook', () => {
   it('should determine the available upgrades given some modules out of date and auction is currently paused', async () => {
     // Mock verification to return all upgrades as registered
     vi.mocked(usePublicClient).mockReturnValue({
-      multicall: vi.fn(async () => [
-        // Current implementations batch
-        { result: '0x0000000000000000000000000000000000000001' }, // governor
-        { result: '0x0000000000000000000000000000000000000002' }, // treasury
-        { result: '0x0000000000000000000000000000000000000003' }, // token
-        { result: '0x0000000000000000000000000000000000000004' }, // auction
-        { result: '0x0000000000000000000000000000000000000005' }, // metadata
-        // Verification batch
-        { result: true }, // governor registered
-        { result: true }, // treasury registered
-        { result: true }, // token registered
-        { result: true }, // auction registered
-        { result: true }, // metadata registered
-      ]),
+      multicall: createMulticall(),
     } as any)
 
     vi.mocked(useReadContracts).mockReturnValue({
@@ -441,20 +460,7 @@ describe('Use available upgrade hook', () => {
   it('should determine available upgrades given all modules out of date', async () => {
     // Mock verification to return all upgrades as registered
     vi.mocked(usePublicClient).mockReturnValue({
-      multicall: vi.fn(async () => [
-        // Current implementations batch
-        { result: '0x0000000000000000000000000000000000000001' }, // governor
-        { result: '0x0000000000000000000000000000000000000002' }, // treasury
-        { result: '0x0000000000000000000000000000000000000003' }, // token
-        { result: '0x0000000000000000000000000000000000000004' }, // auction
-        { result: '0x0000000000000000000000000000000000000005' }, // metadata
-        // Verification batch
-        { result: true }, // governor registered
-        { result: true }, // treasury registered
-        { result: true }, // token registered
-        { result: true }, // auction registered
-        { result: true }, // metadata registered
-      ]),
+      multicall: createMulticall(),
     } as any)
 
     vi.mocked(useReadContracts).mockReturnValue({
@@ -546,20 +552,7 @@ describe('Use available upgrade hook', () => {
   it('should determine no upgrades required given provided version is met', async () => {
     // Mock verification to return all upgrades as registered
     vi.mocked(usePublicClient).mockReturnValue({
-      multicall: vi.fn(async () => [
-        // Current implementations batch
-        { result: '0x0000000000000000000000000000000000000001' }, // governor
-        { result: '0x0000000000000000000000000000000000000002' }, // treasury
-        { result: '0x0000000000000000000000000000000000000003' }, // token
-        { result: '0x0000000000000000000000000000000000000004' }, // auction
-        { result: '0x0000000000000000000000000000000000000005' }, // metadata
-        // Verification batch
-        { result: true }, // governor registered
-        { result: true }, // treasury registered
-        { result: true }, // token registered
-        { result: true }, // auction registered
-        { result: true }, // metadata registered
-      ]),
+      multicall: createMulticall(),
     } as any)
 
     vi.mocked(useReadContracts).mockReturnValue({
@@ -617,20 +610,7 @@ describe('Use available upgrade hook', () => {
   it('should determine upgrades to latest version given contract does not meet the provided version', async () => {
     // Mock verification to return all upgrades as registered
     vi.mocked(usePublicClient).mockReturnValue({
-      multicall: vi.fn(async () => [
-        // Current implementations batch
-        { result: '0x0000000000000000000000000000000000000001' }, // governor
-        { result: '0x0000000000000000000000000000000000000002' }, // treasury
-        { result: '0x0000000000000000000000000000000000000003' }, // token
-        { result: '0x0000000000000000000000000000000000000004' }, // auction
-        { result: '0x0000000000000000000000000000000000000005' }, // metadata
-        // Verification batch
-        { result: true }, // governor registered
-        { result: true }, // treasury registered
-        { result: true }, // token registered
-        { result: true }, // auction registered
-        { result: true }, // metadata registered
-      ]),
+      multicall: createMulticall(),
     } as any)
 
     vi.mocked(useReadContracts).mockReturnValue({
@@ -724,20 +704,7 @@ describe('Use available upgrade hook', () => {
   it('shows only latest version when multiple upgrades are available', async () => {
     // Mock verification to return all upgrades as registered
     vi.mocked(usePublicClient).mockReturnValue({
-      multicall: vi.fn(async () => [
-        // Current implementations batch
-        { result: '0x0000000000000000000000000000000000000001' }, // governor
-        { result: '0x0000000000000000000000000000000000000002' }, // treasury
-        { result: '0x0000000000000000000000000000000000000003' }, // token
-        { result: '0x0000000000000000000000000000000000000004' }, // auction
-        { result: '0x0000000000000000000000000000000000000005' }, // metadata
-        // Verification batch
-        { result: true }, // governor registered
-        { result: true }, // treasury registered
-        { result: true }, // token registered
-        { result: true }, // auction registered
-        { result: true }, // metadata registered
-      ]),
+      multicall: createMulticall(),
     } as any)
 
     vi.mocked(useReadContracts).mockReturnValue({
