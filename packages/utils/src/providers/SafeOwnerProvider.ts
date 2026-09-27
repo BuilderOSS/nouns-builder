@@ -225,7 +225,48 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
           return param
         })
 
-        return this.ownerProvider.request({ method, params: modifiedParams })
+        // Try the request directly first
+        try {
+          return await this.ownerProvider.request({ method, params: modifiedParams })
+        } catch (error) {
+          // If it fails because provider needs connect(), try connecting first
+          const errorAny = error as any
+          const errorMsg = String(
+            errorAny?.message ||
+              errorAny?.details ||
+              errorAny?.error?.message ||
+              errorAny?.reason ||
+              ''
+          )
+
+          debugSafe(`[SafeOwnerProvider] Signature request failed, checking error:`, {
+            message: errorMsg,
+            errorKeys: Object.keys(errorAny || {}),
+          })
+
+          if (errorMsg.includes('Please call connect()')) {
+            debugSafe(
+              `[SafeOwnerProvider] Provider needs connect(), calling connect() and retrying...`
+            )
+
+            // Call connect() to initialize the provider
+            const providerAny = this.ownerProvider as any
+            if (providerAny.connect) {
+              try {
+                await providerAny.connect()
+              } catch (connectError) {
+                debugSafe(`[SafeOwnerProvider] connect() failed:`, connectError)
+              }
+            }
+
+            // Retry the request
+            debugSafe(`[SafeOwnerProvider] Retrying signature request after connect()`)
+            return await this.ownerProvider.request({ method, params: modifiedParams })
+          }
+
+          // Re-throw other errors
+          throw error
+        }
       }
 
       // Transaction methods - handle Safe transactions

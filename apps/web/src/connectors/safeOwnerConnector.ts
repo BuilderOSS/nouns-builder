@@ -408,7 +408,10 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
           }
 
           // Get the owner wallet provider.
+          // IMPORTANT: Call getProvider() without chainId parameter to preserve the active session.
+          // Passing chainId triggers switchChain() which can disconnect the WalletConnect session.
           debugSafeConnector('Getting provider from owner connector:', ownerConnector_.id)
+
           const rawProvider = await ownerConnector_.getProvider()
           if (!rawProvider) {
             const errorMsg = `Failed to get provider from owner connector '${saved.ownerConnectorId}'. The wallet may not be fully initialized.`

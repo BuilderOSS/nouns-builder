@@ -371,12 +371,15 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
 
     try {
       debugWallet(
-        'Connecting to %s (id: %s, connector: %O)...',
+        'Connecting to %s (id: %s, connector: %O)',
         wallet.name,
         wallet.id,
         wallet.connector
       )
-      const result = await connectAsync({ connector: wallet.connector })
+
+      const result = await connectAsync({
+        connector: wallet.connector,
+      })
       if (attemptId !== authAttemptRef.current || flowCancelledRef.current) return
       debugWallet('Connected successfully: %O', result)
       const connectedAddress = result.accounts?.[0]
@@ -718,7 +721,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           connectedWallet={connectedWallet}
           onSelectWallet={handleSelectWallet}
           onSelectConnectedWallet={handleSelectConnectedWallet}
-          onSelectSafe={() => {}}
+          onSelectSafe={() => { }}
           showSafeOption={false}
           title="Connect Safe Owner Wallet"
           description="Choose a wallet that is an owner of this Safe to continue."
