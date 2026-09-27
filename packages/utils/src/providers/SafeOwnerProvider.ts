@@ -4,7 +4,6 @@ import type { PublicClient } from 'viem'
 
 import type { SafeTransactionHandler } from '../safe/handler'
 import { getSafeTransactionHandler } from '../safe/handler'
-import { executeSafeTransaction } from '../safe/proposeTransaction'
 import type {
   CallParams,
   EIP1193Provider,
@@ -292,32 +291,22 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
           threshold: this.safe.threshold,
         })
 
-        // Auto-execute for 1-of-N Safes (no multi-sig needed)
-        if (this.safe.threshold === 1) {
-          debugSafe(' Threshold is 1, auto-executing transaction')
-          const txHash = await executeSafeTransaction(
-            this.safe,
-            txParams.safeTransactions ?? txParams,
-            this.ownerProvider
-          )
-          debugSafe(' Transaction executed:', txHash)
-          return txHash
-        }
+        // Determine mode based on threshold
+        const mode = this.safe.threshold === 1 ? 'execute' : 'propose'
+        debugSafe(` Threshold is ${this.safe.threshold}, mode: ${mode}`)
 
-        // Multi-sig: use instance handler or fall back to global handler
-        debugSafe(' Multi-sig Safe, using handler')
+        // Use handler for both 1/N and multi-sig to show consistent modal UX
         const handler = this.transactionHandler ?? getSafeTransactionHandler()
         if (!handler) {
-          debugSafe('ERROR:  No handler registered!')
+          debugSafe('ERROR: No handler registered!')
           throw new Error(
             'Safe transaction handler not initialized. ' +
-              'This is a multi-signature Safe transaction that requires approval from other owners. ' +
-              'Please ensure SafeTransactionProvider is mounted in your app.'
+              'Please ensure SafeTransactionHandler is mounted in your app.'
           )
         }
 
         debugSafe(' Handler found, calling it...')
-        // Handler will show modal and return safeTxHash
+        // Handler will show modal and return txHash or safeTxHash
         const result = await handler({
           safeInfo: this.safe,
           transaction: txParams,
@@ -325,11 +314,12 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
             ? { transactions: txParams.safeTransactions }
             : {}),
           eoaProvider: this.ownerProvider,
+          mode,
         })
 
         debugSafe(' Handler returned result:', result)
-        // Return safeTxHash (treated like txHash by wagmi)
-        return result.safeTxHash
+        // Return appropriate hash based on mode
+        return result.mode === 'execute' ? result.txHash! : result.safeTxHash!
       }
 
       case 'eth_sendRawTransaction':
