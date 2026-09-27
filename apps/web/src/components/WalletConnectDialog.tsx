@@ -249,7 +249,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           }
 
           if (flowCancelledRef.current) {
-            await disconnectAsync({ connector: safeConnector })
+            await safeConnector.connect()
             return
           }
 
@@ -384,9 +384,8 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         wallet.connector
       )
 
-      const result = await connectAsync({
-        connector: wallet.connector,
-      })
+      // Use the connect callback from walletConnectors to ensure diagnostics are triggered
+      const result = await connectAsync({ connector: wallet.connector })
       if (attemptId !== authAttemptRef.current || flowCancelledRef.current) return
       debugWallet('Connected successfully: %O', result)
       const connectedAddress = result.accounts?.[0]

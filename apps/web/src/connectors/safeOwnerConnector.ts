@@ -204,6 +204,21 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
             return false
           }
 
+          // Compare saved owner address with live first account
+          // If they differ, the wallet was switched - clear and return false
+          if (
+            saved.ownerAddress &&
+            ownerAccounts[0].toLowerCase() !== saved.ownerAddress.toLowerCase()
+          ) {
+            debugSafeConnector(
+              'isAuthorized: Owner account mismatch - saved: %s, current: %s',
+              saved.ownerAddress,
+              ownerAccounts[0]
+            )
+            clearSafeInfo()
+            return false
+          }
+
           // Verify the wallet is still a Safe owner.
           debugSafeConnector('isAuthorized: Verifying Safe ownership...')
           const isOwner = await isOwnerOfSafe(
@@ -380,6 +395,16 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
 
         // Clear cached state
         clearCache()
+
+        // Invalidate cached provider for this connector
+        const saved = loadSafeConfig()
+        if (saved) {
+          debugSafeConnector(
+            'disconnect: Clearing cached provider for: %s',
+            saved.ownerConnectorId
+          )
+          clearCachedProvider(saved.ownerConnectorId)
+        }
 
         // Clear Safe info from storage
         clearSafeInfo()
@@ -621,6 +646,17 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
         if (provider_) {
           provider_.destroy()
         }
+
+        // Invalidate cached provider for this connector
+        const saved = loadSafeConfig()
+        if (saved) {
+          debugSafeConnector(
+            'onDisconnect: Clearing cached provider for: %s',
+            saved.ownerConnectorId
+          )
+          clearCachedProvider(saved.ownerConnectorId)
+        }
+
         clearCache()
         clearSafeInfo()
         config.emitter.emit('disconnect')
