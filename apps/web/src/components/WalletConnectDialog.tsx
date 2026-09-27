@@ -458,6 +458,26 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         connectedAddress
       )
 
+      // If connecting as Safe owner, cache the provider to preserve its session
+      if (
+        state.context.pendingSafeInfo &&
+        typeof activeConnector.getProvider === 'function'
+      ) {
+        try {
+          debugWallet('Caching provider for Safe owner wallet: %s', activeConnector.id)
+          const provider = await activeConnector.getProvider()
+          if (provider) {
+            cacheOwnerProvider(activeConnector.id, provider as any)
+            debugWallet('✓ Provider cached successfully')
+          }
+        } catch (err) {
+          debugWallet(
+            'Failed to cache provider (will fall back to getProvider later):',
+            err
+          )
+        }
+      }
+
       // Skip the SELECT_WALLET and connectAsync steps, go directly to WALLET_CONNECTED
       send({
         type: 'WALLET_CONNECTED',
