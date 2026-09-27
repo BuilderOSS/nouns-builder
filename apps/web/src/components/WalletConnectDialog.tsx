@@ -599,11 +599,49 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         (error as Error).name,
         (error as Error).message
       )
+
+      // Provide user-friendly error messages based on error type
+      const errorMessage = (error as Error).message || 'Unknown error'
+      let userFriendlyMessage = errorMessage
+
+      if (
+        errorMessage.includes('Cannot sign with Safe') ||
+        errorMessage.includes('owner wallet address is not available')
+      ) {
+        userFriendlyMessage =
+          'Your Safe owner wallet is not properly connected. Please disconnect and reconnect your wallet to continue.'
+      } else if (
+        errorMessage.includes('Cannot create Safe provider') ||
+        errorMessage.includes('owner address is not available')
+      ) {
+        userFriendlyMessage =
+          'Your Safe owner wallet connection is invalid. Please disconnect and reconnect your wallet.'
+      } else if (
+        errorMessage.includes('Owner connector') &&
+        errorMessage.includes('not found')
+      ) {
+        userFriendlyMessage =
+          'Your wallet connector was not found. Please disconnect and reconnect your wallet.'
+      } else if (errorMessage.includes('Failed to get provider')) {
+        userFriendlyMessage =
+          'Failed to connect to your wallet. Please check that your wallet is active and try again.'
+      } else if (errorMessage.includes('not connected')) {
+        userFriendlyMessage =
+          'Your wallet is not connected. Please reconnect your wallet and try again.'
+      } else if (
+        errorMessage.includes('wallet') &&
+        errorMessage.toLowerCase().includes('denied')
+      ) {
+        userFriendlyMessage = 'You rejected the signature request in your wallet.'
+      }
+
+      debugWallet('Sending error to state machine: %s', userFriendlyMessage)
+      debugWallet('Original error was: %s', errorMessage)
       send({
         type: 'ERROR',
         error: {
           code: 'SIGNATURE_REJECTED',
-          message: (error as Error).message || 'Unknown error',
+          message: userFriendlyMessage,
         },
       })
     }

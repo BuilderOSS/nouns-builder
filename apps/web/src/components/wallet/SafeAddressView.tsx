@@ -4,7 +4,7 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SAFE_SERVICE_URL } from '@buildeross/constants/safe'
 import { CHAIN_ID } from '@buildeross/types'
 import { DropdownSelect, FIELD_TYPES, SmartInput } from '@buildeross/ui'
-import { getRecentSafeWallets, getEnsAddress } from '@buildeross/utils'
+import { getEnsAddress, getRecentSafeWallets } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import { ChangeEvent, useState } from 'react'
@@ -165,11 +165,7 @@ export function SafeAddressView({ onSubmit, onBack, error }: SafeAddressViewProp
       )}
 
       <Flex gap="x3" className={actionRow}>
-        <Button
-          onClick={handleSubmit}
-          className={actionButton}
-          disabled={isResolving}
-        >
+        <Button onClick={handleSubmit} className={actionButton} disabled={isResolving}>
           {isResolving ? 'Resolving...' : 'Continue'}
         </Button>
         <Button onClick={onBack} variant="secondary" className={actionButton}>

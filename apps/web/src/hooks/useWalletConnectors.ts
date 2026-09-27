@@ -1,6 +1,9 @@
+import debug from 'debug'
 import { type Connector, useConnect } from 'wagmi'
 
 import { getRecentWalletIds } from '../utils/recentWalletIds'
+
+const debugWalletConnect = debug('app:walletConnect:normal')
 
 // Simplified WalletInstance type (from RainbowKit)
 interface WalletInstance extends Connector {
@@ -64,10 +67,69 @@ export function useWalletConnectors(): WalletConnector[] {
 
   // Connect function that adds to recent wallets
   async function connectWallet(connector: Connector): Promise<any> {
-    const result = await connectAsync({
-      connector,
-    })
-    return result
+    debugWalletConnect(`[${connector.id}] Connect called`)
+    debugWalletConnect(`[${connector.id}] Starting connection...`)
+
+    try {
+      // Trace the connector methods before calling connect
+      if (connector.id === 'walletConnect' || connector.id.includes('walletConnect')) {
+        debugWalletConnect(`[${connector.id}] *** NORMAL WalletConnect Flow ***`)
+
+        // Check initial authorization state
+        try {
+          debugWalletConnect(`[${connector.id}] Checking initial isAuthorized()...`)
+          const initialAuth = await connector.isAuthorized()
+          debugWalletConnect(
+            `[${connector.id}] Initial isAuthorized() returned:`,
+            initialAuth
+          )
+
+          // Try to get initial accounts
+          debugWalletConnect(`[${connector.id}] Checking initial getAccounts()...`)
+          const initialAccounts = await connector.getAccounts()
+          debugWalletConnect(`[${connector.id}] Initial getAccounts() returned:`, {
+            count: initialAccounts?.length ?? 0,
+            accounts: initialAccounts,
+          })
+
+          // Try to get provider to see if it's initialized
+          debugWalletConnect(
+            `[${connector.id}] Checking if getProvider() is available...`
+          )
+          if (typeof connector.getProvider === 'function') {
+            try {
+              debugWalletConnect(`[${connector.id}] Calling getProvider()...`)
+              const provider = await connector.getProvider()
+              const providerAny = provider as any
+              debugWalletConnect(`[${connector.id}] getProvider() returned provider`, {
+                type: typeof provider,
+                hasRequest: typeof providerAny?.request === 'function',
+              })
+            } catch (err) {
+              debugWalletConnect(`[${connector.id}] getProvider() threw error:`, err)
+            }
+          }
+        } catch (err) {
+          debugWalletConnect(`[${connector.id}] Initial checks failed:`, err)
+        }
+      }
+
+      // Now call the actual connect
+      debugWalletConnect(`[${connector.id}] Calling connectAsync...`)
+      const result = await connectAsync({
+        connector,
+      })
+
+      debugWalletConnect(`[${connector.id}] connectAsync succeeded:`, {
+        accounts: result?.accounts ?? [],
+        chainId: result?.chainId,
+      })
+
+      return result
+    } catch (error) {
+      debugWalletConnect(`[${connector.id}] connectAsync failed:`, error)
+      throw error
+    }
   }
 
   // Separate EIP-6963 (auto-discovered browser extensions)

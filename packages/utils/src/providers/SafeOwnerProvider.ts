@@ -66,6 +66,15 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
     publicClient: PublicClient
   ) {
     super()
+
+    // Validate that we have the owner address for signing operations
+    if (!safe.ownerAddress) {
+      debugSafe(
+        '[SafeOwnerProvider] WARNING: Created without cached ownerAddress. ' +
+          'Signature requests will fall back to eth_accounts which may fail for some providers like WalletConnect.'
+      )
+    }
+
     this.safe = safe
     this.ownerProvider = ownerProvider
     this.publicClient = publicClient
@@ -160,15 +169,47 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
       case 'eth_signTypedData_v4': {
         // Delegate signing to the owner provider.
         // Replace the presented Safe address with the owner wallet address in params.
-        const ownerAccounts = (await this.ownerProvider.request({
-          method: 'eth_accounts',
-        })) as string[]
 
-        if (!ownerAccounts || ownerAccounts.length === 0) {
-          throw new Error('Safe owner wallet not connected')
+        // Use cached owner address if available (prevents eth_accounts call which can fail for WalletConnect)
+        let ownerAddress = this.safe.ownerAddress
+
+        // Fallback: try to get accounts from owner provider if not cached
+        if (!ownerAddress) {
+          debugSafe(
+            '[SafeOwnerProvider] No cached ownerAddress, falling back to eth_accounts call'
+          )
+          try {
+            const ownerAccounts = (await this.ownerProvider.request({
+              method: 'eth_accounts',
+            })) as string[]
+
+            if (ownerAccounts && ownerAccounts.length > 0) {
+              ownerAddress = ownerAccounts[0]
+            }
+          } catch (error) {
+            debugSafe(
+              '[SafeOwnerProvider] Failed to get accounts from owner provider:',
+              error
+            )
+          }
         }
 
-        const ownerAddress = ownerAccounts[0]
+        if (!ownerAddress) {
+          const errorMsg =
+            'Cannot sign with Safe: owner wallet address is not available.\n\n' +
+            'This usually happens when:\n' +
+            '1. The owner wallet (WalletConnect/MetaMask) was disconnected\n' +
+            '2. The wallet connection was interrupted\n' +
+            '3. The Safe owner changed\n\n' +
+            'Solution: Disconnect the Safe and reconnect with your owner wallet.'
+          debugSafe('[SafeOwnerProvider] ERROR: Unable to resolve owner address')
+          debugSafe('[SafeOwnerProvider] Full error message:', errorMsg)
+          throw new Error(errorMsg)
+        }
+
+        debugSafe(
+          `[SafeOwnerProvider] Delegating signature request (${method}) to owner wallet at ${ownerAddress}`
+        )
 
         // Replace Safe address with owner address in params.
         // For personal_sign: [message, address]
