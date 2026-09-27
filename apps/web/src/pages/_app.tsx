@@ -52,6 +52,7 @@ import { ErrorBoundary } from 'src/components/ErrorBoundary'
 import { FrameProvider } from 'src/components/FrameProvider'
 import { LinksProvider } from 'src/components/LinksProvider'
 import { useAppDisconnect } from 'src/hooks/useAppDisconnect'
+import { useDebugConnectorLifecycle } from 'src/hooks/useDebugConnectorLifecycle'
 import { useSession } from 'src/hooks/useSession'
 import { sessionMachine } from 'src/machines/sessionMachine'
 import { AppThemeProvider } from 'src/theme/AppThemeProvider'
@@ -105,6 +106,9 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const config = useConfig()
   const { connector } = useAccount()
   const logoutInProgress = isSiweLogoutInProgress()
+
+  // Enable debug logging with: localStorage.setItem('debug', 'app:walletConnect:*')
+  useDebugConnectorLifecycle()
 
   // Use ref to always get latest safeState in auth adapter callbacks
   const safeStateRef = React.useRef(safeState)

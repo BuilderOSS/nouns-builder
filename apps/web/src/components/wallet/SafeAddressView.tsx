@@ -4,7 +4,7 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { SAFE_SERVICE_URL } from '@buildeross/constants/safe'
 import { CHAIN_ID } from '@buildeross/types'
 import { DropdownSelect, FIELD_TYPES, SmartInput } from '@buildeross/ui'
-import { getRecentSafeWallets } from '@buildeross/utils'
+import { getEnsAddress, getRecentSafeWallets } from '@buildeross/utils'
 import { Box, Button, Flex, Stack, Text } from '@buildeross/zord'
 import Image from 'next/image'
 import { ChangeEvent, useState } from 'react'
@@ -39,23 +39,37 @@ export function SafeAddressView({ onSubmit, onBack, error }: SafeAddressViewProp
   const [address, setAddress] = useState('')
   const [chainId, setChainId] = useState<CHAIN_ID>(CHAIN_ID.ETHEREUM)
   const [validationError, setValidationError] = useState<string>()
+  const [isResolving, setIsResolving] = useState(false)
   const recentSafeWallets = getRecentSafeWallets()
     .filter((wallet) => CHAINS_BY_ID.has(wallet.chainId))
     .slice(0, 3)
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!address) {
       setValidationError('Please enter a Safe address')
       return
     }
 
-    if (!isAddress(address)) {
-      setValidationError('Invalid address format')
-      return
-    }
+    setIsResolving(true)
 
-    setValidationError(undefined)
-    onSubmit(address as Address, chainId)
+    try {
+      // Attempt to resolve ENS name to address
+      const resolvedAddress = await getEnsAddress(address.trim())
+
+      // Validate the resolved address
+      if (!isAddress(resolvedAddress)) {
+        setValidationError('Invalid address format')
+        setIsResolving(false)
+        return
+      }
+
+      setValidationError(undefined)
+      setIsResolving(false)
+      onSubmit(resolvedAddress as Address, chainId)
+    } catch (error) {
+      setValidationError('Failed to resolve address')
+      setIsResolving(false)
+    }
   }
 
   return (
@@ -151,8 +165,8 @@ export function SafeAddressView({ onSubmit, onBack, error }: SafeAddressViewProp
       )}
 
       <Flex gap="x3" className={actionRow}>
-        <Button onClick={handleSubmit} className={actionButton}>
-          Continue
+        <Button onClick={handleSubmit} className={actionButton} disabled={isResolving}>
+          {isResolving ? 'Resolving...' : 'Continue'}
         </Button>
         <Button onClick={onBack} variant="secondary" className={actionButton}>
           Back

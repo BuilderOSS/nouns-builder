@@ -12,6 +12,7 @@ import { useReadContract } from 'wagmi'
 
 import { FixRendererBase } from '../FixRendererBase'
 import { ConfigureUpdatablePeriodModal } from './ConfigureUpdatablePeriodModal'
+import { isGovernorUpgrade, replaceV3SummaryContractDetails } from './summary'
 import { v1_1_0, v1_2_0, v2_0_0, v3_0_0 } from './versions'
 
 export const VERSION_PROPOSAL_SUMMARY: { [key: string]: string } = {
@@ -99,6 +100,10 @@ export const Upgrade = ({
     votingPeriodSeconds && updatablePeriodSeconds > Number(votingPeriodSeconds)
 
   const isV3Upgrade = latest === '3.0.0'
+  const isGovernorV3Upgrade =
+    isV3Upgrade &&
+    !!upgradeTransaction &&
+    isGovernorUpgrade(upgradeTransaction.transactions, addresses)
 
   if (!shouldUpgrade)
     return (
@@ -109,7 +114,7 @@ export const Upgrade = ({
 
   const handleUpgrade = (): void => {
     // For v3.0.0 upgrades, show modal first to collect updatable period
-    if (isV3Upgrade) {
+    if (isGovernorV3Upgrade) {
       setShowModal(true)
       return
     }
@@ -119,10 +124,12 @@ export const Upgrade = ({
   }
 
   const proceedWithUpgrade = (): void => {
-    const transactions = [upgradeTransaction!]
+    const transactions = [
+      { ...upgradeTransaction!, transactions: [...upgradeTransaction!.transactions] },
+    ]
 
     // For v3.0.0 upgrades, append the setUpdatablePeriod transaction
-    if (isV3Upgrade && addresses.governor) {
+    if (isGovernorV3Upgrade && addresses.governor) {
       const periodToSet = enableUpdatablePeriod ? updatablePeriodSeconds : 0
       const setUpdatablePeriodTx = createSetUpdatablePeriodTransaction({
         governorAddress: addresses.governor as `0x${string}`,
@@ -134,6 +141,12 @@ export const Upgrade = ({
     // Generate summary with dynamic updatable period for v3.0.0
     let summary = VERSION_PROPOSAL_SUMMARY?.[latest as string] || ''
     if (isV3Upgrade) {
+      summary = replaceV3SummaryContractDetails(
+        summary,
+        upgradeTransaction!.transactions,
+        addresses
+      )
+
       if (enableUpdatablePeriod) {
         // Format the selected updatable period
         const periodParts = []
@@ -195,7 +208,7 @@ Since updatable proposals are disabled, the standard proposal states will be use
 
         // 3. Update "Proposal Replacement Tracking" section
         const replacementTrackingSection =
-          /### Proposal Replacement Tracking[\s\S]*?(?=### Technical Details)/
+          /### Proposal Replacement Tracking[\s\S]*?(?=### Compatibility Note)/
         const disabledTrackingSection = `### Proposal Replacement Tracking
 
 Proposal replacement tracking is not applicable when updatable proposals are disabled.
@@ -209,6 +222,10 @@ Proposal replacement tracking is not applicable when updatable proposals are dis
         summary = summary
           .replace(/\{\{UPDATABLE_PERIOD\}\}/g, 'disabled')
           .replace(/\{\{UPDATABLE_PERIOD_SECONDS\}\}/g, '0')
+          .replace(
+            "Governor's updatable proposal period is set to disabled",
+            "Governor's updatable proposal period is set to 0 seconds (disabled)"
+          )
       }
     }
 

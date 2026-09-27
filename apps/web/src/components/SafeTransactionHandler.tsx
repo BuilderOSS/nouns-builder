@@ -48,12 +48,6 @@ export function SafeTransactionHandler() {
     }
   }, [send])
 
-  const handleConfirm = async () => {
-    return new Promise<{ safeTxHash: string }>((resolve, reject) => {
-      send({ type: 'CONFIRM', resolve, reject })
-    })
-  }
-
   const handleClose = () => {
     const event = state.matches('error') || state.matches('success') ? 'CLOSE' : 'CANCEL'
     send({ type: event })
@@ -73,10 +67,15 @@ export function SafeTransactionHandler() {
   }
 
   const isOpen = !state.matches('idle')
+  const mode = state.context.params.mode
+  const isExecuting = state.matches('executing')
+  const isSuccess = state.matches('success')
+  const isError = state.matches('error')
 
   return (
     <SafeTransactionModal
       isOpen={isOpen}
+      mode={mode}
       onClose={handleClose}
       onRetry={handleRetry}
       safeAddress={state.context.params.safeInfo.safeAddress}
@@ -93,7 +92,12 @@ export function SafeTransactionHandler() {
         value: transaction.value,
         data: transaction.data,
       }))}
-      onConfirm={handleConfirm}
+      txHash={state.context.result?.txHash}
+      safeTxHash={state.context.result?.safeTxHash}
+      isExecuting={isExecuting}
+      isSuccess={isSuccess}
+      isError={isError}
+      error={state.context.error}
     />
   )
 }

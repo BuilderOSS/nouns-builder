@@ -4,7 +4,6 @@ import type { PublicClient } from 'viem'
 
 import type { SafeTransactionHandler } from '../safe/handler'
 import { getSafeTransactionHandler } from '../safe/handler'
-import { executeSafeTransaction } from '../safe/proposeTransaction'
 import type {
   CallParams,
   EIP1193Provider,
@@ -66,6 +65,15 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
     publicClient: PublicClient
   ) {
     super()
+
+    // Validate that we have the owner address for signing operations
+    if (!safe.ownerAddress) {
+      debugSafe(
+        '[SafeOwnerProvider] WARNING: Created without cached ownerAddress. ' +
+          'Signature requests will fall back to eth_accounts which may fail for some providers like WalletConnect.'
+      )
+    }
+
     this.safe = safe
     this.ownerProvider = ownerProvider
     this.publicClient = publicClient
@@ -160,15 +168,47 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
       case 'eth_signTypedData_v4': {
         // Delegate signing to the owner provider.
         // Replace the presented Safe address with the owner wallet address in params.
-        const ownerAccounts = (await this.ownerProvider.request({
-          method: 'eth_accounts',
-        })) as string[]
 
-        if (!ownerAccounts || ownerAccounts.length === 0) {
-          throw new Error('Safe owner wallet not connected')
+        // Use cached owner address if available (prevents eth_accounts call which can fail for WalletConnect)
+        let ownerAddress = this.safe.ownerAddress
+
+        // Fallback: try to get accounts from owner provider if not cached
+        if (!ownerAddress) {
+          debugSafe(
+            '[SafeOwnerProvider] No cached ownerAddress, falling back to eth_accounts call'
+          )
+          try {
+            const ownerAccounts = (await this.ownerProvider.request({
+              method: 'eth_accounts',
+            })) as string[]
+
+            if (ownerAccounts && ownerAccounts.length > 0) {
+              ownerAddress = ownerAccounts[0]
+            }
+          } catch (error) {
+            debugSafe(
+              '[SafeOwnerProvider] Failed to get accounts from owner provider:',
+              error
+            )
+          }
         }
 
-        const ownerAddress = ownerAccounts[0]
+        if (!ownerAddress) {
+          const errorMsg =
+            'Cannot sign with Safe: owner wallet address is not available.\n\n' +
+            'This usually happens when:\n' +
+            '1. The owner wallet (WalletConnect/MetaMask) was disconnected\n' +
+            '2. The wallet connection was interrupted\n' +
+            '3. The Safe owner changed\n\n' +
+            'Solution: Disconnect the Safe and reconnect with your owner wallet.'
+          debugSafe('[SafeOwnerProvider] ERROR: Unable to resolve owner address')
+          debugSafe('[SafeOwnerProvider] Full error message:', errorMsg)
+          throw new Error(errorMsg)
+        }
+
+        debugSafe(
+          `[SafeOwnerProvider] Delegating signature request (${method}) to owner wallet at ${ownerAddress}`
+        )
 
         // Replace Safe address with owner address in params.
         // For personal_sign: [message, address]
@@ -184,7 +224,48 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
           return param
         })
 
-        return this.ownerProvider.request({ method, params: modifiedParams })
+        // Try the request directly first
+        try {
+          return await this.ownerProvider.request({ method, params: modifiedParams })
+        } catch (error) {
+          // If it fails because provider needs connect(), try connecting first
+          const errorAny = error as any
+          const errorMsg = String(
+            errorAny?.message ||
+              errorAny?.details ||
+              errorAny?.error?.message ||
+              errorAny?.reason ||
+              ''
+          )
+
+          debugSafe(`[SafeOwnerProvider] Signature request failed, checking error:`, {
+            message: errorMsg,
+            errorKeys: Object.keys(errorAny || {}),
+          })
+
+          if (errorMsg.includes('Please call connect()')) {
+            debugSafe(
+              `[SafeOwnerProvider] Provider needs connect(), calling connect() and retrying...`
+            )
+
+            // Call connect() to initialize the provider
+            const providerAny = this.ownerProvider as any
+            if (providerAny.connect) {
+              try {
+                await providerAny.connect()
+              } catch (connectError) {
+                debugSafe(`[SafeOwnerProvider] connect() failed:`, connectError)
+              }
+            }
+
+            // Retry the request
+            debugSafe(`[SafeOwnerProvider] Retrying signature request after connect()`)
+            return await this.ownerProvider.request({ method, params: modifiedParams })
+          }
+
+          // Re-throw other errors
+          throw error
+        }
       }
 
       // Transaction methods - handle Safe transactions
@@ -210,32 +291,22 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
           threshold: this.safe.threshold,
         })
 
-        // Auto-execute for 1-of-N Safes (no multi-sig needed)
-        if (this.safe.threshold === 1) {
-          debugSafe(' Threshold is 1, auto-executing transaction')
-          const txHash = await executeSafeTransaction(
-            this.safe,
-            txParams.safeTransactions ?? txParams,
-            this.ownerProvider
-          )
-          debugSafe(' Transaction executed:', txHash)
-          return txHash
-        }
+        // Determine mode based on threshold
+        const mode = this.safe.threshold === 1 ? 'execute' : 'propose'
+        debugSafe(` Threshold is ${this.safe.threshold}, mode: ${mode}`)
 
-        // Multi-sig: use instance handler or fall back to global handler
-        debugSafe(' Multi-sig Safe, using handler')
+        // Use handler for both 1/N and multi-sig to show consistent modal UX
         const handler = this.transactionHandler ?? getSafeTransactionHandler()
         if (!handler) {
-          debugSafe('ERROR:  No handler registered!')
+          debugSafe('ERROR: No handler registered!')
           throw new Error(
             'Safe transaction handler not initialized. ' +
-              'This is a multi-signature Safe transaction that requires approval from other owners. ' +
-              'Please ensure SafeTransactionProvider is mounted in your app.'
+              'Please ensure SafeTransactionHandler is mounted in your app.'
           )
         }
 
         debugSafe(' Handler found, calling it...')
-        // Handler will show modal and return safeTxHash
+        // Handler will show modal and return txHash or safeTxHash
         const result = await handler({
           safeInfo: this.safe,
           transaction: txParams,
@@ -243,11 +314,12 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
             ? { transactions: txParams.safeTransactions }
             : {}),
           eoaProvider: this.ownerProvider,
+          mode,
         })
 
         debugSafe(' Handler returned result:', result)
-        // Return safeTxHash (treated like txHash by wagmi)
-        return result.safeTxHash
+        // Return appropriate hash based on mode
+        return result.mode === 'execute' ? result.txHash! : result.safeTxHash!
       }
 
       case 'eth_sendRawTransaction':

@@ -2,9 +2,11 @@ import type {
   EIP1193Provider,
   SafeInfo,
   SafeTransactionParams,
+  SafeTransactionResult,
   SendTransactionParams,
 } from '@buildeross/utils'
 import {
+  executeSafeTransaction,
   getSafeErrorMessage,
   proposeSafeTransaction,
   SafeTransactionError,
@@ -16,24 +18,17 @@ import { debugSafeTx } from '../utils/debug'
 
 interface SafeTransactionContext {
   params: SafeTransactionParams | null
-  safeTxHash: string | null
+  result: SafeTransactionResult | null
   error: string | null
-  resolve: ((result: { safeTxHash: string }) => void) | null
+  resolve: ((result: SafeTransactionResult) => void) | null
   reject: ((error: Error) => void) | null
-  confirmResolve: ((result: { safeTxHash: string }) => void) | null
-  confirmReject: ((error: Error) => void) | null
 }
 
 export type SafeTransactionEvent =
   | {
       type: 'PROPOSE'
       params: SafeTransactionParams
-      resolve: (result: { safeTxHash: string }) => void
-      reject: (error: Error) => void
-    }
-  | {
-      type: 'CONFIRM'
-      resolve: (result: { safeTxHash: string }) => void
+      resolve: (result: SafeTransactionResult) => void
       reject: (error: Error) => void
     }
   | { type: 'RETRY' }
@@ -50,42 +45,30 @@ export const safeTransactionMachine = createMachine(
     },
     context: {
       params: null,
-      safeTxHash: null,
+      result: null,
       error: null,
       resolve: null,
       reject: null,
-      confirmResolve: null,
-      confirmReject: null,
     },
     states: {
       idle: {
         entry: () => debugSafeTx('State: idle'),
         on: {
           PROPOSE: {
-            target: 'reviewing',
+            target: 'executing',
             actions: 'setProposalParams',
           },
         },
       },
-      reviewing: {
-        entry: () => debugSafeTx('State: reviewing (awaiting user confirmation)'),
-        on: {
-          CONFIRM: {
-            target: 'proposing',
-            actions: 'setConfirmationCallbacks',
-          },
-          CANCEL: 'cancelled',
-          CLOSE: 'cancelled',
-        },
-      },
-      proposing: {
-        entry: () => debugSafeTx('State: proposing to Safe Service'),
+      executing: {
+        entry: () => debugSafeTx('State: executing/proposing transaction'),
         invoke: {
-          src: 'proposeSafeTransaction',
+          src: 'executeTransaction',
           input: ({ context }) => ({
             safeInfo: context.params!.safeInfo,
             transaction: context.params!.transactions ?? context.params!.transaction,
             eoaProvider: context.params!.eoaProvider,
+            mode: context.params!.mode,
           }),
           onDone: {
             target: 'success',
@@ -93,7 +76,7 @@ export const safeTransactionMachine = createMachine(
           },
           onError: {
             target: 'error',
-            actions: ['setError', 'rejectConfirmation'],
+            actions: 'setError',
           },
         },
       },
@@ -106,7 +89,7 @@ export const safeTransactionMachine = createMachine(
       error: {
         entry: ['logError'],
         on: {
-          RETRY: { target: 'reviewing', actions: 'clearError' },
+          RETRY: { target: 'executing', actions: 'clearError' },
           CANCEL: 'cancelled',
           CLOSE: 'cancelled',
         },
@@ -125,7 +108,7 @@ export const safeTransactionMachine = createMachine(
       setProposalParams: assign({
         params: ({ event }) => {
           if (event.type === 'PROPOSE') {
-            debugSafeTx('Received proposal params: %O', event.params)
+            debugSafeTx('Received transaction params (mode: %s)', event.params.mode)
             return event.params
           }
           return null
@@ -143,20 +126,19 @@ export const safeTransactionMachine = createMachine(
           return null
         },
         error: null,
-        safeTxHash: null,
-      }),
-      setConfirmationCallbacks: assign({
-        confirmResolve: ({ event }: { event: SafeTransactionEvent }) =>
-          event.type === 'CONFIRM' ? event.resolve : null,
-        confirmReject: ({ event }: { event: SafeTransactionEvent }) =>
-          event.type === 'CONFIRM' ? event.reject : null,
+        result: null,
       }),
       setSuccess: assign({
-        safeTxHash: ({ event }) => {
+        result: ({ event }) => {
           if ('output' in event) {
-            const hash = event.output as string
-            debugSafeTx('Transaction proposed successfully: %s', hash)
-            return hash
+            const result = event.output as SafeTransactionResult
+            debugSafeTx('Transaction successful (mode: %s)', result.mode)
+            if (result.mode === 'execute') {
+              debugSafeTx('Execution txHash: %s', result.txHash)
+            } else {
+              debugSafeTx('Proposal safeTxHash: %s', result.safeTxHash)
+            }
+            return result
           }
           return null
         },
@@ -170,25 +152,17 @@ export const safeTransactionMachine = createMachine(
             debugSafeTx('Transaction error: %s', message)
             return message
           }
-          return 'Failed to propose transaction'
+          return 'Failed to execute transaction'
         },
       }),
-      rejectConfirmation: ({ context, event }) => {
-        if ('error' in event) {
-          context.confirmReject?.(event.error as Error)
-        }
-      },
       clearError: assign({ error: null }),
       logSuccess: () => {
         debugSafeTx('State: success')
       },
       resolvePromises: ({ context }) => {
-        if (context.resolve && context.safeTxHash) {
-          context.resolve({ safeTxHash: context.safeTxHash })
-        }
-        if (context.confirmResolve && context.safeTxHash) {
-          context.confirmResolve({ safeTxHash: context.safeTxHash })
-          debugSafeTx('Promise resolved with safeTxHash: %s', context.safeTxHash)
+        if (context.resolve && context.result) {
+          context.resolve(context.result)
+          debugSafeTx('Promise resolved with result: %O', context.result)
         }
       },
       logError: () => {
@@ -205,33 +179,43 @@ export const safeTransactionMachine = createMachine(
         if (context.reject) {
           context.reject(error)
         }
-        context.confirmReject?.(error)
         debugSafeTx('Promise rejected: %s', error.message)
       },
       resetContext: assign({
         params: null,
-        safeTxHash: null,
+        result: null,
         error: null,
         resolve: null,
         reject: null,
-        confirmResolve: null,
-        confirmReject: null,
       }),
     },
     actors: {
-      proposeSafeTransaction: fromPromise<
-        string,
+      executeTransaction: fromPromise<
+        SafeTransactionResult,
         {
           safeInfo: SafeInfo
           transaction: SendTransactionParams | SendTransactionParams[]
           eoaProvider: EIP1193Provider
+          mode: 'execute' | 'propose'
         }
       >(async ({ input }) => {
-        return await proposeSafeTransaction(
-          input.safeInfo,
-          input.transaction,
-          input.eoaProvider
-        )
+        if (input.mode === 'execute') {
+          // Execute transaction immediately for 1/N Safe
+          const txHash = await executeSafeTransaction(
+            input.safeInfo,
+            input.transaction,
+            input.eoaProvider
+          )
+          return { txHash, mode: 'execute' }
+        } else {
+          // Create proposal for multi-sig Safe
+          const safeTxHash = await proposeSafeTransaction(
+            input.safeInfo,
+            input.transaction,
+            input.eoaProvider
+          )
+          return { safeTxHash, mode: 'propose' }
+        }
       }),
     },
   }

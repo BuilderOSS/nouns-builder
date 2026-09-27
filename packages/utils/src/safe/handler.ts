@@ -5,10 +5,13 @@ export interface SafeTransactionParams {
   transaction: SendTransactionParams
   transactions?: SendTransactionParams[]
   eoaProvider: EIP1193Provider
+  mode: 'execute' | 'propose' // execute for 1/N, propose for multi-sig
 }
 
 export interface SafeTransactionResult {
-  safeTxHash: string
+  txHash?: string // Ethereum tx hash for execute mode
+  safeTxHash?: string // Safe tx hash for propose mode
+  mode: 'execute' | 'propose'
 }
 
 export type SafeTransactionHandler = (

@@ -211,6 +211,7 @@ export const walletModalMachine = createMachine(
           input: ({ context }) => ({
             safeInfo: context.safeInfo!,
             ownerConnectorId: context.connector!.id,
+            ownerAddress: context.address!, // Pass the confirmed owner address
           }),
         },
         on: {
@@ -510,10 +511,11 @@ export const walletModalMachine = createMachine(
       ),
       switchToSafeConnector: fromPromise<
         void,
-        { safeInfo: SafeInfo; ownerConnectorId: string }
+        { safeInfo: SafeInfo; ownerConnectorId: string; ownerAddress: Address }
       >(async ({ input }) => {
-        // Save Safe info before the Safe connector switch begins.
-        saveSafeInfo(input.safeInfo, input.ownerConnectorId)
+        // Save Safe info with owner address before the Safe connector switch begins.
+        // This allows SafeOwnerConnector to retrieve the address without wagmi state access issues
+        saveSafeInfo(input.safeInfo, input.ownerConnectorId, input.ownerAddress)
         // Actual connector switch handled by component
       }),
       signSiweMessage: fromPromise<

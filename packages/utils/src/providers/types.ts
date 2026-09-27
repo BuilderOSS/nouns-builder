@@ -7,6 +7,7 @@ export interface SafeInfo {
   owners: Address[]
   isReadOnly: boolean
   ownerAddress?: Address
+  ownerProvider?: EIP1193Provider // Cached provider with active session (not persisted to storage)
   nonce?: number
   version?: string
 }

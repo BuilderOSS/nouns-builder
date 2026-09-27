@@ -9,6 +9,10 @@ import type { Address } from 'viem'
 import { createSiweMessage } from 'viem/siwe'
 import { useAccount, useConfig, useConnect, useDisconnect, useSignMessage } from 'wagmi'
 
+import {
+  cacheOwnerProvider,
+  clearAllCachedProviders,
+} from '../connectors/safeOwnerConnector'
 import { useWalletConnectors } from '../hooks/useWalletConnectors'
 import { walletModalMachine } from '../machines/walletModalMachine'
 import type { WalletInfo } from '../types/auth'
@@ -53,6 +57,9 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
 
     safeFlowStartedRef.current = false
     clearSafeInfo()
+
+    // Clear cached provider
+    clearAllCachedProviders()
 
     if (activeConnector?.id === 'safeOwner') {
       try {
@@ -242,7 +249,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           }
 
           if (flowCancelledRef.current) {
-            await disconnectAsync({ connector: safeConnector })
+            await safeConnector.connect()
             return
           }
 
@@ -371,11 +378,13 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
 
     try {
       debugWallet(
-        'Connecting to %s (id: %s, connector: %O)...',
+        'Connecting to %s (id: %s, connector: %O)',
         wallet.name,
         wallet.id,
         wallet.connector
       )
+
+      // Use the connect callback from walletConnectors to ensure diagnostics are triggered
       const result = await connectAsync({ connector: wallet.connector })
       if (attemptId !== authAttemptRef.current || flowCancelledRef.current) return
       debugWallet('Connected successfully: %O', result)
@@ -384,6 +393,26 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
 
       if (!connectedAddress) {
         throw new Error('Wallet connection did not return an address')
+      }
+
+      // If connecting as Safe owner, cache the provider to preserve its session
+      if (
+        state.context.pendingSafeInfo &&
+        typeof connectedConnector.getProvider === 'function'
+      ) {
+        try {
+          debugWallet('Caching provider for Safe owner wallet: %s', connectedConnector.id)
+          const provider = await connectedConnector.getProvider()
+          if (provider) {
+            cacheOwnerProvider(connectedConnector.id, provider as any)
+            debugWallet('✓ Provider cached successfully')
+          }
+        } catch (err) {
+          debugWallet(
+            'Failed to cache provider (will fall back to getProvider later):',
+            err
+          )
+        }
       }
 
       send({
@@ -427,6 +456,26 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         'Skipping connection, directly to signature with address: %s',
         connectedAddress
       )
+
+      // If connecting as Safe owner, cache the provider to preserve its session
+      if (
+        state.context.pendingSafeInfo &&
+        typeof activeConnector.getProvider === 'function'
+      ) {
+        try {
+          debugWallet('Caching provider for Safe owner wallet: %s', activeConnector.id)
+          const provider = await activeConnector.getProvider()
+          if (provider) {
+            cacheOwnerProvider(activeConnector.id, provider as any)
+            debugWallet('✓ Provider cached successfully')
+          }
+        } catch (err) {
+          debugWallet(
+            'Failed to cache provider (will fall back to getProvider later):',
+            err
+          )
+        }
+      }
 
       // Skip the SELECT_WALLET and connectAsync steps, go directly to WALLET_CONNECTED
       send({
@@ -599,11 +648,49 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         (error as Error).name,
         (error as Error).message
       )
+
+      // Provide user-friendly error messages based on error type
+      const errorMessage = (error as Error).message || 'Unknown error'
+      let userFriendlyMessage = errorMessage
+
+      if (
+        errorMessage.includes('Cannot sign with Safe') ||
+        errorMessage.includes('owner wallet address is not available')
+      ) {
+        userFriendlyMessage =
+          'Your Safe owner wallet is not properly connected. Please disconnect and reconnect your wallet to continue.'
+      } else if (
+        errorMessage.includes('Cannot create Safe provider') ||
+        errorMessage.includes('owner address is not available')
+      ) {
+        userFriendlyMessage =
+          'Your Safe owner wallet connection is invalid. Please disconnect and reconnect your wallet.'
+      } else if (
+        errorMessage.includes('Owner connector') &&
+        errorMessage.includes('not found')
+      ) {
+        userFriendlyMessage =
+          'Your wallet connector was not found. Please disconnect and reconnect your wallet.'
+      } else if (errorMessage.includes('Failed to get provider')) {
+        userFriendlyMessage =
+          'Failed to connect to your wallet. Please check that your wallet is active and try again.'
+      } else if (errorMessage.includes('not connected')) {
+        userFriendlyMessage =
+          'Your wallet is not connected. Please reconnect your wallet and try again.'
+      } else if (
+        errorMessage.includes('wallet') &&
+        errorMessage.toLowerCase().includes('denied')
+      ) {
+        userFriendlyMessage = 'You rejected the signature request in your wallet.'
+      }
+
+      debugWallet('Sending error to state machine: %s', userFriendlyMessage)
+      debugWallet('Original error was: %s', errorMessage)
       send({
         type: 'ERROR',
         error: {
           code: 'SIGNATURE_REJECTED',
-          message: (error as Error).message || 'Unknown error',
+          message: userFriendlyMessage,
         },
       })
     }
