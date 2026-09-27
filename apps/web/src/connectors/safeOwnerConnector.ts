@@ -29,6 +29,35 @@ export function setWagmiConfig(config: Config) {
   wagmiConfig = config
 }
 
+// Cache for owner wallet providers with active sessions
+// Key: connectorId, Value: provider
+const providerCache = new Map<string, EIP1193Provider>()
+
+/**
+ * Cache a provider for later use by SafeOwnerConnector.
+ * This preserves the provider's active session even after wagmi disconnects the connector.
+ */
+export function cacheOwnerProvider(connectorId: string, provider: EIP1193Provider): void {
+  debugSafeConnector('Caching provider for connector: %s', connectorId)
+  providerCache.set(connectorId, provider)
+}
+
+/**
+ * Clear cached provider for a connector
+ */
+export function clearCachedProvider(connectorId: string): void {
+  debugSafeConnector('Clearing cached provider for connector: %s', connectorId)
+  providerCache.delete(connectorId)
+}
+
+/**
+ * Clear all cached providers
+ */
+export function clearAllCachedProviders(): void {
+  debugSafeConnector('Clearing all cached providers')
+  providerCache.clear()
+}
+
 /**
  * Creates a static SafeOwnerConnector that reads Safe configuration from localStorage.
  * This connector works with wagmi's built-in persistence and reconnection system.
@@ -408,22 +437,30 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
           }
 
           // Get the owner wallet provider.
-          // IMPORTANT: Call getProvider() without chainId parameter to preserve the active session.
-          // Passing chainId triggers switchChain() which can disconnect the WalletConnect session.
+          // IMPORTANT: Check cache first to preserve the provider's active session.
+          // Wagmi disconnects connectors when switching, which destroys their sessions.
           debugSafeConnector('Getting provider from owner connector:', ownerConnector_.id)
 
-          const rawProvider = await ownerConnector_.getProvider()
-          if (!rawProvider) {
-            const errorMsg = `Failed to get provider from owner connector '${saved.ownerConnectorId}'. The wallet may not be fully initialized.`
-            debugSafeConnector('ERROR:', errorMsg)
-            console.error('[SafeOwnerConnector]', errorMsg)
-            throw new Error(errorMsg)
+          let ownerProvider: EIP1193Provider
+
+          // Try cache first (preserves session even after wagmi disconnects the connector)
+          const cachedProvider = providerCache.get(saved.ownerConnectorId)
+          if (cachedProvider) {
+            debugSafeConnector('✓ Using cached provider with active session')
+            ownerProvider = cachedProvider
+          } else {
+            debugSafeConnector('No cached provider, calling getProvider()...')
+            const rawProvider = await ownerConnector_.getProvider()
+            if (!rawProvider) {
+              const errorMsg = `Failed to get provider from owner connector '${saved.ownerConnectorId}'. The wallet may not be fully initialized.`
+              debugSafeConnector('ERROR:', errorMsg)
+              console.error('[SafeOwnerConnector]', errorMsg)
+              throw new Error(errorMsg)
+            }
+
+            debugSafeConnector('Successfully retrieved provider from owner connector')
+            ownerProvider = rawProvider as EIP1193Provider
           }
-
-          debugSafeConnector('Successfully retrieved provider from owner connector')
-
-          // Type assert to EIP1193Provider
-          const ownerProvider = rawProvider as EIP1193Provider
 
           // Create public client if not already created
           if (!publicClient_) {

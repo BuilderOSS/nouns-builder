@@ -9,6 +9,10 @@ import type { Address } from 'viem'
 import { createSiweMessage } from 'viem/siwe'
 import { useAccount, useConfig, useConnect, useDisconnect, useSignMessage } from 'wagmi'
 
+import {
+  cacheOwnerProvider,
+  clearAllCachedProviders,
+} from '../connectors/safeOwnerConnector'
 import { useWalletConnectors } from '../hooks/useWalletConnectors'
 import { walletModalMachine } from '../machines/walletModalMachine'
 import type { WalletInfo } from '../types/auth'
@@ -53,6 +57,9 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
 
     safeFlowStartedRef.current = false
     clearSafeInfo()
+
+    // Clear cached provider
+    clearAllCachedProviders()
 
     if (activeConnector?.id === 'safeOwner') {
       try {
@@ -389,6 +396,26 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         throw new Error('Wallet connection did not return an address')
       }
 
+      // If connecting as Safe owner, cache the provider to preserve its session
+      if (
+        state.context.pendingSafeInfo &&
+        typeof connectedConnector.getProvider === 'function'
+      ) {
+        try {
+          debugWallet('Caching provider for Safe owner wallet: %s', connectedConnector.id)
+          const provider = await connectedConnector.getProvider()
+          if (provider) {
+            cacheOwnerProvider(connectedConnector.id, provider as any)
+            debugWallet('✓ Provider cached successfully')
+          }
+        } catch (err) {
+          debugWallet(
+            'Failed to cache provider (will fall back to getProvider later):',
+            err
+          )
+        }
+      }
+
       send({
         type: 'WALLET_CONNECTED',
         address: connectedAddress,
@@ -721,7 +748,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           connectedWallet={connectedWallet}
           onSelectWallet={handleSelectWallet}
           onSelectConnectedWallet={handleSelectConnectedWallet}
-          onSelectSafe={() => { }}
+          onSelectSafe={() => {}}
           showSafeOption={false}
           title="Connect Safe Owner Wallet"
           description="Choose a wallet that is an owner of this Safe to continue."
