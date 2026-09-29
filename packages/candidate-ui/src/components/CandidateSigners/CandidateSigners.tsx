@@ -2,12 +2,12 @@ import { useEnsData, useVotes } from '@buildeross/hooks'
 import { governorAbi } from '@buildeross/sdk/contract'
 import type { CandidateSponsorSignature } from '@buildeross/sdk/subgraph'
 import { getCandidateSponsorSignatures } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { WalletIdentityWithPreview } from '@buildeross/ui'
 import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
-import { useAccount, useReadContract } from 'wagmi'
+import { useReadContract } from 'wagmi'
 
 import { filterValidSignatures, isSignatureExpired } from '../../utils/candidateProposal'
 import { CandidatePromoteButton, type ProposerSignature } from '../CandidatePromoteButton'
@@ -40,7 +40,7 @@ export const CandidateSigners: React.FC<CandidateSignersProps> = ({
 }) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
-  const { address } = useAccount()
+  const { address } = useAuthStore()
   const [expanded, setExpanded] = React.useState(false)
   const isCreator = React.useMemo(
     () => !!address && address.toLowerCase() === proposer.toLowerCase(),

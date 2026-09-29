@@ -1,20 +1,25 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+const { profileDashboardQueryMock, redisMock } = vi.hoisted(() => {
+  // Set required environment variable for iron-session before module imports
+  process.env.IRON_PASSWORD = 'test-password-at-least-32-characters-long-for-testing'
+
+  return {
+    profileDashboardQueryMock: vi.fn(),
+    redisMock: {
+      expire: vi.fn(),
+      get: vi.fn(),
+      incr: vi.fn(),
+      setex: vi.fn(),
+    },
+  }
+})
+
 import defaultHandler, {
   getProfileDashboardCacheKey,
   profileDashboardHandler,
 } from '../pages/api/profile-dashboard'
-
-const { profileDashboardQueryMock, redisMock } = vi.hoisted(() => ({
-  profileDashboardQueryMock: vi.fn(),
-  redisMock: {
-    expire: vi.fn(),
-    get: vi.fn(),
-    incr: vi.fn(),
-    setex: vi.fn(),
-  },
-}))
 
 vi.mock('@buildeross/constants/chains', () => ({
   PUBLIC_DEFAULT_CHAINS: [{ id: 8453, name: 'Base', slug: 'base' }],

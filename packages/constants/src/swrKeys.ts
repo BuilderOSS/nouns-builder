@@ -73,4 +73,7 @@ export const SWR_KEYS = {
   DROP_ADDRESSES: 'drop-addresses',
   POOL_MAX_SWAP_AMOUNT: 'pool-max-swap-amount',
   ZORA_COIN_COMMENTS: 'zora-coin-comments',
+  UNISWAP_QUOTE: 'uniswap-quote',
+  UNISWAP_SWAP: 'uniswap-swap',
+  POPULAR_TOKENS: 'popular-tokens',
 } as const

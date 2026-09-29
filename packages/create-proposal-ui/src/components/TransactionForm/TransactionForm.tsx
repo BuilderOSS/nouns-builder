@@ -19,6 +19,7 @@ import { ResumeAuctions } from './ResumeAuctions'
 import { SendNft } from './SendNft'
 import { SendTokens } from './SendTokens'
 import { StreamTokens } from './StreamTokens'
+import { UniswapSwap } from './UniswapSwap'
 import { WalletConnect } from './WalletConnect'
 
 export type TransactionFormType = (typeof TRANSACTION_FORM_OPTIONS)[number]
@@ -28,6 +29,7 @@ export const TRANSACTION_FORM_OPTIONS = [
   TransactionType.SEND_NFT,
   TransactionType.STREAM_TOKENS,
   TransactionType.AIRDROP_TOKENS,
+  TransactionType.UNISWAP_SWAP,
   TransactionType.MILESTONE_PAYMENTS,
   TransactionType.MINT_GOVERNANCE_TOKENS,
   TransactionType.WALLET_CONNECT,
@@ -53,6 +55,7 @@ const FORMS: Record<TransactionFormType, React.FC> = {
   [TransactionType.SEND_TOKENS]: SendTokens,
   [TransactionType.STREAM_TOKENS]: StreamTokens,
   [TransactionType.AIRDROP_TOKENS]: AirdropTokens,
+  [TransactionType.UNISWAP_SWAP]: UniswapSwap,
   [TransactionType.MILESTONE_PAYMENTS]: MilestonePayments,
   [TransactionType.NOMINATE_DELEGATE]: NominateEscrowDelegate,
   [TransactionType.WALLET_CONNECT]: WalletConnect,

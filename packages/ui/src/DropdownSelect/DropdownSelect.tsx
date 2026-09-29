@@ -4,6 +4,7 @@ import {
   ButtonProps,
   Flex,
   Icon,
+  Input,
   Spinner,
   Stack,
   Text,
@@ -88,6 +89,8 @@ interface DropdownSelectProps<T> {
   align?: 'left' | 'right'
   height?: DropdownHeight
   minWidth?: string
+  searchable?: boolean
+  searchPlaceholder?: string
 }
 
 export function DropdownSelect<T extends React.Key>({
@@ -107,36 +110,59 @@ export function DropdownSelect<T extends React.Key>({
   align = 'left',
   height = 'x18',
   minWidth = '200px',
+  searchable = false,
+  searchPlaceholder = 'Search...',
 }: React.PropsWithChildren<DropdownSelectProps<T>>) {
   const [showOptions, setShowOptions] = useState(false)
   const [activeIndex, setActiveIndex] = useState<number>(-1)
+  const [searchTerm, setSearchTerm] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement | null>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const listboxId = useId()
   const triggerId = id ?? `${listboxId}-trigger`
   const inputLabelId = inputLabel ? `${listboxId}-label` : undefined
 
+  // Filter options based on search term
+  const filteredOptions = useMemo(() => {
+    if (!searchable || !searchTerm.trim()) return options
+
+    const search = searchTerm.toLowerCase().trim()
+    return options.filter((option) => {
+      const labelMatch = option.label.toLowerCase().includes(search)
+      const descriptionMatch = option.description?.toLowerCase().includes(search)
+      const valueMatch = String(option.value).toLowerCase().includes(search)
+      return labelMatch || descriptionMatch || valueMatch
+    })
+  }, [searchable, searchTerm, options])
+
   const handleOptionSelect = (option: SelectOption<T>) => {
     onChange(option.value)
     setShowOptions(false)
+    setSearchTerm('')
   }
 
   const selectedOption = options.find((option) => option.value === value)
   const displayLabel = customLabel ?? selectedOption?.label ?? 'Select option'
   const isInteractive = !disabled && !isLoading
   const selectedIndex = useMemo(
-    () => options.findIndex((option) => option.value === value),
-    [options, value]
+    () => filteredOptions.findIndex((option) => option.value === value),
+    [filteredOptions, value]
   )
 
   const closeOptions = () => {
     setShowOptions(false)
     setActiveIndex(-1)
+    setSearchTerm('')
   }
 
   const openOptions = () => {
     setShowOptions(true)
     setActiveIndex(selectedIndex >= 0 ? selectedIndex : 0)
+    // Focus search input when dropdown opens (if searchable)
+    if (searchable) {
+      setTimeout(() => searchInputRef.current?.focus(), 0)
+    }
   }
 
   // Click outside handler for absolute positioning
@@ -166,7 +192,7 @@ export function DropdownSelect<T extends React.Key>({
   }, [selectedIndex, showOptions])
 
   const handleTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (!options.length || disabled) return
+    if (!filteredOptions.length || disabled) return
 
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
@@ -178,7 +204,7 @@ export function DropdownSelect<T extends React.Key>({
       const delta = event.key === 'ArrowDown' ? 1 : -1
       setActiveIndex((prev) => {
         const current = prev >= 0 ? prev : selectedIndex >= 0 ? selectedIndex : 0
-        return (current + delta + options.length) % options.length
+        return (current + delta + filteredOptions.length) % filteredOptions.length
       })
       return
     }
@@ -193,7 +219,7 @@ export function DropdownSelect<T extends React.Key>({
     if (event.key === 'End') {
       event.preventDefault()
       if (!showOptions) openOptions()
-      setActiveIndex(options.length - 1)
+      setActiveIndex(filteredOptions.length - 1)
       return
     }
 
@@ -204,7 +230,7 @@ export function DropdownSelect<T extends React.Key>({
         return
       }
 
-      const option = options[activeIndex]
+      const option = filteredOptions[activeIndex]
       if (option) {
         handleOptionSelect(option)
       }
@@ -219,48 +245,108 @@ export function DropdownSelect<T extends React.Key>({
   }
 
   // Shared option renderer
-  const renderOptions = (optionClassName: string) =>
-    options.map((option, index) => (
-      <Flex
-        key={option.value}
-        id={`${listboxId}-option-${index}`}
-        role="option"
-        aria-selected={value === option.value}
-        tabIndex={-1}
-        onClick={() => handleOptionSelect(option)}
-        onMouseEnter={() => setActiveIndex(index)}
-        className={optionClassName}
-        pl={'x4'}
-        pr={option.description ? 'x4' : undefined}
-        direction={'row'}
-        align={'center'}
-        py={option.description ? 'x3' : undefined}
-        height={option.description ? undefined : height}
-        minHeight={height}
-        width={'100%'}
-        gap={option.description ? 'x3' : undefined}
-        fontSize={option.description ? undefined : 16}
-        fontWeight={option.description ? undefined : 'display'}
-        backgroundColor={index === activeIndex ? 'background2' : 'background1'}
-      >
-        {option.icon && (
-          <Flex pr={option.description ? undefined : 'x4'}>{option.icon}</Flex>
-        )}
+  const renderOptions = (optionClassName: string) => (
+    <>
+      {searchable && (
+        <Box p="x3" pb="x2">
+          <Input
+            ref={searchInputRef}
+            type="text"
+            placeholder={searchPlaceholder}
+            value={searchTerm}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSearchTerm(e.target.value)
+            }
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+              if (e.key === 'Escape') {
+                e.preventDefault()
+                closeOptions()
+                triggerRef.current?.focus()
+                return
+              }
 
-        {option.description ? (
-          <Stack gap={'x1'} justify={'center'}>
-            <Text fontSize={16} fontWeight={'display'}>
-              {option.label}
-            </Text>
-            <Text color={'text3'} variant={'paragraph-sm'}>
-              {option.description}
-            </Text>
-          </Stack>
-        ) : (
-          option.label
-        )}
-      </Flex>
-    ))
+              if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                e.preventDefault()
+                e.stopPropagation()
+                const delta = e.key === 'ArrowDown' ? 1 : -1
+                setActiveIndex((prev) => {
+                  const current = prev >= 0 ? prev : 0
+                  return (
+                    (current + delta + filteredOptions.length) % filteredOptions.length
+                  )
+                })
+                return
+              }
+
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                const option = filteredOptions[activeIndex]
+                if (option && activeIndex >= 0) {
+                  handleOptionSelect(option)
+                }
+              }
+            }}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid',
+              borderRadius: '4px',
+              fontSize: '14px',
+            }}
+          />
+        </Box>
+      )}
+      {filteredOptions.length === 0 ? (
+        <Box p="x4" textAlign="center">
+          <Text color="text3" fontSize={14}>
+            No results found
+          </Text>
+        </Box>
+      ) : (
+        filteredOptions.map((option, index) => (
+          <Flex
+            key={option.value}
+            id={`${listboxId}-option-${index}`}
+            role="option"
+            aria-selected={value === option.value}
+            tabIndex={-1}
+            onClick={() => handleOptionSelect(option)}
+            onMouseEnter={() => setActiveIndex(index)}
+            className={optionClassName}
+            pl={'x4'}
+            pr={option.description ? 'x4' : undefined}
+            direction={'row'}
+            align={'center'}
+            py={option.description ? 'x3' : undefined}
+            height={option.description ? undefined : height}
+            minHeight={height}
+            width={'100%'}
+            gap={option.description ? 'x3' : undefined}
+            fontSize={option.description ? undefined : 16}
+            fontWeight={option.description ? undefined : 'display'}
+            backgroundColor={index === activeIndex ? 'background2' : 'background1'}
+          >
+            {option.icon && (
+              <Flex pr={option.description ? undefined : 'x4'}>{option.icon}</Flex>
+            )}
+
+            {option.description ? (
+              <Stack gap={'x1'} justify={'center'}>
+                <Text fontSize={16} fontWeight={'display'}>
+                  {option.label}
+                </Text>
+                <Text color={'text3'} variant={'paragraph-sm'}>
+                  {option.description}
+                </Text>
+              </Stack>
+            ) : (
+              option.label
+            )}
+          </Flex>
+        ))
+      )}
+    </>
+  )
 
   return (
     <Box

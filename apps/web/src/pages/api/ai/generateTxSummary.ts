@@ -15,6 +15,7 @@ import { walletSnippet } from '@buildeross/utils/helpers'
 import * as Sentry from '@sentry/nextjs'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { AI_MODEL, generateCachedAiText } from 'src/utils/api/ai/summaries'
+import { type AuthContext, withAuth } from 'src/utils/api/authMiddleware'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 
 type RequestBody = {
@@ -265,7 +266,11 @@ Final Instruction:
 Respond with 1-2 concise sentences describing this transaction, and nothing else.`
 }
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  _authContext: AuthContext
+) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
     return res.status(405).json({ error: 'Method not allowed' })
@@ -325,4 +330,4 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
 export default withRateLimit({
   keyPrefix: 'ai:txSummary',
-})(handler)
+})(withAuth(handler))

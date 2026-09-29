@@ -1,6 +1,7 @@
 import { useEnsData } from '@buildeross/hooks/useEnsData'
 import { tokenAbi } from '@buildeross/sdk/contract'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { SmartInput } from '@buildeross/ui/Fields'
@@ -8,17 +9,16 @@ import { getEnsAddress } from '@buildeross/utils/ens'
 import { Box, Flex, Heading, Input, Stack, Text, theme } from '@buildeross/zord'
 import React from 'react'
 import { isAddress } from 'viem'
-import { useAccount, useConfig, useWriteContract } from 'wagmi'
-import { waitForTransactionReceipt } from 'wagmi/actions'
+import { useConfig } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 import { adminSection } from '../../styles/Section.css'
 
 export const CustomMinterForm: React.FC = () => {
-  const { address: signerAddress } = useAccount()
+  const { address: signerAddress } = useAuthStore()
   const { addresses } = useDaoStore()
   const chain = useChainStore((x) => x.chain)
   const config = useConfig()
-  const { writeContractAsync } = useWriteContract()
 
   const [recipient, setRecipient] = React.useState<string>('')
   const [tokenId, setTokenId] = React.useState<string>('')
@@ -61,7 +61,7 @@ export const CustomMinterForm: React.FC = () => {
         return
       }
 
-      const txHash = await writeContractAsync({
+      const { request } = await simulateContract(config, {
         abi: tokenAbi,
         address: addresses.token!,
         functionName: 'mintFromReserveTo',
@@ -69,8 +69,13 @@ export const CustomMinterForm: React.FC = () => {
         chainId: chain.id,
       })
 
-      if (txHash) {
-        await waitForTransactionReceipt(config, { hash: txHash, chainId: chain.id })
+      const result = await executeAppTransaction({
+        config,
+        chainId: chain.id,
+        request,
+      })
+
+      if (result.kind === 'mined') {
         const displayRecipient = recipient.endsWith('.eth')
           ? recipient
           : `${resolvedRecipient.slice(0, 6)}...${resolvedRecipient.slice(-4)}`
@@ -84,7 +89,7 @@ export const CustomMinterForm: React.FC = () => {
     } finally {
       setIsMinting(false)
     }
-  }, [recipient, tokenId, addresses.token, chain.id, config, writeContractAsync])
+  }, [recipient, tokenId, addresses.token, chain.id, config])
 
   const displaySignerAddress =
     signerEnsName ||

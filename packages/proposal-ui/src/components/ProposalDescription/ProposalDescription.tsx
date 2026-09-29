@@ -5,6 +5,7 @@ import {
 } from '@buildeross/constants/addresses'
 import { useDecodedTransactions } from '@buildeross/hooks/useDecodedTransactions'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { ProposalState } from '@buildeross/sdk/contract'
 import { Proposal } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import {
@@ -233,6 +234,17 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
     )
   }, [proposal.targets, chain.id])
 
+  const hasEnded = useMemo(() => {
+    return (
+      proposal.state === ProposalState.Executed ||
+      proposal.state === ProposalState.Canceled ||
+      proposal.state === ProposalState.Vetoed ||
+      proposal.state === ProposalState.Defeated ||
+      proposal.state === ProposalState.Expired ||
+      proposal.state === ProposalState.Replaced
+    )
+  }, [proposal.state])
+
   return (
     <Flex
       direction="column"
@@ -360,6 +372,7 @@ export const ProposalDescription: React.FC<ProposalDescriptionProps> = ({
             proposalMetadata={proposalMetadataForSummary}
             transactionBundles={metadataBundles}
             simulationByIndex={failedSimulationByIndex}
+            hasEnded={hasEnded}
           />
         </Section>
       </Flex>

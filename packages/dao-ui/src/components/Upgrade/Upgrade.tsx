@@ -6,13 +6,13 @@ import {
 import { DaoContractAddresses, useChainStore, useProposalStore } from '@buildeross/stores'
 import { UpgradeCard } from '@buildeross/ui/UpgradeCard'
 import { Flex, Text } from '@buildeross/zord'
-import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
 import React from 'react'
 import { useReadContract } from 'wagmi'
 
 import { FixRendererBase } from '../FixRendererBase'
 import { ConfigureUpdatablePeriodModal } from './ConfigureUpdatablePeriodModal'
+import { isGovernorUpgrade, replaceV3SummaryContractDetails } from './summary'
 import { v1_1_0, v1_2_0, v2_0_0, v3_0_0 } from './versions'
 
 export const VERSION_PROPOSAL_SUMMARY: { [key: string]: string } = {
@@ -81,6 +81,7 @@ export const Upgrade = ({
   // State for updatable period (only for v3.0.0+)
   const [updatablePeriod, setUpdatablePeriod] = React.useState(defaultUpdatablePeriod)
   const [showModal, setShowModal] = React.useState(false)
+  const [enableUpdatablePeriod, setEnableUpdatablePeriod] = React.useState(true)
 
   // Update state when default changes
   React.useEffect(() => {
@@ -99,6 +100,10 @@ export const Upgrade = ({
     votingPeriodSeconds && updatablePeriodSeconds > Number(votingPeriodSeconds)
 
   const isV3Upgrade = latest === '3.0.0'
+  const isGovernorV3Upgrade =
+    isV3Upgrade &&
+    !!upgradeTransaction &&
+    isGovernorUpgrade(upgradeTransaction.transactions, addresses)
 
   if (!shouldUpgrade)
     return (
@@ -109,7 +114,7 @@ export const Upgrade = ({
 
   const handleUpgrade = (): void => {
     // For v3.0.0 upgrades, show modal first to collect updatable period
-    if (isV3Upgrade) {
+    if (isGovernorV3Upgrade) {
       setShowModal(true)
       return
     }
@@ -119,13 +124,16 @@ export const Upgrade = ({
   }
 
   const proceedWithUpgrade = (): void => {
-    const transactions = [upgradeTransaction!]
+    const transactions = [
+      { ...upgradeTransaction!, transactions: [...upgradeTransaction!.transactions] },
+    ]
 
     // For v3.0.0 upgrades, append the setUpdatablePeriod transaction
-    if (isV3Upgrade && addresses.governor) {
+    if (isGovernorV3Upgrade && addresses.governor) {
+      const periodToSet = enableUpdatablePeriod ? updatablePeriodSeconds : 0
       const setUpdatablePeriodTx = createSetUpdatablePeriodTransaction({
         governorAddress: addresses.governor as `0x${string}`,
-        proposalUpdatablePeriod: updatablePeriodSeconds,
+        proposalUpdatablePeriod: periodToSet,
       })
       transactions[0].transactions.push(setUpdatablePeriodTx)
     }
@@ -133,39 +141,98 @@ export const Upgrade = ({
     // Generate summary with dynamic updatable period for v3.0.0
     let summary = VERSION_PROPOSAL_SUMMARY?.[latest as string] || ''
     if (isV3Upgrade) {
-      // Format the selected updatable period
-      const periodParts = []
-      if (updatablePeriod.days > 0)
-        periodParts.push(
-          `${updatablePeriod.days} day${updatablePeriod.days > 1 ? 's' : ''}`
-        )
-      if (updatablePeriod.hours > 0)
-        periodParts.push(
-          `${updatablePeriod.hours} hour${updatablePeriod.hours > 1 ? 's' : ''}`
-        )
-      if (updatablePeriod.minutes > 0)
-        periodParts.push(
-          `${updatablePeriod.minutes} minute${updatablePeriod.minutes > 1 ? 's' : ''}`
-        )
-      if (updatablePeriod.seconds > 0)
-        periodParts.push(
-          `${updatablePeriod.seconds} second${updatablePeriod.seconds > 1 ? 's' : ''}`
-        )
-      const periodText = periodParts.join(', ') || '0 seconds'
+      summary = replaceV3SummaryContractDetails(
+        summary,
+        upgradeTransaction!.transactions,
+        addresses
+      )
 
-      // Replace placeholders with actual selected period
-      summary = summary
-        .replace(/\{\{UPDATABLE_PERIOD\}\}/g, periodText)
-        .replace(
-          /\{\{UPDATABLE_PERIOD_SECONDS\}\}/g,
-          updatablePeriodSeconds.toLocaleString()
-        )
+      if (enableUpdatablePeriod) {
+        // Format the selected updatable period
+        const periodParts = []
+        if (updatablePeriod.days > 0)
+          periodParts.push(
+            `${updatablePeriod.days} day${updatablePeriod.days > 1 ? 's' : ''}`
+          )
+        if (updatablePeriod.hours > 0)
+          periodParts.push(
+            `${updatablePeriod.hours} hour${updatablePeriod.hours > 1 ? 's' : ''}`
+          )
+        if (updatablePeriod.minutes > 0)
+          periodParts.push(
+            `${updatablePeriod.minutes} minute${updatablePeriod.minutes > 1 ? 's' : ''}`
+          )
+        if (updatablePeriod.seconds > 0)
+          periodParts.push(
+            `${updatablePeriod.seconds} second${updatablePeriod.seconds > 1 ? 's' : ''}`
+          )
+        const periodText = periodParts.join(', ') || '0 seconds'
+
+        // Replace placeholders with actual selected period
+        summary = summary
+          .replace(/\{\{UPDATABLE_PERIOD\}\}/g, periodText)
+          .replace(
+            /\{\{UPDATABLE_PERIOD_SECONDS\}\}/g,
+            updatablePeriodSeconds.toLocaleString()
+          )
+      } else {
+        // When disabled, rewrite sections to reflect disabled state
+
+        // 1. Replace the "Updatable Proposals" section
+        const updatableProposalsSection =
+          /### Updatable Proposals[\s\S]*?(?=### Signed Proposals)/
+        const disabledSection = `### Updatable Proposals
+
+**The updatable proposals feature is being disabled for this DAO** (updatable period set to 0 seconds).
+
+- Proposals cannot be edited after creation
+- This maintains the traditional governance model where proposals are immutable once submitted
+- You can enable this feature later by creating a proposal to set a non-zero updatable period
+
+`
+        if (updatableProposalsSection.test(summary)) {
+          summary = summary.replace(updatableProposalsSection, disabledSection)
+        }
+
+        // 2. Update "New Proposal States" section to remove updatable-related states
+        const newProposalStatesSection =
+          /### New Proposal States[\s\S]*?(?=### Proposal Replacement Tracking)/
+        const disabledStatesSection = `### New Proposal States
+
+Since updatable proposals are disabled, the standard proposal states will be used (Pending, Active, Defeated, Succeeded, Queued, Executed, Canceled, Vetoed, Expired).
+
+`
+        if (newProposalStatesSection.test(summary)) {
+          summary = summary.replace(newProposalStatesSection, disabledStatesSection)
+        }
+
+        // 3. Update "Proposal Replacement Tracking" section
+        const replacementTrackingSection =
+          /### Proposal Replacement Tracking[\s\S]*?(?=### Compatibility Note)/
+        const disabledTrackingSection = `### Proposal Replacement Tracking
+
+Proposal replacement tracking is not applicable when updatable proposals are disabled.
+
+`
+        if (replacementTrackingSection.test(summary)) {
+          summary = summary.replace(replacementTrackingSection, disabledTrackingSection)
+        }
+
+        // 4. Replace remaining placeholders with cleaner text
+        summary = summary
+          .replace(/\{\{UPDATABLE_PERIOD\}\}/g, 'disabled')
+          .replace(/\{\{UPDATABLE_PERIOD_SECONDS\}\}/g, '0')
+          .replace(
+            "Governor's updatable proposal period is set to disabled",
+            "Governor's updatable proposal period is set to 0 seconds (disabled)"
+          )
+      }
     }
 
     startProposalDraft({
       transactions,
       disabled: true,
-      title: `Nouns Builder Upgrade v${latest} ${dayjs().format('YYYY-MM-DD')}`,
+      title: `Upgrade to Nouns Builder v${latest}`,
       summary,
     })
 
@@ -231,6 +298,8 @@ export const Upgrade = ({
         votingPeriodSeconds={votingPeriodSeconds}
         updatablePeriodSeconds={updatablePeriodSeconds}
         daoName={daoName}
+        enableUpdatablePeriod={enableUpdatablePeriod}
+        onEnableUpdatablePeriodChange={setEnableUpdatablePeriod}
       />
     </>
   )

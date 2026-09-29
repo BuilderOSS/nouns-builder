@@ -1,4 +1,5 @@
 import { BASE_URL } from '@buildeross/constants/baseUrl'
+import { useAuthStore } from '@buildeross/stores'
 import { type AddressType, CHAIN_ID } from '@buildeross/types'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { LikeButton } from '@buildeross/ui/LikeButton'
@@ -11,7 +12,7 @@ import {
 } from '@buildeross/utils/coining'
 import { Button, Flex } from '@buildeross/zord'
 import React, { useCallback, useMemo } from 'react'
-import { useAccount, useBalance } from 'wagmi'
+import { useBalance } from 'wagmi'
 
 import type { OnOpenTradeModal } from '../types/modalStates'
 
@@ -60,7 +61,7 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
     ? true
     : isChainIdSupportedForSaleOfZoraCoins(chainId)
 
-  const { address: userAddress } = useAccount()
+  const { address: userAddress } = useAuthStore()
 
   // Get user's coin balance to determine if they can trade
   // Only fetch balance if sellEnabled is true (otherwise we always show "Buy")

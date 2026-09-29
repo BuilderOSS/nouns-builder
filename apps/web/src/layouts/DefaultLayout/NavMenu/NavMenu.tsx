@@ -1,6 +1,6 @@
+import { useAuthStore } from '@buildeross/stores'
 import { Box, Flex } from '@buildeross/zord'
 import React from 'react'
-import { useAccount } from 'wagmi'
 
 import { ConnectButton } from '../ConnectButton'
 import { ChainMenu } from './ChainMenu'
@@ -15,7 +15,7 @@ interface NavMenuProps {
 export const NavMenu = ({ hideChainMenu = false }: NavMenuProps) => {
   const [activeDropdown, setActiveDropdown] = React.useState<MenuType>()
 
-  const { address } = useAccount()
+  const { address } = useAuthStore()
 
   const onOpenMenu = React.useCallback(
     (open: boolean, menuType: MenuType) => {

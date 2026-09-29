@@ -1,9 +1,11 @@
+import type { TransactionBundleMetadata } from './transaction'
 import { TransactionType } from './transaction'
 
 export type ProposalTransactionBundle = {
   type: TransactionType
   summary?: string
   callCount: number
+  metadata?: TransactionBundleMetadata
 }
 
 export type ProposalDescriptionMetadataV1 = {

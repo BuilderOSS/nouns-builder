@@ -1,0 +1,488 @@
+import debug from 'debug'
+import { EventEmitter } from 'events'
+import type { PublicClient } from 'viem'
+
+import type { SafeTransactionHandler } from '../safe/handler'
+import { getSafeTransactionHandler } from '../safe/handler'
+import type {
+  CallParams,
+  EIP1193Provider,
+  SafeInfo,
+  SendTransactionParams,
+} from './types'
+
+const debugSafe = debug('app:safe')
+
+/**
+ * Custom EIP-1193 provider that presents a Safe wallet as the connected account
+ * while delegating signing operations to the wallet that owns the Safe.
+ *
+ * This provider enables seamless integration of Safe multi-sig wallets with wagmi/viem
+ * by implementing the standard EIP-1193 provider interface. It intelligently routes
+ * different types of requests:
+ *
+ * - **Account/Chain info**: Returns Safe address and chain
+ * - **Signing operations** (personal_sign, eth_signTypedData): Delegates to the owner wallet for SIWE/authentication
+ * - **Transactions** (eth_sendTransaction): Routes through Safe transaction handler for multi-sig
+ * - **Read operations** (eth_call, getBalance, etc.): Uses public client for efficiency
+ *
+ * Based on @safe-global/safe-apps-provider but designed to work outside Safe Apps iframe context,
+ * allowing Safe wallets to be used as a standard wagmi connector.
+ *
+ * @example
+ * ```typescript
+ * const safeProvider = new SafeOwnerProvider(
+ *   {
+ *     safeAddress: '0x123...',
+ *     chainId: 1,
+ *     threshold: 2,
+ *     owners: ['0xabc...', '0xdef...'],
+ *   },
+ *   ownerProvider, // From an owner wallet (EOA or smart contract wallet)
+ *   publicClient  // Viem public client for reads
+ * )
+ *
+ * // Use with wagmi
+ * const config = createConfig({
+ *   // ...
+ *   connectors: [injected({ target: safeProvider })],
+ * })
+ *
+ * // Clean up when done
+ * safeProvider.destroy()
+ * ```
+ */
+export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
+  private readonly safe: SafeInfo
+  private readonly ownerProvider: EIP1193Provider
+  private readonly publicClient: PublicClient
+  private transactionHandler?: SafeTransactionHandler
+  private eventCleanup?: () => void
+
+  constructor(
+    safe: SafeInfo,
+    ownerProvider: EIP1193Provider,
+    publicClient: PublicClient
+  ) {
+    super()
+
+    // Validate that we have the owner address for signing operations
+    if (!safe.ownerAddress) {
+      debugSafe(
+        '[SafeOwnerProvider] WARNING: Created without cached ownerAddress. ' +
+          'Signature requests will fall back to eth_accounts which may fail for some providers like WalletConnect.'
+      )
+    }
+
+    this.safe = safe
+    this.ownerProvider = ownerProvider
+    this.publicClient = publicClient
+
+    // Forward events from EOA provider
+    this.setupEventForwarding()
+  }
+
+  /**
+   * Cleanup event listeners to prevent memory leaks.
+   * Call this when the provider is no longer needed.
+   */
+  destroy(): void {
+    this.eventCleanup?.()
+    this.removeAllListeners()
+  }
+
+  /**
+   * Set a custom transaction handler for this provider instance
+   * Useful for testing or special cases. Falls back to global handler if not set.
+   */
+  setTransactionHandler(handler: SafeTransactionHandler): void {
+    this.transactionHandler = handler
+  }
+
+  private setupEventForwarding(): void {
+    // Forward certain events from the owner provider, but modify accounts.
+    const originalOn = this.ownerProvider.on?.bind(this.ownerProvider)
+    const originalOff = this.ownerProvider.removeListener?.bind(this.ownerProvider)
+
+    // Track event handlers for cleanup
+    const accountsHandler = () => {
+      // Any backing owner account change invalidates the Safe session.
+      this.emit('disconnect')
+    }
+
+    const chainHandler = () => {
+      // Safes are chain-specific. Any backing owner chain change invalidates the session.
+      this.emit('disconnect')
+    }
+
+    const disconnectHandler = () => {
+      this.emit('disconnect')
+    }
+
+    // Listen to owner provider events
+    if (originalOn) {
+      originalOn('accountsChanged', accountsHandler)
+      originalOn('chainChanged', chainHandler)
+      originalOn('disconnect', disconnectHandler)
+
+      // Setup cleanup function
+      this.eventCleanup = () => {
+        if (originalOff) {
+          originalOff('accountsChanged', accountsHandler)
+          originalOff('chainChanged', chainHandler)
+          originalOff('disconnect', disconnectHandler)
+        }
+      }
+    }
+  }
+
+  get chainId(): number {
+    return this.safe.chainId
+  }
+
+  async request(request: {
+    method: string
+    params?: unknown[] | Record<string, unknown>
+  }): Promise<unknown> {
+    const { method, params = [] } = request
+    const paramsArray = Array.isArray(params) ? params : []
+
+    switch (method) {
+      // Account management - return Safe address
+      case 'eth_accounts':
+      case 'eth_requestAccounts':
+        return [this.safe.safeAddress]
+
+      // Chain info - return Safe's chain
+      case 'eth_chainId':
+        return this.numberToHex(this.safe.chainId)
+
+      case 'net_version':
+        return String(this.safe.chainId)
+
+      // Signing methods - delegate to EOA for SIWE authentication
+      case 'personal_sign':
+      case 'eth_sign':
+      case 'eth_signTypedData':
+      case 'eth_signTypedData_v3':
+      case 'eth_signTypedData_v4': {
+        // Delegate signing to the owner provider.
+        // Replace the presented Safe address with the owner wallet address in params.
+
+        // Use cached owner address if available (prevents eth_accounts call which can fail for WalletConnect)
+        let ownerAddress = this.safe.ownerAddress
+
+        // Fallback: try to get accounts from owner provider if not cached
+        if (!ownerAddress) {
+          debugSafe(
+            '[SafeOwnerProvider] No cached ownerAddress, falling back to eth_accounts call'
+          )
+          try {
+            const ownerAccounts = (await this.ownerProvider.request({
+              method: 'eth_accounts',
+            })) as string[]
+
+            if (ownerAccounts && ownerAccounts.length > 0) {
+              ownerAddress = ownerAccounts[0]
+            }
+          } catch (error) {
+            debugSafe(
+              '[SafeOwnerProvider] Failed to get accounts from owner provider:',
+              error
+            )
+          }
+        }
+
+        if (!ownerAddress) {
+          const errorMsg =
+            'Cannot sign with Safe: owner wallet address is not available.\n\n' +
+            'This usually happens when:\n' +
+            '1. The owner wallet (WalletConnect/MetaMask) was disconnected\n' +
+            '2. The wallet connection was interrupted\n' +
+            '3. The Safe owner changed\n\n' +
+            'Solution: Disconnect the Safe and reconnect with your owner wallet.'
+          debugSafe('[SafeOwnerProvider] ERROR: Unable to resolve owner address')
+          debugSafe('[SafeOwnerProvider] Full error message:', errorMsg)
+          throw new Error(errorMsg)
+        }
+
+        debugSafe(
+          `[SafeOwnerProvider] Delegating signature request (${method}) to owner wallet at ${ownerAddress}`
+        )
+
+        // Replace Safe address with owner address in params.
+        // For personal_sign: [message, address]
+        // For eth_signTypedData_v4: [address, typedData]
+        const modifiedParams = paramsArray.map((param) => {
+          // If param is the Safe address, replace with the owner address.
+          if (
+            typeof param === 'string' &&
+            param.toLowerCase() === this.safe.safeAddress.toLowerCase()
+          ) {
+            return ownerAddress
+          }
+          return param
+        })
+
+        // Try the request directly first
+        try {
+          return await this.ownerProvider.request({ method, params: modifiedParams })
+        } catch (error) {
+          // If it fails because provider needs connect(), try connecting first
+          const errorAny = error as any
+          const errorMsg = String(
+            errorAny?.message ||
+              errorAny?.details ||
+              errorAny?.error?.message ||
+              errorAny?.reason ||
+              ''
+          )
+
+          debugSafe(`[SafeOwnerProvider] Signature request failed, checking error:`, {
+            message: errorMsg,
+            errorKeys: Object.keys(errorAny || {}),
+          })
+
+          if (errorMsg.includes('Please call connect()')) {
+            debugSafe(
+              `[SafeOwnerProvider] Provider needs connect(), calling connect() and retrying...`
+            )
+
+            // Call connect() to initialize the provider
+            const providerAny = this.ownerProvider as any
+            if (providerAny.connect) {
+              try {
+                await providerAny.connect()
+              } catch (connectError) {
+                debugSafe(`[SafeOwnerProvider] connect() failed:`, connectError)
+              }
+            }
+
+            // Retry the request
+            debugSafe(`[SafeOwnerProvider] Retrying signature request after connect()`)
+            return await this.ownerProvider.request({ method, params: modifiedParams })
+          }
+
+          // Re-throw other errors
+          throw error
+        }
+      }
+
+      // Transaction methods - handle Safe transactions
+      case 'eth_sendTransaction': {
+        // Validate transaction parameters before type assertion
+        if (!paramsArray || !paramsArray[0] || typeof paramsArray[0] !== 'object') {
+          throw new Error('eth_sendTransaction requires transaction parameters')
+        }
+
+        const txParams = paramsArray[0] as SendTransactionParams & {
+          safeTransactions?: SendTransactionParams[]
+        }
+
+        // Validate required transaction fields
+        if (!txParams.to && !txParams.safeTransactions?.length) {
+          throw new Error('Transaction must have a "to" address')
+        }
+
+        debugSafe('✓ eth_sendTransaction called:', {
+          to: txParams.to,
+          value: txParams.value,
+          safeAddress: this.safe.safeAddress,
+          threshold: this.safe.threshold,
+        })
+
+        // Determine mode based on threshold
+        const mode = this.safe.threshold === 1 ? 'execute' : 'propose'
+        debugSafe(` Threshold is ${this.safe.threshold}, mode: ${mode}`)
+
+        // Use handler for both 1/N and multi-sig to show consistent modal UX
+        const handler = this.transactionHandler ?? getSafeTransactionHandler()
+        if (!handler) {
+          debugSafe('ERROR: No handler registered!')
+          throw new Error(
+            'Safe transaction handler not initialized. ' +
+              'Please ensure SafeTransactionHandler is mounted in your app.'
+          )
+        }
+
+        debugSafe(' Handler found, calling it...')
+        // Handler will show modal and return txHash or safeTxHash
+        const result = await handler({
+          safeInfo: this.safe,
+          transaction: txParams,
+          ...(txParams.safeTransactions
+            ? { transactions: txParams.safeTransactions }
+            : {}),
+          eoaProvider: this.ownerProvider,
+          mode,
+        })
+
+        debugSafe(' Handler returned result:', result)
+        // Return appropriate hash based on mode
+        return result.mode === 'execute' ? result.txHash! : result.safeTxHash!
+      }
+
+      case 'eth_sendRawTransaction':
+        throw new Error('Raw transactions are not supported for Safe wallets')
+
+      // Read operations - use publicClient
+      case 'eth_call': {
+        const callParams = paramsArray[0] as CallParams
+        const blockTag = (paramsArray[1] as string) || 'latest'
+
+        const result = await this.publicClient.call({
+          to: callParams.to as `0x${string}`,
+          data: callParams.data as `0x${string}` | undefined,
+          // Note: viem's call doesn't use 'from', it uses account context
+          ...(callParams.gas && { gas: BigInt(callParams.gas) }),
+          ...(callParams.gasPrice && { gasPrice: BigInt(callParams.gasPrice) }),
+          ...(callParams.value && { value: BigInt(callParams.value) }),
+          blockTag: blockTag as 'latest' | 'earliest' | 'pending',
+        })
+
+        return result.data
+      }
+
+      case 'eth_getBalance': {
+        const address = paramsArray[0] as `0x${string}`
+        const blockTag = (paramsArray[1] as string) || 'latest'
+
+        const balance = await this.publicClient.getBalance({
+          address,
+          blockTag: blockTag as 'latest' | 'earliest' | 'pending',
+        })
+
+        return this.numberToHex(balance)
+      }
+
+      case 'eth_getCode': {
+        const address = paramsArray[0] as `0x${string}`
+        const blockTag = (paramsArray[1] as string) || 'latest'
+
+        return this.publicClient.getBytecode({
+          address,
+          blockTag: blockTag as 'latest' | 'earliest' | 'pending',
+        })
+      }
+
+      case 'eth_getStorageAt': {
+        const address = paramsArray[0] as `0x${string}`
+        const position = paramsArray[1] as `0x${string}`
+        const blockTag = (paramsArray[2] as string) || 'latest'
+
+        return this.publicClient.getStorageAt({
+          address,
+          slot: position,
+          blockTag: blockTag as 'latest' | 'earliest' | 'pending',
+        })
+      }
+
+      case 'eth_getTransactionCount': {
+        const address = paramsArray[0] as `0x${string}`
+        const blockTag = (paramsArray[1] as string) || 'latest'
+
+        const count = await this.publicClient.getTransactionCount({
+          address,
+          blockTag: blockTag as 'latest' | 'earliest' | 'pending',
+        })
+
+        return this.numberToHex(count)
+      }
+
+      case 'eth_getBlockByNumber': {
+        const blockNumber = paramsArray[0] as string
+        const includeTransactions = paramsArray[1] as boolean
+
+        return this.publicClient.getBlock({
+          blockNumber: blockNumber === 'latest' ? undefined : BigInt(blockNumber),
+          includeTransactions,
+        })
+      }
+
+      case 'eth_getBlockByHash': {
+        const blockHash = paramsArray[0] as `0x${string}`
+        const includeTransactions = paramsArray[1] as boolean
+
+        return this.publicClient.getBlock({
+          blockHash,
+          includeTransactions,
+        })
+      }
+
+      case 'eth_getTransactionByHash': {
+        const hash = paramsArray[0] as `0x${string}`
+        return this.publicClient.getTransaction({ hash })
+      }
+
+      case 'eth_getTransactionReceipt': {
+        const hash = paramsArray[0] as `0x${string}`
+        return this.publicClient.getTransactionReceipt({ hash })
+      }
+
+      case 'eth_estimateGas': {
+        const tx = paramsArray[0] as SendTransactionParams
+
+        // Build base params
+        const baseParams: {
+          to: `0x${string}`
+          data?: `0x${string}`
+          value?: bigint
+          nonce?: number
+        } = {
+          to: tx.to as `0x${string}`,
+          ...(tx.data && { data: tx.data as `0x${string}` }),
+          ...(tx.value && { value: BigInt(tx.value) }),
+          ...(tx.nonce && { nonce: Number(tx.nonce) }),
+        }
+
+        // Add gas params (either legacy or EIP-1559, not both)
+        let gasEstimate: bigint
+        if (tx.maxFeePerGas || tx.maxPriorityFeePerGas) {
+          // EIP-1559 transaction
+          gasEstimate = await this.publicClient.estimateGas({
+            ...baseParams,
+            ...(tx.maxFeePerGas && { maxFeePerGas: BigInt(tx.maxFeePerGas) }),
+            ...(tx.maxPriorityFeePerGas && {
+              maxPriorityFeePerGas: BigInt(tx.maxPriorityFeePerGas),
+            }),
+          })
+        } else {
+          // Legacy transaction
+          gasEstimate = await this.publicClient.estimateGas({
+            ...baseParams,
+            ...(tx.gasPrice && { gasPrice: BigInt(tx.gasPrice) }),
+          })
+        }
+
+        return this.numberToHex(gasEstimate)
+      }
+
+      case 'eth_gasPrice': {
+        const gasPrice = await this.publicClient.getGasPrice()
+        return this.numberToHex(gasPrice)
+      }
+
+      case 'eth_blockNumber': {
+        const blockNumber = await this.publicClient.getBlockNumber()
+        return this.numberToHex(blockNumber)
+      }
+
+      // Wallet permissions (EIP-2255)
+      case 'wallet_getPermissions':
+      case 'wallet_requestPermissions':
+        // For now, return empty permissions
+        return []
+
+      // Unsupported methods
+      default:
+        throw new Error(`Method ${method} is not supported by SafeOwnerProvider`)
+    }
+  }
+
+  /**
+   * Convert number or bigint to hex string
+   */
+  private numberToHex(value: number | bigint): string {
+    return `0x${value.toString(16)}`
+  }
+}

@@ -21,6 +21,7 @@ export default defineConfig({
     '@buildeross/proposal-ui',
     '@buildeross/sdk',
     '@buildeross/stores',
+    '@buildeross/swap',
     '@buildeross/types',
     '@buildeross/ui',
     '@buildeross/utils',

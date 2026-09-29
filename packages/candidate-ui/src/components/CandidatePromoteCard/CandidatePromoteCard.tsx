@@ -1,12 +1,12 @@
 import { useVotes } from '@buildeross/hooks'
 import { governorAbi } from '@buildeross/sdk/contract'
 import { getCandidateSponsorSignatures } from '@buildeross/sdk/subgraph'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { Box, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
 import { type Hex } from 'viem'
-import { useAccount, useReadContract } from 'wagmi'
+import { useReadContract } from 'wagmi'
 
 import { filterValidSignatures } from '../../utils/candidateProposal'
 import { CandidatePromoteButton, type ProposerSignature } from '../CandidatePromoteButton'
@@ -37,11 +37,12 @@ export const CandidatePromoteCard: React.FC<CandidatePromoteCardProps> = ({
 }) => {
   const { chain } = useChainStore()
   const { addresses } = useDaoStore()
-  const { address } = useAccount()
+  const { address, isAuthenticated } = useAuthStore()
 
   const isCreator = React.useMemo(
-    () => !!address && address.toLowerCase() === proposer.toLowerCase(),
-    [address, proposer]
+    () =>
+      !!address && isAuthenticated && address.toLowerCase() === proposer.toLowerCase(),
+    [address, isAuthenticated, proposer]
   )
 
   // Fetch sponsor signatures

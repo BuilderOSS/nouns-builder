@@ -10,6 +10,7 @@ import {
 import { ProposalCard } from '@buildeross/proposal-ui'
 import { getProposals, ProposalsResponse } from '@buildeross/sdk/subgraph'
 import {
+  useAuthStore,
   useCandidateStore,
   useChainStore,
   useDaoStore,
@@ -25,7 +26,6 @@ import { walletSnippet } from '@buildeross/utils/helpers'
 import { Box, Flex, Text } from '@buildeross/zord'
 import React from 'react'
 import useSWR from 'swr'
-import { useAccount } from 'wagmi'
 
 import { activitySection } from '../../styles/Section.css'
 import { Upgrade } from '../Upgrade'
@@ -53,7 +53,7 @@ export const Activity: React.FC<ActivityProps> = ({
 
   const { startProposalDraft } = useProposalStore()
   const { startCandidateDraft } = useCandidateStore()
-  const { address } = useAccount()
+  const { address, isAuthenticated } = useAuthStore()
   const { query } = useQueryParams()
   const page: number = query.page ? Number(query.page) : 1
 
@@ -149,16 +149,24 @@ export const Activity: React.FC<ActivityProps> = ({
             align={'center'}
             display={{ '@initial': 'none', '@768': 'flex' }}
           >
-            {address && !isDelegating && !isOwner && supportsCandidates && (
-              <Flex mr={'x4'} color={'tertiary'}>
-                You have no votes. Create a candidate to gather support.
-              </Flex>
-            )}
-            {address && !isDelegating && !isOwner && !supportsCandidates && (
-              <Flex mr={'x4'} color={'tertiary'}>
-                You have no votes.
-              </Flex>
-            )}
+            {address &&
+              isAuthenticated &&
+              !isDelegating &&
+              !isOwner &&
+              supportsCandidates && (
+                <Flex mr={'x4'} color={'tertiary'}>
+                  You have no votes. Create a candidate to gather support.
+                </Flex>
+              )}
+            {address &&
+              isAuthenticated &&
+              !isDelegating &&
+              !isOwner &&
+              !supportsCandidates && (
+                <Flex mr={'x4'} color={'tertiary'}>
+                  You have no votes.
+                </Flex>
+              )}
             {isDelegating && (
               <Flex mr={'x4'} color={'tertiary'}>
                 Your votes are delegated.
@@ -192,20 +200,20 @@ export const Activity: React.FC<ActivityProps> = ({
               className={createProposalBtn}
               chainId={chain.id}
               handleClick={
-                address && !hasThreshold && supportsCandidates
+                address && isAuthenticated && !hasThreshold && supportsCandidates
                   ? handleCandidateCreation
                   : handleProposalCreation
               }
               disabled={
                 isGovernanceDelayed
                   ? true
-                  : address
+                  : address && isAuthenticated
                     ? !hasThreshold && !supportsCandidates
                     : false
               }
               color={'tertiary'}
             >
-              {address && !hasThreshold && supportsCandidates
+              {address && isAuthenticated && !hasThreshold && supportsCandidates
                 ? 'Create candidate'
                 : 'Create proposal'}
             </ContractButton>
@@ -232,20 +240,20 @@ export const Activity: React.FC<ActivityProps> = ({
               chainId={chain.id}
               className={createProposalBtn}
               handleClick={
-                address && !hasThreshold && supportsCandidates
+                address && isAuthenticated && !hasThreshold && supportsCandidates
                   ? handleCandidateCreation
                   : handleProposalCreation
               }
               disabled={
                 isGovernanceDelayed
                   ? true
-                  : address
+                  : address && isAuthenticated
                     ? !hasThreshold && !supportsCandidates
                     : false
               }
               color={'tertiary'}
             >
-              {address && !hasThreshold && supportsCandidates
+              {address && isAuthenticated && !hasThreshold && supportsCandidates
                 ? 'Create candidate'
                 : 'Create'}
             </ContractButton>

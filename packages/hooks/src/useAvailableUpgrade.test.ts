@@ -1,7 +1,7 @@
 import { CHAIN_ID, DaoContractAddresses } from '@buildeross/types'
 import { renderHook, waitFor } from '@testing-library/react'
 import { expect, vi } from 'vitest'
-import { useReadContracts } from 'wagmi'
+import { usePublicClient, useReadContracts } from 'wagmi'
 
 import { useAvailableUpgrade } from './useAvailableUpgrade'
 
@@ -10,12 +10,34 @@ vi.mock('wagmi', async () => {
   return {
     ...mod,
     useReadContracts: vi.fn(),
+    usePublicClient: vi.fn(),
   }
 })
 
 vi.mock('@buildeross/sdk/subgraph', () => ({
   getProposals: vi.fn(() => Promise.resolve({ proposals: [] })),
 }))
+
+// Storage slot values for ERC1967 proxy implementations
+// The values are padded to 32 bytes, with the address in the last 20 bytes
+const storagePlot1 = '0x0000000000000000000000000000000000000000000000000000000000000001'
+const storagePlot2 = '0x0000000000000000000000000000000000000000000000000000000000000002'
+const storagePlot3 = '0x0000000000000000000000000000000000000000000000000000000000000003'
+const storagePlot4 = '0x0000000000000000000000000000000000000000000000000000000000000004'
+const storagePlot5 = '0x0000000000000000000000000000000000000000000000000000000000000005'
+
+const createPublicClient = (registrations = [true, true, true, true, true]) => ({
+  getStorageAt: vi
+    .fn()
+    .mockResolvedValueOnce(storagePlot1)
+    .mockResolvedValueOnce(storagePlot2)
+    .mockResolvedValueOnce(storagePlot3)
+    .mockResolvedValueOnce(storagePlot4)
+    .mockResolvedValueOnce(storagePlot5),
+  multicall: vi.fn().mockResolvedValue(registrations.map((result) => ({ result }))),
+})
+
+vi.mocked(usePublicClient).mockReturnValue(createPublicClient() as any)
 
 const chainId = CHAIN_ID.FOUNDRY
 
@@ -140,6 +162,9 @@ describe('Use available upgrade hook', () => {
   })
 
   it('should determine no upgrades given all modules are up to date', async () => {
+    // Mock verification to return all upgrades as registered
+    vi.mocked(usePublicClient).mockReturnValue(createPublicClient() as any)
+
     vi.mocked(useReadContracts).mockReturnValue({
       data: [
         false,
@@ -235,8 +260,55 @@ describe('Use available upgrade hook', () => {
     })
   })
 
+  it('does not offer an empty proposal when required upgrades are not registered', async () => {
+    vi.mocked(usePublicClient).mockReturnValue(
+      createPublicClient([true, true, false, true, true]) as any
+    )
+
+    vi.mocked(useReadContracts).mockReturnValue({
+      data: [
+        false,
+        '1.1.0',
+        {
+          governor: '1.1.0',
+          treasury: '1.1.0',
+          metadata: '1.1.0',
+          auction: '1.1.0',
+          token: '1.1.0',
+        },
+        {
+          governor: '1.1.0',
+          treasury: '1.1.0',
+          metadata: '1.1.0',
+          auction: '1.1.0',
+          token: '1.0.0',
+        },
+        '0x0000000000000000000000000000000000000006',
+        '0x9eefef0891b1895af967fe48c5d7d96e984b96a3',
+        '0x0b6d2473f54de3f1d80b27c92b22d13050da289a',
+        '0x2661fe1a882abfd28ae0c2769a90f327850397c6',
+        '0x26f494af990123154e7cc067da7a311b07d54ae1',
+      ],
+      isError: false,
+      isLoading: false,
+    } as any)
+
+    const { result } = renderHook(() => useAvailableUpgrade({ chainId, addresses }))
+
+    await waitFor(() => expect(result.current.latest).toBe('1.1.0'))
+
+    expect(result.current).toMatchObject({
+      shouldUpgrade: false,
+      transaction: undefined,
+      totalContractUpgrades: undefined,
+    })
+  })
+
   //TODO: Re-visit with MSW for graphql requests
   it('should determine the available upgrades given some modules out of date', async () => {
+    // Mock verification to return all upgrades as registered
+    vi.mocked(usePublicClient).mockReturnValue(createPublicClient() as any)
+
     vi.mocked(useReadContracts).mockReturnValue({
       data: [
         false,
@@ -310,6 +382,9 @@ describe('Use available upgrade hook', () => {
   })
 
   it('should determine the available upgrades given some modules out of date and auction is currently paused', async () => {
+    // Mock verification to return all upgrades as registered
+    vi.mocked(usePublicClient).mockReturnValue(createPublicClient() as any)
+
     vi.mocked(useReadContracts).mockReturnValue({
       data: [
         true,
@@ -371,6 +446,9 @@ describe('Use available upgrade hook', () => {
   })
 
   it('should determine available upgrades given all modules out of date', async () => {
+    // Mock verification to return all upgrades as registered
+    vi.mocked(usePublicClient).mockReturnValue(createPublicClient() as any)
+
     vi.mocked(useReadContracts).mockReturnValue({
       data: [
         false,
@@ -458,6 +536,9 @@ describe('Use available upgrade hook', () => {
   })
 
   it('should determine no upgrades required given provided version is met', async () => {
+    // Mock verification to return all upgrades as registered
+    vi.mocked(usePublicClient).mockReturnValue(createPublicClient() as any)
+
     vi.mocked(useReadContracts).mockReturnValue({
       data: [
         false,
@@ -511,6 +592,9 @@ describe('Use available upgrade hook', () => {
   })
 
   it('should determine upgrades to latest version given contract does not meet the provided version', async () => {
+    // Mock verification to return all upgrades as registered
+    vi.mocked(usePublicClient).mockReturnValue(createPublicClient() as any)
+
     vi.mocked(useReadContracts).mockReturnValue({
       data: [
         false,
@@ -600,6 +684,9 @@ describe('Use available upgrade hook', () => {
   })
 
   it('shows only latest version when multiple upgrades are available', async () => {
+    // Mock verification to return all upgrades as registered
+    vi.mocked(usePublicClient).mockReturnValue(createPublicClient() as any)
+
     vi.mocked(useReadContracts).mockReturnValue({
       data: [
         false,

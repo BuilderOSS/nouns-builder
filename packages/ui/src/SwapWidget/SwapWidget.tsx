@@ -54,7 +54,8 @@ export const SwapWidget = ({
   const [pendingTxHash, setPendingTxHash] = useState<`0x${string}` | null>(null)
   const [isWaitingForConfirmation, setIsWaitingForConfirmation] = useState(false)
 
-  const { address: userAddress } = useAccount()
+  const { address: userAddress, connector } = useAccount()
+  const isSafeMode = connector?.id === 'safeOwner'
   const { data: walletClient } = useWalletClient()
   const publicClient = usePublicClient({ chainId })
 
@@ -242,9 +243,11 @@ export const SwapWidget = ({
   } = useExecuteSwap({
     walletClient: walletClient ?? undefined,
     publicClient: publicClient ?? undefined,
+    isSafeMode,
   })
 
   const handleSwap = async () => {
+    if (isExecuting || isWaitingForConfirmation) return
     if (
       !path ||
       !walletClient?.account ||
@@ -435,11 +438,13 @@ export const SwapWidget = ({
 
   const errorMessage = getErrorMessage()
   const canSwap =
+    !isSafeMode &&
     !!path &&
     !!amountInBigInt &&
     amountInBigInt > 0n &&
     !!walletClient?.account &&
     !isLoading &&
+    !isExecuting &&
     !exceedsBalance &&
     !exceedsPoolLimit
 
@@ -520,6 +525,17 @@ export const SwapWidget = ({
   }
 
   const buttonText = getButtonText()
+
+  if (isSafeMode) {
+    return (
+      <Box p="x4" backgroundColor="background2" borderRadius="curved">
+        <Text variant="paragraph-sm" color="text3">
+          Swaps are not available while connected with a Safe. Connect an owner wallet to
+          swap.
+        </Text>
+      </Box>
+    )
+  }
 
   return (
     <Box>

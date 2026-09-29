@@ -1,13 +1,10 @@
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { CHAIN_ID } from '@buildeross/types'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Address } from 'viem'
 import { isAddress, isAddressEqual, parseEther, zeroAddress } from 'viem'
-import {
-  useAccount,
-  useSimulateContract,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from 'wagmi'
+import { useAccount, useConfig, useSimulateContract } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 // Zora protocol reward fee per token (0.000777 ETH)
 export const ZORA_PROTOCOL_REWARD = 0.000777
@@ -99,14 +96,11 @@ export function useZoraMint({
     chainId: chainId,
   })
 
-  const { writeContractAsync, data: pendingHash, reset: resetWrite } = useWriteContract()
+  const config = useConfig()
+  const [pendingHash, setPendingHash] = useState<`0x${string}`>()
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: pendingHash,
-    query: {
-      enabled: Boolean(pendingHash),
-    },
-  })
+  const [isConfirming, setIsConfirming] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -129,7 +123,7 @@ export function useZoraMint({
       // Reset to idle after a delay
       const timer = setTimeout(() => {
         setMintStatus('idle')
-        resetWrite()
+        setPendingHash(undefined)
       }, 3000)
 
       return () => {
@@ -137,7 +131,7 @@ export function useZoraMint({
       }
     }
     return () => {}
-  }, [isSuccess, pendingHash, onSuccess, resetWrite])
+  }, [isSuccess, pendingHash, onSuccess])
 
   const mint = useCallback(
     async (quantity: number = 1, comment?: string): Promise<`0x${string}` | null> => {
@@ -167,6 +161,8 @@ export function useZoraMint({
 
       try {
         setMintError(null)
+        setIsSuccess(false)
+        setIsConfirming(true)
 
         // Phase 1: Waiting for wallet confirmation
         setMintStatus('confirming-wallet')
@@ -177,8 +173,8 @@ export function useZoraMint({
           parseEther(String(ZORA_PROTOCOL_REWARD)) * BigInt(quantity)
         const totalPriceWei = salePriceWei + protocolRewardWei
 
-        // Use mintWithRewards
-        const txHash = await writeContractAsync({
+        // Simulate the transaction to get the properly typed request
+        const { request } = await simulateContract(config, {
           abi: zoraNftMintAbi,
           address: dropAddress,
           functionName: 'mintWithRewards',
@@ -189,14 +185,30 @@ export function useZoraMint({
             (mintReferral || address) as Address, // mintReferral
           ],
           value: totalPriceWei,
-          chainId: chainId,
+          chainId,
         })
+
+        // Execute the transaction
+        const result = await executeAppTransaction({
+          config,
+          chainId,
+          request,
+        })
+        const txHash = result.hash
+        setPendingHash(txHash)
+        setIsConfirming(false)
+        if (result.kind === 'safe-proposed') {
+          setMintStatus('pending-tx')
+          return txHash
+        }
+        setIsSuccess(result.receipt.status === 'success')
 
         // Phase 2: Transaction submitted, waiting for confirmation
         setMintStatus('pending-tx')
 
         return txHash
       } catch (err: unknown) {
+        setIsConfirming(false)
         setMintStatus('error')
         const error = err instanceof Error ? err : new Error('Mint failed')
         const message = error.message
@@ -250,16 +262,7 @@ export function useZoraMint({
         return null
       }
     },
-    [
-      chainId,
-      dropAddress,
-      address,
-      isReady,
-      priceEth,
-      mintReferral,
-      onError,
-      writeContractAsync,
-    ]
+    [chainId, dropAddress, address, isReady, priceEth, mintReferral, onError, config]
   )
 
   const isPending =

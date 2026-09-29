@@ -15,7 +15,11 @@ export type ContractButtonProps = Omit<ButtonProps, 'onClick' | 'type'> & {
   onConnectWallet?: () => void
 }
 
-type ErrorType = 'not_connected' | 'connector_invalid' | 'wrong_chain'
+type ErrorType =
+  | 'not_connected'
+  | 'connector_invalid'
+  | 'wrong_chain'
+  | 'wrong_chain_safe'
 
 type ErrorState = {
   type: ErrorType
@@ -81,6 +85,13 @@ export const ContractButton = React.forwardRef<HTMLButtonElement, ContractButton
         }
       }
       if (userChain?.id !== chainId) {
+        if (connector.id === 'safeOwner') {
+          return {
+            type: 'wrong_chain_safe',
+            message: `Safe wallets cannot switch networks. Connect a Safe on ${chainName} to continue.`,
+          }
+        }
+
         return {
           type: 'wrong_chain',
           message: `Please switch to ${chainName} to continue.`,
@@ -140,6 +151,15 @@ export const ContractButton = React.forwardRef<HTMLButtonElement, ContractButton
         } else if (openConnectModal) {
           openConnectModal()
         }
+      } else if (errorState.type === 'wrong_chain_safe') {
+        setPopupOpen(false)
+        setSwitchError(null)
+
+        if (onConnectWallet) {
+          onConnectWallet()
+        } else if (openConnectModal) {
+          openConnectModal()
+        }
       } else if (errorState.type === 'wrong_chain') {
         switchChain?.(
           { chainId: chainId },
@@ -176,6 +196,8 @@ export const ContractButton = React.forwardRef<HTMLButtonElement, ContractButton
           return 'Connect Wallet'
         case 'connector_invalid':
           return 'Reconnect Wallet'
+        case 'wrong_chain_safe':
+          return 'Connect Safe'
         case 'wrong_chain':
           return `Switch to ${chainName}`
         default:

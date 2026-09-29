@@ -64,7 +64,6 @@ const fetcher = async (
  *
  * @example
  * // Conditionally fetch based on address
- * const { address } = useAccount()
  * const { daos, isLoading } = useDashboardData({
  *   address,
  *   enabled: !!address,

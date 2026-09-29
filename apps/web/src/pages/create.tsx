@@ -10,8 +10,7 @@ import {
   useFormStore,
   VetoForm,
 } from '@buildeross/create-dao-ui'
-import { useIsGnosisSafe } from '@buildeross/hooks/useIsGnosisSafe'
-import { useChainStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { Uploading } from '@buildeross/ui/Uploading'
 import { Box, Flex, Text } from '@buildeross/zord'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -20,16 +19,13 @@ import React from 'react'
 import { Meta } from 'src/components/Meta'
 import { getCreateDaoLayout } from 'src/layouts/CreateDaoLayout'
 import { createWrapperHalf, formWrapper, pageGrid } from 'src/styles/create.css'
-import { useAccount } from 'wagmi'
 
 import { NextPageWithLayout } from './_app'
 
 const CreatePage: NextPageWithLayout = () => {
   const { activeSection, isUploadingToIPFS, ipfsUploadProgress } = useFormStore()
-  const { address } = useAccount()
+  const { address, isSafeMode } = useAuthStore()
   const chain = useChainStore((x) => x.chain)
-
-  const { isGnosisSafe } = useIsGnosisSafe(address, chain.id)
 
   const { push } = useRouter()
 
@@ -124,7 +120,7 @@ const CreatePage: NextPageWithLayout = () => {
                 'linear-gradient(179.98deg, rgba(0, 0, 0, 0.5) -0.98%, rgba(0, 0, 0, 0) 47.4%, rgba(0, 0, 0, 0.6) 99.98%)',
             }}
           />
-          {!!address && !isGnosisSafe && <CreateNavigation sections={sections} />}
+          {!!address && !isSafeMode && <CreateNavigation sections={sections} />}
         </Flex>
         <Flex
           className={createWrapperHalf['right']}
@@ -143,7 +139,7 @@ const CreatePage: NextPageWithLayout = () => {
               </Flex>
             ) : (
               <>
-                {isGnosisSafe ? (
+                {isSafeMode ? (
                   <Flex direction={'column'} mt={'x6'}>
                     <Text mb={'x4'} style={{ fontSize: '24px', fontWeight: 700 }}>
                       DAO Creation Unavailable
@@ -153,7 +149,7 @@ const CreatePage: NextPageWithLayout = () => {
                       Please use a different wallet to create your DAO.
                     </Text>
                     <Text color="text2">
-                      Gnosis Safe doesn’t support the multi-transaction flow required for
+                      Gnosis Safe doesn't support the multi-transaction flow required for
                       DAO creation, which can lead to incomplete setups.
                     </Text>
                   </Flex>

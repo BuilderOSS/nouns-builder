@@ -2,22 +2,25 @@ import { PUBLIC_MANAGER_ADDRESS } from '@buildeross/constants/addresses'
 import { RENDERER_BASE } from '@buildeross/constants/rendererBase'
 import { useManagerVersion } from '@buildeross/hooks'
 import { managerAbi, managerV3Abi } from '@buildeross/sdk/contract'
+import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { CHAIN_ID } from '@buildeross/types'
 import { useState } from 'react'
 import { encodeAbiParameters, parseAbiParameters, zeroAddress } from 'viem'
-import { usePublicClient, useWaitForTransactionReceipt, useWriteContract } from 'wagmi'
+import { useConfig, usePublicClient } from 'wagmi'
+import { simulateContract } from 'wagmi/actions'
 
 import { DAOConfigParams, DeployedContracts } from './useCrossChainMigration'
 
 export const useDeployDAO = (config?: DAOConfigParams, targetChainId?: CHAIN_ID) => {
   const [deployedAddresses, setDeployedAddresses] = useState<DeployedContracts>()
 
-  const { writeContractAsync, data: txHash, isPending } = useWriteContract()
+  const configClient = useConfig()
   const publicClient = usePublicClient({ chainId: targetChainId })
 
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: txHash,
-  })
+  const [txHash, setTxHash] = useState<`0x${string}`>()
+  const [isConfirming, setIsConfirming] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+  const [isSafeProposal, setIsSafeProposal] = useState(false)
 
   // Check if target Manager contract supports v3 features
   const managerAddress = targetChainId ? PUBLIC_MANAGER_ADDRESS[targetChainId] : undefined
@@ -98,7 +101,9 @@ export const useDeployDAO = (config?: DAOConfigParams, targetChainId?: CHAIN_ID)
       : baseGovParams
 
     // Execute deployment with version-appropriate ABI
-    const hash = await writeContractAsync({
+    setIsConfirming(true)
+    setIsSafeProposal(false)
+    const { request } = await simulateContract(configClient, {
       abi: isV3OrHigher ? managerV3Abi : managerAbi,
       address: managerAddress,
       functionName: 'deploy',
@@ -106,7 +111,20 @@ export const useDeployDAO = (config?: DAOConfigParams, targetChainId?: CHAIN_ID)
       chainId: targetChainId,
     })
 
-    return hash
+    try {
+      const result = await executeAppTransaction({
+        config: configClient,
+        chainId: targetChainId,
+        request,
+      })
+      setTxHash(result.hash)
+      setIsSafeProposal(result.kind === 'safe-proposed')
+      setIsSuccess(result.kind === 'mined' && result.receipt.status === 'success')
+
+      return result.hash
+    } finally {
+      setIsConfirming(false)
+    }
   }
 
   const fetchDeployedAddresses = async (tokenAddress: string) => {
@@ -138,8 +156,9 @@ export const useDeployDAO = (config?: DAOConfigParams, targetChainId?: CHAIN_ID)
     fetchDeployedAddresses,
     deployedAddresses,
     txHash,
-    isDeploying: isPending,
+    isDeploying: isConfirming,
     isConfirming,
     isSuccess,
+    isSafeProposal,
   }
 }

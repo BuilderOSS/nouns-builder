@@ -18,8 +18,8 @@ const DAO_TOKEN = '0x3333333333333333333333333333333333333333'
 let mockAddress: AddressType | undefined = USER
 let mockDaos: DashboardDaoWithState[] = []
 
-vi.mock('wagmi', () => ({
-  useAccount: () => ({ address: mockAddress }),
+vi.mock('@buildeross/stores', () => ({
+  useAuthStore: () => ({ address: mockAddress }),
 }))
 
 vi.mock('@buildeross/hooks/useDashboardData', () => ({

@@ -1,4 +1,5 @@
-import { Duration } from '@buildeross/types'
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants'
+import { CHAIN_ID, Duration } from '@buildeross/types'
 import { getAddress, isAddress } from 'viem'
 
 /**
@@ -154,7 +155,7 @@ export const truncateAddress = (addr: string | undefined, chars: number = 5): st
     return addr
   }
 
-  return truncateHex(getAddress(addr), chars)
+  return truncateHex(getAddress(addr) as `0x${string}`, chars)
 }
 
 /**
@@ -318,4 +319,37 @@ export function maxChar(str: string, maxLength: number) {
     return str
   }
   return str.slice(0, maxLength) + '...'
+}
+
+/**
+ * Get the block explorer URL for a transaction hash
+ *
+ * @param chainId - The chain ID
+ * @param txHash - The transaction hash
+ * @returns The block explorer URL for the transaction, or null if no explorer is available
+ */
+export function getBlockExplorerTxUrl(chainId: CHAIN_ID, txHash: string): string | null {
+  const baseUrl = ETHERSCAN_BASE_URL[chainId]
+  if (!baseUrl) {
+    return null
+  }
+  return `${baseUrl}/tx/${txHash}`
+}
+
+/**
+ * Get the block explorer URL for an address
+ *
+ * @param chainId - The chain ID
+ * @param address - The address
+ * @returns The block explorer URL for the address, or null if no explorer is available
+ */
+export function getBlockExplorerAddressUrl(
+  chainId: CHAIN_ID,
+  address: string
+): string | null {
+  const baseUrl = ETHERSCAN_BASE_URL[chainId]
+  if (!baseUrl) {
+    return null
+  }
+  return `${baseUrl}/address/${address}`
 }

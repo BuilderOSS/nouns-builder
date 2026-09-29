@@ -37,9 +37,13 @@ vi.mock('@buildeross/ui/Modal', () => ({
 vi.mock('@buildeross/ui/ContractButton', () => ({
   ContractButton: ({ children }: React.PropsWithChildren) => <button>{children}</button>,
 }))
+vi.mock('@buildeross/stores', () => ({
+  useAuthStore: () => ({
+    address: '0xUser000000000000000000000000000000000000',
+  }),
+}))
 vi.mock('wagmi', async (importOriginal) => ({
   ...(await importOriginal<typeof import('wagmi')>()),
-  useAccount: () => ({ address: '0xUser000000000000000000000000000000000000' }),
   useConfig: () => ({}),
 }))
 vi.mock('wagmi/actions', () => ({

@@ -4,13 +4,12 @@ import {
   PUBLIC_MANAGER_ADDRESS,
 } from '@buildeross/constants/addresses'
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
-import { useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
 import { CHAIN_ID } from '@buildeross/types'
 import { isTestnetChain } from '@buildeross/utils'
 import { Box, Button, Flex, Heading, Icon, Label, Stack, Text } from '@buildeross/zord'
 import { useMemo, useState } from 'react'
 import { zeroAddress } from 'viem'
-import { useAccount } from 'wagmi'
 
 import { useCrossChainMigration } from '../../../hooks/useCrossChainMigration'
 import { useFetchDAOConfigForMigration } from '../../../hooks/useFetchDAOConfigForMigration'
@@ -20,7 +19,7 @@ export const Step1_LoadConfig: React.FC = () => {
   const { chain } = useChainStore()
   const sourceChainId = chain.id
   const { addresses } = useDaoStore()
-  const { address: walletAddress } = useAccount()
+  const { address: walletAddress } = useAuthStore()
   const { setChains, setSourceAddresses, setSourceConfig, goToNextStep } =
     useCrossChainMigration()
 

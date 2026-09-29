@@ -7,6 +7,7 @@ import { AddressType } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getRedisConnection } from 'src/services/redisConnection'
 import { withCors } from 'src/utils/api/cors'
+import { withRateLimit } from 'src/utils/api/rateLimit'
 import { isAddress, keccak256 } from 'viem'
 
 const CACHE_TTL_SECONDS = 300
@@ -331,4 +332,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   }
 }
 
-export default withCors()(handler)
+export default withCors()(
+  withRateLimit({
+    maxRequests: 20,
+    windowSeconds: 60,
+    keyPrefix: 'profile-preview',
+  })(handler)
+)

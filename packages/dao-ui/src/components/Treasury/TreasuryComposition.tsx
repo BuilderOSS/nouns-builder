@@ -1,6 +1,7 @@
 'use client'
 
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants'
+import { ETHERSCAN_BASE_URL } from '@buildeross/constants/etherscan'
 import { SWR_KEYS } from '@buildeross/constants/swrKeys'
 import { useEthUsdPrice } from '@buildeross/hooks'
 import { useEnrichedPinnedAssets } from '@buildeross/hooks/useEnrichedPinnedAssets'
@@ -9,6 +10,7 @@ import { useTokenBalances } from '@buildeross/hooks/useTokenBalances'
 import { daoClankerTokensRequest } from '@buildeross/sdk/subgraph'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import type { AddressType } from '@buildeross/types'
+import { formatUsd } from '@buildeross/utils/numbers'
 import { Box, Button, Flex, Text } from '@buildeross/zord'
 import React, { useMemo, useRef, useState } from 'react'
 import useSWR from 'swr'
@@ -46,7 +48,6 @@ import {
   computeDonutArcs,
   type DonutSlice,
   formatTokenAmount,
-  formatUsd,
   sliceColor,
   tokenUsdValue,
 } from './treasuryComposition.helper'
@@ -361,6 +362,7 @@ export const TreasuryComposition = () => {
               asset={a}
               pct={total > 0 ? a.usd / total : 0}
               showUsd={hasUsd}
+              treasury={treasury}
             />
           ))}
         </Box>
@@ -369,47 +371,70 @@ export const TreasuryComposition = () => {
   )
 }
 
-const AssetRow: React.FC<{ asset: Asset; pct: number; showUsd: boolean }> = ({
-  asset,
-  pct,
-  showUsd,
-}) => (
-  <Box className={row}>
-    {asset.logo ? (
-      <img
-        className={tokenBadge}
-        src={asset.logo}
-        alt={asset.symbol}
-        width={36}
-        height={36}
-      />
-    ) : (
-      <span
-        className={tokenBadge}
-        style={{ background: `${asset.color}22`, color: asset.color }}
-      >
-        {asset.symbol.slice(0, 4)}
-      </span>
-    )}
-    <div>
-      <div className={rowName}>{asset.symbol}</div>
-      <div className={rowSub}>{asset.sub}</div>
-    </div>
-    <div className={rowBalance}>{asset.balanceLabel}</div>
-    {showUsd && (
-      <div className={rowUsdWrap}>
-        <div className={rowUsd}>{formatUsd(asset.usd)}</div>
-        <div className={barTrack}>
-          <div
-            className={barFill}
-            style={{ width: `${pct * 100}%`, background: asset.color }}
-          />
-        </div>
-        <div className={rowPct}>{(pct * 100).toFixed(1)}%</div>
+const AssetRow: React.FC<{
+  asset: Asset
+  pct: number
+  showUsd: boolean
+  treasury: AddressType
+}> = ({ asset, pct, showUsd, treasury }) => {
+  const chain = useChainStore((x) => x.chain)
+  const explorerUrl = ETHERSCAN_BASE_URL[chain.id]
+
+  // Build the appropriate explorer link
+  const linkUrl =
+    asset.address === 'eth'
+      ? `${explorerUrl}/address/${treasury}`
+      : `${explorerUrl}/token/${asset.address}?a=${treasury}`
+
+  return (
+    <Box
+      as={linkUrl ? 'a' : 'div'}
+      className={row}
+      {...(linkUrl
+        ? {
+            href: linkUrl,
+            target: '_blank',
+            rel: 'noreferrer noopener',
+            title: `View ${asset.symbol} on block explorer`,
+          }
+        : {})}
+    >
+      {asset.logo ? (
+        <img
+          className={tokenBadge}
+          src={asset.logo}
+          alt={asset.symbol}
+          width={36}
+          height={36}
+        />
+      ) : (
+        <span
+          className={tokenBadge}
+          style={{ background: `${asset.color}22`, color: asset.color }}
+        >
+          {asset.symbol.slice(0, 4)}
+        </span>
+      )}
+      <div>
+        <div className={rowName}>{asset.symbol}</div>
+        <div className={rowSub}>{asset.sub}</div>
       </div>
-    )}
-  </Box>
-)
+      <div className={rowBalance}>{asset.balanceLabel}</div>
+      {showUsd && (
+        <div className={rowUsdWrap}>
+          <div className={rowUsd}>{formatUsd(asset.usd)}</div>
+          <div className={barTrack}>
+            <div
+              className={barFill}
+              style={{ width: `${pct * 100}%`, background: asset.color }}
+            />
+          </div>
+          <div className={rowPct}>{(pct * 100).toFixed(1)}%</div>
+        </div>
+      )}
+    </Box>
+  )
+}
 
 const Donut: React.FC<{ slices: DonutSlice[]; totalUsd: number }> = ({
   slices,

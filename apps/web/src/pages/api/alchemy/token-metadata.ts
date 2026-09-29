@@ -3,7 +3,7 @@ import { getCachedIsContract } from '@buildeross/utils'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { getCachedTokenMetadatas } from 'src/services/alchemyService'
 import { withCors } from 'src/utils/api/cors'
-import { withRateLimit } from 'src/utils/api/rateLimit'
+import { withTieredRateLimit } from 'src/utils/api/rateLimit'
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { chainId, addresses } = req.query
@@ -56,6 +56,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       })
     }
 
+    // Cache for 1 hour with 15 minute stale-while-revalidate
+    res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=900')
+
     // Data is already sanitized by the service
     return res.status(200).json({
       data: result.data,
@@ -68,7 +71,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 }
 
 export default withCors()(
-  withRateLimit({
+  withTieredRateLimit({
     keyPrefix: 'alchemy:tokenMetadata',
+    anonymousMaxRequests: 5,
+    anonymousWindowSeconds: 60,
+    authenticatedMaxRequests: 60,
+    authenticatedWindowSeconds: 60,
   })(handler)
 )
