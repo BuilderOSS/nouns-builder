@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Icon, Stack, Text } from '@buildeross/zord'
+import { Box, Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 
 import type { WalletInfo } from '../../types/auth'
 import { WalletOption } from '../WalletOption'
@@ -10,6 +10,7 @@ interface WalletListViewProps {
   connectedWallet?: WalletInfo
   onSelectWallet: (walletId: string) => void
   onSelectConnectedWallet?: (walletId: string) => void
+  onDisconnect?: () => void | Promise<void>
   onSelectSafe: () => void
   showSafeOption?: boolean
   title?: string
@@ -21,6 +22,7 @@ export function WalletListView({
   connectedWallet,
   onSelectWallet,
   onSelectConnectedWallet,
+  onDisconnect,
   onSelectSafe,
   showSafeOption = true,
   title = 'Connect Wallet',
@@ -45,13 +47,22 @@ export function WalletListView({
           <Text variant="label-sm" color="text3">
             Connected
           </Text>
-          <WalletOption
-            key={connectedWallet.id}
-            name={connectedWallet.name}
-            icon={connectedWallet.iconUrl || ''}
-            iconBackground="#ffffff"
-            onClick={() => onSelectConnectedWallet?.(connectedWallet.id)}
-          />
+          <Flex align="center" gap="x2">
+            <Box style={{ flex: 1, minWidth: 0 }}>
+              <WalletOption
+                key={connectedWallet.id}
+                name={connectedWallet.name}
+                icon={connectedWallet.iconUrl || ''}
+                iconBackground="#ffffff"
+                onClick={() => onSelectConnectedWallet?.(connectedWallet.id)}
+              />
+            </Box>
+            {onDisconnect && (
+              <Button variant="outline" size="sm" onClick={onDisconnect}>
+                Disconnect
+              </Button>
+            )}
+          </Flex>
         </Stack>
       )}
 

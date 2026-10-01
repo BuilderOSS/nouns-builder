@@ -226,7 +226,10 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
 
         // Try the request directly first
         try {
-          return await this.ownerProvider.request({ method, params: modifiedParams })
+          return await this.ownerProvider.request({
+            method,
+            params: modifiedParams,
+          })
         } catch (error) {
           // If it fails because provider needs connect(), try connecting first
           const errorAny = error as any
@@ -260,7 +263,10 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
 
             // Retry the request
             debugSafe(`[SafeOwnerProvider] Retrying signature request after connect()`)
-            return await this.ownerProvider.request({ method, params: modifiedParams })
+            return await this.ownerProvider.request({
+              method,
+              params: modifiedParams,
+            })
           }
 
           // Re-throw other errors
