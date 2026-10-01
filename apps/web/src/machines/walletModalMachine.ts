@@ -150,6 +150,9 @@ export const walletModalMachine = createMachine(
             target: 'walletConnected',
             actions: 'setConnectedWallet',
           },
+          RETRY: {
+            actions: 'clearError',
+          },
           BACK: 'enteringSafeAddress',
           CLOSE: 'closed',
         },
@@ -434,6 +437,9 @@ export const walletModalMachine = createMachine(
           safeAddress: context.pendingSafeInfo!.safeAddress,
         }),
       }),
+      clearError: assign({
+        error: null,
+      }),
       setSwitchError: assign({
         error: () => ({
           code: 'NETWORK_ERROR',
@@ -501,9 +507,12 @@ export const walletModalMachine = createMachine(
       }),
       validateSafeOwnership: fromPromise<void, { address: Address; safeInfo: SafeInfo }>(
         async ({ input }) => {
-          const isOwner = input.safeInfo.owners.some(
-            (owner) => owner.toLowerCase() === input.address.toLowerCase()
+          const normalizedAddress = input.address.toLowerCase()
+          const normalizedOwners = input.safeInfo.owners.map((owner) =>
+            owner.toLowerCase()
           )
+          const isOwner = normalizedOwners.includes(normalizedAddress)
+
           if (!isOwner) {
             throw new Error('Not a Safe owner')
           }

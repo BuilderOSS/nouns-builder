@@ -2,6 +2,7 @@
 
 import { AnimatedModal } from '@buildeross/ui'
 import { addRecentSafeWallet, clearSafeInfo, getSafeInfo } from '@buildeross/utils'
+import { Stack } from '@buildeross/zord'
 import { getConnectors } from '@wagmi/core'
 import { useMachine } from '@xstate/react'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
@@ -13,6 +14,7 @@ import {
   cacheOwnerProvider,
   clearAllCachedProviders,
 } from '../connectors/safeOwnerConnector'
+import { useAppDisconnect } from '../hooks/useAppDisconnect'
 import { useWalletConnectors } from '../hooks/useWalletConnectors'
 import { walletModalMachine } from '../machines/walletModalMachine'
 import type { WalletInfo } from '../types/auth'
@@ -22,6 +24,7 @@ import { beginSiweAuthFlow, SIWE_NONCE_PATH } from '../utils/siweAuthFlow'
 import { ErrorView } from './wallet/ErrorView'
 import { LoadingView } from './wallet/LoadingView'
 import { SafeAddressView } from './wallet/SafeAddressView'
+import { SafeModeInfo } from './wallet/SafeModeInfo'
 import { SignatureView } from './wallet/SignatureView'
 import { WalletListView } from './wallet/WalletListView'
 
@@ -42,6 +45,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
   const { disconnectAsync } = useDisconnect()
   const { signMessageAsync } = useSignMessage()
   const wagmiConfig = useConfig()
+  const appDisconnect = useAppDisconnect()
 
   // Track if we just authenticated to prevent immediate reopening
   const justAuthenticatedRef = useRef(false)
@@ -351,48 +355,116 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
   }, [state, isOpen])
 
   // Handle wallet selection
-  const handleSelectWallet = async (walletId: string) => {
-    debugWallet('handleSelectWallet called with walletId: %s', walletId)
-    debugWallet(
-      'Available wallets: %O',
-      wallets.map((w) => ({ id: w.id, name: w.name, hasConnector: !!w.connector }))
-    )
+  const handleSelectWallet = useCallback(
+    async (walletId: string) => {
+      debugWallet('handleSelectWallet called with walletId: %s', walletId)
+      debugWallet(
+        'Available wallets: %O',
+        wallets.map((w) => ({ id: w.id, name: w.name, hasConnector: !!w.connector }))
+      )
 
-    const wallet = wallets.find((w) => w.id === walletId)
+      const wallet = wallets.find((w) => w.id === walletId)
 
-    if (!wallet) {
-      debugWallet('ERROR: Wallet not found in list! walletId: %s', walletId)
+      if (!wallet) {
+        debugWallet('ERROR: Wallet not found in list! walletId: %s', walletId)
+        send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
+        return
+      }
+
+      if (!wallet.connector) {
+        debugWallet('ERROR: Wallet connector is null/undefined! wallet: %O', wallet)
+        send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
+        return
+      }
+
+      flowCancelledRef.current = false
+      const attemptId = ++authAttemptRef.current
+      send({ type: 'SELECT_WALLET', walletId })
+
+      try {
+        debugWallet(
+          'Connecting to %s (id: %s, connector: %O)',
+          wallet.name,
+          wallet.id,
+          wallet.connector
+        )
+
+        // Use the connect callback from walletConnectors to ensure diagnostics are triggered
+        const result = await connectAsync({ connector: wallet.connector })
+        if (attemptId !== authAttemptRef.current || flowCancelledRef.current) {
+          return
+        }
+        debugWallet('Connected successfully: %O', result)
+        const connectedAddress = result.accounts?.[0]
+        const connectedConnector = wallet.connector
+
+        if (!connectedAddress) {
+          throw new Error('Wallet connection did not return an address')
+        }
+
+        // If connecting as Safe owner, cache the provider to preserve its session
+        if (
+          state.context.pendingSafeInfo &&
+          typeof connectedConnector.getProvider === 'function'
+        ) {
+          try {
+            debugWallet(
+              'Caching provider for Safe owner wallet: %s',
+              connectedConnector.id
+            )
+            const provider = await connectedConnector.getProvider()
+            if (provider) {
+              cacheOwnerProvider(connectedConnector.id, provider as any)
+              debugWallet('✓ Provider cached successfully')
+            }
+          } catch (err) {
+            debugWallet(
+              'Failed to cache provider (will fall back to getProvider later):',
+              err
+            )
+          }
+        }
+
+        send({
+          type: 'WALLET_CONNECTED',
+          address: connectedAddress,
+          connector: connectedConnector,
+        })
+      } catch (error) {
+        if (attemptId !== authAttemptRef.current || flowCancelledRef.current) {
+          return
+        }
+        debugWallet('Connection error: %O', error)
+        send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
+      }
+    },
+    [connectAsync, send, state, wallets]
+  )
+
+  // Handle selection of already-connected wallet (skip connection, go directly to signing)
+  const handleSelectConnectedWallet = useCallback(async () => {
+    if (!connectedWallet?.connector || !connectedAddress) {
+      debugWallet(
+        'ERROR: No connected wallet or address despite being in connected state'
+      )
       send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
       return
     }
 
-    if (!wallet.connector) {
-      debugWallet('ERROR: Wallet connector is null/undefined! wallet: %O', wallet)
-      send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
-      return
-    }
+    const connectedConnector = connectedWallet.connector
 
     flowCancelledRef.current = false
     const attemptId = ++authAttemptRef.current
-    send({ type: 'SELECT_WALLET', walletId })
 
     try {
+      debugWallet('Using already-connected wallet: %s', connectedWallet.name)
       debugWallet(
-        'Connecting to %s (id: %s, connector: %O)',
-        wallet.name,
-        wallet.id,
-        wallet.connector
+        'Skipping connection, directly to signature with address: %s',
+        connectedAddress
       )
 
-      // Use the connect callback from walletConnectors to ensure diagnostics are triggered
-      const result = await connectAsync({ connector: wallet.connector })
-      if (attemptId !== authAttemptRef.current || flowCancelledRef.current) return
-      debugWallet('Connected successfully: %O', result)
-      const connectedAddress = result.accounts?.[0]
-      const connectedConnector = wallet.connector
-
-      if (!connectedAddress) {
-        throw new Error('Wallet connection did not return an address')
+      if (attemptId !== authAttemptRef.current || flowCancelledRef.current) {
+        return
       }
 
       // If connecting as Safe owner, cache the provider to preserve its session
@@ -415,93 +487,41 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         }
       }
 
+      // Skip the SELECT_WALLET and connectAsync steps, go directly to WALLET_CONNECTED
       send({
         type: 'WALLET_CONNECTED',
         address: connectedAddress,
         connector: connectedConnector,
       })
     } catch (error) {
-      if (attemptId !== authAttemptRef.current || flowCancelledRef.current) return
-      debugWallet('Connection error: %O', error)
-      send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
-    }
-  }
-
-  // Handle selection of already-connected wallet (skip connection, go directly to signing)
-  const handleSelectConnectedWallet = async (walletId: string) => {
-    debugWallet('handleSelectConnectedWallet called with walletId: %s', walletId)
-
-    if (!activeConnector || !connectedAddress) {
-      debugWallet(
-        'ERROR: No active connector or address despite being in connected state'
-      )
-      send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
-      return
-    }
-
-    const wallet = wallets.find((w) => w.id === walletId)
-
-    if (!wallet) {
-      debugWallet('ERROR: Connected wallet not found in list! walletId: %s', walletId)
-      send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
-      return
-    }
-
-    flowCancelledRef.current = false
-    const attemptId = ++authAttemptRef.current
-
-    try {
-      debugWallet('Using already-connected wallet: %s', wallet.name)
-      debugWallet(
-        'Skipping connection, directly to signature with address: %s',
-        connectedAddress
-      )
-
-      // If connecting as Safe owner, cache the provider to preserve its session
-      if (
-        state.context.pendingSafeInfo &&
-        typeof activeConnector.getProvider === 'function'
-      ) {
-        try {
-          debugWallet('Caching provider for Safe owner wallet: %s', activeConnector.id)
-          const provider = await activeConnector.getProvider()
-          if (provider) {
-            cacheOwnerProvider(activeConnector.id, provider as any)
-            debugWallet('✓ Provider cached successfully')
-          }
-        } catch (err) {
-          debugWallet(
-            'Failed to cache provider (will fall back to getProvider later):',
-            err
-          )
-        }
+      if (attemptId !== authAttemptRef.current || flowCancelledRef.current) {
+        return
       }
-
-      // Skip the SELECT_WALLET and connectAsync steps, go directly to WALLET_CONNECTED
-      send({
-        type: 'WALLET_CONNECTED',
-        address: connectedAddress,
-        connector: activeConnector,
-      })
-    } catch (error) {
-      if (attemptId !== authAttemptRef.current || flowCancelledRef.current) return
       debugWallet('Error handling connected wallet: %O', error)
       send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
     }
-  }
+  }, [connectedAddress, connectedWallet, send, state])
+
+  const handleDisconnect = useCallback(async () => {
+    await appDisconnect()
+    onClose()
+  }, [appDisconnect, onClose])
 
   // Handle Safe address submission
-  const handleSubmitSafeAddress = (safeAddress: Address, chainId: number) => {
-    safeFlowStartedRef.current = true
-    send({
-      type: 'SUBMIT_SAFE_ADDRESS',
-      address: safeAddress,
-      chainId,
-    })
-  }
+  const handleSubmitSafeAddress = useCallback(
+    (safeAddress: Address, chainId: number) => {
+      safeFlowStartedRef.current = true
+      send({
+        type: 'SUBMIT_SAFE_ADDRESS',
+        address: safeAddress,
+        chainId,
+      })
+    },
+    [send]
+  )
 
   // Handle signature request
-  const handleSign = async () => {
+  const handleSign = useCallback(async () => {
     debugWallet('handleSign called, current state: %s', state.value)
     debugWallet(
       'State context: address=%s, safeInfo=%O',
@@ -694,38 +714,52 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         },
       })
     }
-  }
+  }, [chainId, send, signMessageAsync, state])
 
   // Handle cancel
-  const handleCancel = async () => {
+  const handleCancel = useCallback(async () => {
     flowCancelledRef.current = true
     authAttemptRef.current += 1
     await cleanupCancelledSafeFlow()
     send({ type: 'CANCEL' })
-  }
+  }, [cleanupCancelledSafeFlow, send])
 
   // Handle back navigation
-  const handleBack = async () => {
+  const handleBack = useCallback(async () => {
     flowCancelledRef.current = true
     authAttemptRef.current += 1
     await cleanupCancelledSafeFlow()
     send({ type: 'BACK' })
-  }
+  }, [cleanupCancelledSafeFlow, send])
 
   // Handle retry
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     send({ type: 'RETRY' })
-  }
+  }, [send])
 
   // Handle close
-  const handleClose = async () => {
+  const handleClose = useCallback(async () => {
     flowCancelledRef.current = true
     await cleanupCancelledSafeFlow()
     if (!state.matches('closed')) {
       send({ type: 'CLOSE' })
     }
     onClose()
-  }
+  }, [cleanupCancelledSafeFlow, onClose, send, state])
+
+  const handleSelectSafe = useCallback(() => {
+    send({ type: 'SELECT_SAFE' })
+  }, [send])
+
+  const handleNoop = useCallback(() => {}, [])
+
+  const safeAddress =
+    state.context.pendingSafeInfo?.safeAddress || state.context.safeInfo?.safeAddress
+  const ownerAddress =
+    state.context.connector?.id === 'safeOwner'
+      ? getCachedSigningAddress(state.context.connector, state.context.address!)
+      : state.context.address ||
+        (activeConnector?.id === 'safeOwner' ? undefined : connectedAddress)
 
   // Render appropriate view based on state
   const renderContent = () => {
@@ -736,7 +770,8 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           connectedWallet={connectedWallet}
           onSelectWallet={handleSelectWallet}
           onSelectConnectedWallet={handleSelectConnectedWallet}
-          onSelectSafe={() => send({ type: 'SELECT_SAFE' })}
+          onDisconnect={handleDisconnect}
+          onSelectSafe={handleSelectSafe}
           showSafeOption={true}
         />
       )
@@ -761,13 +796,25 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
     }
 
     if (state.matches('selectingSafeOwnerWallet')) {
+      if (state.context.error) {
+        return (
+          <ErrorView
+            error={state.context.error}
+            onRetry={handleRetry}
+            onBack={handleBack}
+            onClose={handleClose}
+          />
+        )
+      }
+
       return (
         <WalletListView
           wallets={availableWallets}
           connectedWallet={connectedWallet}
           onSelectWallet={handleSelectWallet}
           onSelectConnectedWallet={handleSelectConnectedWallet}
-          onSelectSafe={() => {}}
+          onDisconnect={handleDisconnect}
+          onSelectSafe={handleNoop}
           showSafeOption={false}
           title="Connect Safe Owner Wallet"
           description="Choose a wallet that is an owner of this Safe to continue."
@@ -846,7 +893,15 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
 
   return (
     <AnimatedModal open={isOpen && !state.matches('closed')} close={handleClose}>
-      {renderContent()}
+      <Stack gap="x4">
+        {safeAddress && (
+          <SafeModeInfo
+            safeAddress={safeAddress}
+            ownerAddress={ownerAddress ?? undefined}
+          />
+        )}
+        {renderContent()}
+      </Stack>
     </AnimatedModal>
   )
 }
