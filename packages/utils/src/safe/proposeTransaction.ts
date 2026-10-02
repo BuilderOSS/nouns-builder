@@ -11,6 +11,23 @@ import { SafeTransactionError, SafeTransactionErrorCode } from './errors'
 
 const debugSafeTx = debug('app:safe:tx')
 
+function assertTransactionChain(
+  safeInfo: SafeInfo,
+  transaction: SendTransactionParams | SendTransactionParams[]
+): void {
+  const transactions = Array.isArray(transaction) ? transaction : [transaction]
+  const mismatchedChain = transactions.find(
+    (tx) => tx.chainId !== undefined && tx.chainId !== safeInfo.chainId
+  )
+
+  if (mismatchedChain) {
+    throw new SafeTransactionError(
+      `Safe is connected to chain ${safeInfo.chainId}, but this transaction requires chain ${mismatchedChain.chainId}. Reconnect the Safe on the correct network before trying again.`,
+      SafeTransactionErrorCode.CHAIN_MISMATCH
+    )
+  }
+}
+
 /**
  * Propose a transaction to Safe Service API for multi-sig approval.
  *
@@ -63,6 +80,8 @@ export async function proposeSafeTransaction(
     chainId: safeInfo.chainId,
     to: Array.isArray(transaction) ? transaction.map(({ to }) => to) : transaction.to,
   })
+
+  assertTransactionChain(safeInfo, transaction)
 
   // Verify provider is on the correct chain, switch if necessary
   await ensureCorrectChain(eoaProvider, safeInfo.chainId)
@@ -258,6 +277,8 @@ export async function executeSafeTransaction(
     chainId: safeInfo.chainId,
     to: Array.isArray(transaction) ? transaction.map(({ to }) => to) : transaction.to,
   })
+
+  assertTransactionChain(safeInfo, transaction)
 
   // Verify provider is on the correct chain, switch if necessary
   await ensureCorrectChain(eoaProvider, safeInfo.chainId)

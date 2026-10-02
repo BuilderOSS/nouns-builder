@@ -1,6 +1,7 @@
 import {
   clearSafeInfo,
   type EIP1193Provider,
+  getProvider,
   getSavedSafeInfo,
   isOwnerOfSafe,
   type SafeInfo,
@@ -10,7 +11,6 @@ import {
 import { getConnectors } from '@wagmi/core'
 import debug from 'debug'
 import type { PublicClient } from 'viem'
-import { createPublicClient, http } from 'viem'
 import {
   type Config,
   type Connector,
@@ -490,15 +490,9 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
           // Create public client if not already created
           if (!publicClient_) {
             debugSafeConnector('Creating public client for chain:', saved.chainId)
-            const chain = config.chains.find((c) => c.id === saved.chainId)
-            if (!chain) {
-              throw new Error(`Chain ${saved.chainId} not found in wagmi config`)
-            }
-
-            publicClient_ = createPublicClient({
-              chain,
-              transport: http(),
-            })
+            // Use the shared provider, which has the configured RPC fallback
+            // list, rather than a bare public RPC client that can hit limits.
+            publicClient_ = getProvider(saved.chainId)
           }
 
           // ===== RESOLVE OWNER ADDRESS =====

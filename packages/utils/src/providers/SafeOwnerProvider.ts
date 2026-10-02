@@ -292,6 +292,7 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
 
         debugSafe('✓ eth_sendTransaction called:', {
           to: txParams.to,
+          chainId: txParams.chainId,
           value: txParams.value,
           safeAddress: this.safe.safeAddress,
           threshold: this.safe.threshold,
@@ -319,7 +320,7 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
           ...(txParams.safeTransactions
             ? { transactions: txParams.safeTransactions }
             : {}),
-          eoaProvider: this.ownerProvider,
+          eoaProvider: this.getExecutionProvider(),
           mode,
         })
 
@@ -482,6 +483,37 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
       // Unsupported methods
       default:
         throw new Error(`Method ${method} is not supported by SafeOwnerProvider`)
+    }
+  }
+
+  /**
+   * Route Safe Protocol Kit reads through the configured public client while
+   * keeping account, signing, chain switching, and writes on the owner wallet.
+   */
+  private getExecutionProvider(): EIP1193Provider {
+    const readMethods = new Set([
+      'eth_call',
+      'eth_getBalance',
+      'eth_getCode',
+      'eth_getStorageAt',
+      'eth_getTransactionCount',
+      'eth_getBlockByNumber',
+      'eth_getBlockByHash',
+      'eth_getTransactionByHash',
+      'eth_getTransactionReceipt',
+      'eth_estimateGas',
+      'eth_gasPrice',
+      'eth_blockNumber',
+    ])
+
+    return {
+      request: ({ method, params }) =>
+        readMethods.has(method)
+          ? this.request({ method, params })
+          : this.ownerProvider.request({ method, params }),
+      on: (event, listener) => this.ownerProvider.on(event, listener),
+      removeListener: (event, listener) =>
+        this.ownerProvider.removeListener(event, listener),
     }
   }
 

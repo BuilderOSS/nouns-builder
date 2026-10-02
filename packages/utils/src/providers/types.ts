@@ -24,6 +24,7 @@ export interface EIP1193Provider {
 export interface SendTransactionParams {
   from: string
   to: string
+  chainId?: number
   value?: string
   data?: string
   gas?: string
