@@ -54,6 +54,28 @@ type ExecuteAppTransactionParams = {
   waitForSubgraphSync?: boolean
 }
 
+type ConnectedConnector = {
+  id?: string
+  safeInfo?: {
+    threshold?: number
+  } | null
+  getChainId?: () => Promise<number>
+}
+
+async function assertSafeChain(
+  connector: ConnectedConnector | undefined,
+  chainId: CHAIN_ID
+): Promise<void> {
+  if (connector?.id !== 'safeOwner' || !connector.getChainId) return
+
+  const safeChainId = await connector.getChainId()
+  if (safeChainId !== chainId) {
+    throw new Error(
+      `Safe is connected to chain ${safeChainId}, but this transaction requires chain ${chainId}. Reconnect the Safe on the correct network before trying again.`
+    )
+  }
+}
+
 export async function executeAppTransactions({
   config,
   requests,
@@ -68,22 +90,17 @@ export async function executeAppTransactions({
     ? config.state.connections.get(config.state.current)
     : undefined
   const connector = connection?.connector
-  const safeConnector = connector as
-    | {
-        id?: string
-        safeInfo?: {
-          threshold?: number
-        } | null
-      }
-    | undefined
+  const safeConnector = connector as ConnectedConnector | undefined
   const isMultiSigSafe =
     safeConnector?.id === 'safeOwner' && (safeConnector.safeInfo?.threshold ?? 0) > 1
+  await assertSafeChain(safeConnector, chainId)
   if (connector?.id === 'safeOwner') {
     const provider = (await connector.getProvider()) as {
       request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
     }
     const transactions = requests.map((request) => ({
       to: request.address,
+      chainId,
       data: encodeFunctionData({
         abi: request.abi,
         functionName: request.functionName,
@@ -161,18 +178,13 @@ export async function executeAppTransaction({
     ? config.state.connections.get(config.state.current)
     : undefined
   const connector = connection?.connector
-  const safeConnector = connector as
-    | {
-        id?: string
-        safeInfo?: {
-          threshold?: number
-        } | null
-      }
-    | undefined
+  const safeConnector = connector as ConnectedConnector | undefined
   const isMultiSigSafe =
     safeConnector?.id === 'safeOwner' && (safeConnector.safeInfo?.threshold ?? 0) > 1
 
-  const hash = await writeContract(config, request)
+  await assertSafeChain(safeConnector, chainId)
+
+  const hash = await writeContract(config, { ...request, chainId })
 
   if (isMultiSigSafe) {
     return { kind: 'safe-proposed', hash }

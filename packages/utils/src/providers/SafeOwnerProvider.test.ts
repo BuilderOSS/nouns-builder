@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest'
 
+import {
+  registerSafeTransactionHandler,
+  unregisterSafeTransactionHandler,
+} from '../safe/handler'
 import { SafeOwnerProvider } from './SafeOwnerProvider'
 
 const safeInfo = {
@@ -119,5 +123,79 @@ describe('SafeOwnerProvider', () => {
         params: ['0x1234', safeInfo.safeAddress],
       })
     ).resolves.toBe('0xsignature')
+  })
+
+  it('forwards the requested chain to the Safe transaction handler', async () => {
+    const eoaProvider = createEoaProvider()
+    const safeProvider = new SafeOwnerProvider(
+      safeInfo as any,
+      eoaProvider as any,
+      publicClient
+    )
+    const handler = vi.fn().mockResolvedValue({ mode: 'propose', safeTxHash: '0xhash' })
+    registerSafeTransactionHandler(handler)
+
+    await expect(
+      safeProvider.request({
+        method: 'eth_sendTransaction',
+        params: [{ to: safeInfo.safeAddress, data: '0x', chainId: safeInfo.chainId }],
+      })
+    ).resolves.toBe('0xhash')
+
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        transaction: expect.objectContaining({ chainId: safeInfo.chainId }),
+      })
+    )
+    unregisterSafeTransactionHandler()
+  })
+
+  it('forwards a chain mismatch to the Safe handler for modal feedback', async () => {
+    const eoaProvider = createEoaProvider()
+    const safeProvider = new SafeOwnerProvider(
+      safeInfo as any,
+      eoaProvider as any,
+      publicClient
+    )
+    const handler = vi.fn().mockResolvedValue({ mode: 'propose', safeTxHash: '0xhash' })
+    registerSafeTransactionHandler(handler)
+
+    await expect(
+      safeProvider.request({
+        method: 'eth_sendTransaction',
+        params: [{ to: safeInfo.safeAddress, chainId: 8453 }],
+      })
+    ).resolves.toBe('0xhash')
+    expect(handler).toHaveBeenCalledOnce()
+    unregisterSafeTransactionHandler()
+  })
+
+  it('preserves the transaction sender when estimating Safe execution gas', async () => {
+    const estimateGas = vi.fn().mockResolvedValue(21000n)
+    const eoaProvider = createEoaProvider()
+    const safeProvider = new SafeOwnerProvider(
+      safeInfo as any,
+      eoaProvider as any,
+      { estimateGas } as any
+    )
+
+    await expect(
+      safeProvider.request({
+        method: 'eth_estimateGas',
+        params: [
+          {
+            from: '0x0000000000000000000000000000000000000003',
+            to: safeInfo.safeAddress,
+            data: '0x1234',
+          },
+        ],
+      })
+    ).resolves.toBe('0x5208')
+
+    expect(estimateGas).toHaveBeenCalledWith(
+      expect.objectContaining({
+        account: '0x0000000000000000000000000000000000000003',
+      })
+    )
   })
 })

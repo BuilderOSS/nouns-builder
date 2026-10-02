@@ -10,6 +10,8 @@ export enum SafeTransactionErrorCode {
   CHAIN_NOT_CONFIGURED = 'CHAIN_NOT_CONFIGURED',
   /** Chain switch rejected by user */
   CHAIN_SWITCH_REJECTED = 'CHAIN_SWITCH_REJECTED',
+  /** Transaction chain differs from the connected Safe chain */
+  CHAIN_MISMATCH = 'CHAIN_MISMATCH',
   /** EOA wallet not connected */
   EOA_NOT_CONNECTED = 'EOA_NOT_CONNECTED',
   /** Connected EOA is not an owner of the Safe */
@@ -77,6 +79,8 @@ export function getSafeErrorMessage(error: unknown): string {
         return 'The required network is not configured in your wallet.'
       case SafeTransactionErrorCode.CHAIN_SWITCH_REJECTED:
         return 'Network switch was rejected.'
+      case SafeTransactionErrorCode.CHAIN_MISMATCH:
+        return error.message
       case SafeTransactionErrorCode.EOA_NOT_CONNECTED:
         return 'Please connect your wallet to continue.'
       case SafeTransactionErrorCode.NOT_SAFE_OWNER:
@@ -96,7 +100,7 @@ export function getSafeErrorMessage(error: unknown): string {
       case SafeTransactionErrorCode.SAFE_INIT_FAILED:
         return 'Failed to initialize Safe. Please try again.'
       case SafeTransactionErrorCode.EXECUTION_FAILED:
-        return 'Transaction execution failed. Please try again.'
+        return error.message || 'Transaction execution failed. Please try again.'
       default:
         return error.message || 'An unexpected error occurred.'
     }

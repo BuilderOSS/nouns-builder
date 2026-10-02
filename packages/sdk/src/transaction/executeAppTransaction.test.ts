@@ -31,6 +31,7 @@ const config = (connector?: {
   id: string
   safeInfo?: { threshold?: number }
   getProvider: () => Promise<unknown>
+  getChainId?: () => Promise<number>
 }) =>
   ({
     state: {
@@ -158,6 +159,24 @@ describe('executeAppTransaction', () => {
       })
     ).resolves.toEqual({ kind: 'safe-proposed', hash })
     expect(waitForTransactionReceipt).not.toHaveBeenCalled()
+  })
+
+  it('rejects a Safe transaction when its chain differs from the request', async () => {
+    await expect(
+      executeAppTransaction({
+        config: config({
+          id: 'safeOwner',
+          safeInfo: { threshold: 1 },
+          getProvider: async () => ({ request: vi.fn() }),
+          getChainId: async () => 1,
+        }),
+        request: request(1),
+        chainId: 8453 as any,
+      })
+    ).rejects.toThrow(
+      'Safe is connected to chain 1, but this transaction requires chain 8453'
+    )
+    expect(writeContract).not.toHaveBeenCalled()
   })
 
   it('treats multisig Safe writes as proposals even without hash tracking', async () => {

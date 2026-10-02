@@ -32,4 +32,26 @@ describe('Safe transaction errors', () => {
       'Safe Service rejected this proposal. Check the transaction details and try again.'
     )
   })
+
+  it('preserves the underlying execution error', () => {
+    expect(
+      getSafeErrorMessage(
+        new SafeTransactionError(
+          'Transaction execution failed: execution reverted: GS026',
+          SafeTransactionErrorCode.EXECUTION_FAILED
+        )
+      )
+    ).toBe('Transaction execution failed: execution reverted: GS026')
+  })
+
+  it('shows the Safe chain mismatch in the transaction UI', () => {
+    expect(
+      getSafeErrorMessage(
+        new SafeTransactionError(
+          'Safe is connected to chain 8453, but this transaction requires chain 84532.',
+          SafeTransactionErrorCode.CHAIN_MISMATCH
+        )
+      )
+    ).toBe('Safe is connected to chain 8453, but this transaction requires chain 84532.')
+  })
 })
