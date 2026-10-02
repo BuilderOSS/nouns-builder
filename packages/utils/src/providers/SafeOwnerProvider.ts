@@ -432,11 +432,13 @@ export class SafeOwnerProvider extends EventEmitter implements EIP1193Provider {
         // Build base params
         const baseParams: {
           to: `0x${string}`
+          account?: `0x${string}`
           data?: `0x${string}`
           value?: bigint
           nonce?: number
         } = {
           to: tx.to as `0x${string}`,
+          ...(tx.from && { account: tx.from as `0x${string}` }),
           ...(tx.data && { data: tx.data as `0x${string}` }),
           ...(tx.value && { value: BigInt(tx.value) }),
           ...(tx.nonce && { nonce: Number(tx.nonce) }),
