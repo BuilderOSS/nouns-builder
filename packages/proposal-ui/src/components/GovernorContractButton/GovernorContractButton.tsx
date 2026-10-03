@@ -103,7 +103,7 @@ export function GovernorContractButton({
   ])
 
   return (
-    <>
+    <Flex direction="column" align="center" gap="x3">
       <ContractButton
         chainId={chain.id}
         handleClick={handleClick}
@@ -134,6 +134,6 @@ export function GovernorContractButton({
           </Flex>
         </Box>
       )}
-    </>
+    </Flex>
   )
 }
