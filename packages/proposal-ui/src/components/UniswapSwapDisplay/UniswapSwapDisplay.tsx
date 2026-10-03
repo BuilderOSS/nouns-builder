@@ -393,7 +393,7 @@ export const UniswapSwapDisplay: React.FC<UniswapSwapDisplayProps> = ({
                               borderRadius="curved"
                             >
                               <Text
-                                fontSize="10"
+                                fontSize="12"
                                 fontWeight="display"
                                 color={getBadgeTextColor(priceDiff)}
                               >
