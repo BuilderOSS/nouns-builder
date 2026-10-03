@@ -4,7 +4,8 @@ import { getProposal } from '@buildeross/sdk/subgraph'
 import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
-import { Box, ButtonProps } from '@buildeross/zord'
+import { getErrorMessage } from '@buildeross/utils/errors'
+import { Box, ButtonProps, Flex, Text } from '@buildeross/zord'
 import { useCallback, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { ContractFunctionName, encodeFunctionData } from 'viem'
@@ -41,12 +42,14 @@ export function GovernorContractButton({
   const config = useConfig()
 
   const [isPending, setIsPending] = useState<boolean>(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleClick = useCallback(async () => {
     if (!addresses.governor || !functionName || !args) return
 
     try {
       setIsPending(true)
+      setErrorMessage(null)
       const { request } = await simulateContract(config, {
         address: addresses.governor,
         abi: governorAbi,
@@ -83,8 +86,10 @@ export function GovernorContractButton({
       setIsPending(false)
       onSuccess()
     } catch (err) {
-      setIsPending(false)
+      setErrorMessage(`Transaction failed: ${getErrorMessage(err)}`)
       console.error('Error interacting with governor contract:', err)
+    } finally {
+      setIsPending(false)
     }
   }, [
     config,
@@ -98,14 +103,28 @@ export function GovernorContractButton({
   ])
 
   return (
-    <ContractButton
-      chainId={chain.id}
-      handleClick={handleClick}
-      className={buttonClassName}
-      disabled={isPending}
-      {...rest}
-    >
-      {isPending ? <Box className={uploadingSpinnerWhite} /> : buttonText}
-    </ContractButton>
+    <Flex direction="column" align="center" gap="x2">
+      <ContractButton
+        chainId={chain.id}
+        handleClick={handleClick}
+        className={buttonClassName}
+        disabled={isPending}
+        {...rest}
+      >
+        {isPending ? <Box className={uploadingSpinnerWhite} /> : buttonText}
+      </ContractButton>
+      {errorMessage && (
+        <Box style={{ maxWidth: 360 }}>
+          <Text
+            variant="paragraph-xs"
+            color="negative"
+            style={{ wordBreak: 'break-word' }}
+            role="alert"
+          >
+            {errorMessage}
+          </Text>
+        </Box>
+      )}
+    </Flex>
   )
 }

@@ -46,7 +46,7 @@ function createRequest(): NextApiRequest {
       safeAddress,
       safeChainId: 1,
     },
-    headers: {},
+    headers: { host: 'builder.test', origin: 'https://builder.test' },
     method: 'POST',
     socket: { remoteAddress: '203.0.113.10' },
     url: '/api/siwe/verify',

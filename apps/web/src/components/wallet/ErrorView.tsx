@@ -17,7 +17,7 @@ function getErrorMessage(error: AuthError): { title: string; message: string } {
     case 'WALLET_NOT_CONNECTED':
       return {
         title: 'Connection Failed',
-        message: 'Failed to connect to your wallet. Please try again.',
+        message: error.message || 'Failed to connect to your wallet. Please try again.',
       }
     case 'SIGNATURE_REJECTED':
       return {

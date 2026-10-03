@@ -1,4 +1,3 @@
-import { BASE_URL } from '@buildeross/constants/baseUrl'
 import type { AddressType, CHAIN_ID } from '@buildeross/types'
 import { useQuery } from '@tanstack/react-query'
 
@@ -83,8 +82,9 @@ const fetchUniswapSwap = async (
       : addr
   }
 
-  const response = await fetch(`${BASE_URL}/api/uniswap/swap`, {
+  const response = await fetch('/api/uniswap/swap', {
     method: 'POST',
+    credentials: 'same-origin',
     headers: {
       'Content-Type': 'application/json',
     },

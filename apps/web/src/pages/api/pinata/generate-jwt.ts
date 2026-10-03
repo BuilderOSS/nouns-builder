@@ -3,6 +3,7 @@ import { generateUploadJWT } from 'src/services/pinataService'
 import { type AuthContext, withAuth } from 'src/utils/api/authMiddleware'
 import { withErrorHandling } from 'src/utils/api/error'
 import { withRateLimit } from 'src/utils/api/rateLimit'
+import { withSameOrigin } from 'src/utils/api/sameOrigin'
 
 const handler = withErrorHandling(
   withRateLimit({
@@ -11,16 +12,18 @@ const handler = withErrorHandling(
     keyPrefix: 'pinata:generate-jwt',
   })(
     withAuth(
-      async (req: NextApiRequest, res: NextApiResponse, _authContext: AuthContext) => {
-        if (req.method !== 'POST') {
-          res.setHeader('Allow', ['POST'])
-          return res.status(405).end(`Method ${req.method} Not Allowed`)
-        }
+      withSameOrigin(
+        async (req: NextApiRequest, res: NextApiResponse, _authContext: AuthContext) => {
+          if (req.method !== 'POST') {
+            res.setHeader('Allow', ['POST'])
+            return res.status(405).end(`Method ${req.method} Not Allowed`)
+          }
 
-        const result = await generateUploadJWT()
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
-        res.status(200).json(result)
-      }
+          const result = await generateUploadJWT()
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+          res.status(200).json(result)
+        }
+      )
     )
   )
 )

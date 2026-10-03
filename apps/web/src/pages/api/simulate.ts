@@ -4,6 +4,7 @@ import { InvalidRequestError } from 'src/services/errors'
 import { simulate } from 'src/services/simulationService'
 import { type DaoMembershipData, withDaoAuth } from 'src/utils/api/daoAuthMiddleware'
 import { withRateLimit } from 'src/utils/api/rateLimit'
+import { withSameOrigin } from 'src/utils/api/sameOrigin'
 
 async function handler(
   req: NextApiRequest,
@@ -35,7 +36,7 @@ const authedHandler = withRateLimit({
   maxRequests: 20,
   windowSeconds: 60,
   keyPrefix: 'simulate',
-})(withDaoAuth(handler))
+})(withDaoAuth(withSameOrigin(handler)))
 
 export default async function simulateRoute(
   req: NextApiRequest,

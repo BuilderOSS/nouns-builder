@@ -91,6 +91,28 @@ describe('SplitPayoutCard', () => {
     expect(screen.getByRole('button', { name: /Withdraw 0\.25 ETH/ })).toBeTruthy()
   })
 
+  it('disables payout actions for Safe wallets', () => {
+    useAccount.mockReturnValue({ address: A, connector: { id: 'safeOwner' } })
+    useSplitPayout.mockReturnValue({
+      ...base,
+      recipients: [{ account: A, allocation: 1_000_000, percent: 100 }],
+      distributable: 1_500_000_000_000_000_001n,
+      withdrawable: 250_000_000_000_000_001n,
+      canDistribute: true,
+      canWithdraw: true,
+    })
+
+    render(<SplitPayoutCard chainId={8453} fundsRecipient={SPLIT} />)
+
+    expect(
+      screen.getByText(
+        'Split payouts are not available when connected through a Safe wallet.'
+      )
+    ).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Distribute' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Withdraw 0\.25 ETH/ })).toBeDisabled()
+  })
+
   it('points at splits.org when the recipient list cannot be read', () => {
     useSplitPayout.mockReturnValue({ ...base, recipients: [] })
 

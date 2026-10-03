@@ -1,6 +1,6 @@
 import type { AddressType } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { fetchDashboardDataService, getDashboardTtl } from 'src/services/dashboardService'
+import { fetchDashboardDataService } from 'src/services/dashboardService'
 import { type AuthContext, withAuth } from 'src/utils/api/authMiddleware'
 import { withCors } from 'src/utils/api/cors'
 import { withRateLimit } from 'src/utils/api/rateLimit'
@@ -36,14 +36,8 @@ async function handler(
     // Fetch dashboard data with caching
     const data = await fetchDashboardDataService(address.toLowerCase() as AddressType)
 
-    // Determine TTL
-    const ttl = getDashboardTtl()
-
     // Set cache headers
-    res.setHeader(
-      'Cache-Control',
-      `public, max-age=${ttl}, stale-while-revalidate=${Math.floor(ttl * 0.5)}`
-    )
+    res.setHeader('Cache-Control', 'private, no-store')
 
     // Log request (development only)
     const duration = Date.now() - startTime

@@ -1,7 +1,13 @@
 'use client'
 
 import { AnimatedModal } from '@buildeross/ui'
-import { addRecentSafeWallet, clearSafeInfo, getSafeInfo } from '@buildeross/utils'
+import {
+  addRecentSafeWallet,
+  clearSafeInfo,
+  getErrorMessage,
+  getSafeInfo,
+  WALLET_CONNECTION_ERROR_MESSAGE,
+} from '@buildeross/utils'
 import { Stack } from '@buildeross/zord'
 import { getConnectors } from '@wagmi/core'
 import { useMachine } from '@xstate/react'
@@ -435,7 +441,14 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           return
         }
         debugWallet('Connection error: %O', error)
-        send({ type: 'ERROR', error: { code: 'WALLET_NOT_CONNECTED' } })
+        const message = getErrorMessage(error)
+        send({
+          type: 'ERROR',
+          error: {
+            code: 'WALLET_NOT_CONNECTED',
+            ...(message === WALLET_CONNECTION_ERROR_MESSAGE ? { message } : {}),
+          },
+        })
       }
     },
     [connectAsync, send, state, wallets]
