@@ -371,7 +371,11 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({
             width={'100%'}
             loading={isPending}
             disabled={
-              errors.length > 0 || isPending || isResolving || outcomeUnknown || isSafeMode
+              errors.length > 0 ||
+              isPending ||
+              isResolving ||
+              outcomeUnknown ||
+              isSafeMode
             }
             handleClick={handleCreate}
           >

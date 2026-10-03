@@ -4,6 +4,7 @@ import { isOwnerOfSafe } from '@buildeross/utils/safeService'
 import { getIronSession } from 'iron-session'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { withRateLimit } from 'src/utils/api/rateLimit'
+import { withSameOrigin } from 'src/utils/api/sameOrigin'
 import { ironOptions, type IronSessionData } from 'src/utils/iron'
 import { SIWE_VERIFY_RATE_LIMIT_KEY_PREFIX } from 'src/utils/siweAuthFlow'
 import type { Address, Hex } from 'viem'
@@ -113,4 +114,4 @@ export default withRateLimit({
   maxRequests: 10,
   windowSeconds: 60,
   keyPrefix: SIWE_VERIFY_RATE_LIMIT_KEY_PREFIX,
-})(handler)
+})(withSameOrigin(handler))

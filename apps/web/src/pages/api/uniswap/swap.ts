@@ -1,9 +1,11 @@
 import { CHAIN_ID } from '@buildeross/types'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { Address, parseUnits } from 'viem'
+import { Address, isAddress, parseUnits } from 'viem'
 
+import { type AuthContext, withAuth } from '../../../utils/api/authMiddleware'
 import { withCors } from '../../../utils/api/cors'
 import { withRateLimit } from '../../../utils/api/rateLimit'
+import { withSameOrigin } from '../../../utils/api/sameOrigin'
 
 const UNISWAP_TRADING_API_BASE_URL = 'https://trade-api.gateway.uniswap.org/v1'
 const UNISWAP_API_KEY = process.env.UNISWAP_API_KEY
@@ -16,6 +18,10 @@ const SUPPORTED_CHAIN_IDS = [
   CHAIN_ID.BASE,
   CHAIN_ID.BASE_SEPOLIA,
 ]
+const MAX_TOKEN_DECIMALS = 255
+const MAX_AMOUNT_LENGTH = 100
+const MAX_SLIPPAGE_PERCENT = 100
+const MAX_DEADLINE_SECONDS = 60 * 60 * 24 * 60
 
 interface SwapRequest {
   chainId: number
@@ -65,7 +71,11 @@ interface SwapResponse {
   }
 }
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  _authContext: AuthContext
+) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed. Use POST.' })
   }
@@ -95,8 +105,50 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     })
   }
 
-  // Validate chain ID
-  const chainIdNum = typeof chainId === 'string' ? parseInt(chainId, 10) : chainId
+  if (
+    typeof chainId !== 'number' ||
+    !Number.isSafeInteger(chainId) ||
+    !isAddress(tokenIn, { strict: false }) ||
+    !isAddress(tokenOut, { strict: false }) ||
+    !isAddress(sender, { strict: false }) ||
+    (recipient !== undefined && !isAddress(recipient, { strict: false })) ||
+    typeof amount !== 'string' ||
+    amount.length > MAX_AMOUNT_LENGTH ||
+    !/^(?:\d+\.?\d*|\.\d+)$/.test(amount) ||
+    !Number.isInteger(inputTokenDecimals) ||
+    !Number.isInteger(outputTokenDecimals) ||
+    inputTokenDecimals < 0 ||
+    inputTokenDecimals > MAX_TOKEN_DECIMALS ||
+    outputTokenDecimals < 0 ||
+    outputTokenDecimals > MAX_TOKEN_DECIMALS ||
+    (type !== 'exactIn' && type !== 'exactOut')
+  ) {
+    return res.status(400).json({ error: 'Invalid swap parameters' })
+  }
+
+  const parsedSlippage = Number(slippageTolerance ?? '0.5')
+  if (
+    !Number.isFinite(parsedSlippage) ||
+    parsedSlippage < 0 ||
+    parsedSlippage > MAX_SLIPPAGE_PERCENT
+  ) {
+    return res.status(400).json({ error: 'Invalid slippage tolerance' })
+  }
+
+  if (
+    deadline !== undefined &&
+    (!Number.isSafeInteger(deadline) ||
+      deadline <= Math.floor(Date.now() / 1000) ||
+      deadline > Math.floor(Date.now() / 1000) + MAX_DEADLINE_SECONDS)
+  ) {
+    return res.status(400).json({ error: 'Invalid deadline' })
+  }
+
+  if (tokenIn.toLowerCase() === tokenOut.toLowerCase()) {
+    return res.status(400).json({ error: 'Input and output tokens must differ' })
+  }
+
+  const chainIdNum = chainId
 
   if (!SUPPORTED_CHAIN_IDS.includes(chainIdNum)) {
     return res.status(400).json({
@@ -124,6 +176,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       const decimalsToUse = type === 'exactIn' ? inputTokenDecimals : outputTokenDecimals
       amountInWei = parseUnits(amount, decimalsToUse).toString()
+      if (amountInWei === '0') {
+        return res.status(400).json({ error: 'Amount must be greater than zero' })
+      }
     } catch (error) {
       return res.status(400).json({
         error: 'Invalid amount format',
@@ -139,7 +194,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       tokenOutChainId: chainIdNum,
       amount: amountInWei, // Use wei amount for API
       type: type === 'exactIn' ? 'EXACT_INPUT' : 'EXACT_OUTPUT', // Convert to uppercase format
-      slippageTolerance: parseFloat(slippageTolerance || '0.5'), // Must be a number
+      slippageTolerance: parsedSlippage,
       swapper: sender,
     }
 
@@ -159,7 +214,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (quoteResponse.status === 400) {
         return res.status(400).json({
           error: 'Invalid quote parameters',
-          details: errorText,
         })
       } else if (quoteResponse.status === 404) {
         return res.status(404).json({
@@ -171,7 +225,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         return res.status(quoteResponse.status).json({
           error: 'Uniswap quote API request failed',
           status: quoteResponse.status,
-          details: errorText,
         })
       }
     }
@@ -181,7 +234,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Step 2: Get swap transaction using the quote
     const swapRequestBody = {
       quote: quoteData.quote,
-      slippageTolerance: parseFloat(slippageTolerance || '0.5'),
+      slippageTolerance: parsedSlippage,
       recipient: recipient || sender,
       deadline: deadline || Math.floor(Date.now() / 1000) + 60 * 20, // Default 20 minutes
       enableUniversalRouter: true,
@@ -203,13 +256,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       if (swapResponse.status === 400) {
         return res.status(400).json({
           error: 'Invalid swap parameters',
-          details: errorText,
         })
       } else {
         return res.status(swapResponse.status).json({
           error: 'Uniswap swap API request failed',
           status: swapResponse.status,
-          details: errorText,
         })
       }
     }
@@ -246,7 +297,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     console.error('Uniswap swap API error:', error)
     return res.status(500).json({
       error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
     })
   }
 }
@@ -257,5 +307,5 @@ export default withCors({
   withRateLimit({
     keyPrefix: 'uniswap:swap',
     maxRequests: 20, // 20 requests per minute (lower for transaction creation)
-  })(handler)
+  })(withAuth(withSameOrigin(handler)))
 )

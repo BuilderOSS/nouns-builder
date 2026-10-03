@@ -3,6 +3,7 @@ import { pinCidToIPFS } from 'src/services/pinataService'
 import { type AuthContext, withAuth } from 'src/utils/api/authMiddleware'
 import { withErrorHandling } from 'src/utils/api/error'
 import { withRateLimit } from 'src/utils/api/rateLimit'
+import { withSameOrigin } from 'src/utils/api/sameOrigin'
 
 const handler = withErrorHandling(
   withRateLimit({
@@ -11,16 +12,18 @@ const handler = withErrorHandling(
     keyPrefix: 'pinata:pin-cid',
   })(
     withAuth(
-      async (req: NextApiRequest, res: NextApiResponse, _authContext: AuthContext) => {
-        if (req.method !== 'POST') {
-          res.setHeader('Allow', ['POST'])
-          return res.status(405).end(`Method ${req.method} Not Allowed`)
-        }
+      withSameOrigin(
+        async (req: NextApiRequest, res: NextApiResponse, _authContext: AuthContext) => {
+          if (req.method !== 'POST') {
+            res.setHeader('Allow', ['POST'])
+            return res.status(405).end(`Method ${req.method} Not Allowed`)
+          }
 
-        const { cid, name, group_id } = req.body
-        const result = await pinCidToIPFS({ cid, name, group_id })
-        return res.status(200).json({ text: result.status })
-      }
+          const { cid, name, group_id } = req.body
+          const result = await pinCidToIPFS({ cid, name, group_id })
+          return res.status(200).json({ text: result.status })
+        }
+      )
     )
   )
 )

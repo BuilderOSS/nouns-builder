@@ -105,7 +105,9 @@ describe('SplitPayoutCard', () => {
     render(<SplitPayoutCard chainId={8453} fundsRecipient={SPLIT} />)
 
     expect(
-      screen.getByText('Split payouts are not available when connected through a Safe wallet.')
+      screen.getByText(
+        'Split payouts are not available when connected through a Safe wallet.'
+      )
     ).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Distribute' })).toBeDisabled()
     expect(screen.getByRole('button', { name: /Withdraw 0\.25 ETH/ })).toBeDisabled()
