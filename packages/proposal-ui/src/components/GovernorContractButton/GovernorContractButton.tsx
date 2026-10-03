@@ -103,7 +103,7 @@ export function GovernorContractButton({
   ])
 
   return (
-    <Flex direction="column" align="center" gap="x3">
+    <Flex direction="column" align="center" gap="x2">
       <ContractButton
         chainId={chain.id}
         handleClick={handleClick}
@@ -114,9 +114,9 @@ export function GovernorContractButton({
         {isPending ? <Box className={uploadingSpinnerWhite} /> : buttonText}
       </ContractButton>
       {errorMessage && (
-        <Box mt="x2" style={{ maxWidth: 360 }}>
+        <Box style={{ maxWidth: 360 }}>
           <Text
-            variant="paragraph-sm"
+            variant="paragraph-xs"
             color="negative"
             style={{ wordBreak: 'break-word' }}
             role="alert"
