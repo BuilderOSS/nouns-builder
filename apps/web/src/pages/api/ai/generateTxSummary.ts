@@ -1,4 +1,3 @@
-import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import type {
   CHAIN_ID,
@@ -17,6 +16,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { AI_MODEL, generateCachedAiText } from 'src/utils/api/ai/summaries'
 import { type AuthContext, withAuth } from 'src/utils/api/authMiddleware'
 import { withRateLimit } from 'src/utils/api/rateLimit'
+import { withSameOrigin } from 'src/utils/api/sameOrigin'
 
 type RequestBody = {
   chainId: CHAIN_ID
@@ -299,12 +299,7 @@ async function handler(
         .json({ error: 'transaction must have functionName and args' })
     }
 
-    const { maxAge, swr } = CACHE_TIMES.AI_TRANSACTION_SUMMARY
-
-    res.setHeader(
-      'Cache-Control',
-      `public, s-maxage=${maxAge}, stale-while-revalidate=${swr}`
-    )
+    res.setHeader('Cache-Control', 'private, no-store')
 
     // Generate prompt on backend
     const prompt = generatePrompt(requestData)
@@ -330,4 +325,4 @@ async function handler(
 
 export default withRateLimit({
   keyPrefix: 'ai:txSummary',
-})(withAuth(handler))
+})(withAuth(withSameOrigin(handler)))

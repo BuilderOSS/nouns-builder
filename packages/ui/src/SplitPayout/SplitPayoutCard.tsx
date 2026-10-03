@@ -78,7 +78,8 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
   chainId,
   fundsRecipient,
 }) => {
-  const { address: account } = useAccount()
+  const { address: account, connector } = useAccount()
+  const isSafeMode = connector?.id === 'safeOwner'
   const {
     isSplit,
     recipients,
@@ -201,12 +202,17 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
 
           {isRecipient && (
             <>
+              {isSafeMode && (
+                <Text variant="paragraph-sm" color="text3">
+                  Split payouts are not available when connected through a Safe wallet.
+                </Text>
+              )}
               <Box className={actions}>
                 {recipients.length > 0 && (
                   <ContractButton
                     chainId={chainId}
                     handleClick={distribute}
-                    disabled={!canDistribute}
+                    disabled={!canDistribute || isSafeMode}
                     loading={isDistributing}
                     size="sm"
                   >
@@ -218,7 +224,7 @@ export const SplitPayoutCard: React.FC<SplitPayoutCardProps> = ({
                   <ContractButton
                     chainId={chainId}
                     handleClick={withdraw}
-                    disabled={!canWithdraw}
+                    disabled={!canWithdraw || isSafeMode}
                     loading={isWithdrawing}
                     variant="outline"
                     size="sm"

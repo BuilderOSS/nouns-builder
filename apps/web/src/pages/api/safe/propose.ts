@@ -1,6 +1,9 @@
 import { SAFE_SERVICE_URL } from '@buildeross/constants/safe'
 import SafeApiKit from '@safe-global/api-kit'
 import type { NextApiRequest, NextApiResponse } from 'next'
+import { type AuthContext, withAuth } from 'src/utils/api/authMiddleware'
+import { withRateLimit } from 'src/utils/api/rateLimit'
+import { withSameOrigin } from 'src/utils/api/sameOrigin'
 import { getAddress, isAddress } from 'viem'
 
 interface ProposalRequest {
@@ -64,7 +67,11 @@ function getUpstreamError(error: unknown): { code: ProposalErrorCode; message: s
   }
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  authContext: AuthContext
+) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
     return res.status(405).json({ error: 'Method not allowed' })
@@ -95,6 +102,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Unsupported Safe chain' })
   }
 
+  if (
+    !authContext.isSafeMode ||
+    body.safeAddress.toLowerCase() !== authContext.safeAddress?.toLowerCase() ||
+    body.senderAddress.toLowerCase() !== authContext.ownerAddress.toLowerCase() ||
+    body.chainId !== authContext.safeChainId
+  ) {
+    return res.status(403).json({ error: 'Not authorized to propose for this Safe' })
+  }
+
   try {
     const apiKit = new SafeApiKit({ chainId: BigInt(body.chainId), apiKey })
     await apiKit.proposeTransaction({
@@ -123,3 +139,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
   }
 }
+
+export default withRateLimit({
+  maxRequests: 20,
+  windowSeconds: 60,
+  keyPrefix: 'safe:propose',
+})(withAuth(withSameOrigin(handler)))

@@ -8,6 +8,7 @@ import { FIELD_TYPES, SmartInput } from '@buildeross/ui/Fields'
 import { Box, Button, Flex, Icon, Text } from '@buildeross/zord'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Address } from 'viem'
+import { useAccount } from 'wagmi'
 
 import { useCreateSplit } from '../../../hooks/useCreateSplit'
 import {
@@ -136,6 +137,8 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({
   onEditSplit,
 }) => {
   const chainId = useChainStore((x) => x.chain.id)
+  const { connector } = useAccount()
+  const isSafeMode = connector?.id === 'safeOwner'
   const { createSplit, isPending, error, splitAddress, txHash, reset } = useCreateSplit()
   const [recipients, setRecipients] = useState<SplitRecipient[]>(EMPTY)
   const [resolutions, setResolutions] = useState<Record<string, Resolution>>({})
@@ -356,16 +359,29 @@ export const SplitRecipients: React.FC<SplitRecipientsProps> = ({
           )}
         </div>
       ) : (
-        <ContractButton
-          chainId={chainId}
-          mt={'x4'}
-          width={'100%'}
-          loading={isPending}
-          disabled={errors.length > 0 || isPending || isResolving || outcomeUnknown}
-          handleClick={handleCreate}
-        >
-          Create split
-        </ContractButton>
+        <>
+          {isSafeMode && (
+            <div className={hintText}>
+              Split creation is not available when connected through a Safe wallet.
+            </div>
+          )}
+          <ContractButton
+            chainId={chainId}
+            mt={'x4'}
+            width={'100%'}
+            loading={isPending}
+            disabled={
+              errors.length > 0 ||
+              isPending ||
+              isResolving ||
+              outcomeUnknown ||
+              isSafeMode
+            }
+            handleClick={handleCreate}
+          >
+            Create split
+          </ContractButton>
+        </>
       )}
 
       {error && !splitAddress && (
