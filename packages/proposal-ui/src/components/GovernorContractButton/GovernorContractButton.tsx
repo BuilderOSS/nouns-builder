@@ -5,7 +5,7 @@ import { executeAppTransaction } from '@buildeross/sdk/transaction'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { getErrorMessage } from '@buildeross/utils/errors'
-import { Box, ButtonProps, Flex, Icon, Text } from '@buildeross/zord'
+import { Box, ButtonProps, Flex, Text } from '@buildeross/zord'
 import { useCallback, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { ContractFunctionName, encodeFunctionData } from 'viem'
@@ -86,7 +86,7 @@ export function GovernorContractButton({
       setIsPending(false)
       onSuccess()
     } catch (err) {
-      setErrorMessage(getErrorMessage(err))
+      setErrorMessage(`Transaction failed: ${getErrorMessage(err)}`)
       console.error('Error interacting with governor contract:', err)
     } finally {
       setIsPending(false)
@@ -114,24 +114,15 @@ export function GovernorContractButton({
         {isPending ? <Box className={uploadingSpinnerWhite} /> : buttonText}
       </ContractButton>
       {errorMessage && (
-        <Box
-          mt="x3"
-          p="x3"
-          borderRadius="curved"
-          backgroundColor="negativeDisabled"
-          style={{ maxWidth: 360 }}
-        >
-          <Flex align="flex-start" gap="x2">
-            <Icon id="warning" size="sm" fill="negative" />
-            <Text
-              variant="paragraph-sm"
-              color="negative"
-              style={{ wordBreak: 'break-word' }}
-              role="alert"
-            >
-              {errorMessage}
-            </Text>
-          </Flex>
+        <Box mt="x2" style={{ maxWidth: 360 }}>
+          <Text
+            variant="paragraph-sm"
+            color="negative"
+            style={{ wordBreak: 'break-word' }}
+            role="alert"
+          >
+            {errorMessage}
+          </Text>
         </Box>
       )}
     </Flex>

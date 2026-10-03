@@ -80,7 +80,7 @@ describe('GovernorContractButton', () => {
     await user.click(screen.getByRole('button', { name: 'Execute' }))
 
     expect(
-      await screen.findByText('Proposal is no longer executable')
+      await screen.findByText('Transaction failed: Proposal is no longer executable')
     ).toBeInTheDocument()
   })
 
