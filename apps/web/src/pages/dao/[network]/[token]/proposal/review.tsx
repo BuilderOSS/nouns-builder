@@ -19,10 +19,10 @@ import {
   useProposalStore,
 } from '@buildeross/stores'
 import { AddressType, ProposalCreateStage } from '@buildeross/types'
+import { useConnectModal } from '@buildeross/ui/ConnectModalProvider'
 import { AnimatedModal, SuccessModalContent } from '@buildeross/ui/Modal'
 import { generateProposalSalt } from '@buildeross/utils/proposalMetadata'
 import { Button, Flex, Stack, Text } from '@buildeross/zord'
-import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { GetServerSideProps } from 'next'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
