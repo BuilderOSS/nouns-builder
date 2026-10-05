@@ -51,6 +51,7 @@ import { Disclaimer } from 'src/components/Disclaimer'
 import { ErrorBoundary } from 'src/components/ErrorBoundary'
 import { FrameProvider } from 'src/components/FrameProvider'
 import { LinksProvider } from 'src/components/LinksProvider'
+import { WalletConnectProvider } from 'src/components/WalletConnectProvider'
 import { useAppDisconnect } from 'src/hooks/useAppDisconnect'
 import { useDebugConnectorLifecycle } from 'src/hooks/useDebugConnectorLifecycle'
 import { useSession } from 'src/hooks/useSession'
@@ -327,7 +328,9 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
                   <AppThemeProvider>
                     <LinksProvider>
                       <LinkComponentProvider LinkComponent={Link}>
-                        {getLayout(<Component {...pageProps} err={err} />)}
+                        <WalletConnectProvider>
+                          {getLayout(<Component {...pageProps} err={err} />)}
+                        </WalletConnectProvider>
                       </LinkComponentProvider>
                     </LinksProvider>
                   </AppThemeProvider>

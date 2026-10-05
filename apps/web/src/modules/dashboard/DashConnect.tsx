@@ -1,5 +1,5 @@
+import { useConnectModal } from '@buildeross/ui/ConnectModalProvider'
 import { Button, Flex, Text } from '@buildeross/zord'
-import { useConnectModal } from '@rainbow-me/rainbowkit'
 
 export const DashConnect = () => {
   const { openConnectModal } = useConnectModal()

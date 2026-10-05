@@ -1,23 +1,14 @@
 import { useAuthStore } from '@buildeross/stores'
+import { useConnectModal } from '@buildeross/ui/ConnectModalProvider'
 import { Button, Flex } from '@buildeross/zord'
 import { ConnectButton as RKConnectButton } from '@rainbow-me/rainbowkit'
-import dynamic from 'next/dynamic'
-import React, { useState } from 'react'
+import React from 'react'
 
 import { connectButtonWrapper } from './Nav.styles.css'
 
-// Lazy load WalletConnectDialog for better performance
-const WalletConnectDialog = dynamic(
-  () =>
-    import('src/components/WalletConnectDialog').then((mod) => ({
-      default: mod.WalletConnectDialog,
-    })),
-  { ssr: false }
-)
-
 export const ConnectButton = () => {
-  const [showModal, setShowModal] = useState(false)
   const { isSafeMode } = useAuthStore()
+  const { openConnectModal } = useConnectModal()
 
   return (
     <Flex
@@ -65,15 +56,11 @@ export const ConnectButton = () => {
                 <Button
                   variant="primary"
                   size="sm"
-                  onClick={() => setShowModal(true)}
+                  onClick={openConnectModal}
                   style={{ fontSize: '16px', paddingLeft: '24px', paddingRight: '24px' }}
                 >
                   Connect
                 </Button>
-                <WalletConnectDialog
-                  isOpen={showModal}
-                  onClose={() => setShowModal(false)}
-                />
               </>
             )
           }

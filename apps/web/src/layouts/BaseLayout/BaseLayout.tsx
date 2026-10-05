@@ -14,9 +14,7 @@ import {
   useDaoStore,
 } from '@buildeross/stores'
 import type { Chain, DaoContractAddresses } from '@buildeross/types'
-import { ConnectModalProvider } from '@buildeross/ui/ConnectModalProvider'
 import { Box } from '@buildeross/zord'
-import { useConnectModal } from '@rainbow-me/rainbowkit'
 import React, { ReactNode, useMemo } from 'react'
 import { zeroAddress as ZERO_ADDRESS } from 'viem'
 
@@ -47,27 +45,23 @@ export function BaseLayout({
   const { style, ...rest } = props
   const chainStore = useMemo(() => createChainStore(chain), [chain])
   const daoStore = useMemo(() => createDaoStore(addresses), [addresses])
-  const { openConnectModal } = useConnectModal()
-
   return (
-    <ConnectModalProvider value={{ openConnectModal }}>
-      <ChainStoreProvider store={chainStore}>
-        <DaoStoreProvider store={daoStore}>
-          <DraftStoreProviders>
-            <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-              {nav || <DefaultLayoutNav hideChainMenu={hideChainMenu} />}
-              <Box style={{ ...style, flex: 1 }} {...rest}>
-                {children}
-              </Box>
-              {footer}
+    <ChainStoreProvider store={chainStore}>
+      <DaoStoreProvider store={daoStore}>
+        <DraftStoreProviders>
+          <Box style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            {nav || <DefaultLayoutNav hideChainMenu={hideChainMenu} />}
+            <Box style={{ ...style, flex: 1 }} {...rest}>
+              {children}
             </Box>
-            <ErrorBoundary>
-              <SafeTransactionHandler />
-            </ErrorBoundary>
-          </DraftStoreProviders>
-        </DaoStoreProvider>
-      </ChainStoreProvider>
-    </ConnectModalProvider>
+            {footer}
+          </Box>
+          <ErrorBoundary>
+            <SafeTransactionHandler />
+          </ErrorBoundary>
+        </DraftStoreProviders>
+      </DaoStoreProvider>
+    </ChainStoreProvider>
   )
 }
 
