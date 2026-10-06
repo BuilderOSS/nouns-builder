@@ -212,7 +212,7 @@ export const DropInfo = ({
             <Text variant="label-sm" color="text3" mb="x2">
               {isTreasuryFundsRecipient ? 'DAO & Funds Recipient' : 'DAO'}
             </Text>
-            <Link link={getDaoLink(chainId, daoAddress)} isExternal>
+            <Link link={getDaoLink(chainId, daoAddress)}>
               <Button
                 variant="secondaryAccent"
                 size="md"

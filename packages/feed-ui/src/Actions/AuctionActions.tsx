@@ -168,7 +168,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
           >
             Place Bid
           </ContractButton>
-          <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
+          <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
             <Button size={buttonSize} px="x3" variant="secondary">
               View Auction
             </Button>
@@ -190,7 +190,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
           >
             {isSettling ? 'Settling...' : buttonText}
           </ContractButton>
-          <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
+          <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
             <Button size={buttonSize} px="x3" variant="secondary">
               View Auction
             </Button>
@@ -209,7 +209,7 @@ export const AuctionActions: React.FC<AuctionActionsProps> = ({
               </Button>
             </LinkWrapper>
           )}
-          <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)} isExternal>
+          <LinkWrapper link={getAuctionLink(chainId, daoId, tokenId)}>
             <Button size={buttonSize} px="x3" variant="secondary">
               View Auction
             </Button>

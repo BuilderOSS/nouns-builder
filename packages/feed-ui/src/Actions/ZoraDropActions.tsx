@@ -101,7 +101,7 @@ export const ZoraDropActions: React.FC<ZoraDropActionsProps> = ({
       >
         Mint
       </ContractButton>
-      <LinkWrapper link={getDropLink(chainId, dropAddress)} isExternal>
+      <LinkWrapper link={getDropLink(chainId, dropAddress)}>
         <Button size={buttonSize} px="x3" variant="secondary">
           View Drop
         </Button>

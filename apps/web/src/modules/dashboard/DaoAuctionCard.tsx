@@ -136,7 +136,6 @@ export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
 
       <Link
         link={getAuctionLink(chainId, tokenAddress, currentAuction?.token?.tokenId)}
-        isExternal
         style={{ width: '100%' }}
       >
         <Flex align="center" gap="x2" mb="x3" w="100%">

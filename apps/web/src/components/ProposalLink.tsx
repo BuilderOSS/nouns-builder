@@ -25,7 +25,6 @@ export const ProposalLink = ({ proposal, chainId }: ProposalLinkProps) => {
       </Text>
       <Link
         link={getProposalLink(chainId, proposal.dao.id as Address, proposal.proposalId)}
-        isExternal
       >
         <Button
           variant="secondaryAccent"

@@ -36,7 +36,7 @@ export const ZoraCoinCreatedItem: React.FC<ZoraCoinCreatedItemProps> = ({ item }
   const displayImageUrl = imageUrl
 
   return (
-    <LinkWrapper link={getCoinLink(item.chainId, item.coinAddress)} isExternal>
+    <LinkWrapper link={getCoinLink(item.chainId, item.coinAddress)}>
       <Stack gap="x4" w="100%" className={feedItemContentHorizontal}>
         {/* Media - full-width on mobile, fixed width on desktop */}
         {isLoading ||

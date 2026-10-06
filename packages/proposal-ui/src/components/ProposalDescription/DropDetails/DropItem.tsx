@@ -197,7 +197,7 @@ export const DropItem = ({ drop, index, isExecuted, chainId }: DropItemProps) =>
 
       {/* Executed state: Show link to drop page */}
       {isExecuted && dropLink && (
-        <a href={dropLink.href} className={linkStyle} target="_blank" rel="noreferrer">
+        <a href={dropLink.href} className={linkStyle}>
           <Button variant="secondary" size="sm">
             View Drop Page
             <Icon id="arrow-top-right" />

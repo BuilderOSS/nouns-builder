@@ -16,7 +16,7 @@ export const AuctionCreatedItem: React.FC<AuctionCreatedItemProps> = ({ item }) 
   const { getAuctionLink } = useLinks()
 
   return (
-    <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)} isExternal>
+    <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)}>
       <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
         {/* Image - full-width on mobile, fixed width on desktop */}
         <Box className={feedItemImage}>

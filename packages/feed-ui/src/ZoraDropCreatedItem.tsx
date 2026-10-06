@@ -38,7 +38,7 @@ export const ZoraDropCreatedItem: React.FC<ZoraDropCreatedItemProps> = ({ item }
   const displayImageUrl = item.dropImageURI
 
   return (
-    <LinkWrapper link={getDropLink(item.chainId, item.dropAddress)} isExternal>
+    <LinkWrapper link={getDropLink(item.chainId, item.dropAddress)}>
       <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
         {/* Media - full-width on mobile, fixed width on desktop */}
         {isMediaTypeLoading ? (
