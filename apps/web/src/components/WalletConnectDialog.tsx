@@ -324,27 +324,14 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
     }
   }, [state])
 
-  // Handle modal close after authentication
+  // Close the parent modal as soon as authentication succeeds. The state
+  // machine transitions to closed shortly after this state, which used to
+  // cancel the delayed callback before the parent could be notified.
   useEffect(() => {
-    // Only close if we just authenticated (came from authenticated state)
-    if (state.matches('authenticated')) {
-      debugWallet('Authenticated! Scheduling modal close...')
+    if (state.matches('authenticated') && !justAuthenticatedRef.current) {
+      debugWallet('Authenticated! Closing modal...')
       justAuthenticatedRef.current = true
-
-      // Wait for state machine to transition to closed, then notify parent
-      const timer = setTimeout(() => {
-        debugWallet('Closing modal after authentication')
-        onClose()
-      }, 600) // Slightly longer than state machine's 500ms delay
-
-      return () => {
-        clearTimeout(timer)
-        // Reset flag if component unmounts before timer fires
-        if (justAuthenticatedRef.current) {
-          debugWallet('Component unmounting with authentication pending, resetting flag')
-          justAuthenticatedRef.current = false
-        }
-      }
+      onClose()
     }
   }, [state, onClose])
 
