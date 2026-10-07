@@ -312,7 +312,7 @@ export const CoinInfo = ({
             <Text variant="label-sm" color="text3" mb="x2">
               DAO
             </Text>
-            <Link link={getDaoLink(chainId, daoAddress)} isExternal>
+            <Link link={getDaoLink(chainId, daoAddress)}>
               <Button
                 variant="secondaryAccent"
                 size="md"

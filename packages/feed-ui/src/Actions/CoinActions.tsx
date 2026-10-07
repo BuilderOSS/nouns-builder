@@ -95,7 +95,7 @@ export const CoinActions: React.FC<CoinActionsProps> = ({
           {sellEnabled && hasBalance ? 'Trade' : 'Buy'}
         </ContractButton>
       )}
-      <LinkWrapper link={getCoinLink(chainId, coinAddress)} isExternal>
+      <LinkWrapper link={getCoinLink(chainId, coinAddress)}>
         <Button size={buttonSize} px="x3" variant="secondary">
           View Coin
         </Button>

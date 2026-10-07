@@ -18,7 +18,7 @@ export const ClankerTokenCreatedItem: React.FC<ClankerTokenCreatedItemProps> = (
   const { getCoinLink } = useLinks()
 
   return (
-    <LinkWrapper link={getCoinLink(item.chainId, item.tokenAddress)} isExternal>
+    <LinkWrapper link={getCoinLink(item.chainId, item.tokenAddress)}>
       <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
         {/* Image - full-width on mobile, fixed width on desktop */}
         <Box className={feedItemImage}>

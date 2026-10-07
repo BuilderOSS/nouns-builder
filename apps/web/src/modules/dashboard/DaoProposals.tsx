@@ -26,7 +26,7 @@ export const DaoProposals = ({
   return (
     <Box>
       <Flex justify={'space-between'} mb={'x3'} align="center">
-        <Link align="center" link={getDaoLink?.(chainId, tokenAddress)} isExternal>
+        <Link align="center" link={getDaoLink?.(chainId, tokenAddress)}>
           {contractImage ? (
             <Box mr="x2">
               <FallbackImage
@@ -50,7 +50,6 @@ export const DaoProposals = ({
         <Button
           as={Link}
           link={getProposalCreateLink?.(chainId, tokenAddress)}
-          isExternal
           variant="outline"
           borderRadius="curved"
           size={'sm'}

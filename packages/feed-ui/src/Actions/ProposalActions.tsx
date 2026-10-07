@@ -140,10 +140,7 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
   if (isExecuted) {
     return (
       <Flex gap="x2" align="center" wrap="wrap">
-        <LinkWrapper
-          link={getProposalLink(chainId, daoId, proposalNumber, 'details')}
-          isExternal
-        >
+        <LinkWrapper link={getProposalLink(chainId, daoId, proposalNumber, 'details')}>
           <Button size={buttonSize} px="x3" variant="secondary">
             View Proposal
           </Button>
@@ -186,7 +183,6 @@ export const ProposalActions: React.FC<ProposalActionsProps> = ({
           proposalNumber,
           isUpdate ? 'propdates' : 'details'
         )}
-        isExternal
       >
         <Button size={buttonSize} px="x3" variant="secondary">
           {isUpdate ? 'View Updates' : 'View Proposal'}

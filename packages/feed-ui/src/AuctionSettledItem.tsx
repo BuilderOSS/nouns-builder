@@ -27,7 +27,7 @@ export const AuctionSettledItem: React.FC<AuctionSettledItemProps> = ({ item }) 
   const hasWinner = item.winner !== zeroAddress && BigInt(item.amount) > 0n
 
   return (
-    <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)} isExternal>
+    <LinkWrapper link={getAuctionLink(item.chainId, item.daoId, item.tokenId)}>
       <Stack gap="x3" w="100%" className={feedItemContentHorizontal}>
         {/* Image - full-width on mobile, fixed width on desktop */}
         <Box className={feedItemImage}>

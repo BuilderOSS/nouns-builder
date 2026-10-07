@@ -1,3 +1,4 @@
+import { useAuthStore } from '@buildeross/stores'
 import { ConnectModalProvider } from '@buildeross/ui/ConnectModalProvider'
 import dynamic from 'next/dynamic'
 import React, { ReactNode, useCallback, useState } from 'react'
@@ -12,7 +13,15 @@ const WalletConnectDialog = dynamic(
 
 export function WalletConnectProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
-  const openConnectModal = useCallback(() => setIsOpen(true), [])
+  const { isConnected, isAuthenticated } = useAuthStore()
+  const openConnectModal = useCallback(() => {
+    if (isConnected && isAuthenticated) {
+      setIsOpen(false)
+      return
+    }
+
+    setIsOpen(true)
+  }, [isAuthenticated, isConnected])
 
   return (
     <ConnectModalProvider value={{ openConnectModal }}>

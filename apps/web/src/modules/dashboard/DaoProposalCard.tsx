@@ -64,7 +64,6 @@ export const DaoProposalCard = ({
         px={'x3'}
         position={'relative'}
         link={getProposalLink?.(chainId, collectionAddress, proposalNumber)}
-        isExternal
         className={proposalCardVariants[displayWarning ? 'warning' : 'default']}
       >
         <Text
