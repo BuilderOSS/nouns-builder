@@ -72,8 +72,6 @@ const DaoRow: React.FC<DaoRowProps> = ({ dao, index, isHidden }) => {
       <Link
         href={`/dao/${chainMeta?.slug}/${dao.collectionAddress}`}
         passHref
-        target="_blank"
-        rel="noopener noreferrer"
         style={{ width: '100%', textDecoration: 'none' }}
       >
         <Flex
@@ -244,8 +242,6 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
           <Link
             href={`/profile/${address}`}
             passHref
-            target="_blank"
-            rel="noopener noreferrer"
             style={{ textDecoration: 'none', flex: 1 }}
           >
             <Flex
