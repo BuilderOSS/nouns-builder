@@ -20,11 +20,13 @@ import {
   ProposalCreated,
   ProposalSignersSet,
   ProposalUpdated,
+  VoteCast,
 } from '../generated/templates/Governor/Governor'
 import {
   handleProposalCreated,
   handleProposalSignersSet,
   handleProposalUpdated,
+  handleVoteCast,
 } from '../src/governor'
 
 const TOKEN_ADDRESS = '0x00000000000000000000000000000000000000aa'
@@ -245,6 +247,31 @@ function createProposalSignersSetEvent(signers: string[]): ProposalSignersSet {
   return event
 }
 
+function createVoteCastEvent(proposalId: string, reason: string): VoteCast {
+  const event = newTypedMockEvent<VoteCast>()
+  event.address = Address.fromString(GOVERNOR_ADDRESS)
+  event.parameters = [
+    new ethereum.EventParam(
+      'voter',
+      ethereum.Value.fromAddress(Address.fromString(REPRESENTED))
+    ),
+    new ethereum.EventParam(
+      'proposalId',
+      ethereum.Value.fromFixedBytes(Bytes.fromHexString(proposalId))
+    ),
+    new ethereum.EventParam(
+      'support',
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(1))
+    ),
+    new ethereum.EventParam(
+      'weight',
+      ethereum.Value.fromUnsignedBigInt(BigInt.fromI32(3))
+    ),
+    new ethereum.EventParam('reason', ethereum.Value.fromString(reason)),
+  ]
+  return event
+}
+
 describe('Governor ProposalCreated parsing', () => {
   test('parses new JSON metadata format', () => {
     clearStore()
@@ -365,5 +392,25 @@ describe('Governor ProposalCreated parsing', () => {
     const newSignerId = NEW_PROPOSAL_ID + '-' + signerTwo
     assert.assertTrue(ProposalSigner.load(oldSignerId) == null)
     assert.fieldEquals('ProposalSigner', newSignerId, 'voteWeight', '55')
+  })
+  test('indexes vote with reason and denormalized dao', () => {
+    clearStore()
+    setupDataSourceContext()
+    seedDao()
+    mockGovernorProposalUpdatablePeriod()
+
+    handleProposalCreated(createProposalCreatedEvent('# Vote title\nbody'))
+
+    const proposalId =
+      '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+    const event = createVoteCastEvent(proposalId, 'great idea')
+    handleVoteCast(event)
+
+    const voteId = event.transaction.hash.toHexString() + ':' + event.logIndex.toString()
+    assert.fieldEquals('ProposalVote', voteId, 'reason', 'great idea')
+    assert.fieldEquals('ProposalVote', voteId, 'support', 'FOR')
+    assert.fieldEquals('ProposalVote', voteId, 'proposal', proposalId)
+    assert.fieldEquals('ProposalVote', voteId, 'dao', TOKEN_ADDRESS)
+    assert.fieldEquals('Proposal', proposalId, 'voteCount', '1')
   })
 })

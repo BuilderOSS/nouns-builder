@@ -160,6 +160,7 @@ describe('Auction bid comment parsing', () => {
 
     const bidId = event.transaction.hash.toHexString() + ':' + event.logIndex.toString()
     assert.fieldEquals('AuctionBid', bidId, 'comment', 'comment from bid')
+    assert.fieldEquals('AuctionBid', bidId, 'dao', TOKEN_ADDRESS)
   })
 
   test('stores null comment when calldata has no trailing bytes', () => {

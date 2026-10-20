@@ -421,6 +421,7 @@ export function handleVoteCast(event: VoteCastEvent): void {
   proposalVote.weight = event.params.weight.toI32()
   proposalVote.reason = event.params.reason.length > 0 ? event.params.reason : null
   proposalVote.proposal = proposalId
+  proposalVote.dao = proposal.dao
 
   let support = event.params.support
   let weight = event.params.weight.toI32()
