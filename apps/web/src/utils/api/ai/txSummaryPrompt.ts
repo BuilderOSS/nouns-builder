@@ -17,7 +17,7 @@ import { formatUnits, isAddress, isAddressEqual, zeroAddress } from 'viem'
  * Bump whenever the system prompt, examples or facts format changes so cached
  * summaries produced by the previous prompt are not served.
  */
-export const TX_SUMMARY_PROMPT_VERSION = 'v2'
+export const TX_SUMMARY_PROMPT_VERSION = 'v3'
 
 type SerializedStream = {
   recipient?: string
@@ -102,17 +102,33 @@ export const describeAddress = (
 }
 
 /**
- * "1234567.1234567" -> "1,234,567.123457" (max 6 decimals, trailing zeros trimmed).
+ * Rounds a decimal string to a precision that suits its magnitude, with thousands
+ * separators: "152788.378016" -> "152,788.38", "1.23456789" -> "1.2346",
+ * "0.123456789" -> "0.123457". Dust below 0.000001 keeps its first significant digits.
  */
 export const formatDecimalString = (decimal: string) => {
   const negative = decimal.startsWith('-')
-  const [whole, fraction = ''] = decimal.replace('-', '').split('.')
-  const withCommas = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-  const trimmedFraction = fraction.slice(0, 6).replace(/0+$/, '')
-  const significantFraction =
-    trimmedFraction || (/[1-9]/.test(fraction) ? fraction.match(/^0*[1-9]{1,2}/)![0] : '')
+  const [rawWhole, fraction = ''] = decimal.replace('-', '').split('.')
+  const whole = rawWhole.replace(/^0+(?=\d)/, '') || '0'
+  const sign = negative ? '-' : ''
 
-  return `${negative ? '-' : ''}${withCommas}${significantFraction ? `.${significantFraction}` : ''}`
+  if (whole === '0' && /^0{6}/.test(fraction) && /[1-9]/.test(fraction)) {
+    return `${sign}0.${fraction.match(/^0*[1-9]{1,2}/)![0]}`
+  }
+
+  const digits = whole.length >= 4 ? 2 : whole !== '0' ? 4 : 6
+  const padded = fraction.padEnd(digits + 1, '0')
+  let scaled = BigInt(`${whole}${padded.slice(0, digits)}`)
+  if (Number(padded[digits]) >= 5) scaled += 1n
+
+  const scaledString = scaled.toString().padStart(digits + 1, '0')
+  const roundedWhole = scaledString.slice(0, scaledString.length - digits)
+  const roundedFraction = scaledString
+    .slice(scaledString.length - digits)
+    .replace(/0+$/, '')
+  const withCommas = roundedWhole.replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+
+  return `${sign}${withCommas}${roundedFraction ? `.${roundedFraction}` : ''}`
 }
 
 const toBigInt = (value: unknown) => {
