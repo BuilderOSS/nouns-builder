@@ -305,5 +305,18 @@ describe('simulationService', () => {
       expect(error.message).toContain('<redacted>')
       expect(error.message).not.toContain('test-key')
     })
+
+    it('redacts encoded and decoded api keys from urls with a trailing slash', async () => {
+      const rpcUrl = 'https://eth-mainnet.g.alchemy.com/v2/test%20key/'
+      vi.mocked(getAlchemyServerRpcUrl).mockReturnValueOnce(rpcUrl)
+      simulateBlocks.mockRejectedValueOnce(
+        new Error(`boom at ${rpcUrl} using test%20key and test key`)
+      )
+
+      const error = await simulate(request).catch((e) => e)
+
+      expect(error).toBeInstanceOf(BackendFailedError)
+      expect(error.message).toBe('boom at <redacted> using <redacted> and <redacted>')
+    })
   })
 })

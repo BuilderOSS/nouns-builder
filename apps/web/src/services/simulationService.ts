@@ -96,6 +96,24 @@ const getRevertReason = (error: Error | undefined): string => {
   return error.shortMessage
 }
 
+// viem error messages include the RPC url, which contains the API key
+const redactRpcUrl = (message: string, rpcUrl: string): string => {
+  const secrets = [rpcUrl]
+  const apiKey = new URL(rpcUrl).pathname.split('/').filter(Boolean).pop()
+  if (apiKey) {
+    secrets.push(apiKey)
+    try {
+      secrets.push(decodeURIComponent(apiKey))
+    } catch {
+      // undecodable segment, the encoded form is redacted above
+    }
+  }
+  return secrets.reduce(
+    (result, secret) => result.split(secret).join('<redacted>'),
+    message
+  )
+}
+
 const isInsufficientFundsError = (error: unknown): boolean => {
   if (
     error instanceof BaseError &&
@@ -157,10 +175,8 @@ const simulateTransaction = async ({
         'Insufficient treasury funds to carry out some or all of these transactions'
       )
     }
-    // viem error messages include the RPC url, which contains the API key
-    const apiKey = new URL(rpcUrl).pathname.split('/').pop() as string
     const message = error instanceof Error ? error.message : String(error)
-    throw new BackendFailedError(message.split(apiKey).join('<redacted>'))
+    throw new BackendFailedError(redactRpcUrl(message, rpcUrl))
   }
 }
 
