@@ -40,7 +40,14 @@ describe('formatDecimalString', () => {
   it('adds thousands separators and trims trailing zeros', () => {
     expect(formatDecimalString('1234567.5000')).toBe('1,234,567.5')
     expect(formatDecimalString('780')).toBe('780')
-    expect(formatDecimalString('0.123456789')).toBe('0.123456')
+    expect(formatDecimalString('0.123456789')).toBe('0.123457')
+  })
+
+  it('rounds to a precision that suits the magnitude', () => {
+    expect(formatDecimalString('152788.378016')).toBe('152,788.38')
+    expect(formatDecimalString('1.23456789')).toBe('1.2346')
+    expect(formatDecimalString('999.99995')).toBe('1,000')
+    expect(formatDecimalString('-2.5')).toBe('-2.5')
   })
 
   it('keeps tiny amounts visible', () => {

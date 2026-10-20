@@ -171,17 +171,17 @@ export const TransactionDisplay: React.FC<
         ) : (
           <RawCalldataDisplay calldata={rawCalldata} value={decoded.value} />
         )}
+
+        <TransactionAiSummary
+          isVisible={isDecoded && !isLoadingMetadata && showAiSummary}
+          isGeneratingSummary={isGeneratingSummary}
+          aiSummary={aiSummary}
+          errorSummary={errorSummary}
+          onRegenerate={() => regenerateSummary()}
+        />
       </TransactionDisplayShell>
 
       <SimulationWarning simulation={simulation} />
-
-      <TransactionAiSummary
-        isVisible={isDecoded && !isLoadingMetadata && showAiSummary}
-        isGeneratingSummary={isGeneratingSummary}
-        aiSummary={aiSummary}
-        errorSummary={errorSummary}
-        onRegenerate={() => regenerateSummary()}
-      />
     </Stack>
   )
 }
