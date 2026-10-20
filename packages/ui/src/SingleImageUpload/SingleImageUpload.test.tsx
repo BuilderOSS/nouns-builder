@@ -61,6 +61,36 @@ describe('Single image upload', () => {
     expect(screen.queryByTestId('error-msg')).not.toBeInTheDocument()
   })
 
+  it('should accept an animated GIF avatar', async () => {
+    const user = userEvent.setup()
+    mockUploadFn.mockResolvedValueOnce({ cid: '1234' })
+
+    const file = new File(['GIF89a'], 'avatar.gif', { type: 'image/gif' })
+
+    render(
+      <Formik initialValues={{ daoAvatar: undefined }} onSubmit={vi.fn()}>
+        {(formik) => (
+          <SingleImageUpload
+            {...formik.getFieldProps('daoAvatar')}
+            formik={formik}
+            id="daoAvatar"
+            inputLabel={'Dao avatar'}
+            helperText={'Upload'}
+          />
+        )}
+      </Formik>
+    )
+
+    const input = screen.getByTestId('file-upload') as HTMLInputElement
+    expect(input.accept).toContain('image/gif')
+    await user.upload(input, file)
+
+    await waitFor(() => {
+      expect(mockUploadFn).toHaveBeenCalled()
+    })
+    expect(screen.queryByText(/unsupported file type/)).not.toBeInTheDocument()
+  })
+
   it('should render an error message given a rejected file upload', async () => {
     const user = userEvent.setup()
     mockUploadFn.mockRejectedValueOnce(new Error('Error'))
