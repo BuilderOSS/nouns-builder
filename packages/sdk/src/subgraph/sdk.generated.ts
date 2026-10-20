@@ -77,6 +77,7 @@ export type AuctionBid = {
   bidTime: Scalars['BigInt']['output']
   bidder: Scalars['Bytes']['output']
   comment?: Maybe<Scalars['String']['output']>
+  dao: Dao
   id: Scalars['ID']['output']
   transactionHash: Scalars['Bytes']['output']
 }
@@ -333,6 +334,27 @@ export type AuctionBid_Filter = {
   comment_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   comment_starts_with?: InputMaybe<Scalars['String']['input']>
   comment_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   id?: InputMaybe<Scalars['ID']['input']>
   id_gt?: InputMaybe<Scalars['ID']['input']>
   id_gte?: InputMaybe<Scalars['ID']['input']>
@@ -370,6 +392,29 @@ export enum AuctionBid_OrderBy {
   BidTime = 'bidTime',
   Bidder = 'bidder',
   Comment = 'comment',
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
+  DaoContractImage = 'dao__contractImage',
+  DaoCreatedAt = 'dao__createdAt',
+  DaoCreatedAtBlock = 'dao__createdAtBlock',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTransactionHash = 'dao__transactionHash',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
   Id = 'id',
   TransactionHash = 'transactionHash',
 }
@@ -6729,6 +6774,7 @@ export enum ProposalUpdatedEvent_OrderBy {
 
 export type ProposalVote = {
   __typename?: 'ProposalVote'
+  dao: Dao
   id: Scalars['ID']['output']
   proposal: Proposal
   reason?: Maybe<Scalars['String']['output']>
@@ -6749,6 +6795,27 @@ export type ProposalVote_Filter = {
   /** Filter for the block changed event. */
   _change_block?: InputMaybe<BlockChangedFilter>
   and?: InputMaybe<Array<InputMaybe<ProposalVote_Filter>>>
+  dao?: InputMaybe<Scalars['String']['input']>
+  dao_?: InputMaybe<Dao_Filter>
+  dao_contains?: InputMaybe<Scalars['String']['input']>
+  dao_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_gt?: InputMaybe<Scalars['String']['input']>
+  dao_gte?: InputMaybe<Scalars['String']['input']>
+  dao_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_lt?: InputMaybe<Scalars['String']['input']>
+  dao_lte?: InputMaybe<Scalars['String']['input']>
+  dao_not?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains?: InputMaybe<Scalars['String']['input']>
+  dao_not_contains_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_ends_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_not_in?: InputMaybe<Array<Scalars['String']['input']>>
+  dao_not_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_not_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with?: InputMaybe<Scalars['String']['input']>
+  dao_starts_with_nocase?: InputMaybe<Scalars['String']['input']>
   id?: InputMaybe<Scalars['ID']['input']>
   id_gt?: InputMaybe<Scalars['ID']['input']>
   id_gte?: InputMaybe<Scalars['ID']['input']>
@@ -6842,6 +6909,29 @@ export type ProposalVote_Filter = {
 }
 
 export enum ProposalVote_OrderBy {
+  Dao = 'dao',
+  DaoAuctionAddress = 'dao__auctionAddress',
+  DaoCandidateCount = 'dao__candidateCount',
+  DaoContractImage = 'dao__contractImage',
+  DaoCreatedAt = 'dao__createdAt',
+  DaoCreatedAtBlock = 'dao__createdAtBlock',
+  DaoDescription = 'dao__description',
+  DaoGovernorAddress = 'dao__governorAddress',
+  DaoId = 'dao__id',
+  DaoMetadata = 'dao__metadata',
+  DaoMetadataAddress = 'dao__metadataAddress',
+  DaoName = 'dao__name',
+  DaoOwnerCount = 'dao__ownerCount',
+  DaoProjectUri = 'dao__projectURI',
+  DaoProposalCount = 'dao__proposalCount',
+  DaoSymbol = 'dao__symbol',
+  DaoTokenAddress = 'dao__tokenAddress',
+  DaoTokensCount = 'dao__tokensCount',
+  DaoTotalAuctionSales = 'dao__totalAuctionSales',
+  DaoTotalSupply = 'dao__totalSupply',
+  DaoTransactionHash = 'dao__transactionHash',
+  DaoTreasuryAddress = 'dao__treasuryAddress',
+  DaoVoterCount = 'dao__voterCount',
   Id = 'id',
   Proposal = 'proposal',
   ProposalAbstainVotes = 'proposal__abstainVotes',
@@ -7806,10 +7896,12 @@ export type Query = {
   auctionSettledEvent?: Maybe<AuctionSettledEvent>
   auctionSettledEvents: Array<AuctionSettledEvent>
   auctions: Array<Auction>
+  bidSearch: Array<AuctionBid>
   candidateComment?: Maybe<CandidateComment>
   candidateCommentCreatedEvent?: Maybe<CandidateCommentCreatedEvent>
   candidateCommentCreatedEvents: Array<CandidateCommentCreatedEvent>
   candidateComments: Array<CandidateComment>
+  candidateSearch: Array<ProposalCandidateVersion>
   candidateSponsorSignature?: Maybe<CandidateSponsorSignature>
   candidateSponsorSignatureCreatedEvent?: Maybe<CandidateSponsorSignatureCreatedEvent>
   candidateSponsorSignatureCreatedEvents: Array<CandidateSponsorSignatureCreatedEvent>
@@ -7858,6 +7950,7 @@ export type Query = {
   proposalExecutedEvents: Array<ProposalExecutedEvent>
   proposalMetadataEntities: Array<ProposalMetadataEntity>
   proposalMetadataEntity?: Maybe<ProposalMetadataEntity>
+  proposalSearch: Array<Proposal>
   proposalSigner?: Maybe<ProposalSigner>
   proposalSigners: Array<ProposalSigner>
   proposalUpdate?: Maybe<ProposalUpdate>
@@ -7879,6 +7972,7 @@ export type Query = {
   tokens: Array<Token>
   treasuryAssetPin?: Maybe<TreasuryAssetPin>
   treasuryAssetPins: Array<TreasuryAssetPin>
+  voteSearch: Array<ProposalVote>
   zoraCoin?: Maybe<ZoraCoin>
   zoraCoinCreatedEvent?: Maybe<ZoraCoinCreatedEvent>
   zoraCoinCreatedEvents: Array<ZoraCoinCreatedEvent>
@@ -7995,6 +8089,15 @@ export type QueryAuctionsArgs = {
   where?: InputMaybe<Auction_Filter>
 }
 
+export type QueryBidSearchArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  text: Scalars['String']['input']
+  where?: InputMaybe<AuctionBid_Filter>
+}
+
 export type QueryCandidateCommentArgs = {
   block?: InputMaybe<Block_Height>
   id: Scalars['ID']['input']
@@ -8025,6 +8128,15 @@ export type QueryCandidateCommentsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<CandidateComment_Filter>
+}
+
+export type QueryCandidateSearchArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  text: Scalars['String']['input']
+  where?: InputMaybe<ProposalCandidateVersion_Filter>
 }
 
 export type QueryCandidateSponsorSignatureArgs = {
@@ -8410,6 +8522,15 @@ export type QueryProposalMetadataEntityArgs = {
   subgraphError?: _SubgraphErrorPolicy_
 }
 
+export type QueryProposalSearchArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  text: Scalars['String']['input']
+  where?: InputMaybe<Proposal_Filter>
+}
+
 export type QueryProposalSignerArgs = {
   block?: InputMaybe<Block_Height>
   id: Scalars['ID']['input']
@@ -8578,6 +8699,15 @@ export type QueryTreasuryAssetPinsArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>
   subgraphError?: _SubgraphErrorPolicy_
   where?: InputMaybe<TreasuryAssetPin_Filter>
+}
+
+export type QueryVoteSearchArgs = {
+  block?: InputMaybe<Block_Height>
+  first?: InputMaybe<Scalars['Int']['input']>
+  skip?: InputMaybe<Scalars['Int']['input']>
+  subgraphError?: _SubgraphErrorPolicy_
+  text: Scalars['String']['input']
+  where?: InputMaybe<ProposalVote_Filter>
 }
 
 export type QueryZoraCoinArgs = {
@@ -11358,6 +11488,142 @@ export type ProposalVoteFragment = {
   timestamp: any
 }
 
+export type SearchDaoRefFragment = {
+  __typename?: 'DAO'
+  id: string
+  name: string
+  symbol: string
+  tokenAddress: any
+  contractImage: string
+}
+
+export type SearchDaoFragment = {
+  __typename?: 'DAO'
+  description: string
+  projectURI: string
+  totalSupply: number
+  proposalCount: number
+  ownerCount: number
+  metadataAddress: any
+  treasuryAddress: any
+  governorAddress: any
+  auctionAddress: any
+  id: string
+  name: string
+  symbol: string
+  tokenAddress: any
+  contractImage: string
+}
+
+export type SearchProposalFragment = {
+  __typename?: 'Proposal'
+  id: string
+  proposalId: any
+  proposalNumber: number
+  title?: string | null
+  proposer: any
+  timeCreated: any
+  voteStart: any
+  voteEnd: any
+  expiresAt?: any | null
+  executed: boolean
+  canceled: boolean
+  vetoed: boolean
+  queued: boolean
+  forVotes: number
+  againstVotes: number
+  abstainVotes: number
+  quorumVotes: any
+  voteCount: number
+  dao: {
+    __typename?: 'DAO'
+    id: string
+    name: string
+    symbol: string
+    tokenAddress: any
+    contractImage: string
+  }
+}
+
+export type SearchCandidateFragment = {
+  __typename?: 'ProposalCandidateVersion'
+  id: string
+  title?: string | null
+  createdAt: any
+  attester: any
+  versionNumber: any
+  group: {
+    __typename?: 'ProposalCandidateGroup'
+    id: string
+    candidateNumber: number
+    proposer: any
+    dao: {
+      __typename?: 'DAO'
+      id: string
+      name: string
+      symbol: string
+      tokenAddress: any
+      contractImage: string
+    }
+  }
+  proposal?: { __typename?: 'Proposal'; proposalNumber: number } | null
+}
+
+export type SearchVoteFragment = {
+  __typename?: 'ProposalVote'
+  id: string
+  transactionHash: any
+  timestamp: any
+  voter: any
+  support: ProposalVoteSupport
+  weight: number
+  reason?: string | null
+  dao: {
+    __typename?: 'DAO'
+    id: string
+    name: string
+    symbol: string
+    tokenAddress: any
+    contractImage: string
+  }
+  proposal: { __typename?: 'Proposal'; proposalNumber: number; title?: string | null }
+}
+
+export type SearchBidFragment = {
+  __typename?: 'AuctionBid'
+  id: string
+  transactionHash: any
+  amount: any
+  bidder: any
+  comment?: string | null
+  bidTime: any
+  dao: {
+    __typename?: 'DAO'
+    id: string
+    name: string
+    symbol: string
+    tokenAddress: any
+    contractImage: string
+  }
+  auction: {
+    __typename?: 'Auction'
+    token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
+  }
+}
+
+export type SearchProfileFragment = {
+  __typename?: 'Profile'
+  id: string
+  tokenCount: number
+  ownerDaoCount: number
+  voterDaoCount: number
+  proposalVotesCount: number
+  proposalsSubmittedCount: number
+  bidsPlacedCount: number
+  auctionWinsCount: number
+  lastActiveAt: any
+}
+
 export type SnapshotFragment = {
   __typename?: 'Snapshot'
   id: string
@@ -13301,6 +13567,377 @@ export type FindAuctionsForDaosQuery = {
   }>
 }
 
+export type GlobalSearchQueryVariables = Exact<{
+  text: Scalars['String']['input']
+  first: Scalars['Int']['input']
+  skip: Scalars['Int']['input']
+  withDaos: Scalars['Boolean']['input']
+  withProposals: Scalars['Boolean']['input']
+  withCandidates: Scalars['Boolean']['input']
+  withVotes: Scalars['Boolean']['input']
+  withBids: Scalars['Boolean']['input']
+  daoWhere?: InputMaybe<Dao_Filter>
+  daoWhereSimple?: InputMaybe<Dao_Filter>
+  proposalWhere?: InputMaybe<Proposal_Filter>
+  candidateWhere?: InputMaybe<ProposalCandidateVersion_Filter>
+  voteWhere?: InputMaybe<ProposalVote_Filter>
+  bidWhere?: InputMaybe<AuctionBid_Filter>
+}>
+
+export type GlobalSearchQuery = {
+  __typename?: 'Query'
+  daoSearch?: Array<{
+    __typename?: 'DAO'
+    description: string
+    projectURI: string
+    totalSupply: number
+    proposalCount: number
+    ownerCount: number
+    metadataAddress: any
+    treasuryAddress: any
+    governorAddress: any
+    auctionAddress: any
+    id: string
+    name: string
+    symbol: string
+    tokenAddress: any
+    contractImage: string
+  }>
+  daos?: Array<{
+    __typename?: 'DAO'
+    description: string
+    projectURI: string
+    totalSupply: number
+    proposalCount: number
+    ownerCount: number
+    metadataAddress: any
+    treasuryAddress: any
+    governorAddress: any
+    auctionAddress: any
+    id: string
+    name: string
+    symbol: string
+    tokenAddress: any
+    contractImage: string
+  }>
+  proposalSearch?: Array<{
+    __typename?: 'Proposal'
+    id: string
+    proposalId: any
+    proposalNumber: number
+    title?: string | null
+    proposer: any
+    timeCreated: any
+    voteStart: any
+    voteEnd: any
+    expiresAt?: any | null
+    executed: boolean
+    canceled: boolean
+    vetoed: boolean
+    queued: boolean
+    forVotes: number
+    againstVotes: number
+    abstainVotes: number
+    quorumVotes: any
+    voteCount: number
+    dao: {
+      __typename?: 'DAO'
+      id: string
+      name: string
+      symbol: string
+      tokenAddress: any
+      contractImage: string
+    }
+  }>
+  candidateSearch?: Array<{
+    __typename?: 'ProposalCandidateVersion'
+    id: string
+    title?: string | null
+    createdAt: any
+    attester: any
+    versionNumber: any
+    group: {
+      __typename?: 'ProposalCandidateGroup'
+      id: string
+      candidateNumber: number
+      proposer: any
+      dao: {
+        __typename?: 'DAO'
+        id: string
+        name: string
+        symbol: string
+        tokenAddress: any
+        contractImage: string
+      }
+    }
+    proposal?: { __typename?: 'Proposal'; proposalNumber: number } | null
+  }>
+  voteSearch?: Array<{
+    __typename?: 'ProposalVote'
+    id: string
+    transactionHash: any
+    timestamp: any
+    voter: any
+    support: ProposalVoteSupport
+    weight: number
+    reason?: string | null
+    dao: {
+      __typename?: 'DAO'
+      id: string
+      name: string
+      symbol: string
+      tokenAddress: any
+      contractImage: string
+    }
+    proposal: { __typename?: 'Proposal'; proposalNumber: number; title?: string | null }
+  }>
+  bidSearch?: Array<{
+    __typename?: 'AuctionBid'
+    id: string
+    transactionHash: any
+    amount: any
+    bidder: any
+    comment?: string | null
+    bidTime: any
+    dao: {
+      __typename?: 'DAO'
+      id: string
+      name: string
+      symbol: string
+      tokenAddress: any
+      contractImage: string
+    }
+    auction: {
+      __typename?: 'Auction'
+      token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
+    }
+  }>
+}
+
+export type GlobalAddressLookupQueryVariables = Exact<{
+  id: Scalars['ID']['input']
+  address: Scalars['Bytes']['input']
+  first: Scalars['Int']['input']
+}>
+
+export type GlobalAddressLookupQuery = {
+  __typename?: 'Query'
+  profile?: {
+    __typename?: 'Profile'
+    id: string
+    tokenCount: number
+    ownerDaoCount: number
+    voterDaoCount: number
+    proposalVotesCount: number
+    proposalsSubmittedCount: number
+    bidsPlacedCount: number
+    auctionWinsCount: number
+    lastActiveAt: any
+  } | null
+  daos: Array<{
+    __typename?: 'DAO'
+    description: string
+    projectURI: string
+    totalSupply: number
+    proposalCount: number
+    ownerCount: number
+    metadataAddress: any
+    treasuryAddress: any
+    governorAddress: any
+    auctionAddress: any
+    id: string
+    name: string
+    symbol: string
+    tokenAddress: any
+    contractImage: string
+  }>
+  proposals: Array<{
+    __typename?: 'Proposal'
+    id: string
+    proposalId: any
+    proposalNumber: number
+    title?: string | null
+    proposer: any
+    timeCreated: any
+    voteStart: any
+    voteEnd: any
+    expiresAt?: any | null
+    executed: boolean
+    canceled: boolean
+    vetoed: boolean
+    queued: boolean
+    forVotes: number
+    againstVotes: number
+    abstainVotes: number
+    quorumVotes: any
+    voteCount: number
+    dao: {
+      __typename?: 'DAO'
+      id: string
+      name: string
+      symbol: string
+      tokenAddress: any
+      contractImage: string
+    }
+  }>
+  proposalVotes: Array<{
+    __typename?: 'ProposalVote'
+    id: string
+    transactionHash: any
+    timestamp: any
+    voter: any
+    support: ProposalVoteSupport
+    weight: number
+    reason?: string | null
+    dao: {
+      __typename?: 'DAO'
+      id: string
+      name: string
+      symbol: string
+      tokenAddress: any
+      contractImage: string
+    }
+    proposal: { __typename?: 'Proposal'; proposalNumber: number; title?: string | null }
+  }>
+  auctionBids: Array<{
+    __typename?: 'AuctionBid'
+    id: string
+    transactionHash: any
+    amount: any
+    bidder: any
+    comment?: string | null
+    bidTime: any
+    dao: {
+      __typename?: 'DAO'
+      id: string
+      name: string
+      symbol: string
+      tokenAddress: any
+      contractImage: string
+    }
+    auction: {
+      __typename?: 'Auction'
+      token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
+    }
+  }>
+}
+
+export type GlobalTxLookupQueryVariables = Exact<{
+  hash: Scalars['Bytes']['input']
+}>
+
+export type GlobalTxLookupQuery = {
+  __typename?: 'Query'
+  proposals: Array<{
+    __typename?: 'Proposal'
+    id: string
+    proposalId: any
+    proposalNumber: number
+    title?: string | null
+    proposer: any
+    timeCreated: any
+    voteStart: any
+    voteEnd: any
+    expiresAt?: any | null
+    executed: boolean
+    canceled: boolean
+    vetoed: boolean
+    queued: boolean
+    forVotes: number
+    againstVotes: number
+    abstainVotes: number
+    quorumVotes: any
+    voteCount: number
+    dao: {
+      __typename?: 'DAO'
+      id: string
+      name: string
+      symbol: string
+      tokenAddress: any
+      contractImage: string
+    }
+  }>
+  proposalVotes: Array<{
+    __typename?: 'ProposalVote'
+    id: string
+    transactionHash: any
+    timestamp: any
+    voter: any
+    support: ProposalVoteSupport
+    weight: number
+    reason?: string | null
+    dao: {
+      __typename?: 'DAO'
+      id: string
+      name: string
+      symbol: string
+      tokenAddress: any
+      contractImage: string
+    }
+    proposal: { __typename?: 'Proposal'; proposalNumber: number; title?: string | null }
+  }>
+  auctionBids: Array<{
+    __typename?: 'AuctionBid'
+    id: string
+    transactionHash: any
+    amount: any
+    bidder: any
+    comment?: string | null
+    bidTime: any
+    dao: {
+      __typename?: 'DAO'
+      id: string
+      name: string
+      symbol: string
+      tokenAddress: any
+      contractImage: string
+    }
+    auction: {
+      __typename?: 'Auction'
+      token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
+    }
+  }>
+}
+
+export type GlobalAddressPrefixLookupQueryVariables = Exact<{
+  prefix: Scalars['ID']['input']
+  prefixEnd: Scalars['ID']['input']
+  first: Scalars['Int']['input']
+}>
+
+export type GlobalAddressPrefixLookupQuery = {
+  __typename?: 'Query'
+  profiles: Array<{
+    __typename?: 'Profile'
+    id: string
+    tokenCount: number
+    ownerDaoCount: number
+    voterDaoCount: number
+    proposalVotesCount: number
+    proposalsSubmittedCount: number
+    bidsPlacedCount: number
+    auctionWinsCount: number
+    lastActiveAt: any
+  }>
+  daos: Array<{
+    __typename?: 'DAO'
+    description: string
+    projectURI: string
+    totalSupply: number
+    proposalCount: number
+    ownerCount: number
+    metadataAddress: any
+    treasuryAddress: any
+    governorAddress: any
+    auctionAddress: any
+    id: string
+    name: string
+    symbol: string
+    tokenAddress: any
+    contractImage: string
+  }>
+}
+
 export type LiveAuctionsQueryVariables = Exact<{
   first: Scalars['Int']['input']
   skip: Scalars['Int']['input']
@@ -14523,6 +15160,130 @@ export const ProposalVoteFragmentDoc = gql`
     timestamp
   }
 `
+export const SearchDaoRefFragmentDoc = gql`
+  fragment SearchDaoRef on DAO {
+    id
+    name
+    symbol
+    tokenAddress
+    contractImage
+  }
+`
+export const SearchDaoFragmentDoc = gql`
+  fragment SearchDao on DAO {
+    ...SearchDaoRef
+    description
+    projectURI
+    totalSupply
+    proposalCount
+    ownerCount
+    metadataAddress
+    treasuryAddress
+    governorAddress
+    auctionAddress
+  }
+  ${SearchDaoRefFragmentDoc}
+`
+export const SearchProposalFragmentDoc = gql`
+  fragment SearchProposal on Proposal {
+    id
+    proposalId
+    proposalNumber
+    title
+    proposer
+    timeCreated
+    voteStart
+    voteEnd
+    expiresAt
+    executed
+    canceled
+    vetoed
+    queued
+    forVotes
+    againstVotes
+    abstainVotes
+    quorumVotes
+    voteCount
+    dao {
+      ...SearchDaoRef
+    }
+  }
+  ${SearchDaoRefFragmentDoc}
+`
+export const SearchCandidateFragmentDoc = gql`
+  fragment SearchCandidate on ProposalCandidateVersion {
+    id
+    title
+    createdAt
+    attester
+    versionNumber
+    group {
+      id
+      candidateNumber
+      proposer
+      dao {
+        ...SearchDaoRef
+      }
+    }
+    proposal {
+      proposalNumber
+    }
+  }
+  ${SearchDaoRefFragmentDoc}
+`
+export const SearchVoteFragmentDoc = gql`
+  fragment SearchVote on ProposalVote {
+    id
+    transactionHash
+    timestamp
+    voter
+    support
+    weight
+    reason
+    dao {
+      ...SearchDaoRef
+    }
+    proposal {
+      proposalNumber
+      title
+    }
+  }
+  ${SearchDaoRefFragmentDoc}
+`
+export const SearchBidFragmentDoc = gql`
+  fragment SearchBid on AuctionBid {
+    id
+    transactionHash
+    amount
+    bidder
+    comment
+    bidTime
+    dao {
+      ...SearchDaoRef
+    }
+    auction {
+      token {
+        tokenId
+        name
+        image
+      }
+    }
+  }
+  ${SearchDaoRefFragmentDoc}
+`
+export const SearchProfileFragmentDoc = gql`
+  fragment SearchProfile on Profile {
+    id
+    tokenCount
+    ownerDaoCount
+    voterDaoCount
+    proposalVotesCount
+    proposalsSubmittedCount
+    bidsPlacedCount
+    auctionWinsCount
+    lastActiveAt
+  }
+`
 export const SnapshotFragmentDoc = gql`
   fragment Snapshot on Snapshot {
     dao {
@@ -15682,6 +16443,142 @@ export const FindAuctionsForDaosDocument = gql`
   }
   ${ExploreDaoFragmentDoc}
 `
+export const GlobalSearchDocument = gql`
+  query globalSearch(
+    $text: String!
+    $first: Int!
+    $skip: Int!
+    $withDaos: Boolean!
+    $withProposals: Boolean!
+    $withCandidates: Boolean!
+    $withVotes: Boolean!
+    $withBids: Boolean!
+    $daoWhere: DAO_filter
+    $daoWhereSimple: DAO_filter
+    $proposalWhere: Proposal_filter
+    $candidateWhere: ProposalCandidateVersion_filter
+    $voteWhere: ProposalVote_filter
+    $bidWhere: AuctionBid_filter
+  ) {
+    daoSearch(text: $text, first: $first, skip: $skip, where: $daoWhere)
+      @include(if: $withDaos) {
+      ...SearchDao
+    }
+    daos(first: $first, skip: $skip, where: $daoWhereSimple) @include(if: $withDaos) {
+      ...SearchDao
+    }
+    proposalSearch(text: $text, first: $first, skip: $skip, where: $proposalWhere)
+      @include(if: $withProposals) {
+      ...SearchProposal
+    }
+    candidateSearch(text: $text, first: $first, skip: $skip, where: $candidateWhere)
+      @include(if: $withCandidates) {
+      ...SearchCandidate
+    }
+    voteSearch(text: $text, first: $first, skip: $skip, where: $voteWhere)
+      @include(if: $withVotes) {
+      ...SearchVote
+    }
+    bidSearch(text: $text, first: $first, skip: $skip, where: $bidWhere)
+      @include(if: $withBids) {
+      ...SearchBid
+    }
+  }
+  ${SearchDaoFragmentDoc}
+  ${SearchProposalFragmentDoc}
+  ${SearchCandidateFragmentDoc}
+  ${SearchVoteFragmentDoc}
+  ${SearchBidFragmentDoc}
+`
+export const GlobalAddressLookupDocument = gql`
+  query globalAddressLookup($id: ID!, $address: Bytes!, $first: Int!) {
+    profile(id: $id) {
+      ...SearchProfile
+    }
+    daos(
+      first: 5
+      where: {
+        or: [
+          { tokenAddress: $address }
+          { governorAddress: $address }
+          { treasuryAddress: $address }
+          { auctionAddress: $address }
+          { metadataAddress: $address }
+        ]
+      }
+    ) {
+      ...SearchDao
+    }
+    proposals(
+      first: $first
+      orderBy: timeCreated
+      orderDirection: desc
+      where: { proposer: $address, replacedBy: null }
+    ) {
+      ...SearchProposal
+    }
+    proposalVotes(
+      first: $first
+      orderBy: timestamp
+      orderDirection: desc
+      where: { voter: $address }
+    ) {
+      ...SearchVote
+    }
+    auctionBids(
+      first: $first
+      orderBy: bidTime
+      orderDirection: desc
+      where: { bidder: $address }
+    ) {
+      ...SearchBid
+    }
+  }
+  ${SearchProfileFragmentDoc}
+  ${SearchDaoFragmentDoc}
+  ${SearchProposalFragmentDoc}
+  ${SearchVoteFragmentDoc}
+  ${SearchBidFragmentDoc}
+`
+export const GlobalTxLookupDocument = gql`
+  query globalTxLookup($hash: Bytes!) {
+    proposals(
+      first: 5
+      where: { or: [{ transactionHash: $hash }, { executionTransactionHash: $hash }] }
+    ) {
+      ...SearchProposal
+    }
+    proposalVotes(first: 5, where: { transactionHash: $hash }) {
+      ...SearchVote
+    }
+    auctionBids(first: 5, where: { transactionHash: $hash }) {
+      ...SearchBid
+    }
+  }
+  ${SearchProposalFragmentDoc}
+  ${SearchVoteFragmentDoc}
+  ${SearchBidFragmentDoc}
+`
+export const GlobalAddressPrefixLookupDocument = gql`
+  query globalAddressPrefixLookup($prefix: ID!, $prefixEnd: ID!, $first: Int!) {
+    profiles(
+      first: $first
+      orderBy: lastActiveAt
+      orderDirection: desc
+      where: { id_gte: $prefix, id_lt: $prefixEnd }
+    ) {
+      ...SearchProfile
+    }
+    daos(
+      first: $first
+      where: { id_gte: $prefix, id_lt: $prefixEnd, totalSupply_gt: 0 }
+    ) {
+      ...SearchDao
+    }
+  }
+  ${SearchProfileFragmentDoc}
+  ${SearchDaoFragmentDoc}
+`
 export const LiveAuctionsDocument = gql`
   query liveAuctions($first: Int!, $skip: Int!) {
     auctions(
@@ -16815,6 +17712,78 @@ export function getSdk(
             signal,
           }),
         'findAuctionsForDaos',
+        'query',
+        variables
+      )
+    },
+    globalSearch(
+      variables: GlobalSearchQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<GlobalSearchQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<GlobalSearchQuery>({
+            document: GlobalSearchDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'globalSearch',
+        'query',
+        variables
+      )
+    },
+    globalAddressLookup(
+      variables: GlobalAddressLookupQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<GlobalAddressLookupQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<GlobalAddressLookupQuery>({
+            document: GlobalAddressLookupDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'globalAddressLookup',
+        'query',
+        variables
+      )
+    },
+    globalTxLookup(
+      variables: GlobalTxLookupQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<GlobalTxLookupQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<GlobalTxLookupQuery>({
+            document: GlobalTxLookupDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'globalTxLookup',
+        'query',
+        variables
+      )
+    },
+    globalAddressPrefixLookup(
+      variables: GlobalAddressPrefixLookupQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<GlobalAddressPrefixLookupQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<GlobalAddressPrefixLookupQuery>({
+            document: GlobalAddressPrefixLookupDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'globalAddressPrefixLookup',
         'query',
         variables
       )

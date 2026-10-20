@@ -1,0 +1,113 @@
+query globalSearch(
+  $text: String!
+  $first: Int!
+  $skip: Int!
+  $withDaos: Boolean!
+  $withProposals: Boolean!
+  $withCandidates: Boolean!
+  $withVotes: Boolean!
+  $withBids: Boolean!
+  $daoWhere: DAO_filter
+  $daoWhereSimple: DAO_filter
+  $proposalWhere: Proposal_filter
+  $candidateWhere: ProposalCandidateVersion_filter
+  $voteWhere: ProposalVote_filter
+  $bidWhere: AuctionBid_filter
+) {
+  daoSearch(text: $text, first: $first, skip: $skip, where: $daoWhere)
+    @include(if: $withDaos) {
+    ...SearchDao
+  }
+  daos(first: $first, skip: $skip, where: $daoWhereSimple) @include(if: $withDaos) {
+    ...SearchDao
+  }
+  proposalSearch(text: $text, first: $first, skip: $skip, where: $proposalWhere)
+    @include(if: $withProposals) {
+    ...SearchProposal
+  }
+  candidateSearch(text: $text, first: $first, skip: $skip, where: $candidateWhere)
+    @include(if: $withCandidates) {
+    ...SearchCandidate
+  }
+  voteSearch(text: $text, first: $first, skip: $skip, where: $voteWhere)
+    @include(if: $withVotes) {
+    ...SearchVote
+  }
+  bidSearch(text: $text, first: $first, skip: $skip, where: $bidWhere)
+    @include(if: $withBids) {
+    ...SearchBid
+  }
+}
+
+query globalAddressLookup($id: ID!, $address: Bytes!, $first: Int!) {
+  profile(id: $id) {
+    ...SearchProfile
+  }
+  daos(
+    first: 5
+    where: {
+      or: [
+        { tokenAddress: $address }
+        { governorAddress: $address }
+        { treasuryAddress: $address }
+        { auctionAddress: $address }
+        { metadataAddress: $address }
+      ]
+    }
+  ) {
+    ...SearchDao
+  }
+  proposals(
+    first: $first
+    orderBy: timeCreated
+    orderDirection: desc
+    where: { proposer: $address, replacedBy: null }
+  ) {
+    ...SearchProposal
+  }
+  proposalVotes(
+    first: $first
+    orderBy: timestamp
+    orderDirection: desc
+    where: { voter: $address }
+  ) {
+    ...SearchVote
+  }
+  auctionBids(
+    first: $first
+    orderBy: bidTime
+    orderDirection: desc
+    where: { bidder: $address }
+  ) {
+    ...SearchBid
+  }
+}
+
+query globalTxLookup($hash: Bytes!) {
+  proposals(
+    first: 5
+    where: { or: [{ transactionHash: $hash }, { executionTransactionHash: $hash }] }
+  ) {
+    ...SearchProposal
+  }
+  proposalVotes(first: 5, where: { transactionHash: $hash }) {
+    ...SearchVote
+  }
+  auctionBids(first: 5, where: { transactionHash: $hash }) {
+    ...SearchBid
+  }
+}
+
+query globalAddressPrefixLookup($prefix: ID!, $prefixEnd: ID!, $first: Int!) {
+  profiles(
+    first: $first
+    orderBy: lastActiveAt
+    orderDirection: desc
+    where: { id_gte: $prefix, id_lt: $prefixEnd }
+  ) {
+    ...SearchProfile
+  }
+  daos(first: $first, where: { id_gte: $prefix, id_lt: $prefixEnd, totalSupply_gt: 0 }) {
+    ...SearchDao
+  }
+}
