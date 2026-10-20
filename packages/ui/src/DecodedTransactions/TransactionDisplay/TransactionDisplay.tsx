@@ -1,5 +1,6 @@
 import { DecodedTransaction } from '@buildeross/hooks/useDecodedTransactions'
 import { useTransactionSummary } from '@buildeross/hooks/useTransactionSummary'
+import { useAuthStore } from '@buildeross/stores'
 import {
   CHAIN_ID,
   DaoContractAddresses,
@@ -47,6 +48,9 @@ export const TransactionDisplay: React.FC<
   const [showRawCalldata, setShowRawCalldata] = React.useState(false)
 
   const isDecoded = !decoded.isNotDecoded && !!decoded.transaction.args
+  // The summary endpoint requires a SIWE session; don't show summaries to signed-out users.
+  const { isAuthenticated } = useAuthStore()
+  const showAiSummary = isAuthenticated && !DISABLE_AI_SUMMARY
 
   const {
     sortedArgs,
@@ -73,7 +77,7 @@ export const TransactionDisplay: React.FC<
   })
 
   const transactionData = React.useMemo(() => {
-    if (!isDecoded || isLoadingMetadata || DISABLE_AI_SUMMARY) return null
+    if (!isDecoded || isLoadingMetadata || !showAiSummary) return null
 
     return {
       chainId,
@@ -83,6 +87,7 @@ export const TransactionDisplay: React.FC<
         functionName: decoded.transaction.functionName,
       },
       target: decoded.target as `0x${string}`,
+      value: decoded.value,
       tokenMetadata: tokenMetadata || undefined,
       nftMetadata: nftMetadata || undefined,
       escrowData: escrowData || undefined,
@@ -100,6 +105,7 @@ export const TransactionDisplay: React.FC<
     isLoadingMetadata,
     nftMetadata,
     proposalMetadata,
+    showAiSummary,
     streamData,
     tokenMetadata,
   ])
@@ -170,7 +176,7 @@ export const TransactionDisplay: React.FC<
       <SimulationWarning simulation={simulation} />
 
       <TransactionAiSummary
-        isVisible={isDecoded && !isLoadingMetadata && !DISABLE_AI_SUMMARY}
+        isVisible={isDecoded && !isLoadingMetadata && showAiSummary}
         isGeneratingSummary={isGeneratingSummary}
         aiSummary={aiSummary}
         errorSummary={errorSummary}

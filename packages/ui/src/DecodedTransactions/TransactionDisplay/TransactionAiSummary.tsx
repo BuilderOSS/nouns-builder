@@ -1,15 +1,14 @@
+import { TransactionSummaryError } from '@buildeross/hooks/useTransactionSummary'
 import { Box, Button, Text } from '@buildeross/zord'
 import React from 'react'
 
-const getErrorMessage = (error: unknown) => {
-  if (error instanceof Error) return error.message
-  if (typeof error === 'string') return error
-  try {
-    return JSON.stringify(error)
-  } catch (_error) {
-    return typeof error === 'undefined' ? '<unserializable error>' : String(error)
-  }
-}
+const getErrorMessage = (error: unknown) =>
+  error instanceof TransactionSummaryError
+    ? error.message
+    : "Couldn't generate a summary."
+
+const isHiddenError = (error: unknown) =>
+  error instanceof TransactionSummaryError && error.kind === 'hidden'
 
 export const TransactionAiSummary: React.FC<{
   isVisible: boolean
@@ -19,6 +18,11 @@ export const TransactionAiSummary: React.FC<{
   onRegenerate: () => void
 }> = ({ isVisible, isGeneratingSummary, aiSummary, errorSummary, onRegenerate }) => {
   if (!isVisible) return null
+
+  const showError = !isGeneratingSummary && !aiSummary && !!errorSummary
+
+  // Signed out or no AI provider configured: show nothing rather than an error.
+  if (showError && isHiddenError(errorSummary)) return null
 
   return (
     <Box
@@ -39,20 +43,25 @@ export const TransactionAiSummary: React.FC<{
         <Text as="span" fontWeight="heading" color="accent">
           🤖 AI Summary:{' '}
         </Text>
-        {!isGeneratingSummary && !aiSummary && errorSummary && (
-          <Button onClick={onRegenerate} variant="outline" size="sm" px="x2">
-            Regenerate
-          </Button>
-        )}
         {isGeneratingSummary && <Text as="span"> Generating summary...</Text>}
         {!isGeneratingSummary && aiSummary && <Text as="span"> {aiSummary}</Text>}
-        {!isGeneratingSummary && !aiSummary && errorSummary && (
-          <Text color="negative" as="span">
-            {' '}
-            Error generating summary: {getErrorMessage(errorSummary)}
-          </Text>
+        {showError && (
+          <>
+            <Text color="negative" as="span">
+              {' '}
+              {getErrorMessage(errorSummary)}{' '}
+            </Text>
+            <Button onClick={onRegenerate} variant="outline" size="sm" px="x2">
+              Retry
+            </Button>
+          </>
         )}
       </Text>
+      {!isGeneratingSummary && aiSummary && (
+        <Text variant="paragraph-xs" color="text4" mt="x1">
+          AI-generated from the decoded call. Always verify the details above.
+        </Text>
+      )}
     </Box>
   )
 }
