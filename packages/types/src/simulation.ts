@@ -1,5 +1,4 @@
 export type SimulationOutput = {
-  id: string
   status: boolean
   gas_used: number
   block_number: number
@@ -9,7 +8,8 @@ export type SimulationOutput = {
   value: string
   // the following are added manually after simulation
   index: number
-  url: string
+  // decoded revert reason, set when status is false
+  error?: string
 }
 
 export type SimulationResult = {

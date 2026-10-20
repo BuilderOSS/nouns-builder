@@ -1,13 +1,22 @@
+import { getAlchemyServerRpcUrl } from '@buildeross/constants/alchemy'
 import {
   BytesType,
   CHAIN_ID,
   SimulationOutput,
   SimulationResult,
 } from '@buildeross/types'
-import axios from 'axios'
-import { Address, isAddress } from 'viem'
+import {
+  AbiDecodingZeroDataError,
+  Address,
+  BaseError,
+  ContractFunctionRevertedError,
+  createPublicClient,
+  http,
+  InsufficientFundsError as ViemInsufficientFundsError,
+  isAddress,
+} from 'viem'
 
-import { InvalidRequestError } from './errors'
+import { InsufficientFundsError, InvalidRequestError } from './errors'
 
 export type SimulationRequestBody = {
   tokenAddress: Address
@@ -18,24 +27,34 @@ export type SimulationRequestBody = {
   values: string[]
 }
 
-const TENDERLY_USER = process.env.TENDERLY_USER
-const TENDERLY_PROJECT = process.env.TENDERLY_PROJECT
-const TENDERLY_ACCESS_KEY = process.env.TENDERLY_ACCESS_KEY
+const getRevertReason = (error: Error | undefined): string => {
+  if (!(error instanceof BaseError)) return error?.message || 'Execution reverted'
 
-const getSimulationUrl = (simulation: SimulationOutput) => {
-  return `https://dashboard.tenderly.co/shared/simulation/${simulation.id}`
+  if (error.walk((e) => e instanceof AbiDecodingZeroDataError)) {
+    return 'Execution reverted without a reason'
+  }
+
+  const reverted = error.walk((e) => e instanceof ContractFunctionRevertedError)
+  if (reverted instanceof ContractFunctionRevertedError) {
+    if (reverted.reason) return reverted.reason
+    if (reverted.data?.errorName) {
+      const args = reverted.data.args?.map((arg) => String(arg)).join(', ') ?? ''
+      return `${reverted.data.errorName}(${args})`
+    }
+    if (reverted.signature) return `Custom error ${reverted.signature}`
+  }
+
+  return error.shortMessage
 }
 
-const shareSimulation = async (simulation: SimulationOutput) => {
-  await axios.post(
-    `https://api.tenderly.co/api/v1/account/${TENDERLY_USER}/project/${TENDERLY_PROJECT}/simulations/${simulation.id}/share`,
-    {},
-    {
-      headers: {
-        'X-Access-Key': TENDERLY_ACCESS_KEY as string,
-      },
-    }
-  )
+const isInsufficientFundsError = (error: unknown): boolean => {
+  if (
+    error instanceof BaseError &&
+    error.walk((e) => e instanceof ViemInsufficientFundsError)
+  ) {
+    return true
+  }
+  return error instanceof Error && /insufficient funds/i.test(error.message)
 }
 
 const simulateTransaction = async ({
@@ -45,30 +64,49 @@ const simulateTransaction = async ({
   calldatas,
   values,
 }: Omit<SimulationRequestBody, 'tokenAddress'>): Promise<SimulationOutput[]> => {
-  const simulation = await axios.post(
-    `https://api.tenderly.co/api/v1/account/${TENDERLY_USER}/project/${TENDERLY_PROJECT}/simulate-bundle`,
-    {
-      simulations: targets.map((target, index) => ({
-        network_id: chainId.toString(),
-        save: false,
-        save_if_fails: true,
-        simulation_type: 'full',
-        from: treasuryAddress,
-        to: target,
-        value: values[index].toString(),
-        input: calldatas[index],
-      })),
-    },
-    {
-      headers: {
-        'X-Access-Key': TENDERLY_ACCESS_KEY as string,
-      },
-    }
-  )
+  const rpcUrl = getAlchemyServerRpcUrl(chainId)
+  if (!rpcUrl) {
+    throw new InvalidRequestError(`Chain ${chainId} is not supported for simulation`)
+  }
 
-  return simulation.data.simulation_results.map(
-    (s: { simulation: SimulationOutput }) => s.simulation
-  )
+  const client = createPublicClient({ transport: http(rpcUrl) })
+
+  // eth_simulateV1 executes the calls sequentially in one block, so each call
+  // sees the state changes of the calls before it (like the proposal execution)
+  try {
+    const [block] = await client.simulateBlocks({
+      blocks: [
+        {
+          calls: targets.map((target, index) => ({
+            account: treasuryAddress,
+            to: target,
+            data: calldatas[index],
+            value: BigInt(values[index]),
+          })),
+        },
+      ],
+      validation: false,
+    })
+
+    return block.calls.map((call, index) => ({
+      index,
+      status: call.status === 'success',
+      gas_used: Number(call.gasUsed),
+      block_number: Number(block.number),
+      from: treasuryAddress,
+      to: targets[index],
+      input: calldatas[index],
+      value: values[index].toString(),
+      ...(call.status === 'failure' ? { error: getRevertReason(call.error) } : {}),
+    }))
+  } catch (error) {
+    if (isInsufficientFundsError(error)) {
+      throw new InsufficientFundsError(
+        'Insufficient treasury funds to carry out some or all of these transactions'
+      )
+    }
+    throw error
+  }
 }
 
 export async function simulate({
@@ -104,20 +142,10 @@ export async function simulate({
   const simulationSucceeded = simulations.every((s) => s.status)
   const totalGasUsed = simulations.reduce((total, s) => total + (s.gas_used ?? 0), 0)
 
-  const haveSimulationToShare = simulations.some((s) => !!s.id)
-
-  if (!simulationSucceeded && haveSimulationToShare) {
-    await Promise.all(simulations.filter((s) => !s.status && s.id).map(shareSimulation))
-  }
-
   return {
-    simulations: simulations.map((s, i) => ({
-      ...s,
-      index: i,
-      url: s.id ? getSimulationUrl(s) : '',
-    })),
+    simulations,
     success: simulationSucceeded,
     totalGasUsed: totalGasUsed.toString(),
-    error: haveSimulationToShare ? null : 'Internal Server Error',
+    error: null,
   }
 }

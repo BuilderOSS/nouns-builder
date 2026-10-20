@@ -39,10 +39,7 @@ import { useConfig, useReadContracts } from 'wagmi'
 import { simulateContract } from 'wagmi/actions'
 
 import { prepareProposalTransactions } from '../../utils/prepareTransactions'
-import {
-  isSimulationSupported,
-  simulateTransactions,
-} from '../../utils/tenderlySimulation'
+import { isSimulationSupported, simulateTransactions } from '../../utils/simulation'
 import { MobileProposalActionBar } from '../MobileProposalActionBar'
 import { ProposalDraftForm } from '../ProposalDraftForm'
 import { UpdateDeadlinePassedModal } from '../UpdateDeadlinePassedModal'
@@ -67,7 +64,7 @@ interface ReviewProposalProps {
   onResetMobile?: () => void
 }
 
-const SKIP_SIMULATION = process.env.NEXT_PUBLIC_DISABLE_TENDERLY_SIMULATION === 'true'
+const SKIP_SIMULATION = process.env.NEXT_PUBLIC_DISABLE_SIMULATION === 'true'
 
 const logError = async (e: unknown) => {
   console.error(e)
