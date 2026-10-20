@@ -92,7 +92,8 @@ export const buildTimeline = (
     duration = lcm(duration, l)
     if (duration > maxDurationMs) break
   }
-  if (duration > maxDurationMs) duration = longest
+  if (duration > maxDurationMs)
+    duration = bestAlignedDuration(loops, longest, maxDurationMs)
 
   const changePoints = new Set<number>([0])
   for (const layer of animated) {
@@ -131,6 +132,29 @@ export const buildTimeline = (
   })
 
   return { steps, duration, isAnimated: steps.length > 1 }
+}
+
+/**
+ * When the exact LCM is too long, picks a multiple of the longest loop (within the cap)
+ * at which the other layers are closest to completing whole loops, so the visible jump
+ * at the output's loop seam is as small as possible. Prefers shorter durations unless a
+ * longer one is meaningfully better aligned.
+ */
+const bestAlignedDuration = (loops: number[], longest: number, maxDurationMs: number) => {
+  const misalignment = (t: number) =>
+    loops.reduce((sum, l) => {
+      const r = t % l
+      return sum + Math.min(r, l - r) / l
+    }, 0)
+
+  const candidates: { t: number; score: number }[] = []
+  for (let t = longest; t <= maxDurationMs; t += longest) {
+    candidates.push({ t, score: misalignment(t) })
+  }
+  if (candidates.length === 0) return longest
+
+  const best = Math.min(...candidates.map((c) => c.score))
+  return candidates.find((c) => c.score <= best + 0.05)!.t
 }
 
 /** Drops boundaries closer than minDelay to the previous one, and a trailing sliver before the loop end. */

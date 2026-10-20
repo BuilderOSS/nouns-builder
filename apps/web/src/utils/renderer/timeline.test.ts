@@ -61,6 +61,14 @@ describe('buildTimeline', () => {
     expect(sumDelays(t)).toBe(700)
   })
 
+  it('picks the best-aligned multiple of the longest loop when the LCM is too long', () => {
+    // loops 960, 750 and 1000ms: LCM is 24s. 3000ms completes the 750 and 1000 loops
+    // exactly and leaves the 960ms layer only 120ms off, beating a 1000ms seam.
+    const t = buildTimeline([frames(4, 250), frames(12, 80), frames(5, 150)], opts)
+    expect(t.duration).toBe(3000)
+    expect(sumDelays(t)).toBe(3000)
+  })
+
   it('rounds delays to the 10ms GIF grid', () => {
     const t = buildTimeline([{ delays: [44, 76] }], opts)
     expect(t.steps.map((s) => s.delay)).toEqual([40, 80])
