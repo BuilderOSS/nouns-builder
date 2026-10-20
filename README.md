@@ -190,9 +190,8 @@ pnpm run type-check
 
 This app has several third party api keys that you need in order to run Builder:
 
-- [Tenderly](https://docs.tenderly.co/simulations-and-forks/simulation-api) as the main rpc node provider and transaction simulator
+- [Alchemy](https://www.alchemy.com/) as the main rpc node provider, transaction simulator (`eth_simulateV1`), and for NFT metadata and balances
 - [Etherscan](https://docs.etherscan.io/api-endpoints/contracts) to dynamically fetch abis
-- [Alchemy](https://www.alchemy.com/) for NFT metadata and balances
 - [Redis](https://redis.io/) for caching layer
 
 We ask that you supply your own secrets locally for running in development environment. Non-secret environment variables are already included in the `.env` files in this repo.
@@ -207,19 +206,15 @@ ANVIL_BLOCK_NUMBER=8305745
 Add the following variables to `apps/web/.env.local`:
 
 ```
-# tenderly RPC
-NEXT_PUBLIC_TENDERLY_RPC_KEY=<TENDERLY_API_KEY>
-
-# tenderly simulator env variables
-TENDERLY_ACCESS_KEY=<API_KEY>
-TENDERLY_PROJECT=<PROJECT_NAME>
-TENDERLY_USER=<ACCOUNT_NAME>
-
 # etherscan
 ETHERSCAN_API_KEY=<ETHERSCAN_API_KEY>
 
-# alchemy for NFT/token data
+# alchemy for RPC and NFT/token data
 NEXT_PUBLIC_ALCHEMY_API_KEY=<ALCHEMY_API_KEY>
+
+# optional server-only alchemy key for server-side calls (e.g. transaction simulation)
+# must allow requests without an Origin header; defaults to NEXT_PUBLIC_ALCHEMY_API_KEY
+ALCHEMY_API_KEY=<ALCHEMY_API_KEY>
 
 # redis for caching
 REDIS_URL=<REDIS_URL>

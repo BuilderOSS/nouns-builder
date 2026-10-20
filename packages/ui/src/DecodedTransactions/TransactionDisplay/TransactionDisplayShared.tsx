@@ -114,11 +114,16 @@ export const SimulationWarning: React.FC<{
   return (
     <Flex color="warning" px="x3" pb="x2" gap="x2" wrap="wrap" align="center" w="100%">
       <Text fontWeight="label">Simulation indicates this call may fail.</Text>
-      {!!simulation.url && (
-        <Text flexShrink={0}>
-          <a href={simulation.url} target="_blank" rel="noreferrer">
-            View simulation details
-          </a>
+      {!!simulation.error && (
+        <Text
+          style={{
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-all',
+            overflowWrap: 'anywhere',
+            fontFamily: 'monospace',
+          }}
+        >
+          {simulation.error}
         </Text>
       )}
     </Flex>

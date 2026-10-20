@@ -1,24 +1,63 @@
-import { CHAIN_ID, SimulationOutput } from '@buildeross/types'
-import axios from 'axios'
-import { Address, parseEther } from 'viem'
+import { getAlchemyServerRpcUrl } from '@buildeross/constants/alchemy'
+import { CHAIN_ID } from '@buildeross/types'
+import {
+  Address,
+  ContractFunctionRevertedError,
+  ContractFunctionZeroDataError,
+  createPublicClient,
+  encodeErrorResult,
+  InsufficientFundsError as ViemInsufficientFundsError,
+  RpcRequestError,
+} from 'viem'
 import { vi } from 'vitest'
 
-import { InvalidRequestError } from './errors'
+import { BackendFailedError, InsufficientFundsError, InvalidRequestError } from './errors'
 import { simulate, SimulationRequestBody } from './simulationService'
 
-vi.mock('axios', () => {
+const simulateBlocks = vi.fn()
+
+vi.mock('viem', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('viem')>()
   return {
-    default: {
-      get: vi.fn(),
-      post: vi.fn(),
-      delete: vi.fn(),
-    },
+    ...actual,
+    createPublicClient: vi.fn(() => ({ simulateBlocks })),
   }
 })
 
+vi.mock('@buildeross/constants/alchemy', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@buildeross/constants/alchemy')>()
+  return {
+    ...actual,
+    getAlchemyServerRpcUrl: vi.fn(actual.getAlchemyServerRpcUrl),
+  }
+})
+
+const revertError = (reason: string) =>
+  new ContractFunctionRevertedError({
+    abi: [],
+    data: encodeErrorResult({
+      abi: [
+        {
+          type: 'error',
+          name: 'Error',
+          inputs: [{ name: 'message', type: 'string' }],
+        },
+      ],
+      errorName: 'Error',
+      args: [reason],
+    }),
+    functionName: 'unknown',
+  })
+
 describe('simulationService', () => {
   beforeEach(() => {
-    vi.resetModules()
+    vi.stubEnv('ALCHEMY_API_KEY', 'test-key')
+    simulateBlocks.mockReset()
+    vi.mocked(createPublicClient).mockClear()
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
   })
 
   describe('simulate', () => {
@@ -32,21 +71,8 @@ describe('simulationService', () => {
         '0x7d8ba3e0745079b292f68e421d292c05da2d0721',
         '0xa7c8f84ec8cbed6e8fb793904cd1ec9ddfc9c35d',
       ],
-      calldatas: ['0x', '0x'],
-      values: ['1', '2'],
-    }
-
-    const sampleOutput: SimulationOutput = {
-      index: 0,
-      id: '',
-      status: true,
-      url: `https://dashboard.tenderly.co/shared/simulation/<simulationId>`,
-      gas_used: Number(parseEther('0.005')),
-      block_number: 0,
-      from: treasuryAddress,
-      to: treasuryAddress,
-      input: treasuryAddress,
-      value: '0',
+      calldatas: ['0x', '0xc1'],
+      values: ['0x1', '0x2'],
     }
 
     it('fails with mismatched input array lengths', async () => {
@@ -106,78 +132,191 @@ describe('simulationService', () => {
       ).rejects.toThrow(InvalidRequestError)
     })
 
-    it('returns succeeded simulations', async () => {
-      const simulationId = 'simulationId'
+    it('fails for chains without an alchemy network', async () => {
+      await expect(simulate({ ...request, chainId: CHAIN_ID.FOUNDRY })).rejects.toThrow(
+        InvalidRequestError
+      )
+      expect(simulateBlocks).not.toHaveBeenCalled()
+    })
 
-      const expectedSimulations: SimulationOutput[] = [
+    it('simulates all calls from the treasury in a single block', async () => {
+      simulateBlocks.mockResolvedValueOnce([
         {
-          ...sampleOutput,
-          index: 0,
-          id: simulationId,
-          status: true,
-          url: `https://dashboard.tenderly.co/shared/simulation/${simulationId}`,
-          gas_used: Number(parseEther('0.005')),
+          number: 100n,
+          calls: [
+            { status: 'success', gasUsed: 21000n },
+            { status: 'success', gasUsed: 50000n },
+          ],
         },
-        {
-          ...sampleOutput,
-          index: 1,
-          id: simulationId,
-          status: true,
-          url: `https://dashboard.tenderly.co/shared/simulation/${simulationId}`,
-          gas_used: Number(parseEther('0.005')),
-        },
-      ]
+      ])
 
-      vi.mocked(axios.post).mockResolvedValueOnce({
-        status: 200,
-        data: { simulation_results: expectedSimulations.map((s) => ({ simulation: s })) },
+      await simulate(request)
+
+      expect(createPublicClient).toHaveBeenCalledTimes(1)
+      expect(simulateBlocks).toHaveBeenCalledWith({
+        blocks: [
+          {
+            calls: [
+              {
+                account: treasuryAddress,
+                to: request.targets[0],
+                data: '0x',
+                value: 1n,
+              },
+              {
+                account: treasuryAddress,
+                to: request.targets[1],
+                data: '0xc1',
+                value: 2n,
+              },
+            ],
+          },
+        ],
+        validation: false,
       })
+    })
+
+    it('returns succeeded simulations', async () => {
+      simulateBlocks.mockResolvedValueOnce([
+        {
+          number: 100n,
+          calls: [
+            { status: 'success', gasUsed: 21000n },
+            { status: 'success', gasUsed: 50000n },
+          ],
+        },
+      ])
 
       const response = await simulate(request)
 
       expect(response).toEqual({
-        simulations: expectedSimulations,
+        simulations: [
+          {
+            index: 0,
+            status: true,
+            gas_used: 21000,
+            block_number: 100,
+            from: treasuryAddress,
+            to: request.targets[0],
+            input: '0x',
+            value: '0x1',
+          },
+          {
+            index: 1,
+            status: true,
+            gas_used: 50000,
+            block_number: 100,
+            from: treasuryAddress,
+            to: request.targets[1],
+            input: '0xc1',
+            value: '0x2',
+          },
+        ],
         success: true,
-        totalGasUsed: parseEther('0.01').toString(),
+        totalGasUsed: '71000',
         error: null,
       })
     })
 
-    it('returns simulations with an error', async () => {
-      const simulationId = 'simulationId'
-
-      const expectedSimulations: SimulationOutput[] = [
+    it('returns failed simulations with the revert reason', async () => {
+      simulateBlocks.mockResolvedValueOnce([
         {
-          ...sampleOutput,
-          index: 0,
-          id: simulationId,
-          status: true,
-          url: `https://dashboard.tenderly.co/shared/simulation/${simulationId}`,
-          gas_used: Number(parseEther('0.005')),
+          number: 100n,
+          calls: [
+            { status: 'success', gasUsed: 21000n },
+            {
+              status: 'failure',
+              gasUsed: 30000n,
+              error: revertError('Ownable: caller is not the owner'),
+            },
+          ],
         },
-        {
-          ...sampleOutput,
-          index: 1,
-          id: simulationId,
-          status: false,
-          url: `https://dashboard.tenderly.co/shared/simulation/${simulationId}`,
-          gas_used: Number(parseEther('0.005')),
-        },
-      ]
-
-      vi.mocked(axios.post).mockResolvedValueOnce({
-        status: 200,
-        data: { simulation_results: expectedSimulations.map((s) => ({ simulation: s })) },
-      })
+      ])
 
       const response = await simulate(request)
 
-      expect(response).toEqual({
-        simulations: expectedSimulations,
-        success: false,
-        totalGasUsed: parseEther('0.01').toString(),
-        error: null,
+      expect(response.success).toBe(false)
+      expect(response.totalGasUsed).toBe('51000')
+      expect(response.simulations[0].status).toBe(true)
+      expect(response.simulations[0].error).toBeUndefined()
+      expect(response.simulations[1]).toMatchObject({
+        index: 1,
+        status: false,
+        error: 'Ownable: caller is not the owner',
       })
+    })
+
+    it('decodes builder protocol custom errors and empty reverts', async () => {
+      simulateBlocks.mockResolvedValueOnce([
+        {
+          number: 100n,
+          calls: [
+            {
+              status: 'failure',
+              gasUsed: 25000n,
+              // ONLY_OWNER()
+              error: new ContractFunctionRevertedError({
+                abi: [],
+                data: '0xd238ed59',
+                functionName: 'unknown',
+              }),
+            },
+            {
+              status: 'failure',
+              gasUsed: 25000n,
+              error: new ContractFunctionZeroDataError({ functionName: 'unknown' }),
+            },
+          ],
+        },
+      ])
+
+      const response = await simulate(request)
+
+      expect(response.simulations[0].error).toBe('ONLY_OWNER()')
+      expect(response.simulations[1].error).toBe('Execution reverted without a reason')
+    })
+
+    it('throws InsufficientFundsError when the treasury cannot cover the value', async () => {
+      simulateBlocks.mockRejectedValueOnce(new ViemInsufficientFundsError())
+
+      await expect(simulate(request)).rejects.toThrow(InsufficientFundsError)
+    })
+
+    it('fails with BackendFailedError when the alchemy key is missing', async () => {
+      vi.mocked(getAlchemyServerRpcUrl).mockReturnValueOnce(undefined)
+
+      await expect(simulate(request)).rejects.toThrow(BackendFailedError)
+      expect(simulateBlocks).not.toHaveBeenCalled()
+    })
+
+    it('redacts the api key from other rpc errors', async () => {
+      simulateBlocks.mockRejectedValueOnce(
+        new RpcRequestError({
+          body: {},
+          error: { code: -32000, message: 'boom' },
+          url: 'https://eth-mainnet.g.alchemy.com/v2/test-key',
+        })
+      )
+
+      const error = await simulate(request).catch((e) => e)
+
+      expect(error).toBeInstanceOf(BackendFailedError)
+      expect(error.message).toContain('boom')
+      expect(error.message).toContain('<redacted>')
+      expect(error.message).not.toContain('test-key')
+    })
+
+    it('redacts encoded and decoded api keys from urls with a trailing slash', async () => {
+      const rpcUrl = 'https://eth-mainnet.g.alchemy.com/v2/test%20key/'
+      vi.mocked(getAlchemyServerRpcUrl).mockReturnValueOnce(rpcUrl)
+      simulateBlocks.mockRejectedValueOnce(
+        new Error(`boom at ${rpcUrl} using test%20key and test key`)
+      )
+
+      const error = await simulate(request).catch((e) => e)
+
+      expect(error).toBeInstanceOf(BackendFailedError)
+      expect(error.message).toBe('boom at <redacted> using <redacted> and <redacted>')
     })
   })
 })

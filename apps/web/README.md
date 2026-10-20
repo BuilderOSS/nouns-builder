@@ -11,7 +11,7 @@ Nouns Builder is built on Nextjs and the following dependencies:
 - [swr](https://swr.vercel.app/) - for data fetching and response caching
 - [zustand](https://github.com/pmndrs/zustand) - to manage global and persistent state
 - [vanilla-extract](https://vanilla-extract.style/) - for styles
-- [tenderly](https://docs.tenderly.co/simulations-and-forks/simulation-api) - to simulate transactions
+- [alchemy](https://www.alchemy.com/) - to simulate transactions via `eth_simulateV1`
 - [formik](https://formik.org/docs/api/formik)
 - [wagmi](https://wagmi.sh/)
 - [rainbowkit](https://www.rainbowkit.com/)
@@ -50,11 +50,11 @@ You can swap out the environment variables as defined below to run against diffe
 
 ```
 # to run with all networks including testnets (8 total networks)
-NEXT_PUBLIC_TENDERLY_RPC_KEY=<TENDERLY_RPC_API_KEY>
+NEXT_PUBLIC_ALCHEMY_API_KEY=<ALCHEMY_API_KEY>
 NEXT_PUBLIC_NETWORK_TYPE="testnet"
 
 # to run with production networks only (4 networks: Ethereum, Base, Optimism)
-NEXT_PUBLIC_TENDERLY_RPC_KEY=<TENDERLY_RPC_API_KEY>
+NEXT_PUBLIC_ALCHEMY_API_KEY=<ALCHEMY_API_KEY>
 NEXT_PUBLIC_NETWORK_TYPE="mainnet"
 ```
 

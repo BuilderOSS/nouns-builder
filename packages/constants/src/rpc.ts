@@ -3,7 +3,6 @@ import { foundry } from 'wagmi/chains'
 
 import { getAlchemyRpcUrl } from './alchemy'
 import { getInfuraRpcUrl } from './infura'
-import { getTenderlyRpcUrl } from './tenderly'
 
 const createRpcUrls = () => {
   const urls: Partial<Record<CHAIN_ID, string[]>> = {}
@@ -21,9 +20,6 @@ const createRpcUrls = () => {
   for (const key of Object.keys(CHAIN_ID)) {
     if (isNaN(Number(key))) {
       const chainId = CHAIN_ID[key as keyof typeof CHAIN_ID]
-      const tenderly = getTenderlyRpcUrl(chainId)
-      if (tenderly) addToUrls(chainId, tenderly)
-
       const alchemy = getAlchemyRpcUrl(chainId)
       if (alchemy) addToUrls(chainId, alchemy)
 
