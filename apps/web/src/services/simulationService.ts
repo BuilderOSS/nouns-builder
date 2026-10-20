@@ -1,4 +1,4 @@
-import { getAlchemyServerRpcUrl } from '@buildeross/constants/alchemy'
+import { ALCHEMY_NETWORKS, getAlchemyServerRpcUrl } from '@buildeross/constants/alchemy'
 import {
   auctionAbi,
   governorAbi,
@@ -29,7 +29,7 @@ import {
   parseAbi,
 } from 'viem'
 
-import { InsufficientFundsError, InvalidRequestError } from './errors'
+import { BackendFailedError, InsufficientFundsError, InvalidRequestError } from './errors'
 
 export type SimulationRequestBody = {
   tokenAddress: Address
@@ -113,9 +113,12 @@ const simulateTransaction = async ({
   calldatas,
   values,
 }: Omit<SimulationRequestBody, 'tokenAddress'>): Promise<SimulationOutput[]> => {
+  if (!ALCHEMY_NETWORKS[chainId]) {
+    throw new InvalidRequestError(`Chain ${chainId} is not supported for simulation`)
+  }
   const rpcUrl = getAlchemyServerRpcUrl(chainId)
   if (!rpcUrl) {
-    throw new InvalidRequestError(`Chain ${chainId} is not supported for simulation`)
+    throw new BackendFailedError('Alchemy API key is not configured for simulation')
   }
 
   const client = createPublicClient({ transport: http(rpcUrl) })
@@ -154,7 +157,10 @@ const simulateTransaction = async ({
         'Insufficient treasury funds to carry out some or all of these transactions'
       )
     }
-    throw error
+    // viem error messages include the RPC url, which contains the API key
+    const apiKey = new URL(rpcUrl).pathname.split('/').pop() as string
+    const message = error instanceof Error ? error.message : String(error)
+    throw new BackendFailedError(message.split(apiKey).join('<redacted>'))
   }
 }
 

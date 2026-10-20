@@ -1,3 +1,4 @@
+import { getAlchemyServerRpcUrl } from '@buildeross/constants/alchemy'
 import { CHAIN_ID } from '@buildeross/types'
 import {
   Address,
@@ -10,7 +11,7 @@ import {
 } from 'viem'
 import { vi } from 'vitest'
 
-import { InsufficientFundsError, InvalidRequestError } from './errors'
+import { BackendFailedError, InsufficientFundsError, InvalidRequestError } from './errors'
 import { simulate, SimulationRequestBody } from './simulationService'
 
 const simulateBlocks = vi.fn()
@@ -20,6 +21,14 @@ vi.mock('viem', async (importOriginal) => {
   return {
     ...actual,
     createPublicClient: vi.fn(() => ({ simulateBlocks })),
+  }
+})
+
+vi.mock('@buildeross/constants/alchemy', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@buildeross/constants/alchemy')>()
+  return {
+    ...actual,
+    getAlchemyServerRpcUrl: vi.fn(actual.getAlchemyServerRpcUrl),
   }
 })
 
@@ -273,15 +282,28 @@ describe('simulationService', () => {
       await expect(simulate(request)).rejects.toThrow(InsufficientFundsError)
     })
 
-    it('rethrows other rpc errors', async () => {
-      const error = new RpcRequestError({
-        body: {},
-        error: { code: -32000, message: 'boom' },
-        url: 'https://example.com',
-      })
-      simulateBlocks.mockRejectedValueOnce(error)
+    it('fails with BackendFailedError when the alchemy key is missing', async () => {
+      vi.mocked(getAlchemyServerRpcUrl).mockReturnValueOnce(undefined)
 
-      await expect(simulate(request)).rejects.toBe(error)
+      await expect(simulate(request)).rejects.toThrow(BackendFailedError)
+      expect(simulateBlocks).not.toHaveBeenCalled()
+    })
+
+    it('redacts the api key from other rpc errors', async () => {
+      simulateBlocks.mockRejectedValueOnce(
+        new RpcRequestError({
+          body: {},
+          error: { code: -32000, message: 'boom' },
+          url: 'https://eth-mainnet.g.alchemy.com/v2/test-key',
+        })
+      )
+
+      const error = await simulate(request).catch((e) => e)
+
+      expect(error).toBeInstanceOf(BackendFailedError)
+      expect(error.message).toContain('boom')
+      expect(error.message).toContain('<redacted>')
+      expect(error.message).not.toContain('test-key')
     })
   })
 })
