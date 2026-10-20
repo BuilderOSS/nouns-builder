@@ -1,7 +1,6 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { useCountdown } from '@buildeross/hooks/useCountdown'
 import { useIsMounted } from '@buildeross/hooks/useIsMounted'
-import { auctionAbi } from '@buildeross/sdk/contract'
 import { AddressType } from '@buildeross/types'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
 import { useLinks } from '@buildeross/ui/LinksProvider'
@@ -9,9 +8,8 @@ import { LinkWrapper as Link } from '@buildeross/ui/LinkWrapper'
 import { Box, Flex, Text } from '@buildeross/zord'
 import dayjs from 'dayjs'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { formatEther } from 'viem'
-import { useWatchContractEvent } from 'wagmi'
 
 import { AuctionPaused } from './AuctionPaused'
 import { BidActionButton } from './BidActionButton'
@@ -27,54 +25,17 @@ import {
 
 type DaoAuctionCardProps = DashboardDaoProps & {
   userAddress: AddressType
-  handleMutate: () => void
   isHidden: boolean
 }
 
 export const DaoAuctionCard = (props: DaoAuctionCardProps) => {
-  const {
-    currentAuction,
-    chainId,
-    auctionAddress,
-    handleMutate,
-    tokenAddress,
-    isHidden,
-  } = props
+  const { currentAuction, chainId, tokenAddress, isHidden } = props
 
   const { getAuctionLink } = useLinks()
   const chain = PUBLIC_DEFAULT_CHAINS.find((chain) => chain.id === chainId)
   const { endTime } = currentAuction ?? {}
 
   const [isEnded, setIsEnded] = useState(false)
-  const timeoutRefs = React.useRef<NodeJS.Timeout[]>([])
-
-  React.useEffect(() => {
-    const refs = timeoutRefs.current
-    return () => refs.forEach(clearTimeout)
-  }, [])
-
-  const onLogs = React.useCallback(async () => {
-    const timeoutId = setTimeout(() => {
-      handleMutate()
-    }, 3000)
-    timeoutRefs.current.push(timeoutId)
-  }, [handleMutate])
-
-  useWatchContractEvent({
-    address: auctionAddress,
-    abi: auctionAbi,
-    eventName: 'AuctionCreated',
-    chainId,
-    onLogs,
-  })
-
-  useWatchContractEvent({
-    address: auctionAddress,
-    abi: auctionAbi,
-    eventName: 'AuctionBid',
-    chainId,
-    onLogs,
-  })
 
   const onEnd = () => {
     setIsEnded(true)

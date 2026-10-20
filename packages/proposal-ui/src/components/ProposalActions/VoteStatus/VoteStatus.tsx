@@ -1,25 +1,21 @@
-import { governorAbi, ProposalState } from '@buildeross/sdk/contract'
+import { ProposalState } from '@buildeross/sdk/contract'
 import {
   ProposalVoteFragment as ProposalVote,
   ProposalVoteSupport as Support,
 } from '@buildeross/sdk/subgraph'
-import { useAuthStore, useChainStore, useDaoStore } from '@buildeross/stores'
+import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { ContractButton } from '@buildeross/ui/ContractButton'
 import { Flex, Text } from '@buildeross/zord'
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
-import { getAddress } from 'viem'
-import { useWatchContractEvent } from 'wagmi'
+import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
 import { proposalActionButtonVariants } from '../ProposalActions.css'
 import Pending from './Pending'
 import Updatable from './Updatable'
 import Vote from './Vote'
-import { VoteModal } from './VoteModal'
+import { type SubmittedVote, VoteModal } from './VoteModal'
 import { VotingPowerExplainer } from './VotingPowerExplainer'
 
-type SupportValue = 0 | 1 | 2
-
-const valueToSupport: Record<SupportValue, Support> = {
+const valueToSupport: Record<SubmittedVote['support'], Support> = {
   0: Support.Against,
   1: Support.For,
   2: Support.Abstain,
@@ -52,7 +48,6 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
 }) => {
   const chain = useChainStore((x) => x.chain)
   const { address: userAddress } = useAuthStore()
-  const { governor } = useDaoStore((state) => state.addresses)
   const [showVoteModal, setShowVoteModal] = useState<boolean>(false)
   const [vote, setVote] = useState<ProposalVote | undefined>(signerVote)
 
@@ -73,40 +68,30 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
     }
   }, [userAddress, signerVote, proposalId])
 
-  const shouldListen = useMemo(
-    () => !signerVote && !!userAddress && state === ProposalState.Active,
-    [userAddress, signerVote, state]
-  )
-
   const handleOpenVoteModal = useCallback(() => {
     setShowVoteModal(true)
   }, [setShowVoteModal])
 
-  useWatchContractEvent({
-    address: shouldListen ? governor : undefined,
-    abi: governorAbi,
-    eventName: 'VoteCast',
-    onLogs: async (logs) => {
-      const { voter, proposalId: id, support, weight, reason } = logs[0].args
-      if (id === proposalId && voter && getAddress(voter) === getAddress(userAddress!)) {
-        const eventVote: ProposalVote = {
-          voter,
-          support: valueToSupport[Number(support) as SupportValue],
-          weight: Number(weight),
-          reason,
-          timestamp: logs[0].blockTimestamp
-            ? Number(logs[0].blockTimestamp)
-            : Math.floor(Date.now() / 1000),
-        }
-
-        setVote(eventVote)
-        sessionStorage.setItem(
-          `vote-${proposalId}-${userAddress}`,
-          JSON.stringify(eventVote)
-        )
+  // Show the vote immediately; it stays in sessionStorage until the subgraph
+  // has indexed it (see the effect above)
+  const handleVoteSuccess = useCallback(
+    ({ support, reason }: SubmittedVote) => {
+      if (!userAddress) return
+      const submittedVote: ProposalVote = {
+        voter: userAddress,
+        support: valueToSupport[support],
+        weight: votesAvailable,
+        reason,
+        timestamp: Math.floor(Date.now() / 1000),
       }
+      setVote(submittedVote)
+      sessionStorage.setItem(
+        `vote-${proposalId}-${userAddress}`,
+        JSON.stringify(submittedVote)
+      )
     },
-  })
+    [userAddress, votesAvailable, proposalId]
+  )
 
   return (
     <Flex
@@ -202,6 +187,7 @@ export const VoteStatus: React.FC<VoteStatusProps> = ({
         votesAvailable={votesAvailable}
         showVoteModal={showVoteModal}
         setShowVoteModal={setShowVoteModal}
+        onSuccess={handleVoteSuccess}
       />
     </Flex>
   )

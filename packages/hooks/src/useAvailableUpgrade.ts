@@ -249,7 +249,9 @@ export const useAvailableUpgrade = ({
         console.error('Error verifying upgrades:', e)
         return null
       }
-    }
+    },
+    // Implementations only change through upgrades; skip focus revalidation
+    { revalidateOnFocus: false }
   )
 
   const hasUndefinedAddresses = Object.keys(pickBy(addresses, isUndefined)).length > 0

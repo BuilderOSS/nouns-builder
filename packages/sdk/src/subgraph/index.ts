@@ -24,6 +24,7 @@ export * from './requests/getPropDates'
 export * from './requests/getTreasuryAssetPins'
 export * from './requests/getUserCandidateSignal'
 export * from './requests/homepageQuery'
+export * from './requests/liveAuctions'
 export * from './requests/memberSnapshot'
 export * from './requests/profileDashboardQuery'
 export * from './requests/profileQuery'
@@ -42,6 +43,7 @@ export {
   type AuctionBidFragment,
   type AuctionFragment,
   type AuctionHistoryQuery,
+  type AuctionStatusFragment,
   type CandidateCommentFragmentFragment,
   type CandidateGroupDetailFragmentFragment,
   type CandidateGroupFragmentFragment,
