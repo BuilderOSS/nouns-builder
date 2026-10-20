@@ -1,4 +1,5 @@
 import type { ImageProps, OrderedTraits } from '@buildeross/types'
+import { isArtworkMimeType } from '@buildeross/utils/artworkFiles'
 import { LayerOrdering } from '@buildeross/ui/Artwork'
 import { Playground } from '@buildeross/ui/Playground'
 import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
@@ -11,12 +12,10 @@ const processArtworkFiles = (
   orderedLayers: OrderedTraits
 } | null => {
   const filesArray = Array.from(files).filter((file) => file.name !== '.DS_Store')
-  const acceptableMIME = ['image/png', 'image/svg+xml']
-
   // Validate file types
-  const invalidFiles = filesArray.filter((file) => !acceptableMIME.includes(file.type))
+  const invalidFiles = filesArray.filter((file) => !isArtworkMimeType(file.type))
   if (invalidFiles.length > 0) {
-    throw new Error('Only PNG and SVG files are supported')
+    throw new Error('Only PNG, SVG and GIF files are supported')
   }
 
   // Parse folder structure
@@ -31,7 +30,7 @@ const processArtworkFiles = (
     if (pathParts.length < 3) return
 
     const traitName = pathParts[pathParts.length - 2]
-    const itemName = pathParts[pathParts.length - 1].replace(/\.(png|svg)$/i, '')
+    const itemName = pathParts[pathParts.length - 1].replace(/\.(png|svg|gif)$/i, '')
 
     // Find or create trait
     let trait = traits.find((t) => t.trait === traitName)
@@ -208,7 +207,7 @@ export const CustomArtworkUpload: React.FC = () => {
             contain every variant for that trait.
           </Text>
           <Text color="text3" size="sm">
-            Supported formats: PNG and SVG
+            Supported formats: PNG, SVG and GIF
           </Text>
         </Stack>
 

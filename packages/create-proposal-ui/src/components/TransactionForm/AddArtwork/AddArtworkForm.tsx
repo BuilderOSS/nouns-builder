@@ -32,8 +32,7 @@ export interface AddArtworkFormProps {
   propertiesCount: number
   invalidProperty?: InvalidProperty
   invalidPropertyOrder?: InvalidPropertyOrder
-  fileExtensionMismatch?: string | null
-  dimensionMismatch?: string | null
+  fileTypeMismatch?: string
   handleSubmit: (values: ArtworkFormValues) => void
 }
 
@@ -43,8 +42,7 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
   isPropertyCountValid,
   invalidProperty,
   invalidPropertyOrder,
-  fileExtensionMismatch,
-  dimensionMismatch,
+  fileTypeMismatch,
   propertiesCount,
   handleSubmit,
 }) => {
@@ -78,9 +76,9 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
           original exactly (including spelling and casing).
         </Box>
         <Box mb="x3">
-          <Text fontWeight={'label'}>File consistency:</Text> All uploaded artwork must
-          use the same file type (PNG, SVG, or GIF) and dimensions as existing artwork in
-          the collection.
+          <Text fontWeight={'label'}>File types:</Text> PNG and animated GIF artwork can
+          be mixed, including with existing PNG or GIF traits. SVG collections must stay
+          SVG-only. All images must be square.
         </Box>
         <Box mb="x3">
           <Text fontWeight={'label'}>Avoid duplicates:</Text> Do not re-upload previously
@@ -148,14 +146,9 @@ export const AddArtworkForm: React.FC<AddArtworkFormProps> = ({
                   mb="x2"
                 >{`The trait "${invalidPropertyOrder.trait}" in ${invalidPropertyOrder.invalidLayerName} is not in the correct position. It should be in ${invalidPropertyOrder.layerName}.`}</Text>
               )}
-              {showPropertyErrors && fileExtensionMismatch && (
+              {showPropertyErrors && fileTypeMismatch && (
                 <Text w="100%" textAlign={'left'} color={'negative'} mt="x4" mb="x2">
-                  {fileExtensionMismatch}
-                </Text>
-              )}
-              {showPropertyErrors && dimensionMismatch && (
-                <Text w="100%" textAlign={'left'} color={'negative'} mt="x2" mb="x4">
-                  {dimensionMismatch}
+                  {fileTypeMismatch}
                 </Text>
               )}
 

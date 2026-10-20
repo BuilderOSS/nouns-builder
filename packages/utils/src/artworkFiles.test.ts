@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   areArtworkMimeTypesCompatible,
+  artworkUriToMimeType,
   GIF_ARTWORK_LIMITS,
   isArtworkMimeType,
   mimeToArtworkExtension,
@@ -35,6 +36,14 @@ describe('artwork mime helpers', () => {
     expect(mimeToArtworkExtension('image/png')).toBe('.png')
     expect(mimeToArtworkExtension('image/svg+xml')).toBe('.svg')
     expect(mimeToArtworkExtension('image/gif')).toBe('.gif')
+  })
+
+  it('infers mime types from on-chain item URIs', () => {
+    expect(artworkUriToMimeType('ipfs://cid/heads/cat.png')).toBe('image/png')
+    expect(artworkUriToMimeType('ipfs://cid/heads/cat.GIF')).toBe('image/gif')
+    expect(artworkUriToMimeType('ipfs://cid/heads/cat.svg')).toBe('image/svg+xml')
+    expect(artworkUriToMimeType('ipfs://cid/heads/cat.jpg')).toBeUndefined()
+    expect(artworkUriToMimeType('ipfs://cid/heads/cat')).toBeUndefined()
   })
 
   it('allows mixing PNG and GIF but not SVG with raster types', () => {

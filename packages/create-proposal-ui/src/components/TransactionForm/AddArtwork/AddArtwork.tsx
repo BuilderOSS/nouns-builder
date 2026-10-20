@@ -3,6 +3,12 @@ import { getPropertyItems, metadataAbi } from '@buildeross/sdk/contract'
 import { useChainStore, useDaoStore } from '@buildeross/stores'
 import { AddressType, TransactionType } from '@buildeross/types'
 import { getLayerName } from '@buildeross/ui/Artwork'
+import {
+  areArtworkMimeTypesCompatible,
+  ArtworkMimeType,
+  artworkUriToMimeType,
+  mimeToArtworkExtension,
+} from '@buildeross/utils/artworkFiles'
 import { transformFileProperties } from '@buildeross/utils/transformFileProperties'
 import { Stack } from '@buildeross/zord'
 import { useCallback, useEffect, useMemo } from 'react'
@@ -85,17 +91,35 @@ export const AddArtwork: React.FC = () => {
     }
   }, [orderedLayers, contractOrderedLayers, properties])
 
+  // PNG and GIF can be added alongside each other; SVG collections must stay SVG-only
+  const fileTypeMismatch = useMemo(() => {
+    if (!properties?.length || !ipfsUpload.length) return
+    const existingTypes = properties.flatMap((p) =>
+      p.items
+        .map((item) => artworkUriToMimeType(item.uri))
+        .filter((t): t is ArtworkMimeType => !!t)
+    )
+    const uploadedTypes = ipfsUpload.map((u) => u.type).filter((t): t is string => !!t)
+    if (areArtworkMimeTypesCompatible([...existingTypes, ...uploadedTypes])) return
+
+    const describe = (types: string[]) =>
+      Array.from(new Set(types.map(mimeToArtworkExtension))).join(', ')
+    return `SVG artwork cannot be mixed with PNG or GIF. Existing artwork uses ${describe(existingTypes)}; your upload uses ${describe(uploadedTypes)}.`
+  }, [properties, ipfsUpload])
+
   const isValid = useMemo(
     () =>
       isPropertyCountValid &&
       !invalidProperty &&
       !invalidPropertyOrder &&
+      !fileTypeMismatch &&
       !isUploadingToIPFS &&
       ipfsUpload.length !== 0,
     [
       isPropertyCountValid,
       invalidProperty,
       invalidPropertyOrder,
+      fileTypeMismatch,
       isUploadingToIPFS,
       ipfsUpload,
     ]
@@ -154,6 +178,7 @@ export const AddArtwork: React.FC = () => {
         properties={properties || []}
         invalidProperty={invalidProperty}
         invalidPropertyOrder={invalidPropertyOrder}
+        fileTypeMismatch={fileTypeMismatch}
         handleSubmit={handleAddArtworkTransaction}
       />
     </Stack>

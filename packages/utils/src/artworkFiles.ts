@@ -14,6 +14,18 @@ const RASTER_ARTWORK_MIME_TYPES: readonly string[] = ['image/png', 'image/gif']
 export const mimeToArtworkExtension = (type: string | undefined): string =>
   `${type?.replace('image/', '.').replace('+xml', '').toLowerCase()}`
 
+const EXTENSION_TO_MIME: Record<string, ArtworkMimeType> = {
+  png: 'image/png',
+  svg: 'image/svg+xml',
+  gif: 'image/gif',
+}
+
+/** Infers the artwork MIME type from an on-chain item URI's extension. */
+export const artworkUriToMimeType = (uri: string): ArtworkMimeType | undefined => {
+  const match = uri.match(/\.([a-z0-9]+)(?:$|[?#])/i)
+  return match ? EXTENSION_TO_MIME[match[1].toLowerCase()] : undefined
+}
+
 /**
  * PNG and GIF layers may be mixed (including with existing on-chain artwork);
  * SVG must not be mixed with raster types.
