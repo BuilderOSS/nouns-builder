@@ -1,19 +1,32 @@
 import { getAlchemyServerRpcUrl } from '@buildeross/constants/alchemy'
 import {
+  auctionAbi,
+  governorAbi,
+  managerAbi,
+  merkleReserveMinterAbi,
+  metadataAbi,
+  tokenAbi,
+  treasuryAbi,
+} from '@buildeross/sdk/contract'
+import {
   BytesType,
   CHAIN_ID,
   SimulationOutput,
   SimulationResult,
 } from '@buildeross/types'
 import {
+  Abi,
   AbiDecodingZeroDataError,
   Address,
   BaseError,
   ContractFunctionRevertedError,
+  ContractFunctionZeroDataError,
   createPublicClient,
+  decodeErrorResult,
   http,
   InsufficientFundsError as ViemInsufficientFundsError,
   isAddress,
+  parseAbi,
 } from 'viem'
 
 import { InsufficientFundsError, InvalidRequestError } from './errors'
@@ -27,10 +40,39 @@ export type SimulationRequestBody = {
   values: string[]
 }
 
+// Custom errors of the Builder protocol contracts and common token standards,
+// used to decode revert data of calls made by proposals
+const REVERT_ERRORS_ABI: Abi = [
+  ...auctionAbi,
+  ...governorAbi,
+  ...managerAbi,
+  ...merkleReserveMinterAbi,
+  ...metadataAbi,
+  ...tokenAbi,
+  ...treasuryAbi,
+  ...parseAbi([
+    'error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed)',
+    'error ERC20InsufficientAllowance(address spender, uint256 allowance, uint256 needed)',
+    'error ERC721NonexistentToken(uint256 tokenId)',
+    'error ERC721IncorrectOwner(address sender, uint256 tokenId, address owner)',
+    'error ERC721InsufficientApproval(address operator, uint256 tokenId)',
+    'error OwnableUnauthorizedAccount(address account)',
+  ]),
+].filter((item) => item.type === 'error')
+
+const formatDecodedError = (errorName: string, args?: readonly unknown[]) =>
+  `${errorName}(${args?.map((arg) => String(arg)).join(', ') ?? ''})`
+
 const getRevertReason = (error: Error | undefined): string => {
   if (!(error instanceof BaseError)) return error?.message || 'Execution reverted'
 
-  if (error.walk((e) => e instanceof AbiDecodingZeroDataError)) {
+  if (
+    error.walk(
+      (e) =>
+        e instanceof AbiDecodingZeroDataError ||
+        e instanceof ContractFunctionZeroDataError
+    )
+  ) {
     return 'Execution reverted without a reason'
   }
 
@@ -38,8 +80,15 @@ const getRevertReason = (error: Error | undefined): string => {
   if (reverted instanceof ContractFunctionRevertedError) {
     if (reverted.reason) return reverted.reason
     if (reverted.data?.errorName) {
-      const args = reverted.data.args?.map((arg) => String(arg)).join(', ') ?? ''
-      return `${reverted.data.errorName}(${args})`
+      return formatDecodedError(reverted.data.errorName, reverted.data.args)
+    }
+    if (reverted.raw) {
+      try {
+        const decoded = decodeErrorResult({ abi: REVERT_ERRORS_ABI, data: reverted.raw })
+        return formatDecodedError(decoded.errorName, decoded.args)
+      } catch {
+        // unknown custom error
+      }
     }
     if (reverted.signature) return `Custom error ${reverted.signature}`
   }

@@ -2,6 +2,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import {
   Address,
   ContractFunctionRevertedError,
+  ContractFunctionZeroDataError,
   createPublicClient,
   encodeErrorResult,
   InsufficientFundsError as ViemInsufficientFundsError,
@@ -234,6 +235,36 @@ describe('simulationService', () => {
         status: false,
         error: 'Ownable: caller is not the owner',
       })
+    })
+
+    it('decodes builder protocol custom errors and empty reverts', async () => {
+      simulateBlocks.mockResolvedValueOnce([
+        {
+          number: 100n,
+          calls: [
+            {
+              status: 'failure',
+              gasUsed: 25000n,
+              // ONLY_OWNER()
+              error: new ContractFunctionRevertedError({
+                abi: [],
+                data: '0xd238ed59',
+                functionName: 'unknown',
+              }),
+            },
+            {
+              status: 'failure',
+              gasUsed: 25000n,
+              error: new ContractFunctionZeroDataError({ functionName: 'unknown' }),
+            },
+          ],
+        },
+      ])
+
+      const response = await simulate(request)
+
+      expect(response.simulations[0].error).toBe('ONLY_OWNER()')
+      expect(response.simulations[1].error).toBe('Execution reverted without a reason')
     })
 
     it('throws InsufficientFundsError when the treasury cannot cover the value', async () => {
