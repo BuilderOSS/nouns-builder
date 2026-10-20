@@ -384,17 +384,25 @@ export type AddressLookupChainResult = {
   bids: BidGlobalSearchResult[]
 }
 
-/** Looks up everything an address is associated with on one chain. */
+/**
+ * Looks up everything an address is associated with on one chain.
+ * `daoId` (token address) restricts its proposals, votes and bids to one DAO.
+ */
 export const globalAddressLookupRequest = async (
   chainId: CHAIN_ID,
   address: string,
-  first: number
+  first: number,
+  daoId?: string
 ): Promise<AddressLookupChainResult> => {
   const id = address.toLowerCase()
+  const dao = daoId?.toLowerCase()
   const data = await SDK.connect(chainId).globalAddressLookup({
     id,
     address: id,
     first,
+    proposalWhere: { proposer: id, replacedBy: null, ...(dao && { dao }) },
+    voteWhere: { voter: id, ...(dao && { dao }) },
+    bidWhere: { bidder: id, ...(dao && { dao }) },
   })
   const nowSeconds = Math.floor(Date.now() / 1000)
   let profile: ProfileChainStats | null = null

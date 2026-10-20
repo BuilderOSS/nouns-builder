@@ -39,7 +39,14 @@ query globalSearch(
   }
 }
 
-query globalAddressLookup($id: ID!, $address: Bytes!, $first: Int!) {
+query globalAddressLookup(
+  $id: ID!
+  $address: Bytes!
+  $first: Int!
+  $proposalWhere: Proposal_filter!
+  $voteWhere: ProposalVote_filter!
+  $bidWhere: AuctionBid_filter!
+) {
   profile(id: $id) {
     ...SearchProfile
   }
@@ -61,7 +68,7 @@ query globalAddressLookup($id: ID!, $address: Bytes!, $first: Int!) {
     first: $first
     orderBy: timeCreated
     orderDirection: desc
-    where: { proposer: $address, replacedBy: null }
+    where: $proposalWhere
   ) {
     ...SearchProposal
   }
@@ -69,16 +76,11 @@ query globalAddressLookup($id: ID!, $address: Bytes!, $first: Int!) {
     first: $first
     orderBy: timestamp
     orderDirection: desc
-    where: { voter: $address }
+    where: $voteWhere
   ) {
     ...SearchVote
   }
-  auctionBids(
-    first: $first
-    orderBy: bidTime
-    orderDirection: desc
-    where: { bidder: $address }
-  ) {
+  auctionBids(first: $first, orderBy: bidTime, orderDirection: desc, where: $bidWhere) {
     ...SearchBid
   }
 }

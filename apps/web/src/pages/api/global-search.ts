@@ -200,9 +200,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const fetchCount = Math.min(100, pageInt * limitInt)
 
   try {
-    // ENS / Basename → address. getEnsAddress returns its input on failure.
+    // ENS / Basename → address. getEnsAddress returns its input on failure,
+    // and throws for names that fail ENS normalization.
     if (kind === 'name') {
-      const resolved = await getEnsAddress(rawQuery.toLowerCase())
+      const resolved = await getEnsAddress(rawQuery.toLowerCase()).catch(() => undefined)
       if (resolved && isAddress(resolved)) {
         resolvedAddress = resolved.toLowerCase()
       } else {
@@ -216,7 +217,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const address = resolvedAddress
       const { ok, failedChainIds: failed } = await perChain<AddressLookupChainResult>(
         chains,
-        (chainId) => globalAddressLookupRequest(chainId, address, fetchCount + 1)
+        (chainId) => globalAddressLookupRequest(chainId, address, fetchCount + 1, daoId)
       )
       failedChainIds = failed
 
@@ -233,11 +234,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       if (types.has('daos')) {
         results.daos = ok.flatMap((r) => r.daos)
       }
-      const byDao = <T extends { dao: { id: string } }>(items: T[]) =>
-        daoId ? items.filter((i) => i.dao.id === daoId) : items
       if (types.has('proposals')) {
         const p = paginateByTime(
-          byDao(ok.flatMap((r) => r.proposals)),
+          ok.flatMap((r) => r.proposals),
           (i) => i.timeCreated,
           pageInt,
           limitInt
@@ -247,7 +246,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
       if (types.has('votes')) {
         const v = paginateByTime(
-          byDao(ok.flatMap((r) => r.votes)),
+          ok.flatMap((r) => r.votes),
           (i) => i.timestamp,
           pageInt,
           limitInt
@@ -257,7 +256,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
       if (types.has('bids')) {
         const b = paginateByTime(
-          byDao(ok.flatMap((r) => r.bids)),
+          ok.flatMap((r) => r.bids),
           (i) => i.bidTime,
           pageInt,
           limitInt
@@ -271,9 +270,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         (chainId) => globalTxLookupRequest(chainId, rawQuery)
       )
       failedChainIds = failed
-      if (types.has('proposals')) results.proposals = ok.flatMap((r) => r.proposals)
-      if (types.has('votes')) results.votes = ok.flatMap((r) => r.votes)
-      if (types.has('bids')) results.bids = ok.flatMap((r) => r.bids)
+      // A tx hash is unique, so scope after the lookup instead of in the query
+      const byDao = <T extends { dao: { id: string } }>(items: T[]) =>
+        daoId ? items.filter((i) => i.dao.id === daoId) : items
+      if (types.has('proposals'))
+        results.proposals = byDao(ok.flatMap((r) => r.proposals))
+      if (types.has('votes')) results.votes = byDao(ok.flatMap((r) => r.votes))
+      if (types.has('bids')) results.bids = byDao(ok.flatMap((r) => r.bids))
     } else if (kind === 'addressPrefix') {
       const prefix = rawQuery.toLowerCase()
       const { ok, failedChainIds: failed } =

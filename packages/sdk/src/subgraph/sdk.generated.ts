@@ -13718,6 +13718,9 @@ export type GlobalAddressLookupQueryVariables = Exact<{
   id: Scalars['ID']['input']
   address: Scalars['Bytes']['input']
   first: Scalars['Int']['input']
+  proposalWhere: Proposal_Filter
+  voteWhere: ProposalVote_Filter
+  bidWhere: AuctionBid_Filter
 }>
 
 export type GlobalAddressLookupQuery = {
@@ -16491,7 +16494,14 @@ export const GlobalSearchDocument = gql`
   ${SearchBidFragmentDoc}
 `
 export const GlobalAddressLookupDocument = gql`
-  query globalAddressLookup($id: ID!, $address: Bytes!, $first: Int!) {
+  query globalAddressLookup(
+    $id: ID!
+    $address: Bytes!
+    $first: Int!
+    $proposalWhere: Proposal_filter!
+    $voteWhere: ProposalVote_filter!
+    $bidWhere: AuctionBid_filter!
+  ) {
     profile(id: $id) {
       ...SearchProfile
     }
@@ -16513,7 +16523,7 @@ export const GlobalAddressLookupDocument = gql`
       first: $first
       orderBy: timeCreated
       orderDirection: desc
-      where: { proposer: $address, replacedBy: null }
+      where: $proposalWhere
     ) {
       ...SearchProposal
     }
@@ -16521,16 +16531,11 @@ export const GlobalAddressLookupDocument = gql`
       first: $first
       orderBy: timestamp
       orderDirection: desc
-      where: { voter: $address }
+      where: $voteWhere
     ) {
       ...SearchVote
     }
-    auctionBids(
-      first: $first
-      orderBy: bidTime
-      orderDirection: desc
-      where: { bidder: $address }
-    ) {
+    auctionBids(first: $first, orderBy: bidTime, orderDirection: desc, where: $bidWhere) {
       ...SearchBid
     }
   }

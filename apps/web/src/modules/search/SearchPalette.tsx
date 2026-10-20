@@ -175,7 +175,10 @@ const PaletteDialog: React.FC<Omit<SearchPaletteProps, 'open'>> = ({
       setActiveIndex((i) => (i - 1 + flat.length) % flat.length)
     } else if (event.key === 'Enter') {
       event.preventDefault()
-      if (event.metaKey || event.ctrlKey || !flat[activeIndex]) openFullSearch()
+      // Results still belong to the previous query until the debounce catches up
+      const isStale = searchText !== trimmed
+      if (event.metaKey || event.ctrlKey || isStale || !flat[activeIndex])
+        openFullSearch()
       else selectResult(flat[activeIndex])
     }
   }

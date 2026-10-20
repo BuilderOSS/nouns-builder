@@ -253,6 +253,9 @@ describe('globalAddressLookupRequest', () => {
       id: '0xabc',
       address: '0xabc',
       first: 3,
+      proposalWhere: { proposer: '0xabc', replacedBy: null },
+      voteWhere: { voter: '0xabc' },
+      bidWhere: { bidder: '0xabc' },
     })
     expect(result.profile).toEqual({
       chainId: CHAIN_ID.ETHEREUM,
@@ -265,5 +268,25 @@ describe('globalAddressLookupRequest', () => {
       auctionWinsCount: 1,
       lastActiveAt: '900',
     })
+  })
+
+  it('scopes proposals, votes and bids to a DAO', async () => {
+    sdkMock.globalAddressLookup.mockResolvedValueOnce({
+      profile: null,
+      daos: [],
+      proposals: [],
+      proposalVotes: [],
+      auctionBids: [],
+    })
+
+    await globalAddressLookupRequest(CHAIN_ID.BASE, '0xABC', 5, '0xDAO')
+
+    expect(sdkMock.globalAddressLookup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        proposalWhere: { proposer: '0xabc', replacedBy: null, dao: '0xdao' },
+        voteWhere: { voter: '0xabc', dao: '0xdao' },
+        bidWhere: { bidder: '0xabc', dao: '0xdao' },
+      })
+    )
   })
 })
