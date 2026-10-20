@@ -100,8 +100,14 @@ importers:
         specifier: ^4.1.3
         version: 4.1.3(viem@2.47.1(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12))
       '@ai-sdk/gateway':
-        specifier: ^2.0.0
-        version: 2.0.0(zod@4.1.12)
+        specifier: ^2.0.169
+        version: 2.0.169(zod@4.1.12)
+      '@ai-sdk/google':
+        specifier: ^2.0.104
+        version: 2.0.104(zod@4.1.12)
+      '@ai-sdk/groq':
+        specifier: ^2.0.58
+        version: 2.0.58(zod@4.1.12)
       '@buildeross/analytics':
         specifier: workspace:*
         version: link:../../packages/analytics
@@ -211,8 +217,8 @@ importers:
         specifier: ^0.7.2
         version: 0.7.2
       ai:
-        specifier: ^5.0.76
-        version: 5.0.76(zod@4.1.12)
+        specifier: ^5.0.278
+        version: 5.0.278(zod@4.1.12)
       alchemy-sdk:
         specifier: ^3.6.0
         version: 3.6.5(bufferutil@4.0.9)(debug@4.4.3)(encoding@0.1.13)(typescript@5.9.3)(utf-8-validate@5.0.10)
@@ -424,7 +430,7 @@ importers:
         version: 1.17.4(babel-plugin-macros@3.1.0)
       axios:
         specifier: ^1.12.2
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
@@ -701,7 +707,7 @@ importers:
         version: 1.17.4(babel-plugin-macros@3.1.0)
       axios:
         specifier: ^1.12.2
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
@@ -852,7 +858,7 @@ importers:
         version: 0.7.2
       axios:
         specifier: ^1.12.2
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
@@ -1000,7 +1006,7 @@ importers:
         version: 1.17.4(babel-plugin-macros@3.1.0)
       axios:
         specifier: ^1.12.2
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
@@ -1400,7 +1406,7 @@ importers:
         version: 1.17.4(babel-plugin-macros@3.1.0)
       axios:
         specifier: ^1.12.2
-        version: 1.12.2
+        version: 1.12.2(debug@4.4.3)
       dayjs:
         specifier: ^1.11.13
         version: 1.11.18
@@ -1818,6 +1824,9 @@ importers:
       '@buildeross/sdk':
         specifier: workspace:*
         version: link:../sdk
+      '@buildeross/stores':
+        specifier: workspace:*
+        version: link:../stores
       '@buildeross/swap':
         specifier: workspace:*
         version: link:../swap
@@ -2061,20 +2070,32 @@ packages:
   '@adraffy/ens-normalize@1.11.1':
     resolution: {integrity: sha512-nhCBV3quEgesuf7c7KYfperqSS14T8bYuvJ8PcLJp6znkZpFc0AuW4qBtr8eKVyPPe/8RSr7sglCWPU5eaxwKQ==}
 
-  '@ai-sdk/gateway@2.0.0':
-    resolution: {integrity: sha512-Gj0PuawK7NkZuyYgO/h5kDK/l6hFOjhLdTq3/Lli1FTl47iGmwhH1IZQpAL3Z09BeFYWakcwUmn02ovIm2wy9g==}
+  '@ai-sdk/gateway@2.0.169':
+    resolution: {integrity: sha512-FG9bPyxlx77x9JvEUhcfMhNeZS7A9g2WNAksWDI1B7k5FbY/W3M26xgPEIVIFO+7VBZYwALY4dtmJbTGCfny3g==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^4.1.12
 
-  '@ai-sdk/provider-utils@3.0.12':
-    resolution: {integrity: sha512-ZtbdvYxdMoria+2SlNarEk6Hlgyf+zzcznlD55EAl+7VZvJaSg2sqPvwArY7L6TfDEDJsnCq0fdhBSkYo0Xqdg==}
+  '@ai-sdk/google@2.0.104':
+    resolution: {integrity: sha512-x6iAAa39+SCxVE58yS9MjF45jjRvfp0MkCQL+AOAnBOZTKP0GQa1+2J3z6ultZrb+qHU4CAbhSkM49/lbTJC3Q==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^4.1.12
 
-  '@ai-sdk/provider@2.0.0':
-    resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
+  '@ai-sdk/groq@2.0.58':
+    resolution: {integrity: sha512-ldIcYJTCOqMjDhj5uEvtxQWFckMjYxNp0+ChiNuC7fpD2ZTw2HMAbS7ipRnyGLPw/NmI2lIN9LZ77RunHsax4Q==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^4.1.12
+
+  '@ai-sdk/provider-utils@3.0.41':
+    resolution: {integrity: sha512-xpURVGQud+AEOZ/uRZTBU0eVy2+dt/y/dUEp9ewjW3eTM6yu0vThzTvduhOSabpn6AExewg8WJW04P4D6USVXw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^4.1.12
+
+  '@ai-sdk/provider@2.0.5':
+    resolution: {integrity: sha512-cmG40u10QFEUrYXWYom6Lo6DLR+pND3wWABTTT9Nf7zg9F7BD46KNj+STekndp9Kg5ZAIPA0WxmTI0IwRvKvvQ==}
     engines: {node: '>=18'}
 
   '@apollo/client@3.14.0':
@@ -5781,8 +5802,8 @@ packages:
     resolution: {integrity: sha512-e4kQK9mP8ntpo3dACWirGod/hHv4qO5JMj9a/0a2AZto7b4persj5YP7t1Er372gTtYFTYxNhMx34jRvHooglw==}
     engines: {node: '>=16'}
 
-  '@vercel/oidc@3.0.3':
-    resolution: {integrity: sha512-yNEQvPcVrK9sIe637+I0jD6leluPxzwJKx/Haw6F4H77CdDsszUn5V3o96LPziXkSNE2B83+Z3mjqGKBK/R6Gg==}
+  '@vercel/oidc@3.1.0':
+    resolution: {integrity: sha512-Fw28YZpRnA3cAHHDlkt7xQHiJ0fcL+NRcIqsocZQUSmbzeIKRpwttJjik5ZGanXP+vlA4SbTg+AbA3bP363l+w==}
     engines: {node: '>= 20'}
 
   '@vitejs/plugin-react@4.7.0':
@@ -6187,8 +6208,8 @@ packages:
     resolution: {integrity: sha512-4I7Td01quW/RpocfNayFdFVk1qSuoh0E7JrbRJ16nH01HhKFQ88INq9Sd+nd72zqRySlr9BmDA8xlEJ6vJMrYA==}
     engines: {node: '>=8'}
 
-  ai@5.0.76:
-    resolution: {integrity: sha512-ZCxi1vrpyCUnDbtYrO/W8GLvyacV9689f00yshTIQ3mFFphbD7eIv40a2AOZBv3GGRA7SSRYIDnr56wcS/gyQg==}
+  ai@5.0.278:
+    resolution: {integrity: sha512-zQ07Vd8NltSS0obxybbYWdpSlTr7G+fC8O58PQOaBOvMXfIDXfcVkHaaueVAcSrkY42rPDFrkgBB+g//KRVkQA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^4.1.12
@@ -11099,11 +11120,6 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  semver@7.7.4:
-    resolution: {integrity: sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA==}
-    engines: {node: '>=10'}
-    hasBin: true
-
   semver@7.8.5:
     resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
     engines: {node: '>=10'}
@@ -12716,21 +12732,34 @@ snapshots:
 
   '@adraffy/ens-normalize@1.11.1': {}
 
-  '@ai-sdk/gateway@2.0.0(zod@4.1.12)':
+  '@ai-sdk/gateway@2.0.169(zod@4.1.12)':
     dependencies:
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.12(zod@4.1.12)
-      '@vercel/oidc': 3.0.3
+      '@ai-sdk/provider': 2.0.5
+      '@ai-sdk/provider-utils': 3.0.41(zod@4.1.12)
+      '@vercel/oidc': 3.1.0
       zod: 4.1.12
 
-  '@ai-sdk/provider-utils@3.0.12(zod@4.1.12)':
+  '@ai-sdk/google@2.0.104(zod@4.1.12)':
     dependencies:
-      '@ai-sdk/provider': 2.0.0
+      '@ai-sdk/provider': 2.0.5
+      '@ai-sdk/provider-utils': 3.0.41(zod@4.1.12)
+      zod: 4.1.12
+
+  '@ai-sdk/groq@2.0.58(zod@4.1.12)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.5
+      '@ai-sdk/provider-utils': 3.0.41(zod@4.1.12)
+      zod: 4.1.12
+
+  '@ai-sdk/provider-utils@3.0.41(zod@4.1.12)':
+    dependencies:
+      '@ai-sdk/provider': 2.0.5
       '@standard-schema/spec': 1.0.0
       eventsource-parser: 3.0.6
+      undici: 5.29.0
       zod: 4.1.12
 
-  '@ai-sdk/provider@2.0.0':
+  '@ai-sdk/provider@2.0.5':
     dependencies:
       json-schema: 0.4.0
 
@@ -15576,7 +15605,7 @@ snapshots:
       debug: 4.4.3(supports-color@8.1.1)
       lodash: 4.17.21
       pony-cause: 2.1.11
-      semver: 7.7.3
+      semver: 7.8.5
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -15600,7 +15629,7 @@ snapshots:
       '@types/debug': 4.1.13
       debug: 4.4.3(supports-color@8.1.1)
       pony-cause: 2.1.11
-      semver: 7.7.4
+      semver: 7.8.5
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -17992,7 +18021,7 @@ snapshots:
       satori: 0.12.2
       yoga-wasm-web: 0.3.3
 
-  '@vercel/oidc@3.0.3': {}
+  '@vercel/oidc@3.1.0': {}
 
   '@vitejs/plugin-react@4.7.0(vite@6.3.7(@types/node@22.18.10)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.1))':
     dependencies:
@@ -19177,11 +19206,11 @@ snapshots:
       clean-stack: 2.2.0
       indent-string: 4.0.0
 
-  ai@5.0.76(zod@4.1.12):
+  ai@5.0.278(zod@4.1.12):
     dependencies:
-      '@ai-sdk/gateway': 2.0.0(zod@4.1.12)
-      '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.12(zod@4.1.12)
+      '@ai-sdk/gateway': 2.0.169(zod@4.1.12)
+      '@ai-sdk/provider': 2.0.5
+      '@ai-sdk/provider-utils': 3.0.41(zod@4.1.12)
       '@opentelemetry/api': 1.9.0
       zod: 4.1.12
 
@@ -19476,14 +19505,6 @@ snapshots:
   axios@0.21.4(debug@4.3.4):
     dependencies:
       follow-redirects: 1.15.11(debug@4.3.4)
-    transitivePeerDependencies:
-      - debug
-
-  axios@1.12.2:
-    dependencies:
-      follow-redirects: 1.15.11(debug@4.3.4)
-      form-data: 4.0.4
-      proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
 
@@ -20109,7 +20130,7 @@ snapshots:
       json-schema-typed: 7.0.3
       onetime: 5.1.2
       pkg-up: 3.1.0
-      semver: 7.7.3
+      semver: 7.8.5
 
   confbox@0.1.8: {}
 
@@ -25165,8 +25186,6 @@ snapshots:
 
   semver@7.7.3: {}
 
-  semver@7.7.4: {}
-
   semver@7.8.5: {}
 
   send@0.19.0:
@@ -25963,7 +25982,7 @@ snapshots:
       global-prefix: 4.0.0
       minimist: 1.2.8
       resolve: 1.22.10
-      semver: 7.7.3
+      semver: 7.8.5
       strip-ansi: 6.0.1
 
   ts-toolbelt@9.6.0: {}
