@@ -175,11 +175,41 @@ describe('/api/renderer/stack-images', () => {
       expect(res.headers['content-type']).toBe('image/gif')
     })
 
-    it('falls back to webp when sniffing fails', async () => {
+    it('falls back to webp with a short cache when sniffing fails', async () => {
       fetchMock.mockImplementation(async () => new Response('', { status: 500 }))
       const res = await run('HEAD', { images: [GIF_URI] })
       expect(res.statusCode).toBe(200)
       expect(res.headers['content-type']).toBe('image/webp')
+      expect(res.headers['cache-control']).toBe('public, s-maxage=300')
+    })
+
+    it('times out gateways whose body stalls after headers arrive', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+      try {
+        // Headers arrive immediately, but the body never sends a byte until aborted
+        fetchMock.mockImplementation(
+          async (_url: string, init?: RequestInit) =>
+            new Response(
+              new ReadableStream({
+                start(controller) {
+                  init?.signal?.addEventListener('abort', () =>
+                    controller.error(new Error('aborted'))
+                  )
+                },
+              }),
+              { status: 206 }
+            )
+        )
+        const pending = run('HEAD', { images: [GIF_URI] })
+        // 7 gateways, each given 5s before moving on
+        for (let i = 0; i < 8; i++) await vi.advanceTimersByTimeAsync(5000)
+        const res = await pending
+        expect(res.statusCode).toBe(200)
+        expect(res.headers['content-type']).toBe('image/webp')
+        expect(res.headers['cache-control']).toBe('public, s-maxage=300')
+      } finally {
+        vi.useRealTimers()
+      }
     })
   })
 })

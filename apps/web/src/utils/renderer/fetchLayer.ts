@@ -6,11 +6,18 @@ const SNIFF_TIMEOUT = 5000
 /** Enough to see the NETSCAPE loop extension / first frames of a typical GIF. */
 export const SNIFF_BYTES = 64 * 1024
 
-const fetchWithTimeout = async (url: string, timeoutMs: number, init?: RequestInit) => {
+/** Fetches and reads the response within one timeout, so a stalled body can't hang the request. */
+const fetchWithTimeout = async <T>(
+  url: string,
+  timeoutMs: number,
+  read: (res: Response) => Promise<T>,
+  init?: RequestInit
+): Promise<T> => {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    return await fetch(url, { ...init, signal: controller.signal })
+    const res = await fetch(url, { ...init, signal: controller.signal })
+    return await read(res)
   } finally {
     clearTimeout(timeoutId)
   }
@@ -22,11 +29,10 @@ export const getImageData = async (imageUrl: string): Promise<Buffer> => {
 
   for (const url of urls) {
     try {
-      const res = await fetchWithTimeout(url, REQUEST_TIMEOUT)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-
-      const arrayBuffer = await res.arrayBuffer()
-      return Buffer.from(arrayBuffer)
+      return await fetchWithTimeout(url, REQUEST_TIMEOUT, async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return Buffer.from(await res.arrayBuffer())
+      })
     } catch (err) {
       console.warn(`Failed to fetch from ${url}: ${(err as Error).message}`)
     }
@@ -72,11 +78,15 @@ export const getImagePrefix = async (
 
   for (const url of urls) {
     try {
-      const res = await fetchWithTimeout(url, SNIFF_TIMEOUT, {
-        headers: { Range: `bytes=0-${maxBytes - 1}` },
-      })
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-      return await readPrefix(res, maxBytes)
+      return await fetchWithTimeout(
+        url,
+        SNIFF_TIMEOUT,
+        async (res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`)
+          return readPrefix(res, maxBytes)
+        },
+        { headers: { Range: `bytes=0-${maxBytes - 1}` } }
+      )
     } catch (err) {
       console.warn(`Failed to sniff ${url}: ${(err as Error).message}`)
     }

@@ -36,15 +36,18 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   // Handle HEAD request - sniff layer prefixes to report the likely content type
   if (req.method === 'HEAD') {
     let contentType = 'image/webp'
+    let headCacheControl = cacheControl
     if (!forceStatic) {
       try {
         const prefixes = await Promise.all(images.map((url) => getImagePrefix(url)))
         if (prefixes.some(prefixLooksAnimated)) contentType = `image/${format}`
       } catch (err) {
         console.warn('Renderer HEAD: failed to sniff layers', err)
+        // The content type is only a guess; don't pin it in the CDN for a day
+        headCacheControl = 'public, s-maxage=300'
       }
     }
-    res.setHeader('Cache-Control', cacheControl)
+    res.setHeader('Cache-Control', headCacheControl)
     res.setHeader('Content-Type', contentType)
     res.status(200).end()
     return
