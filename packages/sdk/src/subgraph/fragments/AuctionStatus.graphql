@@ -1,0 +1,21 @@
+fragment AuctionStatus on Auction {
+  id
+  startTime
+  endTime
+  extended
+  settled
+  bidCount
+  highestBid {
+    amount
+    bidder
+  }
+  token {
+    tokenId
+    name
+    image
+  }
+  dao {
+    id
+    auctionAddress
+  }
+}

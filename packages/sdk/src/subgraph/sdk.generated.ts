@@ -11116,6 +11116,19 @@ export type AuctionBidFragment = {
   comment?: string | null
 }
 
+export type AuctionStatusFragment = {
+  __typename?: 'Auction'
+  id: string
+  startTime: any
+  endTime: any
+  extended: boolean
+  settled: boolean
+  bidCount: number
+  highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
+  token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
+  dao: { __typename?: 'DAO'; id: string; auctionAddress: any }
+}
+
 export type ClankerTokenFragment = {
   __typename?: 'ClankerToken'
   pairedToken: any
@@ -12446,6 +12459,35 @@ export type DaoZoraDropsQuery = {
   } | null
 }
 
+export type DaosCurrentAuctionQueryVariables = Exact<{
+  ids: Array<Scalars['ID']['input']> | Scalars['ID']['input']
+  first: Scalars['Int']['input']
+}>
+
+export type DaosCurrentAuctionQuery = {
+  __typename?: 'Query'
+  daos: Array<{
+    __typename?: 'DAO'
+    id: string
+    currentAuction?: {
+      __typename?: 'Auction'
+      id: string
+      startTime: any
+      endTime: any
+      extended: boolean
+      settled: boolean
+      bidCount: number
+      highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
+      token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
+      dao: { __typename?: 'DAO'; id: string; auctionAddress: any }
+    } | null
+  }>
+  _meta?: {
+    __typename?: '_Meta_'
+    block: { __typename?: '_Block_'; number: number }
+  } | null
+}
+
 export type DaosForDashboardQueryVariables = Exact<{
   user: Scalars['Bytes']['input']
   first?: InputMaybe<Scalars['Int']['input']>
@@ -13257,6 +13299,31 @@ export type FindAuctionsForDaosQuery = {
     highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
     token: { __typename?: 'Token'; name: string; image?: string | null; tokenId: any }
   }>
+}
+
+export type LiveAuctionsQueryVariables = Exact<{
+  first: Scalars['Int']['input']
+  skip: Scalars['Int']['input']
+}>
+
+export type LiveAuctionsQuery = {
+  __typename?: 'Query'
+  auctions: Array<{
+    __typename?: 'Auction'
+    id: string
+    startTime: any
+    endTime: any
+    extended: boolean
+    settled: boolean
+    bidCount: number
+    highestBid?: { __typename?: 'AuctionBid'; amount: any; bidder: any } | null
+    token: { __typename?: 'Token'; tokenId: any; name: string; image?: string | null }
+    dao: { __typename?: 'DAO'; id: string; auctionAddress: any }
+  }>
+  _meta?: {
+    __typename?: '_Meta_'
+    block: { __typename?: '_Block_'; number: number }
+  } | null
 }
 
 export type SyncStatusQueryVariables = Exact<{ [key: string]: never }>
@@ -14241,6 +14308,29 @@ export const AuctionBidFragmentDoc = gql`
     amount
     bidder
     comment
+  }
+`
+export const AuctionStatusFragmentDoc = gql`
+  fragment AuctionStatus on Auction {
+    id
+    startTime
+    endTime
+    extended
+    settled
+    bidCount
+    highestBid {
+      amount
+      bidder
+    }
+    token {
+      tokenId
+      name
+      image
+    }
+    dao {
+      id
+      auctionAddress
+    }
   }
 `
 export const ClankerTokenCardFragmentDoc = gql`
@@ -15238,6 +15328,22 @@ export const DaoZoraDropsDocument = gql`
   }
   ${ZoraDropCardFragmentDoc}
 `
+export const DaosCurrentAuctionDocument = gql`
+  query daosCurrentAuction($ids: [ID!]!, $first: Int!) {
+    daos(where: { id_in: $ids }, first: $first) {
+      id
+      currentAuction {
+        ...AuctionStatus
+      }
+    }
+    _meta {
+      block {
+        number
+      }
+    }
+  }
+  ${AuctionStatusFragmentDoc}
+`
 export const DaosForDashboardDocument = gql`
   query daosForDashboard($user: Bytes!, $first: Int, $skip: Int) {
     daos(
@@ -15575,6 +15681,25 @@ export const FindAuctionsForDaosDocument = gql`
     }
   }
   ${ExploreDaoFragmentDoc}
+`
+export const LiveAuctionsDocument = gql`
+  query liveAuctions($first: Int!, $skip: Int!) {
+    auctions(
+      where: { settled: false }
+      first: $first
+      skip: $skip
+      orderBy: endTime
+      orderDirection: desc
+    ) {
+      ...AuctionStatus
+    }
+    _meta {
+      block {
+        number
+      }
+    }
+  }
+  ${AuctionStatusFragmentDoc}
 `
 export const SyncStatusDocument = gql`
   query syncStatus {
@@ -16550,6 +16675,24 @@ export function getSdk(
         variables
       )
     },
+    daosCurrentAuction(
+      variables: DaosCurrentAuctionQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<DaosCurrentAuctionQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<DaosCurrentAuctionQuery>({
+            document: DaosCurrentAuctionDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'daosCurrentAuction',
+        'query',
+        variables
+      )
+    },
     daosForDashboard(
       variables: DaosForDashboardQueryVariables,
       requestHeaders?: GraphQLClientRequestHeaders,
@@ -16672,6 +16815,24 @@ export function getSdk(
             signal,
           }),
         'findAuctionsForDaos',
+        'query',
+        variables
+      )
+    },
+    liveAuctions(
+      variables: LiveAuctionsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit['signal']
+    ): Promise<LiveAuctionsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<LiveAuctionsQuery>({
+            document: LiveAuctionsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        'liveAuctions',
         'query',
         variables
       )

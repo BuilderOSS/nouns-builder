@@ -30,6 +30,7 @@ export const SWR_KEYS = {
   TOKEN: 'token',
   AUCTION: 'auction',
   AUCTION_REWARDS: 'auction-rewards',
+  AUCTION_STATUS: 'auction-status',
   DAO_INFO: 'dao-info',
   DAO_FEED: 'dao-feed',
   MEMBERS: 'members',

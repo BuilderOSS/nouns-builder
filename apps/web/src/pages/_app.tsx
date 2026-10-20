@@ -83,8 +83,10 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // With SSR, we usually want to set some default staleTime
-      // above 0 to avoid refetching immediately on the client
-      staleTime: 5000,
+      // above 0 to avoid refetching immediately on the client. 30s also keeps
+      // window focus from re-firing every on-chain read; flows that change
+      // chain state call refetch() explicitly.
+      staleTime: 30_000,
     },
   },
 })
@@ -100,7 +102,15 @@ type AppPropsWithLayout = AppProps & {
 
 function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page)
-  const fallback = pageProps?.fallback ?? {}
+  const pageFallback = pageProps?.fallback
+  const swrConfig = React.useMemo(
+    () => ({
+      fallback: pageFallback ?? {},
+      // Revalidate on window focus at most every 30s, rather than every 5s
+      focusThrottleInterval: 30_000,
+    }),
+    [pageFallback]
+  )
 
   const { state: safeState, clearSafe } = useSafeAuth()
   const resetApp = useAppDisconnect()
@@ -315,7 +325,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
             status={rainbowKitAuthStatus}
           >
             <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }} modalSize="compact">
-              <SWRConfig value={{ fallback }}>
+              <SWRConfig value={swrConfig}>
                 <NextNProgress
                   color={vars.color.primary}
                   startPosition={0.125}

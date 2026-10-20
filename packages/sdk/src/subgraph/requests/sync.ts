@@ -7,19 +7,19 @@ type SubgraphStatus = {
   hasIndexingErrors: boolean
 }
 
-export const getSyncStatus = async (chainId: CHAIN_ID): Promise<SubgraphStatus> => {
+// Concurrent callers on the same chain share one in-flight request, so
+// parallel waits don't multiply load against the subgraph rate limit.
+const inflightSyncStatus = new Map<CHAIN_ID, Promise<SubgraphStatus>>()
+
+const fetchSyncStatus = async (chainId: CHAIN_ID): Promise<SubgraphStatus> => {
   try {
-    return SDK.connect(chainId)
-      .syncStatus()
-      .then((data) => {
-        const status = {
-          // eslint-disable-next-line no-underscore-dangle
-          syncedBlockNumber: data?._meta?.block?.number ?? 0,
-          // eslint-disable-next-line no-underscore-dangle
-          hasIndexingErrors: data?._meta?.hasIndexingErrors ?? false,
-        }
-        return status
-      })
+    const data = await SDK.connect(chainId).syncStatus()
+    return {
+      // eslint-disable-next-line no-underscore-dangle
+      syncedBlockNumber: data?._meta?.block?.number ?? 0,
+      // eslint-disable-next-line no-underscore-dangle
+      hasIndexingErrors: data?._meta?.hasIndexingErrors ?? false,
+    }
   } catch (error) {
     console.error('Failed to get subgraph status:', error)
     try {
@@ -29,6 +29,17 @@ export const getSyncStatus = async (chainId: CHAIN_ID): Promise<SubgraphStatus> 
     } catch (_) {}
     return { syncedBlockNumber: 0, hasIndexingErrors: false }
   }
+}
+
+export const getSyncStatus = (chainId: CHAIN_ID): Promise<SubgraphStatus> => {
+  const inflight = inflightSyncStatus.get(chainId)
+  if (inflight) return inflight
+
+  const promise = fetchSyncStatus(chainId).finally(() => {
+    inflightSyncStatus.delete(chainId)
+  })
+  inflightSyncStatus.set(chainId, promise)
+  return promise
 }
 
 const RECHECK_INTERVAL = 2000

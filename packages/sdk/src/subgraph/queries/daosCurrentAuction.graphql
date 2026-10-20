@@ -1,0 +1,13 @@
+query daosCurrentAuction($ids: [ID!]!, $first: Int!) {
+  daos(where: { id_in: $ids }, first: $first) {
+    id
+    currentAuction {
+      ...AuctionStatus
+    }
+  }
+  _meta {
+    block {
+      number
+    }
+  }
+}
