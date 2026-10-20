@@ -7,7 +7,7 @@ import {
   loadingImage,
   previewGeneratedImageStyle,
 } from '../Artwork/Artwork.css'
-import { generatedArtworkKey, LayeredArtwork } from '../Artwork/LayeredArtwork'
+import { LayeredArtwork } from '../Artwork/LayeredArtwork'
 import { FallbackImage } from '../FallbackImage'
 
 export const ImageGrid: React.FC<{ generatedImages: GeneratedArtworkImage[] }> = ({
@@ -17,11 +17,7 @@ export const ImageGrid: React.FC<{ generatedImages: GeneratedArtworkImage[] }> =
     <Grid gap="x4" className={imageGridWrapperStyle}>
       {generatedImages &&
         generatedImages.map((image) => (
-          <Box
-            className={previewGeneratedImageStyle}
-            key={generatedArtworkKey(image)}
-            position="relative"
-          >
+          <Box className={previewGeneratedImageStyle} key={image.id} position="relative">
             {image.type === 'layered' ? (
               <LayeredArtwork layers={image.layers} />
             ) : (

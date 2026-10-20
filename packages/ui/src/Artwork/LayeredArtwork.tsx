@@ -11,26 +11,40 @@ const layerStyle: React.CSSProperties = {
   objectFit: 'contain',
 }
 
-/** Stable React key for a generated preview. */
-export const generatedArtworkKey = (image: GeneratedArtworkImage) =>
-  image.type === 'single' ? image.src : image.layers.join('|')
+/** Object URL for a Blob, created and revoked with the component's lifecycle. */
+const useSourceUrl = (source: string | Blob): string | undefined => {
+  const [url, setUrl] = React.useState(typeof source === 'string' ? source : undefined)
+
+  React.useEffect(() => {
+    if (typeof source === 'string') {
+      setUrl(source)
+      return
+    }
+    const objectUrl = URL.createObjectURL(source)
+    setUrl(objectUrl)
+    return () => URL.revokeObjectURL(objectUrl)
+  }, [source])
+
+  return url
+}
+
+const Layer: React.FC<{ source: string | Blob; alt: string }> = ({ source, alt }) => {
+  const src = useSourceUrl(source)
+  if (!src) return null
+  return <img src={src} alt={alt} style={layerStyle} />
+}
 
 /**
  * Stacks layer images (bottom first) so animated GIF layers keep playing,
  * matching how the stack-images renderer composites them.
  */
-export const LayeredArtwork: React.FC<{ layers: string[]; alt?: string }> = ({
-  layers,
-  alt = '',
-}) => (
+export const LayeredArtwork: React.FC<{
+  layers: Extract<GeneratedArtworkImage, { type: 'layered' }>['layers']
+  alt?: string
+}> = ({ layers, alt = '' }) => (
   <Box position="relative" w="100%" h="100%">
-    {layers.map((src, index) => (
-      <img
-        key={`${index}-${src}`}
-        src={src}
-        alt={index === 0 ? alt : ''}
-        style={layerStyle}
-      />
+    {layers.map((source, index) => (
+      <Layer key={index} source={source} alt={index === 0 ? alt : ''} />
     ))}
   </Box>
 )

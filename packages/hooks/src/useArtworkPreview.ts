@@ -88,36 +88,28 @@ export const useArtworkPreview = ({
   const [generatedImages, setGeneratedImages] = React.useState<GeneratedArtworkImage[]>(
     []
   )
-  // One blob URL per local file, kept alive while previews may reference it
-  const blobUrls = React.useRef(new Map<File, string>())
   const isMountedRef = React.useRef(false)
-
-  const revokeBlobUrls = React.useCallback(() => {
-    blobUrls.current.forEach((url) => URL.revokeObjectURL(url))
-    blobUrls.current.clear()
-  }, [])
-
-  const getBlobUrl = React.useCallback((file: File) => {
-    let url = blobUrls.current.get(file)
-    if (!url) {
-      url = URL.createObjectURL(file)
-      blobUrls.current.set(file, url)
-    }
-    return url
-  }, [])
+  const nextImageIdRef = React.useRef(0)
 
   useEffect(() => {
     isMountedRef.current = true
     return () => {
       isMountedRef.current = false
-      revokeBlobUrls()
     }
-  }, [revokeBlobUrls])
+  }, [])
 
-  const pushGeneratedImage = React.useCallback((image: GeneratedArtworkImage) => {
+  type NewImage =
+    | Omit<Extract<GeneratedArtworkImage, { type: 'single' }>, 'id'>
+    | Omit<Extract<GeneratedArtworkImage, { type: 'layered' }>, 'id'>
+
+  const pushGeneratedImage = React.useCallback((image: NewImage) => {
     if (!isMountedRef.current) return
+    const withId = {
+      ...image,
+      id: String(++nextImageIdRef.current),
+    } as GeneratedArtworkImage
     // Keep only last MAX_GENERATED_IMAGES
-    setGeneratedImages((images) => [image, ...images.slice(0, MAX_GENERATED_IMAGES - 1)])
+    setGeneratedImages((images) => [withId, ...images.slice(0, MAX_GENERATED_IMAGES - 1)])
   }, [])
 
   const layers = React.useMemo(() => {
@@ -175,20 +167,19 @@ export const useArtworkPreview = ({
 
   const selectImagesToDraw = React.useCallback(() => {
     if (!layers || !layers.length)
-      return { imageLayerStack: [], hasLocalFile: false, hasGif: false }
+      return { layerSources: [], hasLocalFile: false, hasGif: false }
 
     const traits = selectTraits()
 
-    const stack = traits.map((trait) =>
-      trait.content ? getBlobUrl(trait.content) : trait.uri
-    )
-
-    const imageLayerStack = stack.reverse()
+    // Bottom layer first; local files stay as Files until something needs a URL
+    const layerSources: Array<string | File> = traits
+      .map((trait) => trait.content ?? trait.uri)
+      .reverse()
     const hasLocalFile = traits.some((trait) => !!trait.content)
     const hasGif = traits.some(isGifLayer)
 
-    return { imageLayerStack, hasLocalFile, hasGif }
-  }, [layers, selectTraits, getBlobUrl])
+    return { layerSources, hasLocalFile, hasGif }
+  }, [layers, selectTraits])
 
   const genIdRef = React.useRef(0)
 
@@ -204,50 +195,57 @@ export const useArtworkPreview = ({
         const ctx = _canvas.getContext('2d')
         if (!ctx) return
 
-        const { imageLayerStack, hasLocalFile, hasGif } = selectImagesToDraw()
+        const { layerSources, hasLocalFile, hasGif } = selectImagesToDraw()
 
         if (hasLocalFile && hasGif) {
           // A canvas would freeze GIFs on their first frame; stack the layers instead
-          pushGeneratedImage({ type: 'layered', layers: imageLayerStack })
+          pushGeneratedImage({ type: 'layered', layers: layerSources })
           return
         }
 
-        const imagesToDraw = imageLayerStack.map((src) => {
-          const img = new Image()
-          img.crossOrigin = 'anonymous'
-          img.src = src
-          return img
-        })
-
-        const draw = () => {
-          _canvas.width = imagesToDraw[0].naturalWidth
-          _canvas.height = imagesToDraw[0].naturalHeight
-          imagesToDraw.forEach((img) => {
-            ctx.drawImage(img, 0, 0)
-          })
-          if (_canvas.height > 0) {
-            pushGeneratedImage({ type: 'single', src: _canvas.toDataURL() })
-          }
-        }
-
         if (hasLocalFile) {
-          await Promise.all(
-            imagesToDraw.map(
-              (img) =>
-                new Promise<void>((resolve, reject) => {
-                  img.onload = () => resolve()
-                  img.onerror = () =>
-                    reject(new Error(`Image failed to load: ${img.src}`))
-                })
-            )
+          // Short-lived object URLs: only needed until the canvas has been drawn
+          const srcs = layerSources.map((source) =>
+            typeof source === 'string' ? source : URL.createObjectURL(source)
           )
-          if (genIdRef.current !== myGenId) return
-          draw()
+          try {
+            const imagesToDraw = srcs.map((src) => {
+              const img = new Image()
+              img.crossOrigin = 'anonymous'
+              img.src = src
+              return img
+            })
+            await Promise.all(
+              imagesToDraw.map(
+                (img) =>
+                  new Promise<void>((resolve, reject) => {
+                    if (img.complete && img.naturalWidth) return resolve()
+                    img.onload = () => resolve()
+                    img.onerror = () =>
+                      reject(new Error(`Image failed to load: ${img.src}`))
+                  })
+              )
+            )
+            if (genIdRef.current !== myGenId) return
+
+            _canvas.width = imagesToDraw[0].naturalWidth
+            _canvas.height = imagesToDraw[0].naturalHeight
+            imagesToDraw.forEach((img) => {
+              ctx.drawImage(img, 0, 0)
+            })
+            if (_canvas.height > 0) {
+              pushGeneratedImage({ type: 'single', src: _canvas.toDataURL() })
+            }
+          } finally {
+            srcs.forEach((src) => {
+              if (src.startsWith('blob:')) URL.revokeObjectURL(src)
+            })
+          }
         } else {
           const rendererBase = RENDERER_BASE.replace('https://nouns.build', BASE_URL)
           const url = new URL(rendererBase)
-          for (const image of imageLayerStack) {
-            url.searchParams.append('images', encodeURI(image))
+          for (const image of layerSources) {
+            url.searchParams.append('images', encodeURI(image as string))
           }
           // Animated WebP keeps full colour and alpha for in-app previews
           if (hasGif) url.searchParams.set('format', 'webp')
@@ -267,9 +265,8 @@ export const useArtworkPreview = ({
     if (!layers.length) {
       hasAutoGeneratedRef.current = false
       setGeneratedImages([])
-      revokeBlobUrls()
     }
-  }, [layers.length, revokeBlobUrls])
+  }, [layers.length])
 
   useEffect(() => {
     if (!layers.length) return
