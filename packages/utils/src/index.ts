@@ -1,4 +1,5 @@
 export * from './allocation'
+export * from './artworkFiles'
 export * from './basename'
 export * from './chains'
 export * from './coining'
