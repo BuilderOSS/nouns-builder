@@ -17,6 +17,7 @@ export type ArtworkError = {
   mime?: string
   directory?: string
   dimensions?: string
+  animation?: string
 }
 
 export type ImageProps = {
@@ -54,3 +55,12 @@ export type Property = {
   name: string
   items: Item[]
 }
+
+/**
+ * A generated artwork preview: either a single flattened image URL, or (for local
+ * animated layers that a canvas would freeze) a stack of layers, bottom first. Local
+ * layers are kept as Blobs so the displaying component owns their object URLs.
+ */
+export type GeneratedArtworkImage =
+  | { id: string; type: 'single'; src: string }
+  | { id: string; type: 'layered'; layers: Array<string | Blob> }

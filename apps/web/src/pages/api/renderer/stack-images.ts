@@ -1,11 +1,23 @@
 import { CACHE_TIMES } from '@buildeross/constants/cacheTimes'
-import { getFetchableUrls } from '@buildeross/ipfs-service/gateway'
 import { NextApiRequest, NextApiResponse } from 'next'
-import sharp from 'sharp'
 import { withCors } from 'src/utils/api/cors'
+import { AnimatedFormat, composeLayers } from 'src/utils/renderer/compose'
+import {
+  getImageData,
+  getImagePrefix,
+  prefixLooksAnimated,
+} from 'src/utils/renderer/fetchLayer'
 
-const SVG_DEFAULT_SIZE = 1080
-const REQUEST_TIMEOUT = 20000 // 20s
+const firstParam = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value
+
+const parseFormat = (value: string | string[] | undefined): AnimatedFormat =>
+  firstParam(value)?.toLowerCase() === 'webp' ? 'webp' : 'gif'
+
+const parseStatic = (value: string | string[] | undefined) => {
+  const v = firstParam(value)?.toLowerCase()
+  return v === '1' || v === 'true'
+}
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   let images = req.query.images
@@ -13,72 +25,63 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (!images || !images.length)
     return res.status(400).json({ error: 'No images provided' })
 
+  if (typeof images === 'string') images = [images]
+
+  const format = parseFormat(req.query.format)
+  const forceStatic = parseStatic(req.query.static)
+
   const { maxAge, swr } = CACHE_TIMES.RENDERER
+  const cacheControl = `public, s-maxage=${maxAge}, stale-while-revalidate=${swr}`
 
-  res.setHeader(
-    'Cache-Control',
-    `public, s-maxage=${maxAge}, stale-while-revalidate=${swr}`
-  )
-  res.setHeader('Content-Type', 'image/webp')
-
-  // Handle HEAD request - return headers only
+  // Handle HEAD request - sniff layer prefixes to report the likely content type
   if (req.method === 'HEAD') {
+    let contentType = 'image/webp'
+    let headCacheControl = cacheControl
+    if (!forceStatic) {
+      try {
+        const prefixes = await Promise.all(images.map((url) => getImagePrefix(url)))
+        if (prefixes.some(prefixLooksAnimated)) contentType = `image/${format}`
+      } catch (err) {
+        console.warn('Renderer HEAD: failed to sniff layers', err)
+        // The content type is only a guess; don't pin it in the CDN for a day
+        headCacheControl = 'public, s-maxage=300'
+      }
+    }
+    res.setHeader('Cache-Control', headCacheControl)
+    res.setHeader('Content-Type', contentType)
     res.status(200).end()
     return
   }
 
-  if (typeof images === 'string') images = [images]
+  try {
+    const imageData = await Promise.all(images.map((imageUrl) => getImageData(imageUrl)))
+    const result = await composeLayers(imageData, { format, forceStatic })
 
-  let imageData: Buffer[] = await Promise.all(
-    images.map((imageUrl) => getImageData(imageUrl))
-  )
-
-  // Resize all images to a default size
-  imageData = await Promise.all(
-    imageData.map(async (x) =>
-      sharp(x).resize(SVG_DEFAULT_SIZE, SVG_DEFAULT_SIZE, { fit: 'inside' }).toBuffer()
-    )
-  )
-
-  const compositeParams = imageData.slice(1).map((x) => ({
-    input: x,
-    gravity: 'center',
-  }))
-
-  const compositeRes = await sharp(imageData[0])
-    .composite(compositeParams)
-    .webp({ quality: 75 })
-    .toBuffer()
-
-  res.send(compositeRes)
-}
-
-const getImageData = async (imageUrl: string): Promise<Buffer> => {
-  const urls = getFetchableUrls(imageUrl)
-  if (!urls?.length) throw new Error('Invalid IPFS url: ' + imageUrl)
-
-  for (const url of urls) {
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT)
-
-      let res: Response
-      try {
-        res = await fetch(url, { signal: controller.signal })
-      } finally {
-        clearTimeout(timeoutId)
-      }
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
-
-      const arrayBuffer = await res.arrayBuffer()
-      return Buffer.from(arrayBuffer)
-    } catch (err) {
-      console.warn(`Failed to fetch from ${url}: ${(err as Error).message}`)
+    if (result.animated || result.fallback) {
+      console.info('Renderer: composed', {
+        layers: images.length,
+        animated: result.animated,
+        fallback: result.fallback,
+        size: result.size,
+        frames: result.frames,
+        bytes: result.buffer.length,
+        timings: result.timings,
+      })
     }
-  }
 
-  throw new Error('Failed to fetch image from all fetchable URLs')
+    // Errors may be transient; don't pin a degraded static image in the CDN for a day
+    res.setHeader(
+      'Cache-Control',
+      result.fallback === 'error' ? 'public, s-maxage=300' : cacheControl
+    )
+    res.setHeader('Content-Type', result.contentType)
+    if (result.fallback) res.setHeader('X-Renderer-Fallback', result.fallback)
+    res.send(result.buffer)
+  } catch (err) {
+    console.error('Renderer: failed to render images', err)
+    res.setHeader('Cache-Control', 'no-store')
+    res.status(500).json({ error: 'Failed to render images' })
+  }
 }
 
 export default withCors()(handler)

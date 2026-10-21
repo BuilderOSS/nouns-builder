@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Lint (type-check + eslint) the whole monorepo before pushing.
+# Package lint scripts run `eslint --fix`, so block the push if that changed
+# anything: the fixes would otherwise be left uncommitted and not pushed.
+before=$(git diff | git hash-object --stdin)
+
+pnpm lint || exit 1
+
+after=$(git diff | git hash-object --stdin)
+if [ "$before" != "$after" ]; then
+  echo "pre-push: 'pnpm lint' auto-fixed files. Review and commit them, then push again." >&2
+  git diff --stat >&2
+  exit 1
+fi

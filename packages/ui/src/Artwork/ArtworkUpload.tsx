@@ -102,6 +102,7 @@ export const ArtworkUpload: React.FC<ArtworkUploadProps> = ({
               {artworkError?.mime && <li>{artworkError.mime}</li>}
               {artworkError?.directory && <li>{artworkError.directory}</li>}
               {artworkError?.dimensions && <li>{artworkError.dimensions}</li>}
+              {artworkError?.animation && <li>{artworkError.animation}</li>}
             </Box>
           </Box>
         )}
