@@ -20,7 +20,10 @@ const createRpcUrls = () => {
   for (const key of Object.keys(CHAIN_ID)) {
     if (isNaN(Number(key))) {
       const chainId = CHAIN_ID[key as keyof typeof CHAIN_ID]
-      const alchemy = getAlchemyRpcUrl(chainId)
+      // The public alchemy key is domain-locked, so it only works from the
+      // browser; server transports add a keyless authenticated alchemy URL
+      const alchemy =
+        typeof window !== 'undefined' ? getAlchemyRpcUrl(chainId) : undefined
       if (alchemy) addToUrls(chainId, alchemy)
 
       const infura = getInfuraRpcUrl(chainId)

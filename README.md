@@ -209,17 +209,40 @@ Add the following variables to `apps/web/.env.local`:
 # etherscan
 ETHERSCAN_API_KEY=<ETHERSCAN_API_KEY>
 
-# alchemy for RPC and NFT/token data
+# alchemy key for browser RPC calls; lock it to your domains with an allowlist
 NEXT_PUBLIC_ALCHEMY_API_KEY=<ALCHEMY_API_KEY>
 
-# optional server-only alchemy key for server-side calls (e.g. transaction simulation)
-# must allow requests without an Origin header; defaults to NEXT_PUBLIC_ALCHEMY_API_KEY
+# server-side alchemy auth (RPC, simulation, NFT/token data), sent as an
+# `Authorization: Bearer` header, in order of preference:
+# 1. a JWT signed with this key pair (see "Alchemy JWT auth" below)
+ALCHEMY_JWT_PRIVATE_KEY=<PKCS8_PEM_PRIVATE_KEY>
+ALCHEMY_JWT_KEY_ID=<ALCHEMY_KEY_ID>
+# 2. a server-only key that allows requests without an Origin header
 ALCHEMY_API_KEY=<ALCHEMY_API_KEY>
+# 3. otherwise NEXT_PUBLIC_ALCHEMY_API_KEY, which only works if it isn't domain-locked
 
 # redis for caching
 REDIS_URL=<REDIS_URL>
 
 ```
+
+### Alchemy JWT auth
+
+Server-side requests carry no `Origin` header, so they can't use the domain-locked public key. They authenticate with short-lived JWTs instead ([Alchemy docs](https://www.alchemy.com/docs/how-to-use-jwts-for-api-requests)):
+
+1. Generate an RSA key pair. The private key must be PKCS#8 (`BEGIN PRIVATE KEY`):
+
+   ```
+   openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out alchemy_private_key.pem
+   openssl pkey -in alchemy_private_key.pem -pubout -out alchemy_public_key.pem
+   ```
+
+   A PKCS#1 key (`BEGIN RSA PRIVATE KEY`) can be converted with `openssl pkcs8 -topk8 -nocrypt -in private_key.pem`.
+
+2. In the Alchemy dashboard, open the app, go to **Security → Import Public Key**, and paste `alchemy_public_key.pem`. Copy the generated **Key ID**.
+3. Set `ALCHEMY_JWT_PRIVATE_KEY` to the private key PEM (multi-line, or with `\n` escapes) and `ALCHEMY_JWT_KEY_ID` to the key ID.
+
+The server signs a 10-minute RS256 token and re-signs it shortly before it expires.
 
 ## Running tests
 

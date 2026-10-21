@@ -43,7 +43,6 @@
     "@zoralabs/coins-sdk": "^0.4.3",
     "@zoralabs/protocol-deployments": "^0.7.2",
     "ai": "^5.0.278",
-    "alchemy-sdk": "^3.6.0",
     "axios": "^1.12.2",
     "dayjs": "^1.11.13",
     "debug": "^4.4.3",

@@ -1,6 +1,7 @@
 import { getAlchemyServerRpcUrl } from '@buildeross/constants/alchemy'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { CHAIN_ID } from '@buildeross/types'
+import { alchemyServerFetch } from '@buildeross/utils/alchemyAuth'
 import {
   Address,
   createPublicClient,
@@ -14,8 +15,12 @@ import {
 import { InsufficientFundsError } from './errors'
 import { simulate } from './simulationService'
 
-// Runs against Alchemy Base Sepolia; requires a server-side ALCHEMY_API_KEY
-describe.skipIf(!process.env.ALCHEMY_API_KEY)('simulationService (Alchemy)', () => {
+// Runs against Alchemy Base Sepolia; requires server-side alchemy credentials
+// (ALCHEMY_JWT_PRIVATE_KEY + ALCHEMY_JWT_KEY_ID, or ALCHEMY_API_KEY)
+const hasServerCredentials =
+  !!process.env.ALCHEMY_JWT_PRIVATE_KEY || !!process.env.ALCHEMY_API_KEY
+
+describe.skipIf(!hasServerCredentials)('simulationService (Alchemy)', () => {
   const tokenAddress: Address = '0x1234567890123456789012345678901234567890'
   const treasuryAddress: Address = '0x1234000000000000000000000000000000005678'
   const recipient: Address = '0x1111111111111111111111111111111111111111'
@@ -68,7 +73,9 @@ describe.skipIf(!process.env.ALCHEMY_API_KEY)('simulationService (Alchemy)', () 
 
   it('carries state between builder protocol calls made by the treasury', async () => {
     const client = createPublicClient({
-      transport: http(getAlchemyServerRpcUrl(CHAIN_ID.BASE_SEPOLIA)),
+      transport: http(getAlchemyServerRpcUrl(CHAIN_ID.BASE_SEPOLIA), {
+        fetchFn: alchemyServerFetch,
+      }),
     })
     const paused = await client.readContract({
       address: daoAuction,
