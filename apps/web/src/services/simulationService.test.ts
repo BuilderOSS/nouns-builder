@@ -24,14 +24,6 @@ vi.mock('viem', async (importOriginal) => {
   }
 })
 
-vi.mock('@buildeross/constants/alchemy', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@buildeross/constants/alchemy')>()
-  return {
-    ...actual,
-    getAlchemyServerRpcUrl: vi.fn(actual.getAlchemyServerRpcUrl),
-  }
-})
-
 const revertError = (reason: string) =>
   new ContractFunctionRevertedError({
     abi: [],
@@ -282,19 +274,21 @@ describe('simulationService', () => {
       await expect(simulate(request)).rejects.toThrow(InsufficientFundsError)
     })
 
-    it('fails with BackendFailedError when the alchemy key is missing', async () => {
-      vi.mocked(getAlchemyServerRpcUrl).mockReturnValueOnce(undefined)
+    it('fails with BackendFailedError when no alchemy credentials are configured', async () => {
+      vi.stubEnv('ALCHEMY_API_KEY', '')
+      vi.stubEnv('NEXT_PUBLIC_ALCHEMY_API_KEY', '')
+      vi.stubEnv('ALCHEMY_JWT_PRIVATE_KEY', '')
 
       await expect(simulate(request)).rejects.toThrow(BackendFailedError)
       expect(simulateBlocks).not.toHaveBeenCalled()
     })
 
-    it('redacts the api key from other rpc errors', async () => {
+    it('calls the keyless alchemy url, keeping credentials out of error messages', async () => {
       simulateBlocks.mockRejectedValueOnce(
         new RpcRequestError({
           body: {},
           error: { code: -32000, message: 'boom' },
-          url: 'https://eth-mainnet.g.alchemy.com/v2/test-key',
+          url: getAlchemyServerRpcUrl(CHAIN_ID.ETHEREUM)!,
         })
       )
 
@@ -302,21 +296,7 @@ describe('simulationService', () => {
 
       expect(error).toBeInstanceOf(BackendFailedError)
       expect(error.message).toContain('boom')
-      expect(error.message).toContain('<redacted>')
       expect(error.message).not.toContain('test-key')
-    })
-
-    it('redacts encoded and decoded api keys from urls with a trailing slash', async () => {
-      const rpcUrl = 'https://eth-mainnet.g.alchemy.com/v2/test%20key/'
-      vi.mocked(getAlchemyServerRpcUrl).mockReturnValueOnce(rpcUrl)
-      simulateBlocks.mockRejectedValueOnce(
-        new Error(`boom at ${rpcUrl} using test%20key and test key`)
-      )
-
-      const error = await simulate(request).catch((e) => e)
-
-      expect(error).toBeInstanceOf(BackendFailedError)
-      expect(error.message).toBe('boom at <redacted> using <redacted> and <redacted>')
     })
   })
 })

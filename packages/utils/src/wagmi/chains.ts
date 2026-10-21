@@ -1,28 +1,45 @@
-import { PUBLIC_ALL_CHAINS, RPC_URLS } from '@buildeross/constants'
+import {
+  getAlchemyServerRpcUrl,
+  PUBLIC_ALL_CHAINS,
+  RPC_URLS,
+} from '@buildeross/constants'
 import { Chain, CHAIN_ID } from '@buildeross/types'
-import { http, Transport } from 'viem'
+import { http, HttpTransportConfig, Transport } from 'viem'
 import { fallback } from 'wagmi'
+
+import { alchemyServerFetch, isAlchemyServerAuthConfigured } from '../alchemyAuth'
 
 export const chains = PUBLIC_ALL_CHAINS
 
+/**
+ * Ordered RPC transports for a chain, ending with the chain's default public RPC.
+ * On the server, alchemy goes first through a keyless URL with an
+ * `Authorization` header, since the public key is domain-locked.
+ */
+export const getRpcTransports = (
+  chainId: CHAIN_ID,
+  config?: HttpTransportConfig
+): Transport[] => {
+  const list: Transport[] = []
+
+  if (typeof window === 'undefined' && isAlchemyServerAuthConfigured()) {
+    const alchemy = getAlchemyServerRpcUrl(chainId)
+    if (alchemy) list.push(http(alchemy, { ...config, fetchFn: alchemyServerFetch }))
+  }
+
+  for (const rpc of RPC_URLS[chainId] ?? []) {
+    list.push(http(rpc, config))
+  }
+  list.push(http(undefined, config))
+
+  return list
+}
+
 export const transports: Record<CHAIN_ID, Transport> = chains.reduce(
-  (acc: Record<CHAIN_ID, Transport>, chain: Chain) => {
-    const list = []
-
-    const rpcs = RPC_URLS[chain.id]
-
-    if (!!rpcs) {
-      for (const rpc of rpcs) {
-        list.push(http(rpc))
-      }
-    }
-    list.push(http())
-
-    return {
-      ...acc,
-      [chain.id]: fallback(list),
-    }
-  },
+  (acc: Record<CHAIN_ID, Transport>, chain: Chain) => ({
+    ...acc,
+    [chain.id]: fallback(getRpcTransports(chain.id)),
+  }),
   {} as Record<CHAIN_ID, Transport>
 )
 

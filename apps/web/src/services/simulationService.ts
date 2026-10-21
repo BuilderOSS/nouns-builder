@@ -15,6 +15,10 @@ import {
   SimulationResult,
 } from '@buildeross/types'
 import {
+  alchemyServerFetch,
+  isAlchemyServerAuthConfigured,
+} from '@buildeross/utils/alchemyAuth'
+import {
   Abi,
   AbiDecodingZeroDataError,
   Address,
@@ -96,24 +100,6 @@ const getRevertReason = (error: Error | undefined): string => {
   return error.shortMessage
 }
 
-// viem error messages include the RPC url, which contains the API key
-const redactRpcUrl = (message: string, rpcUrl: string): string => {
-  const secrets = [rpcUrl]
-  const apiKey = new URL(rpcUrl).pathname.split('/').filter(Boolean).pop()
-  if (apiKey) {
-    secrets.push(apiKey)
-    try {
-      secrets.push(decodeURIComponent(apiKey))
-    } catch {
-      // undecodable segment, the encoded form is redacted above
-    }
-  }
-  return secrets.reduce(
-    (result, secret) => result.split(secret).join('<redacted>'),
-    message
-  )
-}
-
 const isInsufficientFundsError = (error: unknown): boolean => {
   if (
     error instanceof BaseError &&
@@ -135,11 +121,13 @@ const simulateTransaction = async ({
     throw new InvalidRequestError(`Chain ${chainId} is not supported for simulation`)
   }
   const rpcUrl = getAlchemyServerRpcUrl(chainId)
-  if (!rpcUrl) {
-    throw new BackendFailedError('Alchemy API key is not configured for simulation')
+  if (!rpcUrl || !isAlchemyServerAuthConfigured()) {
+    throw new BackendFailedError('Alchemy is not configured for simulation')
   }
 
-  const client = createPublicClient({ transport: http(rpcUrl) })
+  const client = createPublicClient({
+    transport: http(rpcUrl, { fetchFn: alchemyServerFetch }),
+  })
 
   // eth_simulateV1 executes the calls sequentially in one block, so each call
   // sees the state changes of the calls before it (like the proposal execution)
@@ -176,7 +164,7 @@ const simulateTransaction = async ({
       )
     }
     const message = error instanceof Error ? error.message : String(error)
-    throw new BackendFailedError(redactRpcUrl(message, rpcUrl))
+    throw new BackendFailedError(message)
   }
 }
 

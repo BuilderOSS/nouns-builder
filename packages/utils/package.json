@@ -9,6 +9,7 @@
     "bignumber.js": "^9.3.0",
     "debug": "^4.4.3",
     "decimal.js": "^10.6.0",
+    "jose": "^5.10.0",
     "sablier": "^2.0.1",
     "tinycolor2": "^1.4.2",
     "wink-porter2-stemmer": "^2.0.1"
