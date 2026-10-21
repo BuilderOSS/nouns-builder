@@ -1,7 +1,7 @@
 import type { ImageProps, OrderedTraits } from '@buildeross/types'
-import { isArtworkMimeType } from '@buildeross/utils/artworkFiles'
 import { LayerOrdering } from '@buildeross/ui/Artwork'
 import { Playground } from '@buildeross/ui/Playground'
+import { isArtworkMimeType } from '@buildeross/utils/artworkFiles'
 import { Button, Flex, Icon, Stack, Text } from '@buildeross/zord'
 import React, { BaseSyntheticEvent, useCallback, useEffect, useState } from 'react'
 
