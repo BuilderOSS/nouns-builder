@@ -71,7 +71,14 @@ export async function attestCandidate(
       { name: 'calldatas', type: 'bytes[]' },
       { name: 'description', type: 'string' },
     ],
-    [candidateId, salt, targets.map(getAddress), values, calldatas, description]
+    [
+      candidateId,
+      salt,
+      targets.map((target) => getAddress(target)),
+      values,
+      calldatas,
+      description,
+    ]
   )
 
   // 2. Create attestation params
