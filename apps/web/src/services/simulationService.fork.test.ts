@@ -1,3 +1,5 @@
+// @vitest-environment node
+// jose's JWT signing for Alchemy rejects jsdom's Uint8Array
 import { getAlchemyServerRpcUrl } from '@buildeross/constants/alchemy'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { CHAIN_ID } from '@buildeross/types'
