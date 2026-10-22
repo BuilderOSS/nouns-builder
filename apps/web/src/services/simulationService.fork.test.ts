@@ -1,3 +1,5 @@
+// @vitest-environment node
+// jose's JWT signing for Alchemy rejects jsdom's Uint8Array
 import { getAlchemyServerRpcUrl } from '@buildeross/constants/alchemy'
 import { auctionAbi } from '@buildeross/sdk/contract'
 import { CHAIN_ID } from '@buildeross/types'
@@ -12,7 +14,6 @@ import {
   toHex,
 } from 'viem'
 
-import { InsufficientFundsError } from './errors'
 import { simulate } from './simulationService'
 
 // Runs against Alchemy Base Sepolia; requires server-side alchemy credentials
@@ -58,17 +59,22 @@ describe.skipIf(!hasServerCredentials)('simulationService (Alchemy)', () => {
     expect(result.simulations[1].error).toMatch(/exceeds balance/i)
   }, 30_000)
 
-  it('throws InsufficientFundsError when the treasury cannot cover the value', async () => {
-    await expect(
-      simulate({
-        tokenAddress,
-        treasuryAddress,
-        chainId: CHAIN_ID.BASE_SEPOLIA,
-        targets: [recipient],
-        calldatas: ['0x'],
-        values: [toHex(parseEther('1'))],
-      })
-    ).rejects.toThrow(InsufficientFundsError)
+  it('marks the call the treasury cannot fund', async () => {
+    const result = await simulate({
+      tokenAddress,
+      treasuryAddress,
+      chainId: CHAIN_ID.BASE_SEPOLIA,
+      targets: [recipient, recipient],
+      calldatas: ['0x', '0x'],
+      values: ['0x0', toHex(parseEther('1'))],
+    })
+
+    expect(result.success).toBe(false)
+    expect(result.simulations[0].status).toBe(true)
+    expect(result.simulations[1]).toMatchObject({
+      status: false,
+      error: expect.stringMatching(/^Treasury doesn't have enough ETH for this call/),
+    })
   }, 30_000)
 
   it('carries state between builder protocol calls made by the treasury', async () => {

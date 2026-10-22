@@ -184,7 +184,7 @@ export const CandidatePromoteButton: React.FC<CandidatePromoteButtonProps> = ({
 
       {/* Transaction Status Modal */}
       <AnimatedModal
-        open={isSubmitting || isTxSuccess}
+        open={isSubmitting || isTxSuccess || !!errorMessage}
         close={isSubmitting ? undefined : handleCloseModal}
       >
         <SuccessModalContent

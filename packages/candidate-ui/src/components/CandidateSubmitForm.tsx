@@ -399,7 +399,7 @@ export const CandidateSubmitForm: React.FC<CandidateSubmitFormProps> = ({
 
       {/* Transaction Status Modal */}
       <AnimatedModal
-        open={isSubmitting || isTxSuccess}
+        open={isSubmitting || isTxSuccess || !!errorMessage}
         close={isSubmitting ? undefined : handleCloseModal}
       >
         <SuccessModalContent

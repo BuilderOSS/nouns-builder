@@ -1,6 +1,6 @@
 import { ErrorResult, SimulationResult } from '@buildeross/types'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { InsufficientFundsError, InvalidRequestError } from 'src/services/errors'
+import { InvalidRequestError } from 'src/services/errors'
 import { simulate } from 'src/services/simulationService'
 import { type DaoMembershipData, withDaoAuth } from 'src/utils/api/daoAuthMiddleware'
 import { withRateLimit } from 'src/utils/api/rateLimit'
@@ -17,7 +17,7 @@ async function handler(
   } catch (error) {
     console.error(error)
 
-    if (error instanceof InvalidRequestError || error instanceof InsufficientFundsError) {
+    if (error instanceof InvalidRequestError) {
       return res.status(400).json({ error: error.message })
     }
     return res
