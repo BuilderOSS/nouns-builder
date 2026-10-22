@@ -113,7 +113,11 @@ export const SimulationWarning: React.FC<{
 
   return (
     <Flex color="warning" px="x3" pb="x2" gap="x2" wrap="wrap" align="center" w="100%">
-      <Text fontWeight="label">Simulation indicates this call may fail.</Text>
+      <Text fontWeight="label">
+        {simulation.notSimulated
+          ? 'Simulation did not reach this call.'
+          : 'Simulation indicates this call may fail.'}
+      </Text>
       {!!simulation.error && (
         <Text
           style={{
