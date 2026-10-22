@@ -124,8 +124,9 @@ type CallError =
   | { kind: 'other'; reason: string }
 
 type SimulationRun =
-  | { block: SimulateBlocksReturnType[number]; callError?: undefined }
-  | { block?: undefined; callError: CallError }
+  | { block: SimulateBlocksReturnType[number]; callError?: undefined; timedOut?: false }
+  | { block?: undefined; callError: CallError; timedOut?: false }
+  | { block?: undefined; callError?: undefined; timedOut: true }
 
 const isInsufficientFundsError = (error: unknown): boolean => {
   if (
@@ -177,8 +178,20 @@ const simulateTransaction = async ({
     throw new BackendFailedError('Alchemy is not configured for simulation')
   }
 
+  // Aborts in-flight requests once the time budget runs out, so a slow request
+  // can't hold the API route past it
+  const deadline = new AbortController()
+  const deadlineTimer = setTimeout(() => deadline.abort(), SIMULATION_TIME_BUDGET_MS)
+  const fetchWithDeadline: typeof alchemyServerFetch = (input, init) =>
+    alchemyServerFetch(input, {
+      ...init,
+      signal: init?.signal
+        ? AbortSignal.any([init.signal, deadline.signal])
+        : deadline.signal,
+    })
+
   const client = createPublicClient({
-    transport: http(rpcUrl, { fetchFn: alchemyServerFetch }),
+    transport: http(rpcUrl, { fetchFn: fetchWithDeadline }),
   })
 
   const calls = targets.map((target, index) => ({
@@ -188,9 +201,9 @@ const simulateTransaction = async ({
     value: BigInt(values[index]),
   }))
 
-  const deadline = Date.now() + SIMULATION_TIME_BUDGET_MS
   let requestCount = 0
-  const hasBudget = () => requestCount < MAX_SIMULATION_REQUESTS && Date.now() < deadline
+  const hasBudget = () =>
+    requestCount < MAX_SIMULATION_REQUESTS && !deadline.signal.aborted
 
   // eth_simulateV1 executes the calls sequentially in one block, so each call
   // sees the state changes of the calls before it (like the proposal execution)
@@ -203,6 +216,7 @@ const simulateTransaction = async ({
       })
       return { block }
     } catch (error) {
+      if (deadline.signal.aborted) return { timedOut: true }
       const callError = getCallError(error)
       if (!callError) {
         const message = error instanceof Error ? error.message : String(error)
@@ -222,6 +236,7 @@ const simulateTransaction = async ({
       if (!hasBudget()) return undefined
       const middle = Math.floor((passing + failing) / 2)
       const probe = await run(indices.slice(0, middle))
+      if (probe.timedOut) return undefined
       if (probe.block) passing = middle
       else failing = middle
     }
@@ -255,42 +270,50 @@ const simulateTransaction = async ({
     indices.forEach((index) => skippedCalls.set(index, reason))
 
   let finalBlock: SimulationRun['block']
-  while (active.length > 0) {
-    if (!hasBudget()) {
-      skip(active, 'The simulation budget ran out before this call')
-      break
-    }
-    const result = await run(active)
-    if (result.block) {
-      finalBlock = result.block
-      break
-    }
-    if (failedCalls.size >= MAX_FAILED_CALLS) {
-      skip(active, 'Too many earlier calls failed')
-      break
-    }
+  try {
+    while (active.length > 0) {
+      if (!hasBudget()) {
+        skip(active, 'The simulation budget ran out before this call')
+        break
+      }
+      const result = await run(active)
+      if (result.timedOut) {
+        skip(active, 'The simulation budget ran out before this call')
+        break
+      }
+      if (result.block) {
+        finalBlock = result.block
+        break
+      }
+      if (failedCalls.size >= MAX_FAILED_CALLS) {
+        skip(active, 'Too many earlier calls failed')
+        break
+      }
 
-    const position = await findFailingPosition(active)
-    if (position === undefined) {
-      skip(active, 'The simulation budget ran out before this call')
-      break
-    }
-    failedCalls.set(
-      active[position],
-      await describeCallError(result.callError, active[position])
-    )
-
-    if (result.callError.kind === 'block-gas-limit') {
-      // Gas runs out because of all the calls before this one, so every later
-      // call would hit the limit too
-      skip(
-        active.slice(position + 1),
-        'The proposal exceeds the block gas limit at an earlier call'
+      const position = await findFailingPosition(active)
+      if (position === undefined) {
+        skip(active, 'The simulation budget ran out before this call')
+        break
+      }
+      failedCalls.set(
+        active[position],
+        await describeCallError(result.callError, active[position])
       )
-      active = active.slice(0, position)
-    } else {
-      active = active.filter((_, activePosition) => activePosition !== position)
+
+      if (result.callError.kind === 'block-gas-limit') {
+        // Gas runs out because of all the calls before this one, so every later
+        // call would hit the limit too
+        skip(
+          active.slice(position + 1),
+          'The proposal exceeds the block gas limit at an earlier call'
+        )
+        active = active.slice(0, position)
+      } else {
+        active = active.filter((_, activePosition) => activePosition !== position)
+      }
     }
+  } finally {
+    clearTimeout(deadlineTimer)
   }
 
   const blockNumber = Number(finalBlock?.number ?? 0n)

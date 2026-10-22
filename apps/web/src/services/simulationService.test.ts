@@ -6,6 +6,7 @@ import {
   ContractFunctionZeroDataError,
   createPublicClient,
   encodeErrorResult,
+  http,
   HttpRequestError,
   InsufficientFundsError as ViemInsufficientFundsError,
   parseEther,
@@ -25,6 +26,7 @@ vi.mock('viem', async (importOriginal) => {
   return {
     ...actual,
     createPublicClient: vi.fn(() => ({ simulateBlocks, getBalance })),
+    http: vi.fn(actual.http),
   }
 })
 
@@ -489,6 +491,44 @@ describe('simulationService', () => {
             error: 'The simulation budget ran out before this call',
           })
         })
+      })
+
+      it('aborts an in-flight request when the time budget runs out', async () => {
+        vi.useFakeTimers()
+        // a request that only settles when it is aborted
+        const fetch = vi.fn(
+          (_input: unknown, init?: RequestInit) =>
+            new Promise<Response>((_, reject) =>
+              init?.signal?.addEventListener('abort', () => reject(init.signal?.reason))
+            )
+        )
+        vi.stubGlobal('fetch', fetch)
+        simulateBlocks
+          .mockRejectedValueOnce(new ViemInsufficientFundsError())
+          .mockImplementationOnce(async () => {
+            const { fetchFn } = vi.mocked(http).mock.lastCall![1]!
+            await fetchFn!('https://rpc.test', {})
+          })
+
+        try {
+          const response = simulate(proposal(3))
+          await vi.advanceTimersByTimeAsync(20_000)
+
+          expect(fetch).toHaveBeenCalledTimes(1)
+          expect((await response).simulations).toEqual(
+            Array.from({ length: 3 }, () =>
+              expect.objectContaining({
+                status: false,
+                notSimulated: true,
+                error: 'The simulation budget ran out before this call',
+              })
+            )
+          )
+          expect(simulateBlocks).toHaveBeenCalledTimes(2)
+        } finally {
+          vi.unstubAllGlobals()
+          vi.useRealTimers()
+        }
       })
 
       it('fails with BackendFailedError for request-level errors', async () => {
