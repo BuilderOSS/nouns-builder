@@ -73,14 +73,12 @@ const PaletteDialog: React.FC<Omit<SearchPaletteProps, 'open'>> = ({
     if (!visibleTabs.some((t) => t.tab === tab)) setTab('all')
   }, [visibleTabs, tab])
 
-  const { data, error, isLoading, isValidating, isEmpty, searchText } = useGlobalSearch(
-    query,
-    {
+  const { data, error, isLoading, isValidating, isEmpty, searchText, isPreviousData } =
+    useGlobalSearch(query, {
       types: tab === 'all' ? undefined : [tab],
       limit: tab === 'all' ? PALETTE_ALL_LIMIT : PALETTE_TAB_LIMIT,
       scope,
-    }
-  )
+    })
 
   const groups = useMemo(() => {
     if (!data) return []
@@ -175,8 +173,9 @@ const PaletteDialog: React.FC<Omit<SearchPaletteProps, 'open'>> = ({
       setActiveIndex((i) => (i - 1 + flat.length) % flat.length)
     } else if (event.key === 'Enter') {
       event.preventDefault()
-      // Results still belong to the previous query until the debounce catches up
-      const isStale = searchText !== trimmed
+      // Results still belong to an earlier query or filter: the debounce hasn't caught
+      // up, or the request for the current query/tab/scope hasn't returned yet
+      const isStale = searchText !== trimmed || isPreviousData
       if (event.metaKey || event.ctrlKey || isStale || !flat[activeIndex])
         openFullSearch()
       else selectResult(flat[activeIndex])

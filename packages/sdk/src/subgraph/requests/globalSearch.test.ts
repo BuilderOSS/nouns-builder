@@ -216,6 +216,63 @@ describe('globalSearchRequest', () => {
     )
   })
 
+  it('pages through candidate versions until it has enough distinct candidates', async () => {
+    const version = (group: string, v: number) => ({
+      id: `${group}-v${v}`,
+      title: `Candidate ${group}`,
+      createdAt: '1',
+      attester: '0xattester',
+      versionNumber: String(v),
+      group: { id: group, candidateNumber: 1, proposer: '0xproposer', dao: daoRef },
+      proposal: null,
+    })
+    // first: 2 → each request asks for 3 rows; the first page is three versions of one group
+    sdkMock.globalSearch
+      .mockResolvedValueOnce({
+        candidateSearch: [version('a', 3), version('a', 2), version('a', 1)],
+      })
+      .mockResolvedValueOnce({
+        candidateSearch: [version('b', 1), version('a', 0), version('c', 1)],
+      })
+
+    const result = await globalSearchRequest(CHAIN_ID.BASE, 'cand:*', 'cand', {
+      types: ['candidates'],
+      first: 2,
+    })
+
+    expect(sdkMock.globalSearch).toHaveBeenCalledTimes(2)
+    expect(sdkMock.globalSearch).toHaveBeenLastCalledWith(
+      expect.objectContaining({ skip: 3, withCandidates: true, withProposals: false })
+    )
+    // Relevance order is preserved and one lookahead group signals a next page
+    expect(result.candidates.map((c) => c.groupId)).toEqual(['a', 'b', 'c'])
+    expect(result.candidates[0].versionNumber).toBe(3)
+  })
+
+  it('stops paging candidates when the index runs out', async () => {
+    sdkMock.globalSearch.mockResolvedValueOnce({
+      candidateSearch: [
+        {
+          id: 'a-v1',
+          title: 'Only',
+          createdAt: '1',
+          attester: '0xattester',
+          versionNumber: '1',
+          group: { id: 'a', candidateNumber: 1, proposer: '0xproposer', dao: daoRef },
+          proposal: null,
+        },
+      ],
+    })
+
+    const result = await globalSearchRequest(CHAIN_ID.BASE, 'only:*', 'only', {
+      types: ['candidates'],
+      first: 2,
+    })
+
+    expect(sdkMock.globalSearch).toHaveBeenCalledTimes(1)
+    expect(result.candidates).toHaveLength(1)
+  })
+
   it('returns empty results without querying for blank text', async () => {
     const result = await globalSearchRequest(CHAIN_ID.BASE, ' ', ' ', {
       types: ['proposals'],

@@ -290,6 +290,9 @@ const dedupeBy = <T>(items: T[], key: (item: T) => string): T[] => {
   })
 }
 
+/** Extra candidate-only requests allowed per search to fill a page of distinct groups */
+const MAX_CANDIDATE_REFILLS = 4
+
 const emptyChainResults = (): GlobalSearchChainResults => ({
   daos: [],
   proposals: [],
@@ -341,7 +344,7 @@ export const globalSearchRequest = async (
   const voteWhere: ProposalVote_Filter = dao ? { dao } : {}
   const bidWhere: AuctionBid_Filter = dao ? { dao } : {}
 
-  const data = await SDK.connect(chainId).globalSearch({
+  const variables = {
     text,
     first: first + 1,
     skip,
@@ -356,7 +359,37 @@ export const globalSearchRequest = async (
     candidateWhere,
     voteWhere,
     bidWhere,
-  })
+  }
+  const data = await SDK.connect(chainId).globalSearch(variables)
+
+  // The candidate index returns versions, and one candidate can have many matching
+  // versions. Page through more versions (keeping relevance order) until there are
+  // `first` distinct candidates plus one to detect a next page, or the index runs out.
+  // `skip` therefore counts versions, not candidates.
+  let candidateRows = data.candidateSearch ?? []
+  if (variables.withCandidates) {
+    let lastPageSize = candidateRows.length
+    const distinctGroups = () => new Set(candidateRows.map((c) => c.group.id)).size
+    for (
+      let refill = 0;
+      refill < MAX_CANDIDATE_REFILLS &&
+      lastPageSize === first + 1 &&
+      distinctGroups() < first + 1;
+      refill++
+    ) {
+      const more = await SDK.connect(chainId).globalSearch({
+        ...variables,
+        skip: skip + candidateRows.length,
+        withDaos: false,
+        withProposals: false,
+        withVotes: false,
+        withBids: false,
+      })
+      const rows = more.candidateSearch ?? []
+      candidateRows = [...candidateRows, ...rows]
+      lastPageSize = rows.length
+    }
+  }
 
   const nowSeconds = Math.floor(Date.now() / 1000)
 
@@ -367,10 +400,10 @@ export const globalSearchRequest = async (
     proposals: (data.proposalSearch ?? []).map((p) =>
       mapSearchProposal(chainId, p, nowSeconds)
     ),
-    // Each candidate group can have many versions; keep the best-ranked one per group
-    candidates: dedupeBy(data.candidateSearch ?? [], (c) => c.group.id).map((c) =>
-      mapSearchCandidate(chainId, c)
-    ),
+    // Keep the best-ranked version per candidate group
+    candidates: dedupeBy(candidateRows, (c) => c.group.id)
+      .slice(0, first + 1)
+      .map((c) => mapSearchCandidate(chainId, c)),
     votes: (data.voteSearch ?? []).map((v) => mapSearchVote(chainId, v)),
     bids: (data.bidSearch ?? []).map((b) => mapSearchBid(chainId, b)),
   }

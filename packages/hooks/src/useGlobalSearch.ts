@@ -33,16 +33,24 @@ export interface UseGlobalSearchResult {
   isValidating: boolean
   /** True once a response arrived with no results in any group */
   isEmpty: boolean
-  /** The debounced query the current data belongs to */
+  /** The debounced query the current request is for */
   searchText: string
+  /**
+   * True when `data` was produced by an earlier request (a different query, tab or
+   * scope) and is only kept on screen while the current request loads or after it failed
+   */
+  isPreviousData: boolean
 }
+
+/** A response tagged with the request URL (query + filters) that produced it */
+type TaggedResponse = { url: string; response: GlobalSearchResponse }
 
 type GlobalSearchKey = readonly [typeof SWR_KEYS.GLOBAL_SEARCH, string]
 
 const globalSearchFetcher = async (
   [, url]: GlobalSearchKey,
   { signal }: { signal?: AbortSignal } = {}
-): Promise<GlobalSearchResponse> => {
+): Promise<TaggedResponse> => {
   const response = await fetch(url, {
     signal,
     headers: { Accept: 'application/json' },
@@ -55,7 +63,7 @@ const globalSearchFetcher = async (
     err.body = body
     throw err
   }
-  return body as GlobalSearchResponse
+  return { url, response: body as GlobalSearchResponse }
 }
 
 export const buildGlobalSearchUrl = (
@@ -92,15 +100,18 @@ export function useGlobalSearch(
   }, [query, debounceMs])
 
   const searchText = debouncedQuery.trim()
+  const url = buildGlobalSearchUrl(searchText, options)
   const swrKey: GlobalSearchKey | null =
     enabled && searchText.length >= GLOBAL_SEARCH_MIN_LENGTH
-      ? [SWR_KEYS.GLOBAL_SEARCH, buildGlobalSearchUrl(searchText, options)]
+      ? [SWR_KEYS.GLOBAL_SEARCH, url]
       : null
 
-  const { data, error, isLoading, isValidating } = useSWR<
-    GlobalSearchResponse,
-    HttpError
-  >(swrKey, globalSearchFetcher, {
+  const {
+    data: tagged,
+    error,
+    isLoading,
+    isValidating,
+  } = useSWR<TaggedResponse, HttpError>(swrKey, globalSearchFetcher, {
     keepPreviousData: true,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
@@ -110,6 +121,7 @@ export function useGlobalSearch(
     errorRetryInterval: 1000,
   })
 
+  const data = tagged?.response
   const hasAnyResult =
     !!data && Object.values(data.results).some((group) => group.length > 0)
 
@@ -120,5 +132,6 @@ export function useGlobalSearch(
     isValidating: !!swrKey && isValidating,
     isEmpty: !!swrKey && !!data && !isValidating && !error && !hasAnyResult,
     searchText,
+    isPreviousData: !!swrKey && !!tagged && tagged.url !== url,
   }
 }
