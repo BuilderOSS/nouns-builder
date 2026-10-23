@@ -3,7 +3,11 @@ import { AddressType, CHAIN_ID, NftTokenType } from '@buildeross/types'
 import axios from 'axios'
 import { formatUnits, fromHex, getAddress, Hex, zeroHash } from 'viem'
 
-import { type AlchemyNft, getAlchemyClient } from './alchemyApi'
+import {
+  type AlchemyNft,
+  getAlchemyClient,
+  isAlchemyInvalidParamsError,
+} from './alchemyApi'
 import { BackendFailedError } from './errors'
 import { getRedisConnection } from './redisConnection'
 
@@ -28,6 +32,9 @@ const getNftBalancesKey = (chainId: CHAIN_ID, address: string, filterSpam: boole
 
 const getNftMetadataKey = (chainId: CHAIN_ID, contractAddress: string, tokenId: string) =>
   `alchemy:nft-metadata:${chainTypeTag}:${chainId}:${contractAddress.toLowerCase()}:${tokenId}`
+
+// Cached in place of metadata for addresses Alchemy rejects as tokens
+const INVALID_TOKEN_MARKER = 'null'
 
 const getCoinGeckoLogoKey = (chainId: CHAIN_ID, address: string) =>
   `coingecko:logo:${chainTypeTag}:${chainId}:${address.toLowerCase()}`
@@ -386,7 +393,8 @@ export const getCachedTokenMetadatas = async (
     const cached = await redis?.get(cacheKey)
 
     if (cached) {
-      results.push(JSON.parse(cached))
+      // Known non-token addresses are cached as a marker and omitted
+      if (cached !== INVALID_TOKEN_MARKER) results.push(JSON.parse(cached))
       hasCache = true
     } else {
       uncachedAddresses.push(address)
@@ -395,15 +403,36 @@ export const getCachedTokenMetadatas = async (
 
   // Fetch uncached metadata from API
   if (uncachedAddresses.length > 0) {
+    let failed = false
+
     try {
-      const metadatas = await Promise.all(
+      const settled = await Promise.allSettled(
         uncachedAddresses.map((address) => alchemy.getTokenMetadata(address))
       )
 
       // Process and cache each metadata
-      for (let i = 0; i < metadatas.length; i++) {
-        const metadata = metadatas[i]
+      for (let i = 0; i < settled.length; i++) {
+        const outcome = settled[i]
         const address = uncachedAddresses[i]
+        const cacheKey = getTokenMetadataKey(chainId, address)
+
+        if (outcome.status === 'rejected') {
+          if (isAlchemyInvalidParamsError(outcome.reason)) {
+            // Not an ERC-20 (e.g. Permit2): omit it rather than failing the
+            // whole batch, and remember so we don't ask Alchemy again
+            await redis?.setex(cacheKey, 86400, INVALID_TOKEN_MARKER)
+          } else {
+            failed = true
+            console.error('getCachedTokenMetadatas error:', {
+              chainId,
+              address,
+              error: outcome.reason,
+            })
+          }
+          continue
+        }
+
+        const metadata = outcome.value
 
         let logoUrl = metadata.logo
         if (!logoUrl) {
@@ -422,7 +451,6 @@ export const getCachedTokenMetadatas = async (
         }
 
         // Cache individual metadata (24 hours TTL)
-        const cacheKey = getTokenMetadataKey(chainId, address)
         await redis?.setex(cacheKey, 86400, JSON.stringify(tokenMetadata))
 
         results.push(tokenMetadata)
@@ -431,6 +459,10 @@ export const getCachedTokenMetadatas = async (
       console.error('getCachedTokenMetadatas error:', error)
       throw new BackendFailedError('Failed to fetch token metadata')
     }
+
+    // Transient failures still fail the request, so the partial result isn't
+    // cached by the CDN; successful lookups are already in Redis for the retry
+    if (failed) throw new BackendFailedError('Failed to fetch token metadata')
   }
 
   return {
