@@ -17,6 +17,36 @@ import {
  * in the URL path.
  */
 
+/** A failed Alchemy request, with the JSON-RPC error code when Alchemy sent one */
+export class AlchemyRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status?: number,
+    readonly rpcCode?: number
+  ) {
+    super(message)
+    this.name = 'AlchemyRequestError'
+  }
+}
+
+const JSON_RPC_INVALID_PARAMS = -32602
+
+/**
+ * Alchemy rejects contracts that aren't ERC-20 tokens (e.g. Permit2, NFTs)
+ * with JSON-RPC "Invalid params".
+ */
+export const isAlchemyInvalidParamsError = (error: unknown): boolean =>
+  error instanceof AlchemyRequestError && error.rpcCode === JSON_RPC_INVALID_PARAMS
+
+const parseRpcErrorCode = (detail: string): number | undefined => {
+  try {
+    const code = JSON.parse(detail)?.error?.code
+    return typeof code === 'number' ? code : undefined
+  } catch {
+    return undefined
+  }
+}
+
 const MAX_ATTEMPTS = 3
 const RETRY_DELAY_MS = 500
 
@@ -37,8 +67,11 @@ const request = async <T>(url: string, body?: unknown): Promise<T> => {
 
     if (attempt >= MAX_ATTEMPTS || !isRetryable(response.status)) {
       const detail = await response.text().catch(() => '')
-      throw new Error(
-        `Alchemy request to ${new URL(url).pathname} failed with ${response.status}: ${detail}`
+      // JSON-RPC errors can arrive with a 4xx status and the error in the body
+      throw new AlchemyRequestError(
+        `Alchemy request to ${new URL(url).pathname} failed with ${response.status}: ${detail}`,
+        response.status,
+        parseRpcErrorCode(detail)
       )
     }
     await new Promise((resolve) =>
@@ -99,7 +132,11 @@ const createAlchemyClient = (chainId: CHAIN_ID, network: string) => {
       error?: { code: number; message: string }
     }>(rpcUrl, { jsonrpc: '2.0', id: 1, method, params })
     if (response.error) {
-      throw new Error(`Alchemy ${method} failed: ${response.error.message}`)
+      throw new AlchemyRequestError(
+        `Alchemy ${method} failed: ${response.error.message}`,
+        undefined,
+        response.error.code
+      )
     }
     return response.result as T
   }

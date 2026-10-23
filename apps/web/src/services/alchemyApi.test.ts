@@ -9,7 +9,7 @@ import {
   vi,
 } from 'vitest'
 
-import { getAlchemyClient } from './alchemyApi'
+import { getAlchemyClient, isAlchemyInvalidParamsError } from './alchemyApi'
 
 const jsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status })
@@ -71,6 +71,30 @@ describe('alchemyApi', () => {
     await expect(
       getAlchemyClient(CHAIN_ID.BASE)!.getTokenMetadata('0xtoken')
     ).rejects.toThrow('alchemy_getTokenMetadata failed: bad')
+  })
+
+  it('flags invalid-params errors from the json-rpc body or a 4xx response', async () => {
+    const client = getAlchemyClient(CHAIN_ID.BASE)!
+    const invalidParams = {
+      jsonrpc: '2.0',
+      id: 1,
+      error: {
+        code: -32602,
+        message: 'Invalid params: expected a valid token contract address.',
+      },
+    }
+
+    fetchMock.mockResolvedValueOnce(jsonResponse(invalidParams))
+    const inBody = await client.getTokenMetadata('0xpermit2').catch((e) => e)
+    expect(isAlchemyInvalidParamsError(inBody)).toBe(true)
+
+    fetchMock.mockResolvedValueOnce(jsonResponse(invalidParams, 400))
+    const inResponse = await client.getTokenMetadata('0xpermit2').catch((e) => e)
+    expect(isAlchemyInvalidParamsError(inResponse)).toBe(true)
+
+    fetchMock.mockResolvedValueOnce(jsonResponse({ message: 'forbidden' }, 403))
+    const other = await client.getTokenMetadata('0xtoken').catch((e) => e)
+    expect(isAlchemyInvalidParamsError(other)).toBe(false)
   })
 
   it('calls the nft api on the keyless url', async () => {
