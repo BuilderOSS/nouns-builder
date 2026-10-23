@@ -334,3 +334,28 @@ export function buildSearchText(input: string, opts: BuildOptions = {}): string 
 
   return tokens.join(joiner)
 }
+
+export type SearchQueryKind = 'address' | 'addressPrefix' | 'txHash' | 'name' | 'text'
+
+const ADDRESS_RE = /^0x[0-9a-fA-F]{40}$/
+const TX_HASH_RE = /^0x[0-9a-fA-F]{64}$/
+const ADDRESS_PREFIX_RE = /^0x[0-9a-fA-F]{4,39}$/
+// ENS names (foo.eth), Basenames (foo.base.eth) and other dotted ENS names
+const NAME_RE = /^[^\s.]+(\.[^\s.]+)*\.(eth|xyz|com|org|io|art)$/i
+
+/**
+ * Decides how a global search query should be handled.
+ * - `address`: a full 0x address (profile + DAO contract lookup)
+ * - `addressPrefix`: a partial 0x address (at least 4 hex chars)
+ * - `txHash`: a 32-byte hash (vote / bid / proposal lookup)
+ * - `name`: an ENS or Basename that should be resolved to an address
+ * - `text`: everything else, sent to the fulltext indexes
+ */
+export function classifyQuery(input: string): SearchQueryKind {
+  const query = input.trim()
+  if (ADDRESS_RE.test(query)) return 'address'
+  if (TX_HASH_RE.test(query)) return 'txHash'
+  if (ADDRESS_PREFIX_RE.test(query)) return 'addressPrefix'
+  if (NAME_RE.test(query)) return 'name'
+  return 'text'
+}

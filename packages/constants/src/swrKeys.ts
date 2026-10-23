@@ -26,6 +26,7 @@ export const SWR_KEYS = {
   ENS_AVATAR: 'ens-avatar',
   EXPLORE: 'explore',
   DAO_SEARCH: 'dao-search',
+  GLOBAL_SEARCH: 'global-search',
   FEATURED: 'featured',
   TOKEN: 'token',
   AUCTION: 'auction',
