@@ -148,6 +148,26 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
     [refresh, sendSession]
   )
 
+  // The session machine's state once any in-flight /me check has finished. A
+  // disconnect that lands while the check is running must still log out the
+  // session the check is about to restore.
+  const getSettledSessionState = React.useCallback(
+    () =>
+      new Promise<ReturnType<typeof sessionActor.getSnapshot>>((resolve) => {
+        const snapshot = sessionActor.getSnapshot()
+        if (!snapshot.matches('checkingSession')) {
+          resolve(snapshot)
+          return
+        }
+        const subscription = sessionActor.subscribe((next) => {
+          if (next.matches('checkingSession')) return
+          subscription.unsubscribe()
+          resolve(next)
+        })
+      }),
+    [sessionActor]
+  )
+
   // Sync SWR session data with XState machine
   useEffect(() => {
     if (logoutInProgress) {
@@ -322,15 +342,17 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           // could destroy a session another tab is creating. The saved Safe
           // config is only cleared along with that session, so a disconnect
           // mid-way through the Safe flow doesn't wipe the Safe the user is
-          // signing in to.
-          if (sessionActor.getSnapshot().matches('authenticated')) {
+          // signing in to. Wait out an in-flight session check first, or a
+          // disconnect during page load would leave the server session alive.
+          const settled = await getSettledSessionState()
+          if (settled.matches('authenticated')) {
             requestLogout({ gate: true })
             clearSafe()
           }
           cancelSiweAuthFlow()
         },
       }),
-    [requestLogout, sessionActor, clearSafe, refresh, connector]
+    [requestLogout, getSettledSessionState, clearSafe, refresh, connector]
   )
 
   // RainbowKit auth status derived from XState machine

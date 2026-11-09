@@ -55,6 +55,10 @@ const createFakeRedis = () => {
     mget: vi.fn(async (keys: string[]) => keys.map((key) => store.get(key) ?? null)),
     set,
     del: vi.fn(async (key: string) => (store.delete(key) ? 1 : 0)),
+    // Only the compare-and-delete lock release script is used
+    eval: vi.fn(async (_script: string, _numKeys: number, key: string, token: string) =>
+      store.get(key) === token && store.delete(key) ? 1 : 0
+    ),
     multi: vi.fn(chain),
     pipeline: vi.fn(chain),
   }
@@ -125,6 +129,18 @@ describe('auctionStatusService', () => {
     expect(redis.store.has('auction-status:8453:snapshot')).toBe(true)
     expect(redis.store.has('auction-status:8453:snapshot:stale')).toBe(true)
     expect(redis.store.has('auction-status:8453:snapshot:lock')).toBe(false)
+  })
+
+  it("doesn't release a lock another instance took over after ours expired", async () => {
+    vi.mocked(liveAuctionsRequest).mockImplementation(async () => {
+      // Our lock expired mid-fetch and another instance acquired it
+      redis.store.set('auction-status:8453:snapshot:lock', 'other-instance')
+      return { syncedBlock: 10, auctions: {} }
+    })
+
+    await getLiveAuctionSnapshot(CHAIN_ID.BASE)
+
+    expect(redis.store.get('auction-status:8453:snapshot:lock')).toBe('other-instance')
   })
 
   it('serves the stale snapshot instead of fetching while another instance holds the lock', async () => {

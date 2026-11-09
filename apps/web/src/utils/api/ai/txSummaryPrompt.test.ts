@@ -285,9 +285,21 @@ describe('tryTemplateSummary', () => {
               value: { name: 'value', type: 'uint256', value: '1500000000000000000' },
             },
           },
+          value: '1500000000000000000',
         })
       )
     ).toBe('Sends 1.5 ETH from the DAO treasury to 0xE5F…9f8BE.')
+  })
+
+  it('does not template a contract send(uint256 value) call as an ETH transfer', () => {
+    const transaction = {
+      functionName: 'send',
+      args: {
+        value: { name: 'value', type: 'uint256', value: '1500000000000000000' },
+      },
+    }
+    expect(tryTemplateSummary(makeRequest({ transaction, value: '0' }))).toBeUndefined()
+    expect(tryTemplateSummary(makeRequest({ transaction }))).toBeUndefined()
   })
 
   it('summarises ERC20 transfers', () => {

@@ -19,6 +19,7 @@ import {
   type LiveAuctionsSnapshot,
 } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
+import { randomUUID } from 'crypto'
 
 import { getRedisConnection } from './redisConnection'
 
@@ -53,6 +54,11 @@ const daoCache = new Map<string, MemoryEntry<AuctionStatus | null>>()
 
 // In-flight deduplication
 const inflightSnapshot = new Map<CHAIN_ID, Promise<SnapshotResult>>()
+
+// Deletes the lock only while it still holds our token, so an instance whose
+// fetch outlived LOCK_TTL_MS can't release a lock another instance now holds
+const RELEASE_LOCK_SCRIPT =
+  "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end"
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -105,6 +111,7 @@ async function loadSnapshot(chainId: CHAIN_ID): Promise<SnapshotResult> {
   const key = snapshotKey(chainId)
   const staleKey = `${key}:stale`
   const lockKey = `${key}:lock`
+  const lockToken = randomUUID()
   let lockAcquired = false
 
   if (redis) {
@@ -116,7 +123,8 @@ async function loadSnapshot(chainId: CHAIN_ID): Promise<SnapshotResult> {
 
     try {
       lockAcquired =
-        (await redis.set(lockKey, '1', 'PX', CACHE_CONFIG.LOCK_TTL_MS, 'NX')) === 'OK'
+        (await redis.set(lockKey, lockToken, 'PX', CACHE_CONFIG.LOCK_TTL_MS, 'NX')) ===
+        'OK'
     } catch (err) {
       console.warn('Redis auction status lock error:', err)
     }
@@ -166,7 +174,7 @@ async function loadSnapshot(chainId: CHAIN_ID): Promise<SnapshotResult> {
   } finally {
     if (redis && lockAcquired) {
       try {
-        await redis.del(lockKey)
+        await redis.eval(RELEASE_LOCK_SCRIPT, 1, lockKey, lockToken)
       } catch (_) {}
     }
   }

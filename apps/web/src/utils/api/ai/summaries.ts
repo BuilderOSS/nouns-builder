@@ -2,6 +2,7 @@ import { createGateway } from '@ai-sdk/gateway'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createGroq } from '@ai-sdk/groq'
 import { generateText, type LanguageModel } from 'ai'
+import { createHash } from 'crypto'
 import { getRedisConnection } from 'src/services/redisConnection'
 
 const DEFAULT_CACHE_TTL_SECONDS = 60 * 60 * 24 * 30
@@ -177,16 +178,12 @@ const safeStringify = (value: unknown) =>
     typeof item === 'bigint' ? item.toString() : item
   )
 
+// A collision would serve one transaction's summary for another, so use a
+// cryptographic hash rather than a 32-bit one.
 export const getAiCacheKey = (namespace: string, data: unknown) => {
   const payload = `${namespace}:${safeStringify(data)}`
-  let hash = 2166136261
-
-  for (let i = 0; i < payload.length; i += 1) {
-    hash ^= payload.charCodeAt(i)
-    hash = Math.imul(hash, 16777619)
-  }
-
-  return `${namespace}:${(hash >>> 0).toString(16)}`
+  const hash = createHash('sha256').update(payload).digest('hex')
+  return `${namespace}:${hash}`
 }
 
 const inFlight = new Map<string, Promise<string>>()

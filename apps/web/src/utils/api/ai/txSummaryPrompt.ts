@@ -562,9 +562,17 @@ export const tryTemplateSummary = (request: TxSummaryRequest): string | undefine
   const fn = transaction.functionName
   const role = getDaoRole(target, addresses)
 
+  // Plain ETH transfers are decoded as a synthetic `send(value)`. Only template
+  // them when the call's native value matches, so a real contract function
+  // named `send(uint256 value)` isn't described as an ETH transfer.
   if (fn === 'send' && argCount === 1) {
     const value = getArg(args, 'value')
-    if (typeof value === 'string' && toBigInt(value) !== undefined) {
+    if (
+      typeof value === 'string' &&
+      toBigInt(value) !== undefined &&
+      request.value !== undefined &&
+      toBigInt(String(request.value)) === toBigInt(value)
+    ) {
       return `Sends ${formatTokenAmount(value, 18, 'ETH')} from the DAO treasury to ${describeAddress(target, request)}.`
     }
   }
