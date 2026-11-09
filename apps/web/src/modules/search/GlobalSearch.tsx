@@ -51,6 +51,7 @@ export const GlobalSearch: React.FC = () => {
         className={styles.triggerButton}
         onClick={() => setOpen(true)}
         aria-label="Search"
+        title={`Search (${isMac ? '⌘K' : 'Ctrl K'})`}
         aria-haspopup="dialog"
       >
         <Icon id="search" size="sm" fill="text3" />

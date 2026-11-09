@@ -32,7 +32,7 @@ export const NavMenu = ({ hideChainMenu = false }: NavMenuProps) => {
   )
 
   return (
-    <Flex align={'center'} direction={'row'} gap={{ '@initial': 'x2', '@768': 'x4' }}>
+    <Flex align={'center'} direction={'row'} gap={{ '@initial': 'x2', '@1024': 'x4' }}>
       <GlobalSearch />
       <ThemeToggle />
       {!hideChainMenu && (
@@ -48,7 +48,7 @@ export const NavMenu = ({ hideChainMenu = false }: NavMenuProps) => {
         onSetActiveDropdown={setActiveDropdown}
       />
       {!address && (
-        <Box style={{ width: 110 }} display={{ '@initial': 'none', '@768': 'block' }}>
+        <Box style={{ width: 110 }} display={{ '@initial': 'none', '@1024': 'block' }}>
           <ConnectButton />
         </Box>
       )}

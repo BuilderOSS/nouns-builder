@@ -16,6 +16,9 @@ const popIn = keyframes({
 // Nav trigger
 // ---------------------------------------------------------------------------
 
+// Full "Search… ⌘K" pill only where the nav has room for it; an icon button below
+const COMPACT_TRIGGER = 'screen and (max-width: 1279px)'
+
 export const triggerButton = style({
   display: 'flex',
   alignItems: 'center',
@@ -28,6 +31,7 @@ export const triggerButton = style({
   color: vars.color.text3,
   cursor: 'pointer',
   fontSize: 14,
+  flexShrink: 0,
   transition: 'border-color 0.1s ease-in-out, background 0.1s ease-in-out',
   selectors: {
     '&:hover': { background: vars.color.neutralHover },
@@ -37,7 +41,7 @@ export const triggerButton = style({
     },
   },
   '@media': {
-    'screen and (max-width: 767px)': {
+    [COMPACT_TRIGGER]: {
       width: 40,
       padding: 0,
       justifyContent: 'center',
@@ -49,8 +53,7 @@ export const triggerLabel = style({
   minWidth: 120,
   textAlign: 'left',
   '@media': {
-    'screen and (max-width: 1023px)': { minWidth: 0 },
-    'screen and (max-width: 767px)': { display: 'none' },
+    [COMPACT_TRIGGER]: { display: 'none' },
   },
 })
 
@@ -70,7 +73,7 @@ export const triggerKbd = style([
   kbd,
   {
     '@media': {
-      'screen and (max-width: 767px)': { display: 'none' },
+      [COMPACT_TRIGGER]: { display: 'none' },
     },
   },
 ])
@@ -365,20 +368,38 @@ export const rowAside = style({
   gap: 8,
 })
 
-export const badge = style({
-  fontSize: 11,
-  fontWeight: 600,
-  lineHeight: '18px',
-  padding: '0 8px',
-  borderRadius: 999,
-  background: vars.color.background2,
-  color: vars.color.text2,
-  whiteSpace: 'nowrap',
+// StatBadge's default background matches a hovered/active row, so outline it
+export const badgeOutline = style({
+  border: `1px solid ${vars.color.border}`,
+  selectors: {
+    // A hovered/active row turns background2 too; lift the badge off it
+    [`${row}:hover &, ${row}[data-active="true"] &`]: {
+      background: vars.color.background1,
+    },
+  },
 })
 
-export const badgePositive = style([badge, { color: vars.color.positive }])
-export const badgeNegative = style([badge, { color: vars.color.negative }])
-export const badgeAccent = style([badge, { color: vars.color.accent }])
+// Colours come from the proposal status palette via inline style (border + text)
+export const outlineBadge = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  fontSize: 12,
+  fontWeight: 600,
+  lineHeight: '16px',
+  padding: '1px 8px',
+  borderRadius: 999,
+  borderStyle: 'solid',
+  borderWidth: 1,
+  background: 'transparent',
+  whiteSpace: 'nowrap',
+  verticalAlign: 'middle',
+  selectors: {
+    // Muted statuses use a background2 border, which vanishes on a hovered row
+    [`${row}:hover &, ${row}[data-active="true"] &`]: {
+      background: vars.color.background1,
+    },
+  },
+})
 
 export const chainIcon = style({
   width: 16,
@@ -391,14 +412,6 @@ export const chainTag = style({
   alignItems: 'center',
   gap: 6,
 })
-
-// Testnets reuse mainnet icons, so they also get their name spelled out
-export const testnetBadge = style([
-  badge,
-  {
-    color: vars.color.warning,
-  },
-])
 
 export const mark = style({
   background: 'none',

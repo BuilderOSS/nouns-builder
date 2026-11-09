@@ -1,5 +1,6 @@
 import { PUBLIC_ALL_CHAINS } from '@buildeross/constants/chains'
 import { useEnsData } from '@buildeross/hooks/useEnsData'
+import { getProposalStateColorStyle, parseState } from '@buildeross/proposal-ui'
 import type {
   BidGlobalSearchResult,
   CandidateGlobalSearchResult,
@@ -10,48 +11,51 @@ import type {
   SearchDaoRef,
   VoteGlobalSearchResult,
 } from '@buildeross/sdk/subgraph'
-import { CHAIN_ID, ProposalState } from '@buildeross/types'
+import { CHAIN_ID } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { StatBadge } from '@buildeross/ui/StatBadge'
 import { isTestnetChain } from '@buildeross/utils/chains'
 import { bgForAddress } from '@buildeross/utils/gradient'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
+import { theme } from '@buildeross/zord'
 import Image from 'next/image'
 import Link from 'next/link'
 import React, { useState } from 'react'
+import { profileStatBadge } from 'src/styles/profile.css'
 import { formatEther } from 'viem'
 
 import * as styles from './GlobalSearch.css'
 import { getSearchResultHref } from './links'
 
-const PROPOSAL_STATE_LABEL: Record<ProposalState, string> = {
-  [ProposalState.Pending]: 'Pending',
-  [ProposalState.Active]: 'Active',
-  [ProposalState.Canceled]: 'Canceled',
-  [ProposalState.Defeated]: 'Defeated',
-  [ProposalState.Succeeded]: 'Succeeded',
-  [ProposalState.Queued]: 'Queued',
-  [ProposalState.Expired]: 'Expired',
-  [ProposalState.Executed]: 'Executed',
-  [ProposalState.Vetoed]: 'Vetoed',
-  [ProposalState.Updatable]: 'Updatable',
-  [ProposalState.Replaced]: 'Replaced',
+type OutlineColors = { borderColor: string; color: string }
+
+const SUPPORT_COLORS: Record<VoteGlobalSearchResult['support'], OutlineColors> = {
+  FOR: { borderColor: theme.colors.positiveDisabled, color: theme.colors.positive },
+  AGAINST: { borderColor: theme.colors.negativeDisabled, color: theme.colors.negative },
+  ABSTAIN: { borderColor: theme.colors.border, color: theme.colors.text3 },
 }
 
-const proposalBadgeClass = (state: ProposalState) => {
-  if (state === ProposalState.Active || state === ProposalState.Pending)
-    return styles.badgeAccent
-  if (
-    state === ProposalState.Executed ||
-    state === ProposalState.Succeeded ||
-    state === ProposalState.Queued
-  )
-    return styles.badgePositive
-  if (state === ProposalState.Defeated || state === ProposalState.Vetoed)
-    return styles.badgeNegative
-  return styles.badge
-}
+/**
+ * Outlined pill in the colours the proposal pages use for status, so badges read
+ * the same in light and dark mode.
+ */
+const OutlineBadge: React.FC<{ colors: OutlineColors; children: React.ReactNode }> = ({
+  colors,
+  children,
+}) => (
+  <span className={styles.outlineBadge} style={colors}>
+    {children}
+  </span>
+)
+
+/** Same "Testnet" badge as the profile page DAO lists, outlined for row hovers. */
+const TestnetBadge: React.FC = () => (
+  <StatBadge variant="default" className={`${profileStatBadge} ${styles.badgeOutline}`}>
+    Testnet
+  </StatBadge>
+)
 
 const SUPPORT_LABEL = { FOR: 'For', AGAINST: 'Against', ABSTAIN: 'Abstain' } as const
 
@@ -118,9 +122,7 @@ const ChainIcon: React.FC<{ chainId: CHAIN_ID }> = ({ chainId }) => {
   if (!chain) return null
   return (
     <span className={styles.chainTag} title={chain.name}>
-      {isTestnetChain(chainId) && (
-        <span className={styles.testnetBadge}>{chain.name}</span>
-      )}
+      {isTestnetChain(chainId) && <TestnetBadge />}
       <Image
         src={chain.icon}
         alt={chain.name}
@@ -253,9 +255,9 @@ const ProposalRow: React.FC<{ result: ProposalGlobalSearchResult; query: string 
     }
     aside={
       <>
-        <span className={proposalBadgeClass(result.state)}>
-          {PROPOSAL_STATE_LABEL[result.state]}
-        </span>
+        <OutlineBadge colors={getProposalStateColorStyle(result.state)}>
+          {parseState(result.state)}
+        </OutlineBadge>
         <ChainIcon chainId={result.chainId} />
       </>
     }
@@ -278,7 +280,9 @@ const CandidateRow: React.FC<{ result: CandidateGlobalSearchResult; query: strin
     aside={
       <>
         {result.proposalNumber !== undefined && (
-          <span className={styles.badgePositive}>Prop #{result.proposalNumber}</span>
+          <OutlineBadge colors={SUPPORT_COLORS.FOR}>
+            Prop #{result.proposalNumber}
+          </OutlineBadge>
         )}
         <ChainIcon chainId={result.chainId} />
       </>
@@ -297,17 +301,9 @@ const VoteRow: React.FC<{ result: VoteGlobalSearchResult; query: string }> = ({
       title={
         <>
           {displayName || walletSnippet(result.voter)} voted{' '}
-          <span
-            className={
-              result.support === 'FOR'
-                ? styles.badgePositive
-                : result.support === 'AGAINST'
-                  ? styles.badgeNegative
-                  : styles.badge
-            }
-          >
+          <OutlineBadge colors={SUPPORT_COLORS[result.support]}>
             {SUPPORT_LABEL[result.support]} · {result.weight}
-          </span>
+          </OutlineBadge>
         </>
       }
       meta={`${result.dao.name} #${result.proposalNumber} ${result.proposalTitle} · ${timeAgo(result.timestamp)}`}
