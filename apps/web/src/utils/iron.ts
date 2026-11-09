@@ -38,6 +38,9 @@ export const ironOptions: SessionOptions = {
 
 export interface IronSessionData {
   nonce?: string
+  // When the nonce was issued (server clock, ms). Bounds how long a sign-in
+  // attempt stays valid without trusting the client's clock.
+  nonceIssuedAt?: number
   siwe?: SiweMessage
   ownerAddress?: Address
   safeAddress?: Address

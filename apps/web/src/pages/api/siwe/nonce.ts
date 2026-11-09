@@ -15,6 +15,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     case 'GET':
       const session = await getIronSession<IronSessionData>(req, res, ironOptions)
       session.nonce = generateSiweNonce()
+      session.nonceIssuedAt = Date.now()
       await session.save()
       res.setHeader('Content-Type', 'text/plain')
       res.send(session.nonce)
