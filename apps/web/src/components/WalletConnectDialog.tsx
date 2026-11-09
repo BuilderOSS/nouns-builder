@@ -5,7 +5,8 @@ import {
   addRecentSafeWallet,
   clearSafeInfo,
   getErrorMessage,
-  getSafeInfo,
+  isSafeServiceError,
+  lookupSafeInfo,
   WALLET_CONNECTION_ERROR_MESSAGE,
 } from '@buildeross/utils'
 import { Stack } from '@buildeross/zord'
@@ -13,7 +14,6 @@ import { getConnectors } from '@wagmi/core'
 import { useMachine } from '@xstate/react'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { Address } from 'viem'
-import { createSiweMessage } from 'viem/siwe'
 import { useAccount, useConfig, useConnect, useDisconnect, useSignMessage } from 'wagmi'
 
 import {
@@ -22,11 +22,16 @@ import {
 } from '../connectors/safeOwnerConnector'
 import { useAppDisconnect } from '../hooks/useAppDisconnect'
 import { useWalletConnectors } from '../hooks/useWalletConnectors'
-import { walletModalMachine } from '../machines/walletModalMachine'
+import { SIGNATURE_TIMEOUT_MS, walletModalMachine } from '../machines/walletModalMachine'
 import type { WalletInfo } from '../types/auth'
 import { debugWallet } from '../utils/debug'
 import { getCachedSigningAddress, resolveSigningAddress } from '../utils/signing'
-import { beginSiweAuthFlow, SIWE_NONCE_PATH } from '../utils/siweAuthFlow'
+import {
+  beginSiweAuthFlow,
+  cancelSiweAuthFlow,
+  SIWE_NONCE_PATH,
+} from '../utils/siweAuthFlow'
+import { createSignInMessage } from '../utils/siweMessage'
 import { ErrorView } from './wallet/ErrorView'
 import { LoadingView } from './wallet/LoadingView'
 import { SafeAddressView } from './wallet/SafeAddressView'
@@ -166,7 +171,7 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
             return
           }
 
-          const safeInfo = await getSafeInfo(
+          const safeInfo = await lookupSafeInfo(
             state.context.pendingSafeAddress!,
             state.context.pendingSafeChainId!
           )
@@ -200,7 +205,13 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           debugWallet('Safe validation error: %O', error)
           send({
             type: 'ERROR',
-            error: { code: 'SAFE_NOT_FOUND', address: state.context.pendingSafeAddress! },
+            error: isSafeServiceError(error)
+              ? {
+                  code: 'NETWORK_ERROR',
+                  message:
+                    'Could not reach the Safe service to look up this Safe. Please try again in a moment.',
+                }
+              : { code: 'SAFE_NOT_FOUND', address: state.context.pendingSafeAddress! },
           })
         }
       }
@@ -259,7 +270,11 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           }
 
           if (flowCancelledRef.current) {
-            await safeConnector.connect()
+            // The flow was cancelled while the switch was in flight; undo the
+            // connection it just made so the Safe isn't left connected
+            // without a session.
+            debugWallet('Safe connector switch finished after cancel, disconnecting')
+            await disconnectAsync({ connector: safeConnector })
             return
           }
 
@@ -321,6 +336,17 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
         'WARNING: Back to selectingWallet but have address: %s',
         state.context.address
       )
+    }
+  }, [state])
+
+  // beginSiweAuthFlow() (in handleSign) suppresses RainbowKit sign-out while a
+  // signature is in flight. Clear it whenever the modal is not signing or
+  // verifying, so a rejected, timed-out or cancelled attempt doesn't leave
+  // sign-out suppressed for the rest of the tab session. Success clears it via
+  // markSiweAuthVerified().
+  useEffect(() => {
+    if (!state.matches('signingMessage') && !state.matches('authenticating')) {
+      cancelSiweAuthFlow()
     }
   }, [state])
 
@@ -533,12 +559,13 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
     flowCancelledRef.current = false
     const attemptId = ++authAttemptRef.current
 
-    // Create AbortController with 60s timeout for signature request
+    // Give up on the signature request when the machine's signing timeout
+    // fires (mobile wallets via WalletConnect can take a while)
     const abortController = new AbortController()
     const timeoutId = setTimeout(() => {
       abortController.abort()
-      debugWallet('Signature request timed out after 60s')
-    }, 60000)
+      debugWallet('Signature request timed out after %dms', SIGNATURE_TIMEOUT_MS)
+    }, SIGNATURE_TIMEOUT_MS)
 
     try {
       const currentAddress = state.context.address
@@ -598,16 +625,11 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
       )
 
       // Create SIWE message
-      const message = createSiweMessage({
-        domain: window.location.host,
+      const message = createSignInMessage({
         address: signingAddress,
-        statement: safeAddress
-          ? `Sign in as owner of Safe ${safeAddress}`
-          : 'Sign in with Ethereum to the app.',
-        uri: window.location.origin,
-        version: '1',
         chainId: currentChainId,
         nonce,
+        safeAddress,
       })
 
       debugWallet('SIWE message created: %s', message)
@@ -785,7 +807,9 @@ export function WalletConnectDialog({ isOpen, onClose }: WalletConnectDialogProp
           error={
             state.context.error?.code === 'SAFE_NOT_FOUND'
               ? 'Safe not found on this network'
-              : undefined
+              : state.context.error?.code === 'NETWORK_ERROR'
+                ? state.context.error.message
+                : undefined
           }
         />
       )

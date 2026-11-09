@@ -7,6 +7,9 @@ export const SIWE_LOGOUT_IN_PROGRESS_KEY = 'siwe:logoutInProgressAt'
 export const SIWE_LOGOUT_EVENT = 'siwe:logout'
 export const SIWE_LOGOUT_GATE_CHANGE_EVENT = 'siwe:logoutGateChange'
 export const SIWE_REFRESH_EVENT = 'siwe:refresh'
+// How long a nonce (one sign-in attempt) stays valid, measured on the server.
+// Generous enough for slow mobile wallet round-trips.
+export const SIWE_NONCE_TTL_MS = 15 * 60 * 1000
 export const SIWE_NONCE_PATH = '/api/siwe/nonce'
 export const SIWE_VERIFY_PATH = '/api/siwe/verify'
 export const SIWE_LOGOUT_PATH = '/api/siwe/logout'

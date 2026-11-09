@@ -73,8 +73,9 @@ import {
   SIWE_REFRESH_EVENT,
   SIWE_VERIFY_PATH,
 } from 'src/utils/siweAuthFlow'
+import { createSignInMessage } from 'src/utils/siweMessage'
+import { classifyWagmiStorageEvent } from 'src/utils/wagmiStoreSync'
 import { SWRConfig } from 'swr'
-import { createSiweMessage } from 'viem/siwe'
 import { useAccount, useConfig, WagmiProvider } from 'wagmi'
 
 // Cross-tab storage event debounce interval
@@ -134,6 +135,19 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   // Session data with SWR (auto-refresh, deduplication, focus revalidation)
   const { session, refresh } = useSession()
 
+  // Start a server logout. The cached /me response is dropped first so that,
+  // when loggingOut finishes and the logout gate clears, the sync effect can't
+  // re-authenticate the machine from the stale session before the
+  // post-logout refresh comes back.
+  const requestLogout = React.useCallback(
+    ({ gate }: { gate: boolean }) => {
+      if (gate) beginSiweLogout()
+      void refresh({}, { revalidate: false })
+      sendSession({ type: 'LOGOUT' })
+    },
+    [refresh, sendSession]
+  )
+
   // Sync SWR session data with XState machine
   useEffect(() => {
     if (logoutInProgress) {
@@ -156,13 +170,12 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   useEffect(() => {
     const handleLogout = () => {
       debugSession('Logout event received')
-      beginSiweLogout()
-      sendSession({ type: 'LOGOUT' })
+      requestLogout({ gate: true })
     }
 
     window.addEventListener(SIWE_LOGOUT_EVENT, handleLogout)
     return () => window.removeEventListener(SIWE_LOGOUT_EVENT, handleLogout)
-  }, [sendSession])
+  }, [requestLogout])
 
   // Cross-tab storage sync with debouncing
   useEffect(() => {
@@ -178,8 +191,9 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
         return
       }
 
-      // Only react to wagmi storage changes
-      if (!e.key?.startsWith('wagmi.')) return
+      // Only react to wagmi's persisted connection state
+      const change = classifyWagmiStorageEvent(e.key, e.newValue)
+      if (change === 'ignored') return
 
       // Debounce to prevent multiple rapid fires
       if (debounceTimer) {
@@ -187,8 +201,8 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
       }
 
       debounceTimer = setTimeout(() => {
-        // Disconnect detected (storage removed)
-        if (e.newValue === null) {
+        // Another tab no longer has a wallet connection
+        if (change === 'disconnected') {
           debugSession('Cross-tab disconnect detected')
 
           // Reset wagmi state to match other tab
@@ -205,7 +219,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           // a session another tab just created.
           if (!isSiweLogoutInProgress()) {
             if (sessionActor.getSnapshot().matches('authenticated')) {
-              sendSession({ type: 'LOGOUT' })
+              requestLogout({ gate: false })
             }
             cancelSiweAuthFlow()
           }
@@ -228,7 +242,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
         clearTimeout(debounceTimer)
       }
     }
-  }, [config, sendSession, sessionActor, refresh])
+  }, [config, requestLogout, sessionActor, refresh])
 
   // Custom refresh event (fired after SIWE verification)
   useEffect(() => {
@@ -254,16 +268,11 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           // Use ref to get latest safeState (prevents stale closure)
           const currentSafeState = safeStateRef.current
           const signingAddress = await resolveSigningAddress(connector, address)
-          return createSiweMessage({
-            domain: window.location.host,
+          return createSignInMessage({
             address: signingAddress,
-            statement: currentSafeState.safeAddress
-              ? `Sign in as owner for Safe ${currentSafeState.safeAddress}`
-              : 'Sign in with Ethereum to Nouns Builder',
-            uri: window.location.origin,
-            version: '1',
             chainId: msgChainId,
             nonce,
+            safeAddress: currentSafeState.safeAddress ?? undefined,
           })
         },
 
@@ -310,16 +319,18 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           // RainbowKit calls signOut on every wallet disconnect, including in
           // signed-out tabs (e.g. after a cross-tab wagmi reset). Only a session
           // this tab holds should hit the server; otherwise a signed-out tab
-          // could destroy a session another tab is creating.
+          // could destroy a session another tab is creating. The saved Safe
+          // config is only cleared along with that session, so a disconnect
+          // mid-way through the Safe flow doesn't wipe the Safe the user is
+          // signing in to.
           if (sessionActor.getSnapshot().matches('authenticated')) {
-            beginSiweLogout()
-            sendSession({ type: 'LOGOUT' })
+            requestLogout({ gate: true })
+            clearSafe()
           }
-          clearSafe()
           cancelSiweAuthFlow()
         },
       }),
-    [sendSession, sessionActor, clearSafe, refresh, connector]
+    [requestLogout, sessionActor, clearSafe, refresh, connector]
   )
 
   // RainbowKit auth status derived from XState machine

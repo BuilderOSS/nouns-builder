@@ -77,12 +77,9 @@ export function SignatureView({
         <Button onClick={onSign} disabled={isAuthenticating} className={actionButton}>
           {isAuthenticating ? 'Signing...' : 'Sign Message'}
         </Button>
-        <Button
-          onClick={onCancel}
-          disabled={isAuthenticating}
-          variant="secondary"
-          className={actionButton}
-        >
+        {/* Cancel stays enabled while signing so the user can back out of a
+            request they won't complete in their wallet. */}
+        <Button onClick={onCancel} variant="secondary" className={actionButton}>
           Cancel
         </Button>
       </Flex>

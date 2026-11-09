@@ -114,9 +114,38 @@ export async function getSafesForDelegate(
 }
 
 /**
- * Get Safe information including owners
+ * Thrown when the Safe Transaction Service could not answer (network error,
+ * rate limit, 5xx). Distinct from "this Safe doesn't exist", so callers don't
+ * mistake an outage for a missing Safe or a non-owner.
  */
-export async function getSafeInfo(
+export class SafeServiceError extends Error {
+  readonly status?: number
+
+  constructor(message: string, options?: { status?: number; cause?: unknown }) {
+    super(message, { cause: options?.cause })
+    this.name = 'SafeServiceError'
+    this.status = options?.status
+  }
+}
+
+/**
+ * True for a SafeServiceError. Also matches by name, so the check still works
+ * if this module is bundled into more than one entry point (each with its own
+ * copy of the class).
+ */
+export function isSafeServiceError(error: unknown): error is SafeServiceError {
+  return (
+    error instanceof SafeServiceError ||
+    (error instanceof Error && error.name === 'SafeServiceError')
+  )
+}
+
+/**
+ * Look up a Safe. Resolves to null when the Safe doesn't exist (404, or the
+ * chain has no Safe service), and throws SafeServiceError when the service
+ * could not answer.
+ */
+export async function lookupSafeInfo(
   safeAddress: Address,
   chainId: CHAIN_ID
 ): Promise<SafeInfo | null> {
@@ -126,60 +155,88 @@ export async function getSafeInfo(
     return null
   }
 
+  let response: Response
   try {
-    const url = `${baseUrl}/api/v1/safes/${safeAddress}/`
-    const response = await fetch(url)
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null
-      }
-      debugSafe(`Safe API error: ${response.status}`, await response.text())
-      return null
-    }
-
-    const data: SafeApiResponse = await response.json()
-
-    // Transform API response to SafeInfo format
-    return {
-      safeAddress,
-      chainId,
-      threshold: data.threshold,
-      owners: data.owners,
-      isReadOnly: false,
-      nonce: data.nonce,
-      version: data.version,
-    }
+    response = await fetch(`${baseUrl}/api/v1/safes/${safeAddress}/`)
   } catch (error) {
     debugSafe('Error fetching Safe info:', error)
+    throw new SafeServiceError('Safe service request failed', { cause: error })
+  }
+
+  if (response.status === 404) return null
+
+  if (!response.ok) {
+    debugSafe(`Safe API error: ${response.status}`, await response.text().catch(() => ''))
+    throw new SafeServiceError(`Safe service responded with ${response.status}`, {
+      status: response.status,
+    })
+  }
+
+  let data: SafeApiResponse
+  try {
+    data = await response.json()
+  } catch (error) {
+    throw new SafeServiceError('Safe service returned an invalid response', {
+      cause: error,
+    })
+  }
+
+  // Transform API response to SafeInfo format
+  return {
+    safeAddress,
+    chainId,
+    threshold: data.threshold,
+    owners: data.owners,
+    isReadOnly: false,
+    nonce: data.nonce,
+    version: data.version,
+  }
+}
+
+/**
+ * Get Safe information including owners. Returns null both when the Safe
+ * doesn't exist and when the lookup failed; use lookupSafeInfo to tell the
+ * two apart.
+ */
+export async function getSafeInfo(
+  safeAddress: Address,
+  chainId: CHAIN_ID
+): Promise<SafeInfo | null> {
+  try {
+    return await lookupSafeInfo(safeAddress, chainId)
+  } catch {
     return null
   }
 }
 
 /**
- * Check if an address is a valid Safe
+ * Check if an address is a valid Safe.
+ * Throws SafeServiceError if the Safe service could not answer.
  */
 export async function isSafeAddress(
   address: Address,
   chainId: CHAIN_ID
 ): Promise<boolean> {
-  const safeInfo = await getSafeInfo(address, chainId)
+  const safeInfo = await lookupSafeInfo(address, chainId)
   return safeInfo !== null
 }
 
 /**
- * Get list of owners for a Safe
+ * Get list of owners for a Safe ([] if the Safe doesn't exist).
+ * Throws SafeServiceError if the Safe service could not answer.
  */
 export async function getSafeOwners(
   safeAddress: Address,
   chainId: CHAIN_ID
 ): Promise<Address[]> {
-  const safeInfo = await getSafeInfo(safeAddress, chainId)
+  const safeInfo = await lookupSafeInfo(safeAddress, chainId)
   return safeInfo?.owners || []
 }
 
 /**
- * Check if an address is an owner of a given Safe
+ * Check if an address is an owner of a given Safe.
+ * Throws SafeServiceError if the Safe service could not answer, so an outage
+ * or rate limit is never reported as "not an owner".
  */
 export async function isOwnerOfSafe(
   ownerAddress: Address,

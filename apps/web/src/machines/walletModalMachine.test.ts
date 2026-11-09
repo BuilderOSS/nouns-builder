@@ -65,6 +65,57 @@ describe('walletModalMachine verification', () => {
     window.removeEventListener(SIWE_REFRESH_EVENT, onRefresh)
   })
 
+  it('shows the server explanation when verification is refused', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json(
+          {
+            ok: false,
+            message: 'Could not reach the Safe service to confirm ownership.',
+          },
+          { status: 503 }
+        )
+      )
+    )
+    const actor = createActor(walletModalMachine).start()
+    actor.send({ type: 'OPEN', wallets: [] })
+    actor.send({ type: 'SELECT_WALLET', walletId: 'injected' })
+    actor.send({
+      type: 'WALLET_CONNECTED',
+      address,
+      connector: { id: 'injected', name: 'Injected' } as any,
+    })
+    actor.send({ type: 'SIGN_MESSAGE' })
+    actor.send({ type: 'SIGNATURE_RECEIVED', signature: '0xsig', message: 'msg' })
+
+    await vi.waitFor(() => {
+      expect(actor.getSnapshot().matches('awaitingSignature')).toBe(true)
+    })
+    expect(actor.getSnapshot().context.error).toEqual({
+      code: 'VERIFICATION_FAILED',
+      message: 'Could not reach the Safe service to confirm ownership.',
+    })
+  })
+
+  it('keeps the reason a Safe lookup failed instead of always saying not found', () => {
+    const actor = createActor(walletModalMachine).start()
+    actor.send({ type: 'OPEN', wallets: [] })
+    actor.send({ type: 'SELECT_SAFE' })
+    actor.send({ type: 'SUBMIT_SAFE_ADDRESS', address, chainId: 1 })
+    actor.send({
+      type: 'ERROR',
+      error: { code: 'NETWORK_ERROR', message: 'Could not reach the Safe service.' },
+    })
+
+    const snapshot = actor.getSnapshot()
+    expect(snapshot.matches('enteringSafeAddress')).toBe(true)
+    expect(snapshot.context.error).toEqual({
+      code: 'NETWORK_ERROR',
+      message: 'Could not reach the Safe service.',
+    })
+  })
+
   it('aborts the verify request and re-checks the session when the modal closes', () => {
     const onRefresh = vi.fn()
     window.addEventListener(SIWE_REFRESH_EVENT, onRefresh)
