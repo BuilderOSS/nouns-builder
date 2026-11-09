@@ -2,6 +2,7 @@ import {
   GLOBAL_SEARCH_MIN_LENGTH,
   useGlobalSearch,
 } from '@buildeross/hooks/useGlobalSearch'
+import { useScrollDirection } from '@buildeross/hooks/useScrollDirection'
 import type { GlobalSearchResult } from '@buildeross/sdk/subgraph'
 import { CHAIN_ID } from '@buildeross/types'
 import { Text } from '@buildeross/zord'
@@ -39,6 +40,8 @@ export const SearchResultsPage: React.FC = () => {
   const [input, setInput] = useState(urlQuery)
   const [page, setPage] = useState(1)
   const { add: addRecent } = useRecentSearches()
+  // The fixed nav (80px) hides while scrolling down; keep the search bar right under it
+  const scrollDirection = useScrollDirection()
 
   useEffect(() => setInput(urlQuery), [urlQuery])
   useEffect(() => setPage(1), [urlQuery, tab, scope])
@@ -85,44 +88,49 @@ export const SearchResultsPage: React.FC = () => {
       <Text as="h1" variant="heading-md" mb="x6">
         Search
       </Text>
-      <form onSubmit={onSubmit} role="search">
-        <input
-          className={styles.pageInput}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Search DAOs, profiles, ENS names, proposals, votes and bids"
-          aria-label="Search"
-          autoFocus={!urlQuery}
-        />
-      </form>
+      <div
+        className={styles.pageHeader}
+        style={{ top: scrollDirection === 'down' ? 0 : 80 }}
+      >
+        <form onSubmit={onSubmit} role="search">
+          <input
+            className={styles.pageInput}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Search DAOs, profiles, ENS names, proposals, votes and bids"
+            aria-label="Search"
+            autoFocus={!urlQuery}
+          />
+        </form>
 
-      <div className={styles.pageTabs} role="tablist" aria-label="Result type">
-        {tabs.map(({ tab: t, label }) => (
-          <button
-            key={t}
-            type="button"
-            role="tab"
-            aria-selected={tab === t}
-            className={styles.chip}
-            onClick={() => replace({ type: t })}
-          >
-            {label}
-          </button>
-        ))}
-        {scope && (
-          <>
-            <span className={styles.chipDivider} aria-hidden="true" />
+        <div className={styles.pageTabs} role="tablist" aria-label="Result type">
+          {tabs.map(({ tab: t, label }) => (
             <button
+              key={t}
               type="button"
-              aria-pressed="true"
+              role="tab"
+              aria-selected={tab === t}
               className={styles.chip}
-              onClick={() => replace({ clearScope: true })}
-              title="Search all DAOs"
+              onClick={() => replace({ type: t })}
             >
-              This DAO ✕
+              {label}
             </button>
-          </>
-        )}
+          ))}
+          {scope && (
+            <>
+              <span className={styles.chipDivider} aria-hidden="true" />
+              <button
+                type="button"
+                aria-pressed="true"
+                className={styles.chip}
+                onClick={() => replace({ clearScope: true })}
+                title="Search all DAOs"
+              >
+                This DAO ✕
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {data && data.failedChainIds.length > 0 && (

@@ -30,6 +30,8 @@ export const Footer = ({ hideOnMobile = false }: { hideOnMobile?: boolean }) => 
                 '@1024': 'space-between',
               }}
               direction={{ '@initial': 'column', '@768': 'row' }}
+              // Keep the two link groups apart when they're centred side by side (768–1023px)
+              gap={{ '@initial': 'x0', '@768': 'x4', '@1024': 'x6' }}
             >
               <Flex align="center" direction={{ '@initial': 'column', '@768': 'row' }}>
                 <Text
