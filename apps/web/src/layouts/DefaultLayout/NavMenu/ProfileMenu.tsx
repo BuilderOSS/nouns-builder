@@ -197,7 +197,8 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     if (typeof window === 'undefined') return
 
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768)
+      // Matches the nav's '@1024' breakpoint: below it, nav links live in this menu
+      setIsMobile(window.innerWidth < 1024)
     }
 
     // Set initial value
@@ -666,7 +667,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
         {activeDropdown === MenuType.PROFILE_MENU && renderMobileFullscreen()}
         <Flex
           className={navButton}
-          display={!address ? { '@initial': 'flex', '@768': 'none' } : undefined}
+          display={!address ? { '@initial': 'flex', '@1024': 'none' } : undefined}
           onClick={() => {
             if (activeDropdown === MenuType.PROFILE_MENU) {
               onSetActiveDropdown(undefined)
@@ -686,7 +687,7 @@ export const ProfileMenu: React.FC<ProfileMenuProps> = ({
     <>
       <Flex
         className={navButton}
-        display={!address ? { '@initial': 'flex', '@768': 'none' } : undefined}
+        display={!address ? { '@initial': 'flex', '@1024': 'none' } : undefined}
         onClick={() => onSetActiveDropdown(MenuType.PROFILE_MENU)}
         data-active={!!activeDropdown && activeDropdown !== MenuType.PROFILE_MENU}
       >

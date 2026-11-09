@@ -52,11 +52,7 @@ export const Nav = ({ hideChainMenu = false }: NavProps) => {
               </NetworkController.Testnet>
             </Stack>
           </Link>
-          <Flex
-            display={{ '@initial': 'none', '@768': 'flex' }}
-            ml="x10"
-            gap={{ '@768': 'x2', '@1024': 'x4' }}
-          >
+          <Flex display={{ '@initial': 'none', '@1024': 'flex' }} ml="x10" gap="x4">
             <Link href={'/about'}>
               <Label className={navMenuItem}>About</Label>
             </Link>
