@@ -446,6 +446,19 @@ export const pageInput = style({
   },
 })
 
+// The search bar and tabs stay pinned while results scroll. `top` follows the nav,
+// which slides away on scroll down (set inline from useScrollDirection)
+export const pageHeader = style({
+  position: 'sticky',
+  top: 80,
+  zIndex: z.HERO_CONTENT_LAYER,
+  transition: 'top 150ms cubic-bezier(0.4, 0, 0.2, 1)',
+  background: vars.color.background1,
+  paddingTop: 12,
+  marginTop: -12,
+  borderBottom: `1px solid ${vars.color.border}`,
+})
+
 export const pageSection = style({
   marginTop: 24,
 })
@@ -454,5 +467,6 @@ export const pageTabs = style([
   tabs,
   {
     padding: '16px 0',
+    borderBottom: 'none',
   },
 ])
