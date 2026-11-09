@@ -1,5 +1,29 @@
 # @buildeross/hooks
 
+## 0.4.0
+
+### Minor Changes
+
+- 5ce3fdb: Add global search across DAOs, profiles, proposals, candidates, votes and bids. The subgraph gains `proposalSearch`, `candidateSearch`, `voteSearch` and `bidSearch` fulltext indexes and a denormalized `dao` field on `ProposalVote` and `AuctionBid`. Adds `globalSearchRequest`, `globalAddressLookupRequest`, `globalAddressPrefixLookupRequest` and `globalTxLookupRequest` to the SDK, the `useGlobalSearch` hook, `classifyQuery` and `rankText`/`rankDao` (moved from the web search API) to utils, and an optional `NEXT_PUBLIC_SUBGRAPH_VERSION` override for testing a subgraph version before moving the dev/latest tags.
+- 5068fa1: Replace RPC contract-event watchers with polling of a cached subgraph-backed auction status API. Adds `liveAuctionsRequest`/`daosAuctionStatusRequest` to the SDK and `useAuctionStatus`/`useAuctionStatusByChain` hooks, removes the `VoteCast` watcher in favour of an optimistic vote on submit, dedupes `getSyncStatus` calls, sets per-chain viem polling intervals, and fixes the Infura RPC URL.
+- Bump all publishable packages from 0.3.2 to 0.4.0.
+
+### Patch Changes
+
+- c54bba0: Only show AI transaction summaries to signed-in (SIWE) users, send the call's ETH value to the summary API, and replace raw summary errors with friendly messages (hidden entirely when the user is signed out or no AI provider is configured).
+- Updated dependencies [fabd645]
+- Updated dependencies [2e875f5]
+- Updated dependencies [5ce3fdb]
+- Updated dependencies [5068fa1]
+- Updated dependencies
+- Updated dependencies [90c09a7]
+- Updated dependencies [4090236]
+  - @buildeross/constants@0.4.0
+  - @buildeross/utils@0.4.0
+  - @buildeross/sdk@0.4.0
+  - @buildeross/types@0.4.0
+  - @buildeross/ipfs-service@0.4.0
+
 ## 0.3.2
 
 ### Patch Changes

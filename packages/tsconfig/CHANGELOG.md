@@ -1,5 +1,11 @@
 # @buildeross/tsconfig
 
+## 0.4.0
+
+### Minor Changes
+
+- Bump all publishable packages from 0.3.2 to 0.4.0.
+
 ## 0.3.2
 
 ### Patch Changes
