@@ -13,6 +13,7 @@ import type {
 import { CHAIN_ID, ProposalState } from '@buildeross/types'
 import { Avatar } from '@buildeross/ui/Avatar'
 import { FallbackImage } from '@buildeross/ui/FallbackImage'
+import { isTestnetChain } from '@buildeross/utils/chains'
 import { bgForAddress } from '@buildeross/utils/gradient'
 import { walletSnippet } from '@buildeross/utils/helpers'
 import { formatCryptoVal } from '@buildeross/utils/numbers'
@@ -111,18 +112,23 @@ const timeAgo = (seconds: number): string => {
   return 'just now'
 }
 
+/** Chain icon; testnets (which share mainnet icons) also show their name. */
 const ChainIcon: React.FC<{ chainId: CHAIN_ID }> = ({ chainId }) => {
   const chain = PUBLIC_ALL_CHAINS.find((c) => c.id === chainId)
   if (!chain) return null
   return (
-    <Image
-      src={chain.icon}
-      alt={chain.name}
-      title={chain.name}
-      width={16}
-      height={16}
-      className={styles.chainIcon}
-    />
+    <span className={styles.chainTag} title={chain.name}>
+      {isTestnetChain(chainId) && (
+        <span className={styles.testnetBadge}>{chain.name}</span>
+      )}
+      <Image
+        src={chain.icon}
+        alt={chain.name}
+        width={16}
+        height={16}
+        className={styles.chainIcon}
+      />
+    </span>
   )
 }
 
@@ -160,6 +166,16 @@ const Name: React.FC<{ address: string }> = ({ address }) => {
   const { displayName } = useEnsData(address)
   return <>{displayName || walletSnippet(address)}</>
 }
+
+/** Round avatar for an address: its ENS / Basename avatar, else the address orb. */
+const PersonAvatar: React.FC<{ address: string; src?: string | null }> = ({
+  address,
+  src,
+}) => (
+  <span className={styles.rowAvatar}>
+    <Avatar address={address} src={src} size="32" />
+  </span>
+)
 
 type RowLayoutProps = {
   media: React.ReactNode
@@ -208,11 +224,7 @@ const ProfileRow: React.FC<{ result: ProfileGlobalSearchResult }> = ({ result })
     : 'No onchain activity yet'
   return (
     <RowLayout
-      media={
-        <span className={styles.rowMedia}>
-          <Avatar address={result.address} src={ensAvatar} size="32" />
-        </span>
-      }
+      media={<PersonAvatar address={result.address} src={ensAvatar} />}
       title={displayName || walletSnippet(result.address)}
       meta={`${walletSnippet(result.address)} · ${meta}`}
       aside={result.chains.map((c) => (
@@ -277,66 +289,71 @@ const CandidateRow: React.FC<{ result: CandidateGlobalSearchResult; query: strin
 const VoteRow: React.FC<{ result: VoteGlobalSearchResult; query: string }> = ({
   result,
   query,
-}) => (
-  <RowLayout
-    media={
-      <span className={styles.rowMedia}>
-        <Avatar address={result.voter} size="32" />
-      </span>
-    }
-    title={
-      <>
-        <Name address={result.voter} /> voted{' '}
-        <span
-          className={
-            result.support === 'FOR'
-              ? styles.badgePositive
-              : result.support === 'AGAINST'
-                ? styles.badgeNegative
-                : styles.badge
-          }
-        >
-          {SUPPORT_LABEL[result.support]} · {result.weight}
-        </span>
-      </>
-    }
-    meta={`${result.dao.name} #${result.proposalNumber} ${result.proposalTitle} · ${timeAgo(result.timestamp)}`}
-    snippet={
-      result.reason ? (
-        <Highlight text={snippetAround(result.reason, query)} query={query} />
-      ) : undefined
-    }
-    aside={<ChainIcon chainId={result.chainId} />}
-  />
-)
+}) => {
+  const { displayName, ensAvatar } = useEnsData(result.voter)
+  return (
+    <RowLayout
+      media={<PersonAvatar address={result.voter} src={ensAvatar} />}
+      title={
+        <>
+          {displayName || walletSnippet(result.voter)} voted{' '}
+          <span
+            className={
+              result.support === 'FOR'
+                ? styles.badgePositive
+                : result.support === 'AGAINST'
+                  ? styles.badgeNegative
+                  : styles.badge
+            }
+          >
+            {SUPPORT_LABEL[result.support]} · {result.weight}
+          </span>
+        </>
+      }
+      meta={`${result.dao.name} #${result.proposalNumber} ${result.proposalTitle} · ${timeAgo(result.timestamp)}`}
+      snippet={
+        result.reason ? (
+          <Highlight text={snippetAround(result.reason, query)} query={query} />
+        ) : undefined
+      }
+      aside={<ChainIcon chainId={result.chainId} />}
+    />
+  )
+}
 
 const BidRow: React.FC<{ result: BidGlobalSearchResult; query: string }> = ({
   result,
   query,
-}) => (
-  <RowLayout
-    media={
-      <SquareImage
-        address={result.dao.tokenAddress}
-        src={result.tokenImage ?? result.dao.image}
-        alt={result.tokenName}
-      />
-    }
-    title={
-      <>
-        <Name address={result.bidder} /> bid{' '}
-        {formatCryptoVal(formatEther(BigInt(result.amount)))} ETH
-      </>
-    }
-    meta={`${result.tokenName} · ${timeAgo(result.bidTime)}`}
-    snippet={
-      result.comment ? (
-        <Highlight text={snippetAround(result.comment, query)} query={query} />
-      ) : undefined
-    }
-    aside={<ChainIcon chainId={result.chainId} />}
-  />
-)
+}) => {
+  const { displayName, ensAvatar } = useEnsData(result.bidder)
+  return (
+    <RowLayout
+      media={
+        <SquareImage
+          address={result.dao.tokenAddress}
+          src={result.tokenImage ?? result.dao.image}
+          alt={result.tokenName}
+        />
+      }
+      title={
+        <>
+          <span className={styles.inlineAvatar}>
+            <Avatar address={result.bidder} src={ensAvatar} size="20" />
+          </span>
+          {displayName || walletSnippet(result.bidder)} bid{' '}
+          {formatCryptoVal(formatEther(BigInt(result.amount)))} ETH
+        </>
+      }
+      meta={`${result.tokenName} · ${timeAgo(result.bidTime)}`}
+      snippet={
+        result.comment ? (
+          <Highlight text={snippetAround(result.comment, query)} query={query} />
+        ) : undefined
+      }
+      aside={<ChainIcon chainId={result.chainId} />}
+    />
+  )
+}
 
 const RowContent: React.FC<{ result: GlobalSearchResult; query: string }> = ({
   result,

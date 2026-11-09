@@ -310,6 +310,21 @@ export const rowMedia = style({
   background: vars.color.background2,
 })
 
+// Avatars (orbs or profile images) sit on the row itself, without the media tile
+export const rowAvatar = style([
+  rowMedia,
+  {
+    borderRadius: 999,
+    background: 'transparent',
+  },
+])
+
+export const inlineAvatar = style({
+  display: 'inline-flex',
+  verticalAlign: 'text-bottom',
+  marginRight: 6,
+})
+
 export const rowBody = style({
   flex: 1,
   minWidth: 0,
@@ -370,6 +385,20 @@ export const chainIcon = style({
   height: 16,
   borderRadius: 999,
 })
+
+export const chainTag = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 6,
+})
+
+// Testnets reuse mainnet icons, so they also get their name spelled out
+export const testnetBadge = style([
+  badge,
+  {
+    color: vars.color.warning,
+  },
+])
 
 export const mark = style({
   background: 'none',

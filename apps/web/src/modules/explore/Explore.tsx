@@ -1,14 +1,21 @@
 import { useDaoSearch, useExplore } from '@buildeross/hooks'
 import { useAuthStore, useChainStore } from '@buildeross/stores'
 import { Pagination } from '@buildeross/ui/Pagination'
-import { atoms, Box, Grid, Text } from '@buildeross/zord'
+import { Box, Grid, Icon, Text } from '@buildeross/zord'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useCallback, useEffect, useState } from 'react'
 import { FAVORITE_DAO_LIMIT, useFavoriteDaos } from 'src/hooks/useFavoriteDaos'
 import { getFullSearchHref } from 'src/modules/search/links'
 
-import { exploreGrid, searchContainer } from './Explore.css'
+import {
+  exploreGrid,
+  globalSearchCta,
+  globalSearchCtaHint,
+  globalSearchCtaText,
+  globalSearchCtaTitle,
+  searchContainer,
+} from './Explore.css'
 import { ExploreDaoCard } from './ExploreDaoCard'
 import { ExploreNoDaos } from './ExploreNoDaos'
 import { ExploreSkeleton } from './ExploreSkeleton'
@@ -40,6 +47,9 @@ export const Explore: React.FC = () => {
       setActiveSearchQuery(urlSearch.length >= MIN_SEARCH_LENGTH ? urlSearch : '')
     }
   }, [isReady, urlSearch])
+
+  // The global search link follows what's typed, not only the submitted DAO search
+  const trimmedSearchInput = searchInput.trim()
 
   // Determine if we're in search mode
   const isSearching = activeSearchQuery.trim().length >= MIN_SEARCH_LENGTH
@@ -136,12 +146,18 @@ export const Explore: React.FC = () => {
           minSearchLength={MIN_SEARCH_LENGTH}
           isLoading={isSearchLoading}
         />
-        {isSearching && (
-          <Link
-            href={getFullSearchHref(activeSearchQuery)}
-            className={atoms({ color: 'text3', fontSize: 14 })}
-          >
-            Search proposals, votes, bids and profiles for “{activeSearchQuery}” →
+        {trimmedSearchInput.length >= MIN_SEARCH_LENGTH && (
+          <Link href={getFullSearchHref(trimmedSearchInput)} className={globalSearchCta}>
+            <Icon id="search" size="sm" fill="text3" />
+            <span className={globalSearchCtaText}>
+              <span className={globalSearchCtaTitle}>
+                Search everything for “{trimmedSearchInput}”
+              </span>
+              <span className={globalSearchCtaHint}>
+                Proposals, candidates, votes, bids and profiles across all chains
+              </span>
+            </span>
+            <span aria-hidden="true">→</span>
           </Link>
         )}
       </Box>
