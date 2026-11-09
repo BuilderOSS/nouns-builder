@@ -17,6 +17,11 @@ import {
 // Delay before closing modal after successful authentication
 const MODAL_CLOSE_DELAY_MS = 500
 
+// Server-side verification can do an EIP-1271/6492 RPC call (smart wallets)
+// plus a Safe Transaction Service lookup (Safe mode), so allow well over the
+// typical latency. The request is aborted if this elapses.
+export const VERIFY_TIMEOUT_MS = 30000
+
 interface WalletModalContext {
   wallets: WalletInfo[]
   selectedWalletId: string | null
@@ -260,10 +265,14 @@ export const walletModalMachine = createMachine(
       },
       authenticating: {
         entry: () => debugWallet('State: authenticating'),
+        // Leaving this state stops the invoked actor, which aborts the verify
+        // request so a late response can't set the session cookie behind the
+        // UI's back (or clobber the nonce of a retry). The refresh covers the
+        // narrow window where the cookie landed just before the abort.
         after: {
-          10000: {
+          [VERIFY_TIMEOUT_MS]: {
             target: 'awaitingSignature',
-            actions: 'setTimeoutError',
+            actions: ['setTimeoutError', 'refreshSession'],
           },
         },
         invoke: {
@@ -283,7 +292,7 @@ export const walletModalMachine = createMachine(
           },
         },
         on: {
-          CLOSE: { target: 'closed', actions: 'resetAttemptContext' },
+          CLOSE: { target: 'closed', actions: ['resetAttemptContext', 'refreshSession'] },
         },
       },
       authenticated: {
@@ -418,6 +427,10 @@ export const walletModalMachine = createMachine(
         debugWallet('Authentication complete, triggering refresh')
         window.dispatchEvent(new Event(SIWE_REFRESH_EVENT))
       },
+      refreshSession: () => {
+        debugWallet('Verification abandoned, re-checking session')
+        window.dispatchEvent(new Event(SIWE_REFRESH_EVENT))
+      },
       setValidationError: assign({
         error: ({ context }) => {
           debugWallet('Validation error occurred')
@@ -543,7 +556,7 @@ export const walletModalMachine = createMachine(
           safeAddress?: Address
           safeChainId?: number
         }
-      >(async ({ input }) => {
+      >(async ({ input, signal }) => {
         debugWallet('verifySiweSignature called with: %O', {
           hasMessage: !!input.message,
           hasSignature: !!input.signature,
@@ -556,6 +569,7 @@ export const walletModalMachine = createMachine(
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(input),
+          signal,
         })
 
         debugWallet(
@@ -564,9 +578,12 @@ export const walletModalMachine = createMachine(
           response.ok
         )
 
+        // verify.ts answers 422 when the session nonce is missing or doesn't
+        // match: cookies blocked, or a newer sign-in attempt (e.g. another tab)
+        // replaced the nonce.
         if (response.status === 422) {
           throw new Error(
-            'Cookies are disabled or unavailable. Please enable cookies for this site and try again.'
+            'Your sign-in request expired. Please try again, and make sure cookies are enabled for this site.'
           )
         }
 

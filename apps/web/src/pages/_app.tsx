@@ -55,6 +55,7 @@ import { WalletConnectProvider } from 'src/components/WalletConnectProvider'
 import { useAppDisconnect } from 'src/hooks/useAppDisconnect'
 import { useDebugConnectorLifecycle } from 'src/hooks/useDebugConnectorLifecycle'
 import { useSession } from 'src/hooks/useSession'
+import { useSiweLogoutInProgress } from 'src/hooks/useSiweLogoutInProgress'
 import { sessionMachine } from 'src/machines/sessionMachine'
 import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
@@ -116,7 +117,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const resetApp = useAppDisconnect()
   const config = useConfig()
   const { connector } = useAccount()
-  const logoutInProgress = isSiweLogoutInProgress()
+  const logoutInProgress = useSiweLogoutInProgress()
 
   // Enable debug logging with: localStorage.setItem('debug', 'app:walletConnect:*')
   useDebugConnectorLifecycle()
@@ -128,7 +129,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   }, [safeState])
 
   // Session management with XState machine
-  const [sessionState, sendSession] = useMachine(sessionMachine)
+  const [sessionState, sendSession, sessionActor] = useMachine(sessionMachine)
 
   // Session data with SWR (auto-refresh, deduplication, focus revalidation)
   const { session, refresh } = useSession()
@@ -198,9 +199,14 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
             status: 'disconnected',
           }))
 
+          // Only log out a session this tab holds, and only when this is not
+          // part of an active logout. LOGOUT now runs from any machine state,
+          // so without the authenticated check a signed-out tab would destroy
+          // a session another tab just created.
           if (!isSiweLogoutInProgress()) {
-            // Logout in XState machine only when this is not part of an active logout
-            sendSession({ type: 'LOGOUT' })
+            if (sessionActor.getSnapshot().matches('authenticated')) {
+              sendSession({ type: 'LOGOUT' })
+            }
             cancelSiweAuthFlow()
           }
         }
@@ -222,7 +228,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
         clearTimeout(debounceTimer)
       }
     }
-  }, [config, sendSession, refresh])
+  }, [config, sendSession, sessionActor, refresh])
 
   // Custom refresh event (fired after SIWE verification)
   useEffect(() => {
@@ -301,13 +307,19 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           }
 
           debugSession('Signing out')
-          beginSiweLogout()
-          sendSession({ type: 'LOGOUT' })
+          // RainbowKit calls signOut on every wallet disconnect, including in
+          // signed-out tabs (e.g. after a cross-tab wagmi reset). Only a session
+          // this tab holds should hit the server; otherwise a signed-out tab
+          // could destroy a session another tab is creating.
+          if (sessionActor.getSnapshot().matches('authenticated')) {
+            beginSiweLogout()
+            sendSession({ type: 'LOGOUT' })
+          }
           clearSafe()
           cancelSiweAuthFlow()
         },
       }),
-    [sendSession, clearSafe, refresh, connector]
+    [sendSession, sessionActor, clearSafe, refresh, connector]
   )
 
   // RainbowKit auth status derived from XState machine

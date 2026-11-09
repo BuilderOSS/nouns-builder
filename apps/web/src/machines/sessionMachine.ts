@@ -55,11 +55,16 @@ export const sessionMachine = createMachine(
         entry: () => debugSession('Checking session...'),
         invoke: {
           src: 'fetchSession',
-          onDone: {
-            target: 'authenticated',
-            actions: 'setSessionFromInvoke',
-            guard: 'hasValidSession',
-          },
+          onDone: [
+            {
+              target: 'authenticated',
+              actions: 'setSessionFromInvoke',
+              guard: 'hasValidSession',
+            },
+            // /me answers 200 with no address when signed out; without this
+            // fallback the machine would sit in checkingSession indefinitely.
+            { target: 'unauthenticated' },
+          ],
           onError: {
             target: 'unauthenticated',
             actions: 'setError',
@@ -70,6 +75,11 @@ export const sessionMachine = createMachine(
             target: 'authenticated',
             actions: ['cancelFetch', 'setSession'],
           },
+          // Logout is accepted from every state (not only `authenticated`) so
+          // the logout gate set by beginSiweLogout() is always cleared by
+          // loggingOut, and any server session the client doesn't know about
+          // yet is destroyed too.
+          LOGOUT: 'loggingOut',
         },
       },
       authenticated: {
@@ -88,6 +98,7 @@ export const sessionMachine = createMachine(
             actions: 'setSession',
           },
           CHECK_SESSION: 'checkingSession',
+          LOGOUT: 'loggingOut',
         },
       },
       loggingOut: {
