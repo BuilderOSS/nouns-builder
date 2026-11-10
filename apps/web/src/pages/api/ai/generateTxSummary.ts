@@ -1,269 +1,41 @@
 import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
-import type {
-  CHAIN_ID,
-  DaoContractAddresses,
-  DecodedArgs,
-  ProposalDescriptionMetadataV1,
-  ProposalTransactionBundleContext,
-  SerializedNftMetadata,
-  TokenMetadata,
-} from '@buildeross/types'
-import type { DecodedEscrowData } from '@buildeross/utils/escrow'
-import { formatBpsValue, formatTokenValue } from '@buildeross/utils/formatArgs'
-import { walletSnippet } from '@buildeross/utils/helpers'
 import * as Sentry from '@sentry/nextjs'
 import { NextApiRequest, NextApiResponse } from 'next'
-import { AI_MODEL, generateCachedAiText } from 'src/utils/api/ai/summaries'
+import { generateCachedAiText, isAiConfigured } from 'src/utils/api/ai/summaries'
+import {
+  buildTxSummaryPrompt,
+  tryTemplateSummary,
+  TX_SUMMARY_PROMPT_VERSION,
+  TX_SUMMARY_SYSTEM_PROMPT,
+  type TxSummaryRequest,
+} from 'src/utils/api/ai/txSummaryPrompt'
 import { type AuthContext, withAuth } from 'src/utils/api/authMiddleware'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 import { withSameOrigin } from 'src/utils/api/sameOrigin'
 
-type RequestBody = {
-  chainId: CHAIN_ID
-  addresses: DaoContractAddresses
-  transaction: { functionName: string; args: DecodedArgs }
-  target: string
-  tokenMetadata?: TokenMetadata
-  nftMetadata?: SerializedNftMetadata
-  escrowData?: DecodedEscrowData
-  proposalMetadata?: ProposalDescriptionMetadataV1
-  bundleContext?: ProposalTransactionBundleContext
-}
+const validateRequest = (data: Partial<TxSummaryRequest> | undefined) => {
+  if (!data?.chainId || !data.addresses) return 'chainId and addresses are required'
 
-/**
- * Recursively traverses transaction arguments and formats
- * token-related fields or BPS percentage fields.
- */
-export const formatAmounts = ({
-  transaction,
-  tokenMetadata,
-  nftMetadata,
-}: RequestBody): string => {
-  const isNFT = !!nftMetadata
-  const keywords = isNFT ? ['price'] : ['amount', 'value', 'price']
-  const formattedEntries: string[] = []
+  if (!PUBLIC_DEFAULT_CHAINS.some((c) => c.id === data.chainId))
+    return 'chainId not found'
 
-  const traverse = (obj: any, path: string[] = []) => {
-    if (!obj || typeof obj !== 'object') return
+  if (Object.values(data.addresses).filter(Boolean).length < 5)
+    return 'addresses not found'
 
-    for (const [key, val] of Object.entries(obj)) {
-      const currentPath = [...path, key]
-      const lowerKey = key.toLowerCase()
+  if (!data.transaction || !data.target) return 'transaction and target are required'
 
-      const matchesTokenKey = keywords.some((k) => lowerKey.includes(k))
-      const matchesBpsKey = key.endsWith('BPS') && key !== 'BPS'
+  if (
+    typeof data.transaction.functionName !== 'string' ||
+    !data.transaction.functionName ||
+    !data.transaction.args ||
+    typeof data.transaction.args !== 'object'
+  )
+    return 'transaction must have functionName and args'
 
-      if (val !== undefined && val !== null) {
-        try {
-          if (matchesBpsKey) {
-            const formatted = formatBpsValue(val)
-            formattedEntries.push(`${currentPath.join('.')}: ${formatted}`)
-          } else if (matchesTokenKey) {
-            const formatted = formatTokenValue(val, tokenMetadata)
-            const finalFormatted = Array.isArray(formatted)
-              ? formatted.join(', ')
-              : formatted
-            formattedEntries.push(`${currentPath.join('.')}: ${finalFormatted}`)
-          }
-        } catch {
-          formattedEntries.push(`${currentPath.join('.')}: ${val} (raw)`)
-        }
-      }
+  if (data.value !== undefined && !/^\d+$/.test(String(data.value)))
+    return 'value must be an integer string'
 
-      if (typeof val === 'object') {
-        traverse(val, currentPath)
-      }
-    }
-  }
-
-  traverse(transaction.args)
-
-  return formattedEntries.length > 0
-    ? `\n(For internal reference only — do not copy these values verbatim)\n${formattedEntries
-        .map((entry) => `- ${entry}`)
-        .join('\n')}\n`
-    : ''
-}
-
-const formatArgs = (args: DecodedArgs) => {
-  const MAX_ARGS_CHARS = 4000
-  try {
-    const json = JSON.stringify(
-      args,
-      (_k, v) => (typeof v === 'bigint' ? v.toString() : v),
-      2
-    )
-    return json.length > MAX_ARGS_CHARS
-      ? json.slice(0, MAX_ARGS_CHARS) + '\n… [truncated]'
-      : json
-  } catch {
-    return '[omitted: failed to serialize args]'
-  }
-}
-
-const formatBundleMetadata = (proposalMetadata?: ProposalDescriptionMetadataV1) => {
-  const bundles = proposalMetadata?.transactionBundles
-  if (!bundles?.length) return ''
-
-  try {
-    const json = JSON.stringify(bundles, null, 2)
-    const MAX_CHARS = 3000
-    const bounded =
-      json.length > MAX_CHARS ? `${json.slice(0, MAX_CHARS)}\n... [truncated]` : json
-    return `Proposal Bundle Metadata JSON (context only):\n${bounded}\n`
-  } catch {
-    return ''
-  }
-}
-
-const generatePrompt = (data: RequestBody): string => {
-  const {
-    chainId,
-    addresses,
-    transaction,
-    target,
-    tokenMetadata,
-    nftMetadata,
-    escrowData,
-    proposalMetadata,
-    bundleContext,
-  } = data
-
-  const chain = PUBLIC_DEFAULT_CHAINS.find((c) => c.id === chainId)!
-
-  const safeFunctionName = transaction.functionName.replace(/[^a-zA-Z0-9]/g, '')
-  const contractType =
-    target === addresses.token
-      ? '- DAO token contract'
-      : target === addresses.governor
-        ? '- DAO governor contract'
-        : target === addresses.treasury
-          ? '- DAO treasury contract'
-          : target === addresses.metadata
-            ? '- DAO metadata contract'
-            : target === addresses.auction
-              ? '- DAO auction contract'
-              : ''
-
-  return `You are an expert blockchain analyst who explains smart contract transactions in clear, plain English for a general audience.
-Write 1-2 short, plain-English sentence describing what this transaction does.
-
----
-
-Writing Rules:
-- Start with a capitalized verb in present tense (e.g., Transfers, Approves, Mints, Deposits).
-- Write 1-2 sentences and end it with a period.
-- Use correct singular/plural forms (e.g., "1 NFT" vs "2 NFTs").
-- Use natural amount formatting (omit extra zeros).
-- Be clear, simple, and factual — avoid technical jargon, markdown, or speculation.
-- If token symbol or amount is missing, use general words like "tokens" or "assets".
-- Only use relevant argument data to describe the transaction’s action.
-- If bundle context is provided, use it only to clarify intent and avoid redundant phrasing.
-
----
-
-DAO Contracts and Roles:
-Token (${walletSnippet(addresses.token)}) — Governance NFTs  
-Governor (${walletSnippet(addresses.governor)}) — Proposal management and transaction scheduling
-Treasury (${walletSnippet(addresses.treasury)}) — Treasury and transaction execution
-Metadata (${walletSnippet(addresses.metadata)}) — Artwork generation and rendering
-Auction (${walletSnippet(addresses.auction)}) — Auction operations
-
----
-
-Output Examples (for style and brevity; not related to this transaction):
-
-Example 1 — Minting Governance NFTs  
-mintBatchTo (DAO token contract); amount = 2; recipient = 0x2feb...AEd6a  
-Mints 2 governance NFTs to the address 0x2feb...AEd6a.
-
-Example 1a — Singular NFT Mint  
-mintTo (DAO token contract); amount = 1; recipient = 0x1111...1111  
-Mints 1 governance NFT to the address 0x1111...1111.
-
-Example 2 — Treasury Token Transfer  
-transfer (DAO treasury contract); to = 0xE5f6...8bEb; value = 780 USDC  
-Transfers 780 USDC from the DAO's treasury to the address 0xE5f6...8bEb.
-
-Example 3 — Approving Token Spend  
-approve (USDC token contract); spender = 0xA0b8...0ce3; value = 1,000 DAI  
-Approves address 0xA0b8...0ce3 to spend up to 1,000 DAI tokens.
-
-Example 4 — Unclear Function  
-executeProposal (governor contract); proposalId = 42  
-Calls the executeProposal function on the governor contract.
-
----
-
-Transaction Overview:
-Function: ${transaction.functionName} | Network: ${chain.name} (ID: ${chain.id})  
-Target: ${target} ${contractType}
-
-${
-  bundleContext
-    ? `Bundle Context:
-- Bundle type: ${bundleContext.bundleTypeTitle || bundleContext.bundleType}
-- Bundle intent: ${bundleContext.bundleIntent || 'N/A'}
-- Call position: ${bundleContext.positionInBundle} of ${bundleContext.bundleCallCount}
-`
-    : ''
-}
-
-Below are the transaction arguments — use only the relevant information to describe the action:
-${formatArgs(transaction.args)}
-
-${formatAmounts(data)}
-
-${
-  proposalMetadata?.transactionBundles?.length
-    ? `Proposal Metadata (for context only):
-- Includes ${proposalMetadata.transactionBundles.length} transaction bundle(s)
-`
-    : ''
-}
-
-${formatBundleMetadata(proposalMetadata)}
-
-${
-  tokenMetadata
-    ? `Token Information:
-- Symbol: ${tokenMetadata.symbol}
-- Name: ${tokenMetadata.name}
-- Decimals: ${tokenMetadata.decimals}
-`
-    : ''
-}${
-    nftMetadata
-      ? `NFT Information:
-- Name: ${nftMetadata.name || 'Unknown'}
-- Type: ${nftMetadata.tokenType}
-`
-      : ''
-  }${
-    escrowData
-      ? `Escrow Information:
-- Client: ${escrowData.clientAddress || 'N/A'}
-- Provider: ${escrowData.providerAddress || 'N/A'}
-- Token: ${escrowData.tokenAddress || 'N/A'}
-- Termination Time: ${
-          escrowData.terminationTime
-            ? new Date(Number(escrowData.terminationTime) * 1000).toLocaleString()
-            : 'N/A'
-        }
-`
-      : ''
-  }
-
----
-
-Fallback Rule (only if purpose cannot be determined):
-If you cannot confidently infer the action from the name, arguments, or DAO context:
-Calls the ${safeFunctionName} function on the target contract.
-
----
-
-Final Instruction:
-Respond with 1-2 concise sentences describing this transaction, and nothing else.`
+  return undefined
 }
 
 async function handler(
@@ -277,39 +49,33 @@ async function handler(
   }
 
   try {
-    const requestData: RequestBody = req.body
+    const requestData = req.body as TxSummaryRequest
+    const validationError = validateRequest(requestData)
 
-    if (!requestData.chainId || !requestData.addresses) {
-      return res.status(400).json({ error: 'chainId and addresses are required' })
-    }
-
-    if (!PUBLIC_DEFAULT_CHAINS.some((c) => c.id === requestData.chainId))
-      return res.status(400).json({ error: 'chainId not found' })
-
-    if (!requestData.addresses || Object.values(requestData.addresses).length < 5)
-      return res.status(400).json({ error: 'addresses not found' })
-
-    if (!requestData.transaction || !requestData.target) {
-      return res.status(400).json({ error: 'transaction and target are required' })
-    }
-
-    if (!requestData.transaction.functionName || !requestData.transaction.args) {
-      return res
-        .status(400)
-        .json({ error: 'transaction must have functionName and args' })
+    if (validationError) {
+      return res.status(400).json({ error: validationError })
     }
 
     res.setHeader('Cache-Control', 'private, no-store')
 
-    // Generate prompt on backend
-    const prompt = generatePrompt(requestData)
-    const model = AI_MODEL
+    const templateSummary = tryTemplateSummary(requestData)
+    if (templateSummary) {
+      return res.status(200).json({ text: templateSummary })
+    }
+
+    if (!isAiConfigured()) {
+      return res.status(503).json({ error: 'ai_unavailable' })
+    }
+
+    // The prompt is a pure function of the request, so it doubles as the cache key
+    // payload; unrelated request fields (e.g. full proposal metadata) don't bust the cache.
+    const prompt = buildTxSummaryPrompt(requestData)
 
     const text = await generateCachedAiText({
-      namespace: 'ai:txSummary',
-      data: requestData,
+      namespace: `ai:txSummary:${TX_SUMMARY_PROMPT_VERSION}`,
+      data: prompt,
+      system: TX_SUMMARY_SYSTEM_PROMPT,
       prompt,
-      model,
     })
 
     res.status(200).json({ text })

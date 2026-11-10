@@ -1,7 +1,7 @@
-import { PUBLIC_ALL_CHAINS, RPC_URLS } from '@buildeross/constants'
+import { PUBLIC_ALL_CHAINS } from '@buildeross/constants'
 import { AddressType, BytesType, CHAIN_ID, ProposalState } from '@buildeross/types'
-import { serverConfig } from '@buildeross/utils'
-import { createPublicClient, fallback, http } from 'viem'
+import { getRpcTransports, serverConfig } from '@buildeross/utils'
+import { createPublicClient, fallback } from 'viem'
 import { readContract } from 'wagmi/actions'
 
 import { governorAbi } from '../abis'
@@ -18,14 +18,9 @@ export const getProposalState = async (
 
   if (signal) {
     const chain = PUBLIC_ALL_CHAINS.find((candidate) => candidate.id === chainId)
-    const rpcUrls = RPC_URLS[chainId] ?? []
     const client = createPublicClient({
       chain,
-      transport: fallback(
-        rpcUrls
-          .map((rpcUrl) => http(rpcUrl, { fetchOptions: { signal } }))
-          .concat(http(undefined, { fetchOptions: { signal } }))
-      ),
+      transport: fallback(getRpcTransports(chainId, { fetchOptions: { signal } })),
     })
 
     return (await client.readContract({

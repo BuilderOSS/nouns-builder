@@ -109,7 +109,8 @@ export const ReplaceArtwork: React.FC = () => {
     if (!transactions || !isValid) return
 
     const formattedTransactions = transactions.map((transaction, i) => {
-      const functionSignature = i > 1 ? 'addProperties' : 'deleteAndRecreateProperties'
+      // Only the first call resets artwork; later calls (>500 items or per file type) append
+      const functionSignature = i === 0 ? 'deleteAndRecreateProperties' : 'addProperties'
 
       return {
         functionSignature,

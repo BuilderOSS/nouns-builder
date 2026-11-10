@@ -1,6 +1,7 @@
 import { useAuthStore } from '@buildeross/stores'
 import { Box, Flex } from '@buildeross/zord'
 import React from 'react'
+import { GlobalSearch } from 'src/modules/search/GlobalSearch'
 
 import { ConnectButton } from '../ConnectButton'
 import { ChainMenu } from './ChainMenu'
@@ -31,7 +32,8 @@ export const NavMenu = ({ hideChainMenu = false }: NavMenuProps) => {
   )
 
   return (
-    <Flex align={'center'} direction={'row'} gap={'x4'}>
+    <Flex align={'center'} direction={'row'} gap={{ '@initial': 'x2', '@1024': 'x4' }}>
+      <GlobalSearch />
       <ThemeToggle />
       {!hideChainMenu && (
         <ChainMenu
@@ -46,7 +48,7 @@ export const NavMenu = ({ hideChainMenu = false }: NavMenuProps) => {
         onSetActiveDropdown={setActiveDropdown}
       />
       {!address && (
-        <Box style={{ width: 110 }} display={{ '@initial': 'none', '@768': 'block' }}>
+        <Box style={{ width: 110 }} display={{ '@initial': 'none', '@1024': 'block' }}>
           <ConnectButton />
         </Box>
       )}

@@ -81,6 +81,60 @@ type _Schema_
       }
     ]
   )
+  @fulltext(
+    name: "proposalSearch"
+    language: en
+    algorithm: rank
+    include: [
+      {
+        entity: "Proposal"
+        fields: [
+          { name: "title" }
+          { name: "description" }
+        ]
+      }
+    ]
+  )
+  @fulltext(
+    name: "candidateSearch"
+    language: en
+    algorithm: rank
+    include: [
+      {
+        entity: "ProposalCandidateVersion"
+        fields: [
+          { name: "title" }
+          { name: "description" }
+        ]
+      }
+    ]
+  )
+  @fulltext(
+    name: "voteSearch"
+    language: en
+    algorithm: rank
+    include: [
+      {
+        entity: "ProposalVote"
+        fields: [
+          { name: "reason" }
+        ]
+      }
+    ]
+  )
+  @fulltext(
+    name: "bidSearch"
+    language: en
+    algorithm: rank
+    include: [
+      {
+        entity: "AuctionBid"
+        fields: [
+          { name: "comment" }
+        ]
+      }
+    ]
+  )
 
 type DAOTokenOwner @entity {
   id: ID!
@@ -365,6 +419,7 @@ type ProposalVote @entity {
   weight: Int!
   reason: String
   proposal: Proposal!
+  dao: DAO!
 }
 
 type AuctionConfig @entity {
@@ -402,6 +457,7 @@ type AuctionBid @entity {
   bidder: Bytes!
   comment: String
   auction: Auction!
+  dao: DAO!
   bidTime: BigInt!
 }
 

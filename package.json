@@ -10,6 +10,7 @@
     "eslint": "8.57.1",
     "husky": "^8.0.3",
     "ioredis": "^5.8.1",
+    "lint-staged": "^16.4.0",
     "prettier": "3.5.3",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
@@ -58,5 +59,12 @@
   },
   "dependencies": {
     "@wagmi/core": "^2.22.1"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": "prettier --write"
   }
 }

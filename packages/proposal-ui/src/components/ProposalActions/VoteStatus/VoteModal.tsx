@@ -44,6 +44,12 @@ interface FormValues {
   reason: string
 }
 
+/** The vote the connected account just cast, for optimistic display */
+export interface SubmittedVote {
+  support: 0 | 1 | 2
+  reason: string
+}
+
 export interface VoteModalProps {
   title: string
   proposalId: BytesType
@@ -52,7 +58,7 @@ export interface VoteModalProps {
   setShowVoteModal: (show: boolean) => void
   addresses?: RequiredDaoContractAddresses
   chainId?: CHAIN_ID
-  onSuccess?: () => void
+  onSuccess?: (vote: SubmittedVote) => void
 }
 
 export const VoteModal: React.FC<VoteModalProps> = ({
@@ -89,9 +95,9 @@ export const VoteModal: React.FC<VoteModalProps> = ({
     }
   }
 
-  const handleSuccess = () => {
+  const handleSuccess = (vote: SubmittedVote) => {
     setIsSuccess(true)
-    onSuccess?.()
+    onSuccess?.(vote)
     if (successTimerRef.current) {
       clearTimeout(successTimerRef.current)
     }
@@ -132,7 +138,7 @@ export const SubmitVoteForm: React.FC<{
   proposalId: BytesType
   votesAvailable: number
   handleModalClose: () => void
-  onSuccess: () => void
+  onSuccess: (vote: SubmittedVote) => void
   title: string
   addresses?: RequiredDaoContractAddresses
   chainId?: CHAIN_ID
@@ -193,7 +199,10 @@ export const SubmitVoteForm: React.FC<{
           getProposal(chainId, proposalId)
         )
 
-        onSuccess()
+        onSuccess({
+          support: Number(values.choice) as SubmittedVote['support'],
+          reason: values.reason,
+        })
       } catch (err) {
         console.error('Error casting vote:', err)
         throw err

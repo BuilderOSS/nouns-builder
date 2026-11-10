@@ -1,7 +1,4 @@
-// NOTE/TODO: Currently this service only supports Tenderly for transaction simulation.
-// Ideally we should support multiple simulation providers (e.g., Foundry fork tests,
-// Ganache, Hardhat Network, etc.) and allow developers to choose between them.
-// Additionally, the API endpoint is hardcoded to /api/simulate, which means developers
+// NOTE: The API endpoint is hardcoded to /api/simulate, which means developers
 // must implement the same endpoint structure in their applications for this service to work.
 
 import { AddressType, CHAIN_ID, ErrorResult, SimulationResult } from '@buildeross/types'

@@ -20,12 +20,6 @@ async function handler(
     if (error instanceof InvalidRequestError) {
       return res.status(400).json({ error: error.message })
     }
-    if ((error as Error).message.includes('insufficient funds for')) {
-      return res.status(400).json({
-        error:
-          'Insufficient treasury funds to carry out some or all of these transactions',
-      })
-    }
     return res
       .status(500)
       .json({ error: 'Unexpected Error: Unable to simulate these transactions' })

@@ -1,11 +1,10 @@
+import { useContractVersion } from '@buildeross/hooks/useContractVersion'
 import { useTimeout } from '@buildeross/hooks/useTimeout'
-import { auctionAbi } from '@buildeross/sdk/contract'
 import { AuctionBidFragment } from '@buildeross/sdk/subgraph'
 import { AddressType, CHAIN_ID } from '@buildeross/types'
 import dayjs from 'dayjs'
 import { Fragment, useState } from 'react'
 import { formatEther, isAddress } from 'viem'
-import { useReadContract } from 'wagmi'
 
 import { AuctionDetails } from '../AuctionDetails'
 import { BidAmount } from '../BidAmount'
@@ -46,10 +45,9 @@ export const CurrentAuction = ({
   const [isEnded, setIsEnded] = useState(false)
   const [isEnding, setIsEnding] = useState(false)
 
-  const { data: auctionVersion } = useReadContract({
-    abi: auctionAbi,
-    address: auctionAddress,
-    functionName: 'contractVersion',
+  const { version: auctionVersion } = useContractVersion({
+    chainId,
+    contractAddress: auctionAddress,
   })
 
   const isEndingTimeout = isEnded ? 4000 : null

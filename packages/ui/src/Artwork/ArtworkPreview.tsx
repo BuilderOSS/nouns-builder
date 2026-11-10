@@ -1,13 +1,14 @@
-import { ImageProps, OrderedTraits } from '@buildeross/types'
+import { GeneratedArtworkImage, ImageProps, OrderedTraits } from '@buildeross/types'
 import { Flex, Icon } from '@buildeross/zord'
 
 import { AnimatedModal } from '../Modal'
 import { Playground } from '../Playground'
 import { artworkPreviewGenerateButton, artworkPreviewImageWrapper } from './Artwork.css'
+import { LayeredArtwork } from './LayeredArtwork'
 
 export interface ArtworkPreviewProps {
   canvas: React.RefObject<HTMLCanvasElement | null>
-  generatedImages: any[]
+  generatedImages: GeneratedArtworkImage[]
   generateStackedImage: () => Promise<void>
   images: ImageProps[] | undefined
   orderedLayers: OrderedTraits
@@ -23,8 +24,16 @@ export const ArtworkPreview: React.FC<ArtworkPreviewProps> = ({
   return (
     <Flex align={'center'} justify={'center'} direction={'column'}>
       <Flex className={artworkPreviewImageWrapper} mb={'x8'}>
-        {generatedImages[0] && (
-          <img height={'100%'} width={'100%'} src={generatedImages[0]} alt="preview" />
+        {generatedImages[0]?.type === 'single' && (
+          <img
+            height={'100%'}
+            width={'100%'}
+            src={generatedImages[0].src}
+            alt="preview"
+          />
+        )}
+        {generatedImages[0]?.type === 'layered' && (
+          <LayeredArtwork layers={generatedImages[0].layers} alt="preview" />
         )}
         <canvas ref={canvas} style={{ display: 'none' }} />
       </Flex>

@@ -4,6 +4,7 @@ import {
   getProvider,
   getSavedSafeInfo,
   isOwnerOfSafe,
+  isSafeServiceError,
   type SafeInfo,
   SafeOwnerProvider,
   setSafeInfo,
@@ -19,6 +20,10 @@ import {
 } from 'wagmi'
 
 const debugSafeConnector = debug('app:safe:connector')
+
+function isSameAddress(a: string, b: string): boolean {
+  return a.toLowerCase() === b.toLowerCase()
+}
 
 createSafeOwnerConnector.type = 'safeOwner' as const
 
@@ -98,14 +103,98 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
     }
 
     /**
+     * Listeners on the owner wallet's provider. The connector has to watch the
+     * owner wallet itself: wagmi only wires a connector's handlers to its own
+     * provider, so without this an owner account switch or wallet disconnect
+     * left the Safe looking connected.
+     */
+    let ownerListeners: {
+      provider: EIP1193Provider
+      accountsChanged: (...args: unknown[]) => void
+      disconnect: (...args: unknown[]) => void
+    } | null = null
+
+    function detachOwnerListeners() {
+      if (!ownerListeners) return
+      const { provider, accountsChanged, disconnect } = ownerListeners
+      try {
+        provider.removeListener('accountsChanged', accountsChanged)
+        provider.removeListener('disconnect', disconnect)
+      } catch (error) {
+        debugSafeConnector('Failed to remove owner provider listeners:', error)
+      }
+      ownerListeners = null
+    }
+
+    function attachOwnerListeners(provider: EIP1193Provider) {
+      detachOwnerListeners()
+
+      const accountsChanged = (accounts: unknown) => {
+        const owner = loadSafeConfig()?.ownerAddress ?? ownerAddress_
+        if (!owner) return
+        const list = Array.isArray(accounts) ? (accounts as string[]) : []
+        // Only drop the Safe when the owner account is no longer available.
+        // Signing and the SIWE session are both tied to that owner address.
+        if (!list.some((account) => isSameAddress(account, owner))) {
+          debugSafeConnector('Owner account no longer available, disconnecting Safe')
+          handleDisconnect()
+        }
+      }
+      const disconnect = () => {
+        debugSafeConnector('Owner wallet disconnected, disconnecting Safe')
+        handleDisconnect()
+      }
+
+      try {
+        provider.on('accountsChanged', accountsChanged)
+        provider.on('disconnect', disconnect)
+        ownerListeners = { provider, accountsChanged, disconnect }
+      } catch (error) {
+        debugSafeConnector('Failed to listen to owner provider events:', error)
+      }
+    }
+
+    /**
+     * Drop the SafeOwnerProvider (and its owner listeners) but keep the owner
+     * connector, so the next getProvider() rebuilds it with fresh Safe info.
+     */
+    function resetProvider() {
+      detachOwnerListeners()
+      if (provider_) provider_.destroy()
+      provider_ = undefined
+      safeInfo_ = null
+    }
+
+    /**
      * Clear cached state
      */
     function clearCache() {
+      detachOwnerListeners()
       provider_ = undefined
       safeInfo_ = null
       publicClient_ = null
       ownerConnector_ = null
       ownerAddress_ = null
+    }
+
+    function handleDisconnect() {
+      if (provider_) {
+        provider_.destroy()
+      }
+
+      // Invalidate cached provider for this connector
+      const saved = loadSafeConfig()
+      if (saved) {
+        debugSafeConnector(
+          'onDisconnect: Clearing cached provider for: %s',
+          saved.ownerConnectorId
+        )
+        clearCachedProvider(saved.ownerConnectorId)
+      }
+
+      clearCache()
+      clearSafeInfo()
+      config.emitter.emit('disconnect')
     }
 
     return {
@@ -221,11 +310,26 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
 
           // Verify the wallet is still a Safe owner.
           debugSafeConnector('isAuthorized: Verifying Safe ownership...')
-          const isOwner = await isOwnerOfSafe(
-            ownerAccounts[0],
-            saved.safeAddress,
-            saved.chainId
-          )
+          let isOwner: boolean
+          try {
+            isOwner = await isOwnerOfSafe(
+              ownerAccounts[0],
+              saved.safeAddress,
+              saved.chainId
+            )
+          } catch (error) {
+            if (!isSafeServiceError(error)) throw error
+            // The Safe service is down or rate-limiting. The owner was
+            // validated when this connection was saved and the owner wallet
+            // is still authorized with the same account, so keep the Safe
+            // connection rather than wiping it and letting the owner EOA
+            // reconnect as the active account under a Safe session.
+            debugSafeConnector(
+              'isAuthorized: Safe service unavailable, trusting saved owner:',
+              error
+            )
+            return true
+          }
 
           debugSafeConnector('isAuthorized: Safe ownership verified:', isOwner)
           if (!isOwner) {
@@ -335,6 +439,11 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
               'Please ensure your wallet is connected and try again.'
           )
         }
+
+        // Watch the owner wallet from the start when its provider is already
+        // cached by the Safe flow (otherwise this happens in getProvider()).
+        const cachedOwnerProvider = providerCache.get(saved.ownerConnectorId)
+        if (cachedOwnerProvider) attachOwnerListeners(cachedOwnerProvider)
 
         // Persist the resolved owner address so the signing UI can read it back later.
         debugSafeConnector('Calling setSafeInfo() with resolved owner address...', {
@@ -590,6 +699,7 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
           // Create SafeOwnerProvider
           debugSafeConnector('Creating new SafeOwnerProvider instance')
           provider_ = new SafeOwnerProvider(safeInfo_, ownerProvider, publicClient_)
+          attachOwnerListeners(ownerProvider)
           debugSafeConnector('SafeOwnerProvider created successfully')
         }
 
@@ -637,23 +747,7 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
       },
 
       onDisconnect() {
-        if (provider_) {
-          provider_.destroy()
-        }
-
-        // Invalidate cached provider for this connector
-        const saved = loadSafeConfig()
-        if (saved) {
-          debugSafeConnector(
-            'onDisconnect: Clearing cached provider for: %s',
-            saved.ownerConnectorId
-          )
-          clearCachedProvider(saved.ownerConnectorId)
-        }
-
-        clearCache()
-        clearSafeInfo()
-        config.emitter.emit('disconnect')
+        handleDisconnect()
       },
 
       // Custom property to expose Safe info
@@ -698,7 +792,14 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
         return ownerConnector_
       },
 
-      // Custom method to get the owner address for signing.
+      /**
+       * The owner address to sign with. Prefers the owner wallet's live
+       * account (so a switched account is picked up), but keeps the address in
+       * the SIWE message, the saved Safe config and the SafeOwnerProvider's
+       * signer in agreement: if the live account is another owner of this Safe
+       * it is adopted everywhere; if it isn't an owner, signing is refused
+       * rather than producing a signature that can never verify.
+       */
       async getOwnerAddress(): Promise<`0x${string}` | null> {
         const saved = loadSafeConfig()
         if (!saved) return null
@@ -706,21 +807,58 @@ export function createSafeOwnerConnector(): CreateConnectorFn {
         if (!ownerConnector_) {
           ownerConnector_ = findOwnerConnector(saved.ownerConnectorId)
         }
-        const ownerConnector = ownerConnector_
-        const ownerAddress = ownerConnector
-          ? (await ownerConnector.getAccounts())?.[0]
-          : null
-        if (ownerAddress) {
-          ownerAddress_ = ownerAddress
-          return ownerAddress
+
+        let liveAddress: `0x${string}` | null = null
+        if (ownerConnector_) {
+          try {
+            liveAddress = (await ownerConnector_.getAccounts())?.[0] ?? null
+          } catch (error) {
+            debugSafeConnector('getOwnerAddress: getAccounts() failed:', error)
+          }
         }
 
-        if (saved.ownerAddress) {
-          ownerAddress_ = saved.ownerAddress
-          return saved.ownerAddress
+        if (!liveAddress) {
+          if (saved.ownerAddress) {
+            ownerAddress_ = saved.ownerAddress
+            return saved.ownerAddress
+          }
+          return null
         }
 
-        return null
+        if (saved.ownerAddress && !isSameAddress(liveAddress, saved.ownerAddress)) {
+          if (!saved.owners.some((owner) => isSameAddress(owner, liveAddress))) {
+            throw new Error(
+              // Worded to avoid the dialog's generic "Cannot sign with Safe"
+              // mapping, so the user sees what actually went wrong.
+              `Your wallet switched to ${liveAddress}, which is not an owner of this Safe. ` +
+                'Switch back to an owner account, or disconnect and reconnect.'
+            )
+          }
+
+          debugSafeConnector(
+            'getOwnerAddress: owner wallet switched from %s to %s (also an owner), adopting it',
+            saved.ownerAddress,
+            liveAddress
+          )
+          setSafeInfo(
+            {
+              safeAddress: saved.safeAddress,
+              chainId: saved.chainId,
+              threshold: saved.threshold,
+              owners: saved.owners,
+              isReadOnly: false,
+              nonce: saved.nonce,
+              version: saved.version,
+            },
+            saved.ownerConnectorId,
+            liveAddress
+          )
+          // Rebuild the provider so it signs as the adopted owner.
+          resetProvider()
+        }
+
+        ownerAddress_ = liveAddress
+        return liveAddress
       },
     }
   })

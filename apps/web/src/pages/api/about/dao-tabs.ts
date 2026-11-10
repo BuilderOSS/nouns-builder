@@ -6,7 +6,7 @@ import { CHAIN_ID } from '@buildeross/types'
 import { chainIdToSlug } from '@buildeross/utils/chains'
 import { gql, GraphQLClient } from 'graphql-request'
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { summarizeDaoDescription } from 'src/utils/api/ai/summaries'
+import { isAiConfigured, summarizeDaoDescription } from 'src/utils/api/ai/summaries'
 import { withCors } from 'src/utils/api/cors'
 import { withRateLimit } from 'src/utils/api/rateLimit'
 import { parseEther } from 'viem'
@@ -220,9 +220,7 @@ const shortenDescription = (description?: string | null) => {
 
 const createDaoDescriptionResolver = () => {
   const summaries = new Map<string, Promise<string | null>>()
-  const aiConfigured = Boolean(
-    process.env.AI_GATEWAY_API_KEY || process.env.OPENAI_API_KEY
-  )
+  const aiConfigured = isAiConfigured()
 
   return (description?: string | null) => {
     const base = description?.trim()

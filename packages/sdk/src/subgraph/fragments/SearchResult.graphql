@@ -1,0 +1,111 @@
+fragment SearchDaoRef on DAO {
+  id
+  name
+  symbol
+  tokenAddress
+  contractImage
+}
+
+fragment SearchDao on DAO {
+  ...SearchDaoRef
+  description
+  projectURI
+  totalSupply
+  proposalCount
+  ownerCount
+  metadataAddress
+  treasuryAddress
+  governorAddress
+  auctionAddress
+}
+
+fragment SearchProposal on Proposal {
+  id
+  proposalId
+  proposalNumber
+  title
+  proposer
+  timeCreated
+  voteStart
+  voteEnd
+  expiresAt
+  executed
+  canceled
+  vetoed
+  queued
+  forVotes
+  againstVotes
+  abstainVotes
+  quorumVotes
+  voteCount
+  dao {
+    ...SearchDaoRef
+  }
+}
+
+fragment SearchCandidate on ProposalCandidateVersion {
+  id
+  title
+  createdAt
+  attester
+  versionNumber
+  group {
+    id
+    candidateNumber
+    proposer
+    dao {
+      ...SearchDaoRef
+    }
+  }
+  proposal {
+    proposalNumber
+  }
+}
+
+fragment SearchVote on ProposalVote {
+  id
+  transactionHash
+  timestamp
+  voter
+  support
+  weight
+  reason
+  dao {
+    ...SearchDaoRef
+  }
+  proposal {
+    proposalNumber
+    title
+  }
+}
+
+fragment SearchBid on AuctionBid {
+  id
+  transactionHash
+  amount
+  bidder
+  comment
+  bidTime
+  dao {
+    ...SearchDaoRef
+  }
+  auction {
+    token {
+      tokenId
+      name
+      image
+    }
+  }
+}
+
+fragment SearchProfile on Profile {
+  id
+  tokenCount
+  ownerDaoCount
+  voterDaoCount
+  proposalVotesCount
+  proposalsSubmittedCount
+  bidsPlacedCount
+  auctionWinsCount
+  lastActiveAt
+}

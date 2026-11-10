@@ -1,5 +1,35 @@
 # @buildeross/feed-ui
 
+## 0.4.0
+
+### Minor Changes
+
+- Bump all publishable packages from 0.3.2 to 0.4.0.
+
+### Patch Changes
+
+- Updated dependencies [fc1a9fc]
+- Updated dependencies [c54bba0]
+- Updated dependencies [fabd645]
+- Updated dependencies [2e875f5]
+- Updated dependencies [5ce3fdb]
+- Updated dependencies [5068fa1]
+- Updated dependencies
+- Updated dependencies [90c09a7]
+- Updated dependencies [4090236]
+- Updated dependencies [d41d9e9]
+  - @buildeross/ui@0.4.0
+  - @buildeross/hooks@0.4.0
+  - @buildeross/constants@0.4.0
+  - @buildeross/utils@0.4.0
+  - @buildeross/sdk@0.4.0
+  - @buildeross/types@0.4.0
+  - @buildeross/auction-ui@0.4.0
+  - @buildeross/proposal-ui@0.4.0
+  - @buildeross/ipfs-service@0.4.0
+  - @buildeross/stores@0.4.0
+  - @buildeross/zord@0.4.0
+
 ## 0.3.2
 
 ### Patch Changes

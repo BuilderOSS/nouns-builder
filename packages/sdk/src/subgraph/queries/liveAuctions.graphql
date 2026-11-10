@@ -1,0 +1,16 @@
+query liveAuctions($first: Int!, $skip: Int!) {
+  auctions(
+    where: { settled: false }
+    first: $first
+    skip: $skip
+    orderBy: endTime
+    orderDirection: desc
+  ) {
+    ...AuctionStatus
+  }
+  _meta {
+    block {
+      number
+    }
+  }
+}

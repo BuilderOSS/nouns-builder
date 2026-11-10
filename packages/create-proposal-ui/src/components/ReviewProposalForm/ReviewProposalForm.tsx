@@ -39,20 +39,12 @@ import { useConfig, useReadContracts } from 'wagmi'
 import { simulateContract } from 'wagmi/actions'
 
 import { prepareProposalTransactions } from '../../utils/prepareTransactions'
-import {
-  isSimulationSupported,
-  simulateTransactions,
-} from '../../utils/tenderlySimulation'
+import { isSimulationSupported, simulateTransactions } from '../../utils/simulation'
 import { MobileProposalActionBar } from '../MobileProposalActionBar'
 import { ProposalDraftForm } from '../ProposalDraftForm'
 import { UpdateDeadlinePassedModal } from '../UpdateDeadlinePassedModal'
 import { createValidationSchema, ERROR_CODE, FormValues } from './fields'
-import {
-  checkboxHelperText,
-  checkboxLabel,
-  checkboxStyleVariants,
-  visuallyHiddenCheckbox,
-} from './ReviewProposalForm.css'
+import { SimulationSummary } from './SimulationSummary'
 
 interface ReviewProposalProps {
   disabled: boolean
@@ -67,7 +59,7 @@ interface ReviewProposalProps {
   onResetMobile?: () => void
 }
 
-const SKIP_SIMULATION = process.env.NEXT_PUBLIC_DISABLE_TENDERLY_SIMULATION === 'true'
+const SKIP_SIMULATION = process.env.NEXT_PUBLIC_DISABLE_SIMULATION === 'true'
 
 const logError = async (e: unknown) => {
   console.error(e)
@@ -295,7 +287,7 @@ export const ReviewProposalForm = ({
 
           if (simulationResult?.error) {
             logError(simulationResult.error)
-            setSimulationError('Error simulating transactions: ' + simulationResult.error)
+            setSimulationError(simulationResult.error)
             return
           }
 
@@ -661,7 +653,6 @@ export const ReviewProposalForm = ({
               }
 
               const validationMessages = flattenErrorMessages(formik.errors)
-              const hasSimulationFailures = failedSimulations.length > 0
 
               const validateAndSubmit = async () => {
                 setHasAttemptedSubmit(true)
@@ -822,44 +813,17 @@ export const ReviewProposalForm = ({
                     </Flex>
                   </Stack>
 
-                  {(!!simulationError || hasSimulationFailures) && (
-                    <Stack mt={'x4'} gap={'x2'} pb={'x4'} w="100%" align="center">
-                      <Text color={'warning'} textAlign={'center'}>
-                        <Text as="span" fontWeight={'label'}>
-                          Warning:
-                        </Text>
-                        <Text as="span">
-                          {' Simulation indicates this proposal may fail to execute.'}
-                        </Text>
-                      </Text>
-                      <Flex align={'center'} justify={'center'} gap={'x2'}>
-                        <label className={checkboxLabel}>
-                          <input
-                            type="checkbox"
-                            checked={skipSimulation}
-                            onChange={(e) => setSkipSimulation(e.target.checked)}
-                            className={visuallyHiddenCheckbox}
-                            aria-describedby="skip-simulation-helper"
-                          />
-                          <Flex
-                            align={'center'}
-                            justify={'center'}
-                            className={
-                              checkboxStyleVariants[
-                                skipSimulation ? 'confirmed' : 'default'
-                              ]
-                            }
-                          >
-                            {skipSimulation && <Icon fill="background1" id="check" />}
-                          </Flex>
-                        </label>
-
-                        <Flex id="skip-simulation-helper" className={checkboxHelperText}>
-                          I understand the risks and want to submit anyway.
-                        </Flex>
-                      </Flex>
-                    </Stack>
-                  )}
+                  <SimulationSummary
+                    simulationError={simulationError}
+                    failedCount={
+                      failedSimulations.filter(({ notSimulated }) => !notSimulated).length
+                    }
+                    notSimulatedCount={
+                      failedSimulations.filter(({ notSimulated }) => notSimulated).length
+                    }
+                    skipSimulation={skipSimulation}
+                    onSkipSimulationChange={setSkipSimulation}
+                  />
 
                   {updateProposalId && (
                     <Box mb={'x6'}>

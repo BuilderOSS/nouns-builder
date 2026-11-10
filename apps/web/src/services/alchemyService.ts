@@ -1,17 +1,13 @@
-import { ALCHEMY_API_KEY, ALCHEMY_NETWORKS } from '@buildeross/constants/alchemy'
 import { PUBLIC_IS_TESTNET } from '@buildeross/constants/chains'
-import { AddressType, CHAIN_ID } from '@buildeross/types'
-import {
-  Alchemy,
-  Network,
-  NftTokenType,
-  OwnedNft,
-  type OwnedNftsResponse,
-  TokenBalanceType,
-} from 'alchemy-sdk'
+import { AddressType, CHAIN_ID, NftTokenType } from '@buildeross/types'
 import axios from 'axios'
 import { formatUnits, fromHex, getAddress, Hex, zeroHash } from 'viem'
 
+import {
+  type AlchemyNft,
+  getAlchemyClient,
+  isAlchemyInvalidParamsError,
+} from './alchemyApi'
 import { BackendFailedError } from './errors'
 import { getRedisConnection } from './redisConnection'
 
@@ -36,6 +32,9 @@ const getNftBalancesKey = (chainId: CHAIN_ID, address: string, filterSpam: boole
 
 const getNftMetadataKey = (chainId: CHAIN_ID, contractAddress: string, tokenId: string) =>
   `alchemy:nft-metadata:${chainTypeTag}:${chainId}:${contractAddress.toLowerCase()}:${tokenId}`
+
+// Cached in place of metadata for addresses Alchemy rejects as tokens
+const INVALID_TOKEN_MARKER = 'null'
 
 const getCoinGeckoLogoKey = (chainId: CHAIN_ID, address: string) =>
   `coingecko:logo:${chainTypeTag}:${chainId}:${address.toLowerCase()}`
@@ -71,7 +70,7 @@ export type SerializedNftMetadata = {
 }
 
 // Parse Alchemy NFT data into our serialized type
-const parseNftData = (nfts: OwnedNft[]): SerializedNft[] => {
+const parseNftData = (nfts: AlchemyNft[]): SerializedNft[] => {
   return nfts.map((nft) => ({
     tokenId: nft.tokenId || '',
     tokenType: nft.tokenType || NftTokenType.UNKNOWN,
@@ -174,18 +173,6 @@ export type EnrichedPinnedAsset = {
   isPinned: true
 }
 
-// Helper to create Alchemy instance
-const createAlchemyInstance = (chainId: CHAIN_ID): Alchemy | null => {
-  const network = ALCHEMY_NETWORKS[chainId]
-  if (!network || !ALCHEMY_API_KEY) {
-    return null
-  }
-  return new Alchemy({
-    apiKey: ALCHEMY_API_KEY,
-    network: network as Network,
-  })
-}
-
 export type TokenBalanceOptions = {
   useCache?: boolean
 }
@@ -195,7 +182,7 @@ export const getCachedTokenBalances = async (
   address: AddressType,
   options?: TokenBalanceOptions
 ): Promise<CachedResult<TokenBalance[]> | null> => {
-  const alchemy = createAlchemyInstance(chainId)
+  const alchemy = getAlchemyClient(chainId)
   if (!alchemy) {
     return null
   }
@@ -218,9 +205,7 @@ export const getCachedTokenBalances = async (
 
   try {
     // Fetch from Alchemy API
-    const tokenBalances = await alchemy.core.getTokenBalances(address, {
-      type: TokenBalanceType.ERC20,
-    })
+    const tokenBalances = await alchemy.getTokenBalances(address)
 
     const nonZeroBalances = tokenBalances.tokenBalances.filter(
       (balance) => !!balance.tokenBalance && balance.tokenBalance !== zeroHash
@@ -253,14 +238,14 @@ export type NFTBalanceOptions = {
 const NFT_PAGE_LIMIT = 3
 const NFT_TARGET_COUNT = 100
 
-const isNotSpam = (nft: OwnedNft): boolean => nft.contract?.isSpam !== true
+const isNotSpam = (nft: AlchemyNft): boolean => nft.contract?.isSpam !== true
 
 export const getCachedNFTBalance = async (
   chainId: CHAIN_ID,
   address: AddressType,
   options?: NFTBalanceOptions
 ): Promise<CachedResult<SerializedNft[]> | null> => {
-  const alchemy = createAlchemyInstance(chainId)
+  const alchemy = getAlchemyClient(chainId)
   if (!alchemy) {
     return null
   }
@@ -288,14 +273,12 @@ export const getCachedNFTBalance = async (
     // `isSpam` flag — the same classification — ships with the unfiltered
     // response on every plan, so filter here instead. Spam is dropped after the
     // fact, so walk a few pages to refill what gets removed.
-    const owned: OwnedNft[] = []
+    const owned: AlchemyNft[] = []
     let pageKey: string | undefined = undefined
     for (let page = 0; page < NFT_PAGE_LIMIT; page++) {
-      const res: OwnedNftsResponse = await alchemy.nft.getNftsForOwner(address, {
-        pageKey,
-      })
+      const res = await alchemy.getNftsForOwner(address, { pageKey })
       owned.push(...res.ownedNfts)
-      pageKey = res.pageKey
+      pageKey = res.pageKey ?? undefined
       if (!pageKey) break
       if (owned.filter(isNotSpam).length >= NFT_TARGET_COUNT) break
     }
@@ -394,7 +377,7 @@ export const getCachedTokenMetadatas = async (
   chainId: CHAIN_ID,
   addresses: AddressType[]
 ): Promise<CachedResult<TokenMetadata[]> | null> => {
-  const alchemy = createAlchemyInstance(chainId)
+  const alchemy = getAlchemyClient(chainId)
   if (!alchemy) {
     return null
   }
@@ -410,7 +393,8 @@ export const getCachedTokenMetadatas = async (
     const cached = await redis?.get(cacheKey)
 
     if (cached) {
-      results.push(JSON.parse(cached))
+      // Known non-token addresses are cached as a marker and omitted
+      if (cached !== INVALID_TOKEN_MARKER) results.push(JSON.parse(cached))
       hasCache = true
     } else {
       uncachedAddresses.push(address)
@@ -419,15 +403,36 @@ export const getCachedTokenMetadatas = async (
 
   // Fetch uncached metadata from API
   if (uncachedAddresses.length > 0) {
+    let failed = false
+
     try {
-      const metadatas = await Promise.all(
-        uncachedAddresses.map((address) => alchemy.core.getTokenMetadata(address))
+      const settled = await Promise.allSettled(
+        uncachedAddresses.map((address) => alchemy.getTokenMetadata(address))
       )
 
       // Process and cache each metadata
-      for (let i = 0; i < metadatas.length; i++) {
-        const metadata = metadatas[i]
+      for (let i = 0; i < settled.length; i++) {
+        const outcome = settled[i]
         const address = uncachedAddresses[i]
+        const cacheKey = getTokenMetadataKey(chainId, address)
+
+        if (outcome.status === 'rejected') {
+          if (isAlchemyInvalidParamsError(outcome.reason)) {
+            // Not an ERC-20 (e.g. Permit2): omit it rather than failing the
+            // whole batch, and remember so we don't ask Alchemy again
+            await redis?.setex(cacheKey, 86400, INVALID_TOKEN_MARKER)
+          } else {
+            failed = true
+            console.error('getCachedTokenMetadatas error:', {
+              chainId,
+              address,
+              error: outcome.reason,
+            })
+          }
+          continue
+        }
+
+        const metadata = outcome.value
 
         let logoUrl = metadata.logo
         if (!logoUrl) {
@@ -446,7 +451,6 @@ export const getCachedTokenMetadatas = async (
         }
 
         // Cache individual metadata (24 hours TTL)
-        const cacheKey = getTokenMetadataKey(chainId, address)
         await redis?.setex(cacheKey, 86400, JSON.stringify(tokenMetadata))
 
         results.push(tokenMetadata)
@@ -455,6 +459,10 @@ export const getCachedTokenMetadatas = async (
       console.error('getCachedTokenMetadatas error:', error)
       throw new BackendFailedError('Failed to fetch token metadata')
     }
+
+    // Transient failures still fail the request, so the partial result isn't
+    // cached by the CDN; successful lookups are already in Redis for the retry
+    if (failed) throw new BackendFailedError('Failed to fetch token metadata')
   }
 
   return {
@@ -467,7 +475,7 @@ export const getCachedTokenPrices = async (
   chainId: CHAIN_ID,
   addresses: AddressType[]
 ): Promise<CachedResult<TokenPrice[]> | null> => {
-  const alchemy = createAlchemyInstance(chainId)
+  const alchemy = getAlchemyClient(chainId)
   if (!alchemy) {
     return null
   }
@@ -503,15 +511,7 @@ export const getCachedTokenPrices = async (
 
       // Process each batch
       for (const batch of batches) {
-        // Create TokenAddressRequest objects for the batch
-        const tokenAddressRequests = batch.map((address) => ({
-          network: ALCHEMY_NETWORKS[chainId] as Network,
-          address: address,
-        }))
-
-        // Call the API with the array of requests
-        const priceResponse =
-          await alchemy.prices.getTokenPriceByAddress(tokenAddressRequests)
+        const priceResponse = await alchemy.getTokenPricesByAddress(batch)
 
         // Process and cache each price
         for (let i = 0; i < priceResponse.data.length; i++) {
@@ -634,7 +634,7 @@ export const getCachedNftMetadata = async (
   contractAddress: AddressType,
   tokenId: string
 ): Promise<CachedResult<SerializedNftMetadata> | null> => {
-  const alchemy = createAlchemyInstance(chainId)
+  const alchemy = getAlchemyClient(chainId)
   if (!alchemy) {
     return null
   }
@@ -653,7 +653,7 @@ export const getCachedNftMetadata = async (
     }
 
     // Fetch from Alchemy API
-    const metadata = await alchemy.nft.getNftMetadata(contractAddress, tokenId)
+    const metadata = await alchemy.getNftMetadata(contractAddress, tokenId)
 
     // Process image URL - handle Zora API replacement
     let imageUrl = metadata.image?.originalUrl || metadata.image?.cachedUrl || null
@@ -696,9 +696,9 @@ export const getEnrichedPinnedAssets = async (
 ): Promise<EnrichedPinnedAsset[]> => {
   if (pinnedAssets.length === 0) return []
 
-  const alchemy = createAlchemyInstance(chainId)
+  const alchemy = getAlchemyClient(chainId)
   if (!alchemy) {
-    throw new BackendFailedError('Failed to create Alchemy instance')
+    throw new BackendFailedError('Alchemy is not configured')
   }
 
   // Separate by token type
@@ -713,7 +713,7 @@ export const getEnrichedPinnedAssets = async (
       const erc20Addresses = erc20Assets.map((a) => a.token)
 
       // Step 1: Get balances for specific tokens using contractAddresses parameter
-      const tokenBalancesResponse = await alchemy.core.getTokenBalances(
+      const tokenBalancesResponse = await alchemy.getTokenBalances(
         treasuryAddress,
         erc20Addresses
       )

@@ -15,5 +15,5 @@ export const getInfuraRpcUrl = (chainId: CHAIN_ID) => {
   if (!network || !INFURA_API_KEY) {
     return undefined
   }
-  return `https://${network}.g.alchemy.com/v2/${INFURA_API_KEY}`
+  return `https://${network}.infura.io/v3/${INFURA_API_KEY}`
 }

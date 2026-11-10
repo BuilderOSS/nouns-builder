@@ -157,7 +157,6 @@ pnpm lint
 - `PUBLIC_SUBGRAPH_URL` - GraphQL subgraph endpoints
 - `PUBLIC_ALCHEMY_API_KEY` - Alchemy API configuration
 - `PUBLIC_ETHERSCAN_API_KEY` - Etherscan API configuration
-- `PUBLIC_TENDERLY_*` - Tenderly simulation configuration
 - `PUBLIC_INFURA_*` - Infura RPC configuration
 - `PUBLIC_WALLETCONNECT_*` - WalletConnect configuration
 - `FARCASTER_ENABLED` - Farcaster integration flag

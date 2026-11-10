@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Lint and format only the staged files; lint-staged re-stages its own fixes.
+# Type-checking and the full lint run in pre-push.
+newest_stash() { git stash list --format='%H' | head -n 1; }
+before=$(newest_stash)
+
+if ! pnpm exec lint-staged; then
+  # If formatting leaves nothing to commit, lint-staged stops before restoring
+  # unstaged edits of partially staged files; they are kept in its backup stash.
+  after=$(newest_stash)
+  if [ -n "$after" ] && [ "$after" != "$before" ] &&
+    git log -1 --format=%gs -g refs/stash | grep -q 'lint-staged automatic backup'; then
+    echo "pre-commit: lint-staged kept a backup of your changes. Restore any missing unstaged edits with:" >&2
+    echo "  git stash apply $after  # then drop that entry from 'git stash list'" >&2
+  fi
+  exit 1
+fi

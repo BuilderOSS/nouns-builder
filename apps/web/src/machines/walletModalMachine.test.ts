@@ -1,9 +1,135 @@
 import { clearSafeInfo, getSavedSafeInfo } from '@buildeross/utils'
 import type { Address } from 'viem'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createActor } from 'xstate'
 
-import { walletModalMachine } from './walletModalMachine'
+import { SIWE_REFRESH_EVENT } from '../utils/siweAuthFlow'
+import { VERIFY_TIMEOUT_MS, walletModalMachine } from './walletModalMachine'
+
+describe('walletModalMachine verification', () => {
+  const address = '0x0000000000000000000000000000000000000002' as Address
+
+  afterEach(() => {
+    vi.useRealTimers()
+    vi.unstubAllGlobals()
+  })
+
+  // Drives the machine into `authenticating` with a verify request that never
+  // settles, and returns the AbortSignal the request was made with.
+  const startVerifying = () => {
+    let verifySignal: AbortSignal | undefined
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((_url: string, init?: RequestInit) => {
+        verifySignal = init?.signal ?? undefined
+        return new Promise<Response>(() => {})
+      })
+    )
+
+    const actor = createActor(walletModalMachine).start()
+    actor.send({ type: 'OPEN', wallets: [] })
+    actor.send({ type: 'SELECT_WALLET', walletId: 'injected' })
+    actor.send({
+      type: 'WALLET_CONNECTED',
+      address,
+      connector: { id: 'injected', name: 'Injected' } as any,
+    })
+    actor.send({ type: 'SIGN_MESSAGE' })
+    actor.send({ type: 'SIGNATURE_RECEIVED', signature: '0xsig', message: 'msg' })
+
+    expect(actor.getSnapshot().matches('authenticating')).toBe(true)
+    expect(verifySignal).toBeDefined()
+    expect(verifySignal!.aborted).toBe(false)
+
+    return { actor, signal: verifySignal! }
+  }
+
+  it('aborts the verify request and re-checks the session when it times out', () => {
+    vi.useFakeTimers()
+    const onRefresh = vi.fn()
+    window.addEventListener(SIWE_REFRESH_EVENT, onRefresh)
+
+    const { actor, signal } = startVerifying()
+
+    vi.advanceTimersByTime(VERIFY_TIMEOUT_MS - 1)
+    expect(actor.getSnapshot().matches('authenticating')).toBe(true)
+    expect(signal.aborted).toBe(false)
+
+    vi.advanceTimersByTime(1)
+    const snapshot = actor.getSnapshot()
+    expect(snapshot.matches('awaitingSignature')).toBe(true)
+    expect(snapshot.context.error).toMatchObject({ code: 'NETWORK_ERROR' })
+    expect(signal.aborted).toBe(true)
+    expect(onRefresh).toHaveBeenCalledTimes(1)
+
+    window.removeEventListener(SIWE_REFRESH_EVENT, onRefresh)
+  })
+
+  it('shows the server explanation when verification is refused', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json(
+          {
+            ok: false,
+            message: 'Could not reach the Safe service to confirm ownership.',
+          },
+          { status: 503 }
+        )
+      )
+    )
+    const actor = createActor(walletModalMachine).start()
+    actor.send({ type: 'OPEN', wallets: [] })
+    actor.send({ type: 'SELECT_WALLET', walletId: 'injected' })
+    actor.send({
+      type: 'WALLET_CONNECTED',
+      address,
+      connector: { id: 'injected', name: 'Injected' } as any,
+    })
+    actor.send({ type: 'SIGN_MESSAGE' })
+    actor.send({ type: 'SIGNATURE_RECEIVED', signature: '0xsig', message: 'msg' })
+
+    await vi.waitFor(() => {
+      expect(actor.getSnapshot().matches('awaitingSignature')).toBe(true)
+    })
+    expect(actor.getSnapshot().context.error).toEqual({
+      code: 'VERIFICATION_FAILED',
+      message: 'Could not reach the Safe service to confirm ownership.',
+    })
+  })
+
+  it('keeps the reason a Safe lookup failed instead of always saying not found', () => {
+    const actor = createActor(walletModalMachine).start()
+    actor.send({ type: 'OPEN', wallets: [] })
+    actor.send({ type: 'SELECT_SAFE' })
+    actor.send({ type: 'SUBMIT_SAFE_ADDRESS', address, chainId: 1 })
+    actor.send({
+      type: 'ERROR',
+      error: { code: 'NETWORK_ERROR', message: 'Could not reach the Safe service.' },
+    })
+
+    const snapshot = actor.getSnapshot()
+    expect(snapshot.matches('enteringSafeAddress')).toBe(true)
+    expect(snapshot.context.error).toEqual({
+      code: 'NETWORK_ERROR',
+      message: 'Could not reach the Safe service.',
+    })
+  })
+
+  it('aborts the verify request and re-checks the session when the modal closes', () => {
+    const onRefresh = vi.fn()
+    window.addEventListener(SIWE_REFRESH_EVENT, onRefresh)
+
+    const { actor, signal } = startVerifying()
+    actor.send({ type: 'CLOSE' })
+
+    expect(actor.getSnapshot().matches('closed')).toBe(true)
+    expect(signal.aborted).toBe(true)
+    expect(onRefresh).toHaveBeenCalledTimes(1)
+
+    window.removeEventListener(SIWE_REFRESH_EVENT, onRefresh)
+  })
+})
 
 describe('walletModalMachine', () => {
   const safeAddress = '0x0000000000000000000000000000000000000001' as Address

@@ -138,11 +138,11 @@ export const TreasuryComposition = () => {
       args: [treasury as `0x${string}`],
       chainId: chain.id,
     })),
-    // Treasury balances change rarely, so don't poll: the app sets a global 5s
-    // refetchInterval, and at that cadence an occasional failed read would drop a
-    // token row for a cycle, so rows visibly blinked. They still refresh on
-    // mount/focus, and the per-token last-good cache below keeps a row visible
-    // across a failed read (without ever showing another DAO's balance).
+    // Treasury balances change rarely, so never poll: an occasional failed read
+    // would drop a token row for a cycle, so rows visibly blinked. They still
+    // refresh on mount/focus once stale, and the per-token last-good cache below
+    // keeps a row visible across a failed read (without ever showing another
+    // DAO's balance).
     query: {
       // Kept enabled even when Alchemy answers: it is the fallback list, and
       // gating it on Alchemy's state left the card showing ETH alone whenever

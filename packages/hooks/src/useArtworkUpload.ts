@@ -1,5 +1,10 @@
 import { uploadDirectory } from '@buildeross/ipfs-service/upload'
 import { ArtworkError, IPFSUpload, IPFSUploadResponse, Trait } from '@buildeross/types'
+import {
+  areArtworkMimeTypesCompatible,
+  isArtworkMimeType,
+  validateGifArtwork,
+} from '@buildeross/utils/artworkFiles'
 import { sanitizeFileName } from '@buildeross/utils/sanitize'
 import React from 'react'
 
@@ -18,12 +23,8 @@ type UploadArtworkStatus =
   | 'ready'
   | 'error'
 
-const ACCEPTABLE_MIME = ['image/png', 'image/svg+xml'] as const
 const MIN_IMAGE_DIMENSION_PX = 600
 const MAX_TRAITS = 10
-
-const isAcceptableMime = (t: string): t is (typeof ACCEPTABLE_MIME)[number] =>
-  (ACCEPTABLE_MIME as readonly string[]).includes(t)
 
 function hasInvalidNameOrStructure(file: File, paths: string[]): boolean {
   // forward slashes sometimes converted to `:`
@@ -81,6 +82,14 @@ async function validateSquareMinSize(
   }
 
   return { ok: true }
+}
+
+async function validateGif(
+  file: File
+): Promise<{ ok: true } | { ok: false; error: ArtworkError }> {
+  if (file.type !== 'image/gif') return { ok: true }
+  const error = validateGifArtwork(await file.arrayBuffer(), file.name)
+  return error ? { ok: false, error: { animation: error } } : { ok: true }
 }
 
 type ArtworkItem = {
@@ -189,7 +198,7 @@ export const useArtworkUpload = ({
       }
 
       let collectionName = ''
-      let fileType = ''
+      const fileTypes: string[] = []
 
       // traitsMap: trait -> properties[]
       const traitsMap = new Map<string, string[]>()
@@ -218,7 +227,6 @@ export const useArtworkUpload = ({
         const currentProperty = sanitizeFileName(propertyRaw)
 
         if (!collectionName) collectionName = collectionRaw
-        if (!fileType) fileType = file.type
 
         if (hasInvalidNameOrStructure(file, paths)) {
           fail({
@@ -227,17 +235,18 @@ export const useArtworkUpload = ({
           return
         }
 
-        if (!isAcceptableMime(file.type)) {
+        if (!isArtworkMimeType(file.type)) {
           fail({
             mime: `${file.type} is an unsupported file type - file: ${file.name}`,
           })
           return
         }
 
-        // enforce consistent mime across all files
-        if (fileType && file.type !== fileType) {
+        // PNG and GIF can be mixed; SVG collections must be SVG only
+        if (!fileTypes.includes(file.type)) fileTypes.push(file.type)
+        if (!areArtworkMimeTypesCompatible(fileTypes)) {
           fail({
-            mime: `All file types must be the same.`,
+            mime: `SVG artwork cannot be mixed with PNG or GIF files.`,
           })
           return
         }
@@ -260,15 +269,18 @@ export const useArtworkUpload = ({
         })
       }
 
-      // Async validations (dimensions) — awaited to avoid race
+      // Async validations (dimensions, GIF animation limits) — awaited to avoid race
       try {
-        const dimensionResults = await Promise.all(
-          filesArray.map((file) => validateSquareMinSize(file, MIN_IMAGE_DIMENSION_PX))
+        const results = await Promise.all(
+          filesArray.flatMap((file) => [
+            validateSquareMinSize(file, MIN_IMAGE_DIMENSION_PX),
+            validateGif(file),
+          ])
         )
 
         if (runId !== processRunIdRef.current) return
 
-        const firstFailure = dimensionResults.find((r) => r.ok === false)
+        const firstFailure = results.find((r) => r.ok === false)
         if (firstFailure && !firstFailure.ok) {
           fail(firstFailure.error)
           return
@@ -291,7 +303,7 @@ export const useArtworkUpload = ({
 
       const processed: ProcessedArtworkInfo = {
         filesLength: artworkItems.length,
-        fileType,
+        fileType: fileTypes.join(', '),
         collectionName,
         traits,
         artworkItems: artworkItems,

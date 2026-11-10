@@ -2,6 +2,7 @@ import { PUBLIC_DEFAULT_CHAINS } from '@buildeross/constants/chains'
 import { Feed, UrgencyAlerts } from '@buildeross/feed-ui'
 import {
   type DashboardDaoWithState,
+  useAuctionStatusByChain,
   useDashboardData,
   useEnsData,
 } from '@buildeross/hooks'
@@ -21,6 +22,7 @@ import { DaoAuctionCard } from './DaoAuctionCard'
 import { DaoProposals } from './DaoProposals'
 import { DashboardLayout } from './DashboardLayout'
 import { DashConnect } from './DashConnect'
+import { withLiveAuctions } from './liveAuction'
 import { AuctionCardSkeleton, DAOCardSkeleton, ProposalCardSkeleton } from './Skeletons'
 import { UserProfileCard } from './UserProfileCard'
 
@@ -36,14 +38,28 @@ export const Dashboard: React.FC = () => {
   const { isDaoHidden, sortDaos, groupHiddenDaosLast } = useDaoListPreferences(address)
 
   const {
-    daos,
+    daos: cachedDaos,
     isLoading,
     error,
-    refresh: mutate,
   } = useDashboardData({
     address,
     enabled: !!address && isAuthenticated,
   })
+
+  // Dashboard data is cached server-side for minutes; poll auction status
+  // (one request per chain) to keep the auction cards current.
+  const auctionStatusItems = useMemo(
+    () => cachedDaos.map((dao) => ({ chainId: dao.chainId, dao: dao.tokenAddress })),
+    [cachedDaos]
+  )
+  const { data: auctionStatusByChain } = useAuctionStatusByChain({
+    items: auctionStatusItems,
+    enabled: !!address && isAuthenticated,
+  })
+  const daos = useMemo(
+    () => withLiveAuctions(cachedDaos, auctionStatusByChain),
+    [cachedDaos, auctionStatusByChain]
+  )
 
   const chainSortedDaos = useMemo<DashboardDaoWithState[]>(() => {
     if (!daos) return []
@@ -83,17 +99,14 @@ export const Dashboard: React.FC = () => {
 
     return visibleDaos.map((dao) => {
       return (
-        <Box key={`auctionCard:${dao.tokenAddress}:${dao?.currentAuction?.endTime || 0}`}>
-          <DaoAuctionCard
-            {...dao}
-            userAddress={address}
-            handleMutate={mutate}
-            isHidden={false}
-          />
+        <Box
+          key={`auctionCard:${dao.tokenAddress}:${dao?.currentAuction?.token?.tokenId ?? 'none'}`}
+        >
+          <DaoAuctionCard {...dao} userAddress={address} isHidden={false} />
         </Box>
       )
     })
-  }, [visibleDaos, address, mutate])
+  }, [visibleDaos, address])
 
   const hiddenAuctionCards = useMemo(() => {
     if (!address || !hiddenDaos.length) return null
@@ -101,18 +114,13 @@ export const Dashboard: React.FC = () => {
     return hiddenDaos.map((dao) => {
       return (
         <Box
-          key={`hiddenAuctionCard:${dao.tokenAddress}:${dao?.currentAuction?.endTime || 0}`}
+          key={`hiddenAuctionCard:${dao.tokenAddress}:${dao?.currentAuction?.token?.tokenId ?? 'none'}`}
         >
-          <DaoAuctionCard
-            {...dao}
-            userAddress={address}
-            handleMutate={mutate}
-            isHidden={true}
-          />
+          <DaoAuctionCard {...dao} userAddress={address} isHidden={true} />
         </Box>
       )
     })
-  }, [hiddenDaos, address, mutate])
+  }, [hiddenDaos, address])
 
   const hasLiveProposals = useMemo(() => {
     if (!sortedDaos.length) return false

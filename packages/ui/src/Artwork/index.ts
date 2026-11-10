@@ -1,4 +1,5 @@
 export * from './ArtworkPreview'
 export * from './ArtworkUpload'
 export * from './LayerBox'
+export * from './LayeredArtwork'
 export * from './LayerOrdering'

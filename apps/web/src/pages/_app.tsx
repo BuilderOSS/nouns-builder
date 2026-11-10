@@ -55,6 +55,7 @@ import { WalletConnectProvider } from 'src/components/WalletConnectProvider'
 import { useAppDisconnect } from 'src/hooks/useAppDisconnect'
 import { useDebugConnectorLifecycle } from 'src/hooks/useDebugConnectorLifecycle'
 import { useSession } from 'src/hooks/useSession'
+import { useSiweLogoutInProgress } from 'src/hooks/useSiweLogoutInProgress'
 import { sessionMachine } from 'src/machines/sessionMachine'
 import { AppThemeProvider } from 'src/theme/AppThemeProvider'
 import { clientConfig } from 'src/utils/clientConfig'
@@ -72,8 +73,9 @@ import {
   SIWE_REFRESH_EVENT,
   SIWE_VERIFY_PATH,
 } from 'src/utils/siweAuthFlow'
+import { createSignInMessage } from 'src/utils/siweMessage'
+import { classifyWagmiStorageEvent } from 'src/utils/wagmiStoreSync'
 import { SWRConfig } from 'swr'
-import { createSiweMessage } from 'viem/siwe'
 import { useAccount, useConfig, WagmiProvider } from 'wagmi'
 
 // Cross-tab storage event debounce interval
@@ -83,8 +85,10 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       // With SSR, we usually want to set some default staleTime
-      // above 0 to avoid refetching immediately on the client
-      staleTime: 5000,
+      // above 0 to avoid refetching immediately on the client. 30s also keeps
+      // window focus from re-firing every on-chain read; flows that change
+      // chain state call refetch() explicitly.
+      staleTime: 30_000,
     },
   },
 })
@@ -100,13 +104,21 @@ type AppPropsWithLayout = AppProps & {
 
 function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   const getLayout = Component.getLayout ?? ((page) => page)
-  const fallback = pageProps?.fallback ?? {}
+  const pageFallback = pageProps?.fallback
+  const swrConfig = React.useMemo(
+    () => ({
+      fallback: pageFallback ?? {},
+      // Revalidate on window focus at most every 30s, rather than every 5s
+      focusThrottleInterval: 30_000,
+    }),
+    [pageFallback]
+  )
 
   const { state: safeState, clearSafe } = useSafeAuth()
   const resetApp = useAppDisconnect()
   const config = useConfig()
   const { connector } = useAccount()
-  const logoutInProgress = isSiweLogoutInProgress()
+  const logoutInProgress = useSiweLogoutInProgress()
 
   // Enable debug logging with: localStorage.setItem('debug', 'app:walletConnect:*')
   useDebugConnectorLifecycle()
@@ -118,10 +130,43 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   }, [safeState])
 
   // Session management with XState machine
-  const [sessionState, sendSession] = useMachine(sessionMachine)
+  const [sessionState, sendSession, sessionActor] = useMachine(sessionMachine)
 
   // Session data with SWR (auto-refresh, deduplication, focus revalidation)
   const { session, refresh } = useSession()
+
+  // Start a server logout. The cached /me response is dropped first so that,
+  // when loggingOut finishes and the logout gate clears, the sync effect can't
+  // re-authenticate the machine from the stale session before the
+  // post-logout refresh comes back.
+  const requestLogout = React.useCallback(
+    ({ gate }: { gate: boolean }) => {
+      if (gate) beginSiweLogout()
+      void refresh({}, { revalidate: false })
+      sendSession({ type: 'LOGOUT' })
+    },
+    [refresh, sendSession]
+  )
+
+  // The session machine's state once any in-flight /me check has finished. A
+  // disconnect that lands while the check is running must still log out the
+  // session the check is about to restore.
+  const getSettledSessionState = React.useCallback(
+    () =>
+      new Promise<ReturnType<typeof sessionActor.getSnapshot>>((resolve) => {
+        const snapshot = sessionActor.getSnapshot()
+        if (!snapshot.matches('checkingSession')) {
+          resolve(snapshot)
+          return
+        }
+        const subscription = sessionActor.subscribe((next) => {
+          if (next.matches('checkingSession')) return
+          subscription.unsubscribe()
+          resolve(next)
+        })
+      }),
+    [sessionActor]
+  )
 
   // Sync SWR session data with XState machine
   useEffect(() => {
@@ -145,13 +190,12 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
   useEffect(() => {
     const handleLogout = () => {
       debugSession('Logout event received')
-      beginSiweLogout()
-      sendSession({ type: 'LOGOUT' })
+      requestLogout({ gate: true })
     }
 
     window.addEventListener(SIWE_LOGOUT_EVENT, handleLogout)
     return () => window.removeEventListener(SIWE_LOGOUT_EVENT, handleLogout)
-  }, [sendSession])
+  }, [requestLogout])
 
   // Cross-tab storage sync with debouncing
   useEffect(() => {
@@ -167,8 +211,9 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
         return
       }
 
-      // Only react to wagmi storage changes
-      if (!e.key?.startsWith('wagmi.')) return
+      // Only react to wagmi's persisted connection state
+      const change = classifyWagmiStorageEvent(e.key, e.newValue)
+      if (change === 'ignored') return
 
       // Debounce to prevent multiple rapid fires
       if (debounceTimer) {
@@ -176,8 +221,8 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
       }
 
       debounceTimer = setTimeout(() => {
-        // Disconnect detected (storage removed)
-        if (e.newValue === null) {
+        // Another tab no longer has a wallet connection
+        if (change === 'disconnected') {
           debugSession('Cross-tab disconnect detected')
 
           // Reset wagmi state to match other tab
@@ -188,9 +233,14 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
             status: 'disconnected',
           }))
 
+          // Only log out a session this tab holds, and only when this is not
+          // part of an active logout. LOGOUT now runs from any machine state,
+          // so without the authenticated check a signed-out tab would destroy
+          // a session another tab just created.
           if (!isSiweLogoutInProgress()) {
-            // Logout in XState machine only when this is not part of an active logout
-            sendSession({ type: 'LOGOUT' })
+            if (sessionActor.getSnapshot().matches('authenticated')) {
+              requestLogout({ gate: false })
+            }
             cancelSiweAuthFlow()
           }
         }
@@ -212,7 +262,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
         clearTimeout(debounceTimer)
       }
     }
-  }, [config, sendSession, refresh])
+  }, [config, requestLogout, sessionActor, refresh])
 
   // Custom refresh event (fired after SIWE verification)
   useEffect(() => {
@@ -238,16 +288,11 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           // Use ref to get latest safeState (prevents stale closure)
           const currentSafeState = safeStateRef.current
           const signingAddress = await resolveSigningAddress(connector, address)
-          return createSiweMessage({
-            domain: window.location.host,
+          return createSignInMessage({
             address: signingAddress,
-            statement: currentSafeState.safeAddress
-              ? `Sign in as owner for Safe ${currentSafeState.safeAddress}`
-              : 'Sign in with Ethereum to Nouns Builder',
-            uri: window.location.origin,
-            version: '1',
             chainId: msgChainId,
             nonce,
+            safeAddress: currentSafeState.safeAddress ?? undefined,
           })
         },
 
@@ -291,13 +336,23 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
           }
 
           debugSession('Signing out')
-          beginSiweLogout()
-          sendSession({ type: 'LOGOUT' })
-          clearSafe()
+          // RainbowKit calls signOut on every wallet disconnect, including in
+          // signed-out tabs (e.g. after a cross-tab wagmi reset). Only a session
+          // this tab holds should hit the server; otherwise a signed-out tab
+          // could destroy a session another tab is creating. The saved Safe
+          // config is only cleared along with that session, so a disconnect
+          // mid-way through the Safe flow doesn't wipe the Safe the user is
+          // signing in to. Wait out an in-flight session check first, or a
+          // disconnect during page load would leave the server session alive.
+          const settled = await getSettledSessionState()
+          if (settled.matches('authenticated')) {
+            requestLogout({ gate: true })
+            clearSafe()
+          }
           cancelSiweAuthFlow()
         },
       }),
-    [sendSession, clearSafe, refresh, connector]
+    [requestLogout, getSettledSessionState, clearSafe, refresh, connector]
   )
 
   // RainbowKit auth status derived from XState machine
@@ -315,7 +370,7 @@ function AppContent({ Component, pageProps, err }: AppPropsWithLayout) {
             status={rainbowKitAuthStatus}
           >
             <RainbowKitProvider appInfo={{ disclaimer: Disclaimer }} modalSize="compact">
-              <SWRConfig value={{ fallback }}>
+              <SWRConfig value={swrConfig}>
                 <NextNProgress
                   color={vars.color.primary}
                   startPosition={0.125}

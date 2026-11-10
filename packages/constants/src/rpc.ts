@@ -3,7 +3,6 @@ import { foundry } from 'wagmi/chains'
 
 import { getAlchemyRpcUrl } from './alchemy'
 import { getInfuraRpcUrl } from './infura'
-import { getTenderlyRpcUrl } from './tenderly'
 
 const createRpcUrls = () => {
   const urls: Partial<Record<CHAIN_ID, string[]>> = {}
@@ -21,10 +20,10 @@ const createRpcUrls = () => {
   for (const key of Object.keys(CHAIN_ID)) {
     if (isNaN(Number(key))) {
       const chainId = CHAIN_ID[key as keyof typeof CHAIN_ID]
-      const tenderly = getTenderlyRpcUrl(chainId)
-      if (tenderly) addToUrls(chainId, tenderly)
-
-      const alchemy = getAlchemyRpcUrl(chainId)
+      // The public alchemy key is domain-locked, so it only works from the
+      // browser; server transports add a keyless authenticated alchemy URL
+      const alchemy =
+        typeof window !== 'undefined' ? getAlchemyRpcUrl(chainId) : undefined
       if (alchemy) addToUrls(chainId, alchemy)
 
       const infura = getInfuraRpcUrl(chainId)

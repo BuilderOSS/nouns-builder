@@ -145,11 +145,9 @@ export const useSplitPayout = ({
     functionName: 'getHash',
     args: address ? [address] : undefined,
     chainId,
-    query: {
-      enabled,
-      // Refetch on every block to detect when a mutable split is updated
-      refetchInterval: 12_000, // ~12s (Ethereum block time)
-    },
+    // A mutable split's hash only changes when its controller updates it
+    // elsewhere; mount/focus refetches pick that up without polling RPC
+    query: { enabled },
   })
 
   const isSplit = Boolean(splitHash && splitHash !== zeroHash)

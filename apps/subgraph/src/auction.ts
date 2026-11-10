@@ -133,6 +133,7 @@ export function handleAuctionBid(event: AuctionBidEvent): void {
   bid.bidder = event.params.bidder
   bid.comment = parseAuctionBidComment(event.transaction.input)
   bid.auction = `${tokenAddress}:${event.params.tokenId.toString()}`
+  bid.dao = tokenAddress
   bid.bidTime = event.block.timestamp
   bid.save()
 

@@ -1,6 +1,8 @@
 import { normalizeIPFSUrl } from '@buildeross/ipfs-service'
 import type { ImageProps, IPFSUpload, OrderedTraits, Property } from '@buildeross/types'
 
+import { mimeToArtworkExtension } from './artworkFiles'
+
 export type PropertyItem = {
   propertyId: bigint
   name: string
@@ -72,6 +74,89 @@ export function transformPropertiesToImageProps(properties: Property[]): ImagePr
   return imageProps
 }
 
+type UploadChunk = {
+  trait: string
+  uploads: IPFSUpload[]
+  isNewTrait: boolean
+  extension: string
+}
+
+/**
+ * Orders uploads into single-extension chunks.
+ *
+ * With one file type this is simply one chunk per trait in contract order. With mixed
+ * types (e.g. PNG + GIF), new traits must still be created in contract order, so each
+ * new trait is created with its first extension's uploads; everything else references
+ * already-existing properties and is grouped by extension to minimise transactions.
+ */
+function buildUploadChunks(
+  uploadsByTrait: { trait: string; uploads: IPFSUpload[] }[],
+  newTraits: string[]
+): UploadChunk[] {
+  const byExtension = (uploads: IPFSUpload[]) => {
+    const groups = new Map<string, IPFSUpload[]>()
+    for (const upload of uploads) {
+      const extension = mimeToArtworkExtension(upload.type)
+      groups.set(extension, [...(groups.get(extension) ?? []), upload])
+    }
+    return groups
+  }
+
+  const allUploads = uploadsByTrait.flatMap(({ uploads }) => uploads)
+  const extensions = Array.from(byExtension(allUploads).keys())
+
+  if (extensions.length <= 1) {
+    const extension = extensions[0] ?? mimeToArtworkExtension(undefined)
+    return uploadsByTrait.map(({ trait, uploads }) => ({
+      trait,
+      uploads,
+      isNewTrait: newTraits.includes(trait),
+      extension,
+    }))
+  }
+
+  const chunks: UploadChunk[] = []
+  const deferred = new Map<string, { trait: string; uploads: IPFSUpload[] }[]>()
+  const defer = (extension: string, trait: string, uploads: IPFSUpload[]) =>
+    deferred.set(extension, [...(deferred.get(extension) ?? []), { trait, uploads }])
+
+  let currentExtension = extensions[0]
+  for (const { trait, uploads } of uploadsByTrait) {
+    const groups = byExtension(uploads)
+    if (!newTraits.includes(trait)) {
+      groups.forEach((group, extension) => defer(extension, trait, group))
+      continue
+    }
+
+    // Prefer creating the trait in the current extension to avoid an extra transaction
+    const createExtension = groups.has(currentExtension)
+      ? currentExtension
+      : (groups.keys().next().value ?? currentExtension)
+    chunks.push({
+      trait,
+      uploads: groups.get(createExtension) ?? [],
+      isNewTrait: true,
+      extension: createExtension,
+    })
+    currentExtension = createExtension
+    groups.forEach((group, extension) => {
+      if (extension !== createExtension) defer(extension, trait, group)
+    })
+  }
+
+  const remainingExtensions = [
+    currentExtension,
+    ...extensions.filter((e) => e !== currentExtension),
+  ]
+  for (const extension of remainingExtensions) {
+    for (const { trait, uploads } of deferred.get(extension) ?? []) {
+      chunks.push({ trait, uploads, isNewTrait: false, extension })
+    }
+  }
+
+  return chunks
+}
+
 export function transformFileProperties(
   orderedLayers: OrderedTraits,
   ipfsUpload: IPFSUpload[],
@@ -94,19 +179,21 @@ export function transformFileProperties(
     }
   )
 
-  const upload = ipfsUpload[0]
-  const data = {
-    baseUri: (normalizeIPFSUrl(upload?.ipfs?.cid) as string) + '/',
-    extension: `${upload?.type
-      ?.replace('image/', '.')
-      .replace('+xml', '')
-      .toLowerCase()}`,
-  }
+  const baseUri = (normalizeIPFSUrl(ipfsUpload[0]?.ipfs?.cid) as string) + '/'
+  const chunks = buildUploadChunks(uploadsByTrait, newTraits)
 
   const transactions: Properties[] = []
-  let currentTransaction: Properties | undefined = { names: [], items: [], data }
-  for (var { trait, uploads } of uploadsByTrait) {
-    const isNewTrait = newTraits.includes(trait)
+  let data: IPFSGroup = { baseUri, extension: chunks[0].extension }
+  let currentTransaction: Properties = { names: [], items: [], data }
+  for (const { trait, uploads, isNewTrait, extension } of chunks) {
+    // Each addProperties call carries a single IPFS group (base URI + extension)
+    if (extension !== data.extension) {
+      if (currentTransaction.items.length > 0 || currentTransaction.names.length > 0) {
+        transactions.push(currentTransaction)
+      }
+      data = { baseUri, extension }
+      currentTransaction = { names: [], items: [], data }
+    }
 
     let availableSpaceInCurrentTransaction =
       maxFilesPerTransaction - currentTransaction.items.length

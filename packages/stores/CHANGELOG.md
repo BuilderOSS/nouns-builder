@@ -1,5 +1,22 @@
 # @buildeross/stores
 
+## 0.4.0
+
+### Minor Changes
+
+- Bump all publishable packages from 0.3.2 to 0.4.0.
+
+### Patch Changes
+
+- Updated dependencies [fabd645]
+- Updated dependencies [2e875f5]
+- Updated dependencies [5ce3fdb]
+- Updated dependencies [5068fa1]
+- Updated dependencies
+- Updated dependencies [4090236]
+  - @buildeross/constants@0.4.0
+  - @buildeross/types@0.4.0
+
 ## 0.3.2
 
 ### Patch Changes

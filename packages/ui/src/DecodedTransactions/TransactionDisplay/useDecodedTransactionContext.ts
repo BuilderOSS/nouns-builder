@@ -15,6 +15,7 @@ import {
   type StreamConfig,
 } from '@buildeross/utils/sablier'
 import React from 'react'
+import { isAddress } from 'viem'
 
 const getParserFromFunctionName = (
   functionName: string
@@ -123,6 +124,18 @@ export const useDecodedTransactionContext = ({
 
   const tokenAddress: `0x${string}` | undefined = React.useMemo(() => {
     if (!enabled) return undefined
+
+    // Permit2's approve(token, spender, amount, expiration) is called on the
+    // Permit2 contract, not the token, so read the token from its argument
+    const tokenArg = transaction.args['token']?.value
+    if (
+      transaction.functionName === 'approve' &&
+      typeof tokenArg === 'string' &&
+      isAddress(tokenArg)
+    ) {
+      return tokenArg as `0x${string}`
+    }
+
     if (
       transaction.functionName === 'transfer' ||
       transaction.functionName === 'approve' ||
@@ -135,7 +148,14 @@ export const useDecodedTransactionContext = ({
     if (streamData?.tokenAddress) return streamData.tokenAddress
     if (escrowData?.tokenAddress) return escrowData.tokenAddress
     return undefined
-  }, [enabled, transaction.functionName, target, escrowData, streamData])
+  }, [
+    enabled,
+    transaction.args,
+    transaction.functionName,
+    target,
+    escrowData,
+    streamData,
+  ])
 
   const nftInfo = React.useMemo(() => {
     if (!enabled) return null
