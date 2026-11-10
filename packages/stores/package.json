@@ -1,7 +1,7 @@
 {
   "name": "@buildeross/stores",
   "description": "State management stores for BuilderOSS apps",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "dependencies": {
     "zustand": "^5.0.4"
   },
@@ -34,8 +34,8 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "peerDependencies": {
-    "@buildeross/constants": "0.3.2",
-    "@buildeross/types": "0.3.2",
+    "@buildeross/constants": "0.4.0",
+    "@buildeross/types": "0.4.0",
     "react": "^19.2.1",
     "wagmi": "^2.15.4"
   },
